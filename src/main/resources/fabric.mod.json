@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "areas-hint",
+	"version": "${version}",
+	"name": "区域提示",
+	"description": "一个可以在玩家进入特定区域时显示区域名称的Minecraft模组",
+	"authors": [
+		"开发者"
+	],
+	"contact": {
+		"homepage": "https://github.com/",
+		"sources": "https://github.com/"
+	},
+	"license": "MIT",
+	"icon": "assets/areas-hint/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"areahint.Areashint"
+		],
+		"client": [
+			"areahint.AreashintClient"
+		],
+		"fabric-datagen": [
+			"areahint.AreashintDataGenerator"
+		]
+	},
+	"mixins": [
+		"areas-hint.mixins.json",
+		{
+			"config": "areas-hint.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.20.4",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"sodium": "*"
+	}
+}
