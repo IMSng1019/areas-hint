@@ -77,6 +77,9 @@ public class GLRender implements RenderManager.IRender {
      */
     private void renderToScreen() {
         if (client.currentScreen != null || currentText == null) {
+            areahint.AreashintClient.LOGGER.debug("GLRender: 跳过渲染，原因: 屏幕={}, 文本={}", 
+                    client.currentScreen != null ? client.currentScreen.getClass().getSimpleName() : "无", 
+                    currentText);
             return;
         }
         
@@ -165,6 +168,9 @@ public class GLRender implements RenderManager.IRender {
         currentText = title;
         animationState = AnimationState.IN;
         animationStartTime = System.currentTimeMillis();
+        
+        // 添加日志记录
+        areahint.AreashintClient.LOGGER.info("GLRender: 开始显示区域标题: {}, 动画状态: {}", title, animationState);
     }
     
     /**

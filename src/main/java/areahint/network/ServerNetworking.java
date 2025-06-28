@@ -4,6 +4,7 @@ import areahint.Areashint;
 import areahint.file.FileManager;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -24,6 +25,13 @@ public class ServerNetworking {
     public static void init() {
         // 注册网络通道和处理器
         Areashint.LOGGER.info("初始化服务端网络处理");
+        
+        // 注册玩家连接事件，当玩家加入服务器时发送区域数据
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayerEntity player = handler.getPlayer();
+            Areashint.LOGGER.info("玩家 " + player.getName().getString() + " 已连接，发送区域数据");
+            sendAllAreaDataToClient(player);
+        });
     }
     
     /**

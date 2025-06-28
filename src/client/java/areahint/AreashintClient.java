@@ -71,7 +71,7 @@ public class AreashintClient implements ClientModInitializer {
 			Path configDirPath = FileManager.checkFolderExist();
 			// 创建配置文件
 			FileManager.createDefaultConfigFile(FileManager.getConfigFile(CONFIG_FILE));
-			LOGGER.info("配置目录初始化完成");
+			LOGGER.info("配置目录初始化完成：{}", configDirPath);
 		} catch (IOException e) {
 			LOGGER.error("创建配置文件失败: " + e.getMessage());
 		}
@@ -91,18 +91,35 @@ public class AreashintClient implements ClientModInitializer {
 			Identifier dimension = client.world.getDimensionKey().getValue();
 			if (currentDimension == null || !currentDimension.equals(dimension)) {
 				currentDimension = dimension;
-				areaDetector.loadAreaData(getDimensionFileName(currentDimension));
+				String dimensionFileName = getDimensionFileName(currentDimension);
+				LOGGER.info("检测到维度变化为：{}，加载对应的区域文件：{}", dimension.toString(), dimensionFileName);
+				areaDetector.loadAreaData(dimensionFileName);
 			}
 			
 			// 按照配置的频率检测玩家位置
 			if (areaDetector.shouldDetect()) {
-				String areaName = areaDetector.detectPlayerArea(player.getX(), player.getZ());
+				double playerX = player.getX();
+				double playerZ = player.getZ();
+				String areaName = areaDetector.detectPlayerArea(playerX, playerZ);
+				
+				// 添加调试日志，无论是否有变化都记录当前检测结果
+				LOGGER.debug("玩家位置检测 - 坐标：({}, {})，检测到区域：{}，之前区域：{}", 
+						playerX, playerZ, areaName, currentAreaName);
 				
 				// 如果区域发生变化，显示新的区域名称
 				if ((areaName == null && currentAreaName != null) || 
 					(areaName != null && !areaName.equals(currentAreaName))) {
+					if (areaName == null) {
+						LOGGER.info("玩家（{}, {}）离开区域：{}", playerX, playerZ, currentAreaName);
+					} else if (currentAreaName == null) {
+						LOGGER.info("玩家（{}, {}）进入区域：{}", playerX, playerZ, areaName);
+					} else {
+						LOGGER.info("玩家（{}, {}）从区域 {} 进入区域：{}", playerX, playerZ, currentAreaName, areaName);
+					}
+					
 					currentAreaName = areaName;
 					if (areaName != null) {
+						LOGGER.info("尝试显示区域名称：{}", areaName);
 						renderManager.showAreaTitle(areaName);
 					}
 				}
@@ -149,7 +166,9 @@ public class AreashintClient implements ClientModInitializer {
 		LOGGER.info("重新加载区域提示模组配置和区域数据...");
 		ClientConfig.load();
 		if (currentDimension != null) {
-			areaDetector.loadAreaData(getDimensionFileName(currentDimension));
+			String dimensionFileName = getDimensionFileName(currentDimension);
+			LOGGER.info("重新加载维度{}的区域文件：{}", currentDimension.toString(), dimensionFileName);
+			areaDetector.loadAreaData(dimensionFileName);
 		}
 	}
 	

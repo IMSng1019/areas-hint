@@ -242,9 +242,39 @@ public class FileManager {
             return false;
         }
         
+        // 验证顶点格式
+        if (!validateVerticesFormat(area)) {
+            Areashint.LOGGER.error("区域顶点格式无效，必须使用标准格式");
+            return false;
+        }
+        
         List<AreaData> areas = readAreaData(path);
         areas.add(area);
         return writeAreaData(path, areas);
+    }
+    
+    /**
+     * 验证顶点格式是否符合标准
+     * @param area 区域数据
+     * @return 如果顶点格式有效返回true，否则返回false
+     */
+    private static boolean validateVerticesFormat(AreaData area) {
+        // 验证一级顶点
+        List<AreaData.Vertex> vertices = area.getVertices();
+        if (vertices == null || vertices.size() < 3) {
+            Areashint.LOGGER.error("一级顶点数量不足，至少需要3个点");
+            return false;
+        }
+        
+        // 验证二级顶点
+        List<AreaData.Vertex> secondVertices = area.getSecondVertices();
+        if (secondVertices == null || secondVertices.size() != 4) {
+            Areashint.LOGGER.error("二级顶点数量不正确，必须是4个点");
+            return false;
+        }
+        
+        Areashint.LOGGER.info("区域 '" + area.getName() + "' 顶点格式验证通过");
+        return true;
     }
     
     /**

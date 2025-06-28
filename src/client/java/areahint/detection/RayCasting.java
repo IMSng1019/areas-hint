@@ -1,5 +1,6 @@
 package areahint.detection;
 
+import areahint.AreashintClient;
 import areahint.data.AreaData;
 
 import java.util.List;
@@ -24,11 +25,14 @@ public class RayCasting {
      */
     public static boolean isPointInPolygon(double x, double z, List<AreaData.Vertex> vertices) {
         if (vertices == null || vertices.size() < 3) {
+            AreashintClient.LOGGER.debug("多边形顶点数量不足，无法进行射线检测");
             return false;
         }
         
         int intersections = 0;
         int vertexCount = vertices.size();
+        
+        AreashintClient.LOGGER.debug("进行射线检测，点坐标({}, {})，多边形顶点数: {}", x, z, vertexCount);
         
         for (int i = 0; i < vertexCount; i++) {
             // 获取当前边的两个顶点
@@ -36,13 +40,17 @@ public class RayCasting {
             AreaData.Vertex next = vertices.get((i + 1) % vertexCount);
             
             // 检查边是否与射线相交
-            if (isIntersect(x, z, current, next)) {
+            boolean intersect = isIntersect(x, z, current, next);
+            if (intersect) {
                 intersections++;
+                AreashintClient.LOGGER.debug("边 {} 与射线相交，当前交点数: {}", i, intersections);
             }
         }
         
         // 奇数个交点表示点在多边形内部，偶数个交点表示点在多边形外部
-        return (intersections % 2 == 1);
+        boolean isInside = (intersections % 2 == 1);
+        AreashintClient.LOGGER.debug("射线检测结果: 交点数 {}，点{}多边形内部", intersections, isInside ? "在" : "不在");
+        return isInside;
     }
     
     /**
@@ -68,6 +76,8 @@ public class RayCasting {
             
             // 如果交点在射线的右侧（点的X坐标的右侧），则射线与线段相交
             if (xIntersect > x) {
+                AreashintClient.LOGGER.debug("线段({}, {}) - ({}, {})与从点({}, {})发射的射线相交，交点X坐标: {}", 
+                        x1, z1, x2, z2, x, z, xIntersect);
                 return true;
             }
         }
@@ -86,6 +96,7 @@ public class RayCasting {
      */
     public static boolean isPointInAABB(double x, double z, List<AreaData.Vertex> secondVertices) {
         if (secondVertices == null || secondVertices.size() != 4) {
+            AreashintClient.LOGGER.debug("AABB顶点数量不正确，应为4个点");
             return false;
         }
         
@@ -103,6 +114,9 @@ public class RayCasting {
         }
         
         // 检查点是否在AABB内部
-        return x >= minX && x <= maxX && z >= minZ && z <= maxZ;
+        boolean isInside = x >= minX && x <= maxX && z >= minZ && z <= maxZ;
+        AreashintClient.LOGGER.debug("AABB检测边界: [{}, {}] - [{}, {}]，点({}, {}){}AABB内部",
+                minX, minZ, maxX, maxZ, x, z, isInside ? "在" : "不在");
+        return isInside;
     }
 } 

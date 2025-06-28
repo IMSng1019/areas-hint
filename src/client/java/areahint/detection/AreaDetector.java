@@ -33,10 +33,24 @@ public class AreaDetector {
         areas = FileManager.readAreaData(areaFile);
         AreashintClient.LOGGER.info("已加载区域数据: {} 个区域", areas.size());
         
+        // 输出所有加载的区域名称
+        if (!areas.isEmpty()) {
+            StringBuilder names = new StringBuilder("加载的区域名称: ");
+            for (AreaData area : areas) {
+                names.append(area.getName()).append("(等级:").append(area.getLevel()).append("), ");
+            }
+            AreashintClient.LOGGER.info(names.toString());
+        }
+        
         // 按等级分组
         areasByLevel.clear();
         for (AreaData area : areas) {
             areasByLevel.computeIfAbsent(area.getLevel(), k -> new ArrayList<>()).add(area);
+        }
+        
+        // 输出按等级分组的信息
+        for (Map.Entry<Integer, List<AreaData>> entry : areasByLevel.entrySet()) {
+            AreashintClient.LOGGER.info("等级 {} 的区域数量: {}", entry.getKey(), entry.getValue().size());
         }
     }
     
@@ -60,7 +74,9 @@ public class AreaDetector {
         
         // 根据配置的样式格式化区域名称
         String style = ClientConfig.getSubtitleStyle();
-        return formatAreaName(currentArea, style);
+        String formattedName = formatAreaName(currentArea, style);
+        AreashintClient.LOGGER.debug("玩家在区域: {}, 格式化后的名称: {}", currentArea.getName(), formattedName);
+        return formattedName;
     }
     
     /**
@@ -80,6 +96,12 @@ public class AreaDetector {
      * @return 玩家所在的区域，如果不在任何区域内则返回null
      */
     private AreaData findArea(double x, double z) {
+        // 如果没有加载任何区域数据，直接返回null
+        if (areas.isEmpty()) {
+            AreashintClient.LOGGER.debug("没有加载任何区域数据，无法检测");
+            return null;
+        }
+        
         // 按照区域等级排序（1为顶级域名，2为二级域名，以此类推）
         List<Integer> levels = new ArrayList<>(areasByLevel.keySet());
         Collections.sort(levels);
@@ -88,14 +110,22 @@ public class AreaDetector {
         List<AreaData> levelOneAreas = areasByLevel.getOrDefault(1, Collections.emptyList());
         AreaData inLevelOne = null;
         
+        AreashintClient.LOGGER.debug("检查玩家({}, {})是否在一级域名内，一级域名数量: {}", x, z, levelOneAreas.size());
+        
         // 对每个一级域名进行距离排序
         List<AreaData> sortedLevelOneAreas = sortAreasByDistance(levelOneAreas, x, z);
         
         for (AreaData area : sortedLevelOneAreas) {
             // 先用AABB快速排除
-            if (RayCasting.isPointInAABB(x, z, area.getSecondVertices())) {
+            boolean inAABB = RayCasting.isPointInAABB(x, z, area.getSecondVertices());
+            AreashintClient.LOGGER.debug("检查区域 {} 的AABB: {}", area.getName(), inAABB ? "在内部" : "在外部");
+            
+            if (inAABB) {
                 // 再用精确的射线法检测
-                if (RayCasting.isPointInPolygon(x, z, area.getVertices())) {
+                boolean inPolygon = RayCasting.isPointInPolygon(x, z, area.getVertices());
+                AreashintClient.LOGGER.debug("检查区域 {} 的多边形: {}", area.getName(), inPolygon ? "在内部" : "在外部");
+                
+                if (inPolygon) {
                     inLevelOne = area;
                     break;
                 }
@@ -104,8 +134,11 @@ public class AreaDetector {
         
         // 如果玩家不在任何一级域名内
         if (inLevelOne == null) {
+            AreashintClient.LOGGER.debug("玩家不在任何一级域名内");
             return null;
         }
+        
+        AreashintClient.LOGGER.debug("玩家在一级域名 {} 内，继续检查更高级别域名", inLevelOne.getName());
         
         // 继续检查更高级别的域名
         AreaData highestArea = inLevelOne;
@@ -121,6 +154,9 @@ public class AreaDetector {
                     .filter(area -> finalBaseName.equals(area.getBaseName()))
                     .collect(Collectors.toList());
             
+            AreashintClient.LOGGER.debug("检查 {} 级域名，基于上级域名 {}，符合条件的下级域名数量: {}", 
+                    currentLevel, baseName, childAreas.size());
+            
             // 按距离排序
             List<AreaData> sortedChildAreas = sortAreasByDistance(childAreas, x, z);
             
@@ -128,12 +164,19 @@ public class AreaDetector {
             
             for (AreaData area : sortedChildAreas) {
                 // 先用AABB快速排除
-                if (RayCasting.isPointInAABB(x, z, area.getSecondVertices())) {
+                boolean inAABB = RayCasting.isPointInAABB(x, z, area.getSecondVertices());
+                AreashintClient.LOGGER.debug("检查区域 {} 的AABB: {}", area.getName(), inAABB ? "在内部" : "在外部");
+                
+                if (inAABB) {
                     // 再用精确的射线法检测
-                    if (RayCasting.isPointInPolygon(x, z, area.getVertices())) {
+                    boolean inPolygon = RayCasting.isPointInPolygon(x, z, area.getVertices());
+                    AreashintClient.LOGGER.debug("检查区域 {} 的多边形: {}", area.getName(), inPolygon ? "在内部" : "在外部");
+                    
+                    if (inPolygon) {
                         highestArea = area;
                         baseName = area.getName();
                         foundInCurrentLevel = true;
+                        AreashintClient.LOGGER.debug("找到更高级别域名: {}", area.getName());
                         break;
                     }
                 }
@@ -141,10 +184,12 @@ public class AreaDetector {
             
             // 如果在当前级别没有找到区域，就停止查找
             if (!foundInCurrentLevel) {
+                AreashintClient.LOGGER.debug("在当前级别没有找到区域，停止查找");
                 break;
             }
         }
         
+        AreashintClient.LOGGER.debug("最终确定玩家在区域: {}", highestArea.getName());
         return highestArea;
     }
     
@@ -278,9 +323,9 @@ public class AreaDetector {
     }
     
     /**
-     * 通过名称查找区域
+     * 根据名称查找区域
      * @param name 区域名称
-     * @return 区域
+     * @return 找到的区域，如果未找到则返回null
      */
     private AreaData findAreaByName(String name) {
         if (name == null) {
