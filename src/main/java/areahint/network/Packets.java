@@ -19,6 +19,14 @@ public class Packets {
     public static final String DIMENSION_NETHER = "the_nether";
     public static final String DIMENSION_END = "the_end";
     
+    // 服务端到客户端的包ID
+    public static final String S2C_AREA_DATA = Areashint.MOD_ID + ":s2c_area_data";
+    public static final String S2C_CLIENT_COMMAND = Areashint.MOD_ID + ":s2c_client_command";
+    public static final String S2C_DEBUG_COMMAND = Areashint.MOD_ID + ":s2c_debug_command";
+    
+    // 客户端到服务端的包ID
+    public static final String C2S_REQUEST_AREA_DATA = Areashint.MOD_ID + ":c2s_request_area_data";
+    
     /**
      * 将维度路径转换为维度类型字符串
      * @param dimensionPath 维度路径

@@ -45,6 +45,9 @@ public class ServerCommands {
     private static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, 
                                         CommandRegistryAccess registryAccess, 
                                         CommandManager.RegistrationEnvironment environment) {
+        // 注册调试命令
+        DebugCommand.register(dispatcher, registryAccess, environment);
+        
         dispatcher.register(literal("areahint")
             // help 命令
             .then(literal("help")
@@ -96,6 +99,8 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint subtitlerender [cpu|opengl|vulkan] §7- 设置或显示字幕渲染方式"));
         source.sendMessage(Text.of("§a/areahint subtitlestyle [full|simple|mixed] §7- 设置或显示字幕样式"));
         source.sendMessage(Text.of("§a/areahint add <JSON> §7- 添加新的域名 (管理员专用)"));
+        source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
+        source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));
         source.sendMessage(Text.of("§7{\"name\": \"区域名称\", \"vertices\": [{\"x\":0,\"z\":10},{\"x\":10,\"z\":0},...], \"second-vertices\": [{\"x\":-10,\"z\":10},...], \"level\": 1, \"base-name\": null}"));
         

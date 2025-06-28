@@ -4,6 +4,8 @@ import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.debug.ClientDebugManager;
+import areahint.debug.ClientDebugManager.DebugCategory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,10 +67,18 @@ public class AreaDetector {
         lastDetectionTime = System.currentTimeMillis();
         
         // 获取玩家当前所在的区域
+        if (ClientDebugManager.isDebugEnabled()) {
+            ClientDebugManager.sendDebugInfo(DebugCategory.PLAYER_POSITION, 
+                String.format("检测玩家位置: (%.2f, %.2f)", x, z));
+        }
+        
         AreaData currentArea = findArea(x, z);
         
         // 如果没有找到区域
         if (currentArea == null) {
+            if (ClientDebugManager.isDebugEnabled()) {
+                ClientDebugManager.sendDebugInfo(DebugCategory.AREA_DETECTION, "没有找到玩家所在区域");
+            }
             return null;
         }
         
@@ -76,6 +86,13 @@ public class AreaDetector {
         String style = ClientConfig.getSubtitleStyle();
         String formattedName = formatAreaName(currentArea, style);
         AreashintClient.LOGGER.debug("玩家在区域: {}, 格式化后的名称: {}", currentArea.getName(), formattedName);
+        
+        if (ClientDebugManager.isDebugEnabled()) {
+            ClientDebugManager.sendDebugInfo(DebugCategory.AREA_DETECTION, 
+                String.format("玩家在区域: %s, 等级: %d, 格式化后: %s", 
+                currentArea.getName(), currentArea.getLevel(), formattedName));
+        }
+        
         return formattedName;
     }
     

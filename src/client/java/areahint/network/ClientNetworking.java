@@ -29,14 +29,20 @@ public class ClientNetworking {
         
         // 注册区域数据接收处理器
         ClientPlayNetworking.registerGlobalReceiver(
-                Packets.AREA_DATA_CHANNEL,
+                new Identifier(Packets.S2C_AREA_DATA),
                 ClientNetworking::handleAreaData
         );
         
         // 注册客户端命令接收处理器
         ClientPlayNetworking.registerGlobalReceiver(
-                Packets.CLIENT_COMMAND_CHANNEL,
+                new Identifier(Packets.S2C_CLIENT_COMMAND),
                 ClientNetworking::handleClientCommand
+        );
+        
+        // 注册调试命令接收处理器
+        ClientPlayNetworking.registerGlobalReceiver(
+                new Identifier(Packets.S2C_DEBUG_COMMAND),
+                ClientNetworking::handleDebugCommand
         );
     }
     
@@ -201,5 +207,36 @@ public class ClientNetworking {
             String style = ClientConfig.getSubtitleStyle();
             client.player.sendMessage(net.minecraft.text.Text.of("§a当前字幕样式为: §6" + style));
         }
+    }
+    
+    /**
+     * 处理接收到的调试命令
+     * @param client Minecraft客户端实例
+     * @param handler 网络处理器
+     * @param buf 数据包缓冲区
+     * @param responseSender 响应发送器
+     */
+    private static void handleDebugCommand(MinecraftClient client, 
+                                          ClientPlayNetworkHandler handler,
+                                          PacketByteBuf buf, 
+                                          PacketSender responseSender) {
+        // 读取调试状态
+        boolean enabled = buf.readBoolean();
+        
+        // 确保在主线程中处理
+        client.execute(() -> {
+            try {
+                AreashintClient.LOGGER.info("接收到服务端调试命令: " + (enabled ? "启用" : "禁用"));
+                
+                // 设置调试状态
+                if (enabled) {
+                    areahint.debug.ClientDebugManager.enableDebug();
+                } else {
+                    areahint.debug.ClientDebugManager.disableDebug();
+                }
+            } catch (Exception e) {
+                AreashintClient.LOGGER.error("处理调试命令时出错: " + e.getMessage());
+            }
+        });
     }
 } 

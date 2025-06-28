@@ -118,11 +118,31 @@ public class ServerNetworking {
             buffer.writeString(command);
             
             // 发送数据包
-            ServerPlayNetworking.send(player, Packets.CLIENT_COMMAND_CHANNEL, buffer);
+            ServerPlayNetworking.send(player, new Identifier(Packets.S2C_CLIENT_COMMAND), buffer);
             
             Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送命令: " + command);
         } catch (Exception e) {
             Areashint.LOGGER.error("发送命令到客户端时出错: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 向客户端发送调试命令
+     * @param player 目标玩家
+     * @param enabled 是否启用调试
+     */
+    public static void sendDebugCommandToClient(ServerPlayerEntity player, boolean enabled) {
+        try {
+            // 创建数据包
+            PacketByteBuf buffer = PacketByteBufs.create();
+            buffer.writeBoolean(enabled);
+            
+            // 发送数据包
+            ServerPlayNetworking.send(player, new Identifier(Packets.S2C_DEBUG_COMMAND), buffer);
+            
+            Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送调试命令: " + (enabled ? "启用" : "禁用"));
+        } catch (Exception e) {
+            Areashint.LOGGER.error("发送调试命令到客户端时出错: " + e.getMessage());
         }
     }
 } 

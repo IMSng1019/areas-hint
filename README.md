@@ -83,6 +83,8 @@ areas-hint-mod/
 │   │   │       ├── data/
 │   │   │       │   ├── AreaData.java  # 区域数据模型
 │   │   │       │   └── ConfigData.java  # 配置数据模型
+│   │   │       ├── debug/
+│   │   │       │   └── DebugManager.java  # 服务端调试管理器（处理调试模式和向玩家发送调试信息）
 │   │   │       ├── file/
 │   │   │       │   ├── FileManager.java  # 文件管理工具
 │   │   │       │   └── JsonHelper.java  # JSON处理工具
@@ -90,7 +92,8 @@ areas-hint-mod/
 │   │   │       │   ├── ServerNetworking.java  # 服务端网络处理
 │   │   │       │   └── Packets.java  # 网络数据包定义
 │   │   │       └── command/
-│   │   │           └── ServerCommands.java  # 服务端命令
+│   │   │           ├── ServerCommands.java  # 服务端命令
+│   │   │           └── DebugCommand.java  # 调试命令处理器（实现/areahint debug命令）
 │   │   └── resources/
 │   │       ├── fabric.mod.json  # 模组元数据
 │   │       └── assets/
@@ -101,6 +104,8 @@ areas-hint-mod/
 │       ├── java/
 │       │   └── areahint/
 │       │       ├── AreashintClient.java  # 客户端主类
+│       │       ├── debug/
+│       │       │   └── ClientDebugManager.java  # 客户端调试管理器（处理客户端调试显示和消息）
 │       │       ├── detection/
 │       │       │   ├── AreaDetector.java  # 区域检测逻辑
 │       │       │   └── RayCasting.java  # 射线法实现
@@ -183,4 +188,40 @@ areas-hint-mod/
 - `/areahint frequency <值>` - 设置检测频率
 - `/areahint subtitlerender <cpu|opengl|vulkan>` - 设置渲染模式
 - `/areahint subtitlestyle <full|simple|mixed>` - 设置字幕样式
-- `/areahint add <域名JSON>` - 添加新的域名（需要管理员权限） 
+- `/areahint add <域名JSON>` - 添加新的域名（需要管理员权限）
+- `/areahint debug` - 切换调试模式（需要管理员权限）
+- `/areahint debug on|off|status` - 启用/禁用/查看调试模式状态（需要管理员权限）
+
+## 调试功能
+
+模组提供了强大的调试功能，可以帮助开发者和服务器管理员诊断问题：
+
+### 调试命令
+
+使用 `/areahint debug` 命令可以切换调试模式。启用调试模式后，模组会向玩家实时显示以下信息：
+
+- 区域检测过程和结果
+- 玩家位置信息
+- 配置加载和应用情况
+- 渲染状态和过程
+- 网络通信情况
+
+调试信息按类别使用不同颜色显示，便于区分：
+
+- 区域检测（青色）
+- 玩家位置（绿色）
+- 配置（黄色）
+- 网络（紫色）
+- 渲染（蓝色）
+- 命令（白色）
+- 通用（灰色）
+
+### 调试文件
+
+调试相关的代码文件：
+
+- `src/main/java/areahint/debug/DebugManager.java` - 服务端调试管理器
+- `src/client/java/areahint/debug/ClientDebugManager.java` - 客户端调试管理器
+- `src/main/java/areahint/command/DebugCommand.java` - 调试命令处理器
+
+调试功能设计为仅在需要时消耗资源，不使用调试命令时不会影响游戏性能。 
