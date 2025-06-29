@@ -8,6 +8,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 
 /**
  * OpenGL渲染实现类
@@ -38,8 +39,72 @@ public class GLRender implements RenderManager.IRender {
     public GLRender(MinecraftClient client) {
         this.client = client;
         
-        // 注册Tick事件用于渲染
+        // 注册Tick事件用于更新动画状态
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
+        
+        // 注册HUD渲染事件
+        HudRenderCallback.EVENT.register(this::onHudRender);
+    }
+    
+    /**
+     * HUD渲染事件处理
+     * @param drawContext 绘制上下文
+     * @param tickDelta tick间隔时间
+     */
+    private void onHudRender(DrawContext drawContext, float tickDelta) {
+        if (animationState == AnimationState.NONE || currentText == null || client.player == null) {
+            return;
+        }
+
+        int screenWidth = client.getWindow().getScaledWidth();
+        int screenHeight = client.getWindow().getScaledHeight();
+        
+        // 计算文本在屏幕上的位置
+        int x = screenWidth / 2;
+        int y = screenHeight / 4; // 屏幕1/4位置
+        
+        // 根据动画状态计算Y偏移和透明度
+        float alpha = 1.0f;
+        int yOffset = 0;
+        
+        long elapsedTime = System.currentTimeMillis() - animationStartTime;
+        float progress = 0;
+        
+        switch (animationState) {
+            case IN:
+                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_IN_DURATION);
+                progress = easeOutCubic(progress); // 使用缓动函数
+                yOffset = (int) ((1.0f - progress) * 50); // 从上方50像素移动到原位
+                alpha = progress;
+                break;
+            case STAY:
+                // 保持原位，完全不透明
+                break;
+            case OUT:
+                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_OUT_DURATION);
+                progress = easeInCubic(progress); // 使用缓动函数
+                yOffset = (int) (progress * -30); // 向上移动30像素
+                alpha = 1.0f - progress;
+                break;
+            case NONE:
+                return; // 不渲染
+        }
+        
+        // 渲染文本
+        Text text = Text.of(currentText);
+        TextRenderer textRenderer = client.textRenderer;
+        int textWidth = textRenderer.getWidth(text);
+        
+        // 计算最终位置
+        int finalX = x - textWidth / 2;
+        int finalY = y + yOffset;
+        
+        // 绘制带有阴影的文本
+        int color = getAlphaColor(0xFFFFFF, alpha);
+        drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
+        
+        // 输出调试信息
+        AreashintClient.LOGGER.debug("GLRender: 实际渲染区域标题: {}, 动画状态: {}, 透明度: {}", currentText, animationState, alpha);
     }
     
     /**
@@ -58,86 +123,16 @@ public class GLRender implements RenderManager.IRender {
         if (animationState == AnimationState.IN && elapsedTime >= ANIMATION_IN_DURATION) {
             animationState = AnimationState.STAY;
             animationStartTime = currentTime;
+            AreashintClient.LOGGER.debug("GLRender: 动画状态更新 IN → STAY");
         } else if (animationState == AnimationState.STAY && elapsedTime >= ANIMATION_STAY_DURATION) {
             animationState = AnimationState.OUT;
             animationStartTime = currentTime;
+            AreashintClient.LOGGER.debug("GLRender: 动画状态更新 STAY → OUT");
         } else if (animationState == AnimationState.OUT && elapsedTime >= ANIMATION_OUT_DURATION) {
             animationState = AnimationState.NONE;
             currentText = null;
+            AreashintClient.LOGGER.debug("GLRender: 动画状态更新 OUT → NONE");
         }
-        
-        // 如果有活动的动画，渲染到屏幕
-        if (animationState != AnimationState.NONE && client.world != null) {
-            renderToScreen();
-        }
-    }
-    
-    /**
-     * 将动画渲染到屏幕
-     */
-    private void renderToScreen() {
-        if (client.currentScreen != null || currentText == null) {
-            areahint.AreashintClient.LOGGER.debug("GLRender: 跳过渲染，原因: 屏幕={}, 文本={}", 
-                    client.currentScreen != null ? client.currentScreen.getClass().getSimpleName() : "无", 
-                    currentText);
-            return;
-        }
-        
-        int screenWidth = client.getWindow().getScaledWidth();
-        int screenHeight = client.getWindow().getScaledHeight();
-        
-        // 计算文本在屏幕上的位置
-        int x = screenWidth / 2;
-        int y = screenHeight / 4; // 屏幕1/4位置
-        
-        // 根据动画状态计算Y偏移和透明度
-        final float[] alpha = {1.0f};
-        final int[] yOffset = {0};
-        
-        long elapsedTime = System.currentTimeMillis() - animationStartTime;
-        float progress = 0;
-        
-        switch (animationState) {
-            case IN:
-                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_IN_DURATION);
-                progress = easeOutCubic(progress); // 使用缓动函数
-                yOffset[0] = (int) ((1.0f - progress) * 50); // 从上方50像素移动到原位
-                alpha[0] = progress;
-                break;
-            case STAY:
-                // 保持原位，完全不透明
-                break;
-            case OUT:
-                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_OUT_DURATION);
-                progress = easeInCubic(progress); // 使用缓动函数
-                yOffset[0] = (int) (progress * -30); // 向上移动30像素
-                alpha[0] = 1.0f - progress;
-                break;
-            case NONE:
-                return; // 不渲染
-        }
-        
-        // 渲染文本
-        client.execute(() -> {
-            MatrixStack matrixStack = new MatrixStack();
-            matrixStack.push();
-            
-            // 将文本居中
-            Text text = Text.of(currentText);
-            TextRenderer textRenderer = client.textRenderer;
-            int textWidth = textRenderer.getWidth(text);
-            
-            // 计算最终位置
-            int finalX = x - textWidth / 2;
-            int finalY = y + yOffset[0];
-            
-            // 绘制带有阴影的文本
-            DrawContext drawContext = new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers());
-            int color = getAlphaColor(0xFFFFFF, alpha[0]);
-            drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
-            
-            matrixStack.pop();
-        });
     }
     
     /**
@@ -170,7 +165,7 @@ public class GLRender implements RenderManager.IRender {
         animationStartTime = System.currentTimeMillis();
         
         // 添加日志记录
-        areahint.AreashintClient.LOGGER.info("GLRender: 开始显示区域标题: {}, 动画状态: {}", title, animationState);
+        AreashintClient.LOGGER.info("GLRender: 开始显示区域标题: {}, 动画状态: {}", title, animationState);
     }
     
     /**

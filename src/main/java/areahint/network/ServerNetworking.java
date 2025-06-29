@@ -49,13 +49,28 @@ public class ServerNetworking {
             
             // 读取区域数据文件
             Path filePath = FileManager.getDimensionFile(fileName);
+            Areashint.LOGGER.info("[调试] 区域文件路径: " + filePath.toAbsolutePath());
+            
             if (!Files.exists(filePath)) {
                 Areashint.LOGGER.warn("区域数据文件不存在: " + filePath);
+                // 尝试创建空文件
+                try {
+                    FileManager.createEmptyAreaFile(filePath);
+                    Areashint.LOGGER.info("已创建空的区域文件: " + filePath);
+                } catch (IOException e) {
+                    Areashint.LOGGER.error("创建空区域文件失败: " + e.getMessage());
+                }
                 return;
             }
             
             // 读取文件内容
             String fileContent = Files.readString(filePath);
+            Areashint.LOGGER.info("[调试] 区域文件内容长度: " + fileContent.length() + " 字节");
+            if (fileContent.length() < 100) {
+                Areashint.LOGGER.info("[调试] 区域文件内容预览: " + fileContent);
+            } else {
+                Areashint.LOGGER.info("[调试] 区域文件内容预览: " + fileContent.substring(0, 100) + "...");
+            }
             
             // 创建数据包
             PacketByteBuf buffer = PacketByteBufs.create();
@@ -63,7 +78,7 @@ public class ServerNetworking {
             buffer.writeString(fileContent);
             
             // 发送数据包
-            ServerPlayNetworking.send(player, Packets.AREA_DATA_CHANNEL, buffer);
+            ServerPlayNetworking.send(player, new Identifier(Packets.S2C_AREA_DATA), buffer);
             
             Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送 " + dimensionName + " 的区域数据");
             
@@ -91,9 +106,11 @@ public class ServerNetworking {
      * 向所有客户端发送所有维度的区域数据
      */
     public static void sendAllAreaDataToAll() {
+        Areashint.LOGGER.info("[调试] 开始向所有客户端发送所有维度的区域数据");
         sendAreaDataToAll(Packets.DIMENSION_OVERWORLD);
         sendAreaDataToAll(Packets.DIMENSION_NETHER);
         sendAreaDataToAll(Packets.DIMENSION_END);
+        Areashint.LOGGER.info("[调试] 完成向所有客户端发送所有维度的区域数据");
     }
     
     /**

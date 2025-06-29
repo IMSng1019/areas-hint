@@ -73,6 +73,7 @@ public class ClientNetworking {
                 
                 // 获取文件路径
                 Path filePath = FileManager.getDimensionFile(fileName);
+                AreashintClient.LOGGER.info("[调试] 客户端保存区域数据到文件: " + filePath.toAbsolutePath());
                 
                 // 确保目录存在
                 FileManager.checkFolderExist();
@@ -81,10 +82,17 @@ public class ClientNetworking {
                 Files.writeString(filePath, fileContent, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
                 
                 AreashintClient.LOGGER.info("已接收并保存 " + dimensionName + " 的区域数据");
+                AreashintClient.LOGGER.info("[调试] 区域数据内容长度: " + fileContent.length() + " 字节");
+                if (fileContent.length() < 100) {
+                    AreashintClient.LOGGER.info("[调试] 区域数据内容预览: " + fileContent);
+                } else {
+                    AreashintClient.LOGGER.info("[调试] 区域数据内容预览: " + fileContent.substring(0, 100) + "...");
+                }
                 
                 // 如果当前在该维度中，则重新加载区域数据
                 if (client.world != null && 
                         dimensionName.equals(Packets.convertDimensionPathToType(client.world.getDimensionKey().getValue().getPath()))) {
+                    AreashintClient.LOGGER.info("[调试] 重新加载当前维度的区域数据: " + fileName);
                     AreashintClient.getAreaDetector().loadAreaData(fileName);
                 }
                 

@@ -168,6 +168,21 @@ public class AreashintClient implements ClientModInitializer {
 		if (currentDimension != null) {
 			String dimensionFileName = getDimensionFileName(currentDimension);
 			LOGGER.info("重新加载维度{}的区域文件：{}", currentDimension.toString(), dimensionFileName);
+			
+			// 获取文件路径并检查是否存在
+			Path areaFile = FileManager.getDimensionFile(dimensionFileName);
+			LOGGER.info("[调试] 重新加载区域文件路径: {}", areaFile.toAbsolutePath());
+			if (java.nio.file.Files.exists(areaFile)) {
+				try {
+					String content = java.nio.file.Files.readString(areaFile);
+					LOGGER.info("[调试] 区域文件大小: {} 字节", content.length());
+				} catch (Exception e) {
+					LOGGER.error("读取区域文件失败", e);
+				}
+			} else {
+				LOGGER.warn("[调试] 区域文件不存在: {}", areaFile.toAbsolutePath());
+			}
+			
 			areaDetector.loadAreaData(dimensionFileName);
 		}
 	}
