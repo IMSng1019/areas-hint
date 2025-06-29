@@ -6,6 +6,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 
 /**
  * Vulkan渲染实现类
@@ -38,9 +39,81 @@ public class VulkanRender implements RenderManager.IRender {
     public VulkanRender(MinecraftClient client) {
         this.client = client;
         
-        // 注册Tick事件用于渲染
+        // 注册Tick事件用于更新动画状态
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
+        
+        // 注册HUD渲染事件
+        HudRenderCallback.EVENT.register(this::onHudRender);
+        
         AreashintClient.LOGGER.info("Vulkan渲染器初始化 (注：实际使用兼容模式)");
+    }
+    
+    /**
+     * HUD渲染事件处理
+     * @param drawContext 绘制上下文
+     * @param tickDelta tick间隔时间
+     */
+    private void onHudRender(DrawContext drawContext, float tickDelta) {
+        if (animationState == AnimationState.NONE || currentText == null || client.player == null) {
+            return;
+        }
+
+        int screenWidth = client.getWindow().getScaledWidth();
+        int screenHeight = client.getWindow().getScaledHeight();
+        
+        // 计算文本在屏幕上的位置
+        int x = screenWidth / 2;
+        int y = screenHeight / 4; // 屏幕1/4位置
+        
+        // 根据动画状态计算Y偏移和透明度
+        float alpha = 1.0f;
+        int yOffset = 0;
+        
+        long elapsedTime = System.currentTimeMillis() - animationStartTime;
+        float progress = 0;
+        
+        switch (animationState) {
+            case IN:
+                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_IN_DURATION);
+                progress = easeOutCubic(progress); // 使用缓动函数
+                yOffset = (int) ((1.0f - progress) * 50); // 从上方50像素移动到原位
+                alpha = progress;
+                break;
+            case STAY:
+                // 保持原位，完全不透明
+                break;
+            case OUT:
+                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_OUT_DURATION);
+                progress = easeInCubic(progress); // 使用缓动函数
+                yOffset = (int) (progress * -30); // 向上移动30像素
+                alpha = 1.0f - progress;
+                break;
+            case NONE:
+                return; // 不渲染
+        }
+        
+        // 渲染文本
+        Text text = Text.of(currentText);
+        TextRenderer textRenderer = client.textRenderer;
+        int textWidth = textRenderer.getWidth(text);
+        
+        // 计算最终位置
+        int finalX = x - textWidth / 2;
+        int finalY = y + yOffset;
+        
+        // 为Vulkan渲染添加额外效果
+        // 注意：这仅是模拟，实际上没有使用Vulkan API
+        
+        // 绘制发光背景（简单模拟高级效果）
+        int bgColor = getAlphaColor(0x2266FF, alpha * 0.3f);
+        drawContext.fill(finalX - 10, finalY - 5, finalX + textWidth + 10, finalY + 15, bgColor);
+        
+        // 绘制文本阴影
+        int color = getAlphaColor(0xFFFFFF, alpha);
+        drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
+        
+        // 输出调试信息
+        AreashintClient.LOGGER.debug("VulkanRender: 实际渲染区域标题: {}, 动画状态: {}, 透明度: {}", currentText, animationState, alpha);
     }
     
     /**
@@ -59,94 +132,16 @@ public class VulkanRender implements RenderManager.IRender {
         if (animationState == AnimationState.IN && elapsedTime >= ANIMATION_IN_DURATION) {
             animationState = AnimationState.STAY;
             animationStartTime = currentTime;
+            AreashintClient.LOGGER.debug("VulkanRender: 动画状态更新 IN → STAY");
         } else if (animationState == AnimationState.STAY && elapsedTime >= ANIMATION_STAY_DURATION) {
             animationState = AnimationState.OUT;
             animationStartTime = currentTime;
+            AreashintClient.LOGGER.debug("VulkanRender: 动画状态更新 STAY → OUT");
         } else if (animationState == AnimationState.OUT && elapsedTime >= ANIMATION_OUT_DURATION) {
             animationState = AnimationState.NONE;
             currentText = null;
+            AreashintClient.LOGGER.debug("VulkanRender: 动画状态更新 OUT → NONE");
         }
-        
-        // 如果有活动的动画，渲染到屏幕
-        if (animationState != AnimationState.NONE && client.world != null) {
-            renderToScreen();
-        }
-    }
-    
-    /**
-     * 将动画渲染到屏幕
-     * 由于没有原生Vulkan支持，这里使用OpenGL进行渲染
-     */
-    private void renderToScreen() {
-        if (client.currentScreen != null || currentText == null) {
-            return;
-        }
-        
-        int screenWidth = client.getWindow().getScaledWidth();
-        int screenHeight = client.getWindow().getScaledHeight();
-        
-        // 计算文本在屏幕上的位置
-        int x = screenWidth / 2;
-        int y = screenHeight / 4; // 屏幕1/4位置
-        
-        // 根据动画状态计算Y偏移和透明度
-        final float[] alpha = {1.0f};
-        final int[] yOffset = {0};
-        
-        long elapsedTime = System.currentTimeMillis() - animationStartTime;
-        float progress = 0;
-        
-        switch (animationState) {
-            case IN:
-                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_IN_DURATION);
-                progress = easeOutCubic(progress); // 使用缓动函数
-                yOffset[0] = (int) ((1.0f - progress) * 50); // 从上方50像素移动到原位
-                alpha[0] = progress;
-                break;
-            case STAY:
-                // 保持原位，完全不透明
-                break;
-            case OUT:
-                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_OUT_DURATION);
-                progress = easeInCubic(progress); // 使用缓动函数
-                yOffset[0] = (int) (progress * -30); // 向上移动30像素
-                alpha[0] = 1.0f - progress;
-                break;
-            case NONE:
-                return; // 不渲染
-        }
-        
-        // 这里使用OpenGL API，但在真正的Vulkan实现中，
-        // 应该使用VK* API和特定的渲染管线
-        client.execute(() -> {
-            MatrixStack matrixStack = new MatrixStack();
-            matrixStack.push();
-            
-            // 将文本居中
-            Text text = Text.of(currentText);
-            TextRenderer textRenderer = client.textRenderer;
-            int textWidth = textRenderer.getWidth(text);
-            
-            // 计算最终位置
-            int finalX = x - textWidth / 2;
-            int finalY = y + yOffset[0];
-            
-            // 绘制带有阴影的文本（使用Minecraft的原生渲染功能）
-            DrawContext drawContext = new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers());
-            int color = getAlphaColor(0xFFFFFF, alpha[0]);
-            
-            // 为Vulkan渲染添加额外效果
-            // 注意：这仅是模拟，实际上没有使用Vulkan API
-            
-            // 绘制发光背景（简单模拟高级效果）
-            int bgColor = getAlphaColor(0x2266FF, alpha[0] * 0.3f);
-            drawContext.fill(finalX - 10, finalY - 5, finalX + textWidth + 10, finalY + 15, bgColor);
-            
-            // 绘制文本阴影
-            drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
-            
-            matrixStack.pop();
-        });
     }
     
     /**
@@ -177,6 +172,9 @@ public class VulkanRender implements RenderManager.IRender {
         currentText = title;
         animationState = AnimationState.IN;
         animationStartTime = System.currentTimeMillis();
+        
+        // 添加日志记录
+        AreashintClient.LOGGER.info("VulkanRender: 开始显示区域标题: {}, 动画状态: {}", title, animationState);
     }
     
     /**

@@ -7,6 +7,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 
 import java.awt.image.BufferedImage;
 import java.awt.Color;
@@ -60,8 +61,77 @@ public class CPURender implements RenderManager.IRender {
         this.client = client;
         this.renderThreadPool = Executors.newFixedThreadPool(2); // 创建固定大小的线程池
         
-        // 注册Tick事件用于渲染
+        // 注册Tick事件用于更新动画状态
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
+        
+        // 注册HUD渲染事件
+        HudRenderCallback.EVENT.register(this::onHudRender);
+    }
+    
+    /**
+     * HUD渲染事件处理
+     * @param drawContext 绘制上下文
+     * @param tickDelta tick间隔时间
+     */
+    private void onHudRender(DrawContext drawContext, float tickDelta) {
+        if (animationState == AnimationState.NONE || currentText == null || client.player == null) {
+            return;
+        }
+
+        int screenWidth = client.getWindow().getScaledWidth();
+        int screenHeight = client.getWindow().getScaledHeight();
+        
+        // 计算文本在屏幕上的位置
+        int x = screenWidth / 2;
+        int y = screenHeight / 4; // 屏幕1/4位置
+        
+        // 根据动画状态计算Y偏移和透明度
+        float alpha = 1.0f;
+        int yOffset = 0;
+        
+        long elapsedTime = System.currentTimeMillis() - animationStartTime;
+        float progress = 0;
+        
+        switch (animationState) {
+            case IN:
+                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_IN_DURATION);
+                progress = easeOutCubic(progress); // 使用缓动函数
+                yOffset = (int) ((1.0f - progress) * 50); // 从上方50像素移动到原位
+                alpha = progress;
+                break;
+            case STAY:
+                // 保持原位，完全不透明
+                break;
+            case OUT:
+                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_OUT_DURATION);
+                progress = easeInCubic(progress); // 使用缓动函数
+                yOffset = (int) (progress * -30); // 向上移动30像素
+                alpha = 1.0f - progress;
+                break;
+            case NONE:
+                return; // 不渲染
+        }
+        
+        // 渲染文本
+        Text text = Text.of(currentText);
+        TextRenderer textRenderer = client.textRenderer;
+        int textWidth = textRenderer.getWidth(text);
+        
+        // 计算最终位置
+        int finalX = x - textWidth / 2;
+        int finalY = y + yOffset;
+        
+        // 绘制带有阴影的文本
+        int color = getAlphaColor(0xFFFFFF, alpha);
+        
+        // CPU渲染特效：添加一个简单的背景框
+        int bgColor = getAlphaColor(0x000000, alpha * 0.5f);
+        drawContext.fill(finalX - 4, finalY - 2, finalX + textWidth + 4, finalY + textRenderer.fontHeight + 2, bgColor);
+        
+        drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
+        
+        // 输出调试信息
+        AreashintClient.LOGGER.debug("CPURender: 实际渲染区域标题: {}, 动画状态: {}, 透明度: {}", currentText, animationState, alpha);
     }
     
     /**
@@ -80,92 +150,16 @@ public class CPURender implements RenderManager.IRender {
         if (animationState == AnimationState.IN && elapsedTime >= ANIMATION_IN_DURATION) {
             animationState = AnimationState.STAY;
             animationStartTime = currentTime;
+            AreashintClient.LOGGER.debug("CPURender: 动画状态更新 IN → STAY");
         } else if (animationState == AnimationState.STAY && elapsedTime >= ANIMATION_STAY_DURATION) {
             animationState = AnimationState.OUT;
             animationStartTime = currentTime;
+            AreashintClient.LOGGER.debug("CPURender: 动画状态更新 STAY → OUT");
         } else if (animationState == AnimationState.OUT && elapsedTime >= ANIMATION_OUT_DURATION) {
             animationState = AnimationState.NONE;
             currentText = null;
+            AreashintClient.LOGGER.debug("CPURender: 动画状态更新 OUT → NONE");
         }
-        
-        // 如果有活动的动画，渲染到屏幕
-        if (animationState != AnimationState.NONE) {
-            renderToScreen();
-        }
-    }
-    
-    /**
-     * 将动画渲染到屏幕
-     */
-    private void renderToScreen() {
-        if (client.currentScreen != null || currentText == null) {
-            return;
-        }
-        
-        BufferedImage textImage = renderedTextImage.get();
-        if (textImage == null) {
-            return;
-        }
-        
-        int screenWidth = client.getWindow().getScaledWidth();
-        int screenHeight = client.getWindow().getScaledHeight();
-        
-        int imgWidth = textImage.getWidth();
-        int imgHeight = textImage.getHeight();
-        
-        // 计算文本在屏幕上的位置
-        int x = (screenWidth - imgWidth) / 2;
-        int y = screenHeight / 4; // 屏幕1/4位置
-        
-        // 根据动画状态计算Y偏移和透明度
-        final float[] alpha = {1.0f};
-        final int[] yOffset = {0};
-        
-        long elapsedTime = System.currentTimeMillis() - animationStartTime;
-        float progress = 0;
-        
-        switch (animationState) {
-            case IN:
-                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_IN_DURATION);
-                progress = easeOutCubic(progress); // 使用缓动函数
-                yOffset[0] = (int) ((1.0f - progress) * 50); // 从上方50像素移动到原位
-                alpha[0] = progress;
-                break;
-            case STAY:
-                // 保持原位，完全不透明
-                break;
-            case OUT:
-                progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_OUT_DURATION);
-                progress = easeInCubic(progress); // 使用缓动函数
-                yOffset[0] = (int) (progress * -30); // 向上移动30像素
-                alpha[0] = 1.0f - progress;
-                break;
-            case NONE:
-                return; // 不渲染
-        }
-        
-        // 绘制文本（这里不使用OpenGL，仅作为占位符）
-        // 在实际实现中，我们需要创建自定义的渲染方法直接修改帧缓冲区
-        // 由于Minecraft的渲染系统仍然需要使用OpenGL，这里仅展示结构
-        
-        // 注意：在实际CPU渲染实现中，我们需要使用更低级别的API
-        // 例如直接操作帧缓冲区，而不是通过DrawContext
-        client.execute(() -> {
-            MatrixStack matrixStack = new MatrixStack();
-            matrixStack.push();
-            matrixStack.translate(x, y + yOffset[0], 0);
-            
-            Text text = Text.of(currentText);
-            TextRenderer textRenderer = client.textRenderer;
-            int textWidth = textRenderer.getWidth(text);
-            
-            // 在实际实现中，应该使用纯软件渲染代替这些方法
-            DrawContext drawContext = new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers());
-            drawContext.drawTextWithShadow(textRenderer, text, (screenWidth - textWidth) / 2, y + yOffset[0], 
-                    getAlphaColor(0xFFFFFF, alpha[0]));
-            
-            matrixStack.pop();
-        });
     }
     
     /**
@@ -243,6 +237,9 @@ public class CPURender implements RenderManager.IRender {
                 AreashintClient.LOGGER.error("渲染文本时出错: " + ex.getMessage());
                 return null;
             });
+        
+        // 添加日志记录
+        AreashintClient.LOGGER.info("CPURender: 开始显示区域标题: {}, 动画状态: {}", title, animationState);
     }
     
     /**
