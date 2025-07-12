@@ -48,6 +48,13 @@ public class CPURender implements RenderManager.IRender {
     // 文本大小缩放比例
     private static final float TEXT_SCALE = 1.5f; // 增大文本大小
     
+    // 上一帧的Y偏移和透明度，用于平滑插值
+    private float lastYOffset = 0;
+    private float lastAlpha = 0;
+    
+    // 插值系数（0-1之间，越小越平滑，但延迟越大）
+    private static final float INTERPOLATION_FACTOR = 0.15f;
+    
     // 预渲染的文本图像
     private final AtomicReference<BufferedImage> renderedTextImage = new AtomicReference<>();
     
@@ -90,29 +97,49 @@ public class CPURender implements RenderManager.IRender {
         
         // 根据动画状态计算Y偏移和透明度
         float alpha = 1.0f;
-        int yOffset = 0;
+        float yOffset = 0.0f;
         
         long elapsedTime = System.currentTimeMillis() - animationStartTime;
         float progress = 0;
         
         switch (animationState) {
             case IN:
+                // 确保渐入动画的进度计算更加平滑
                 progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_IN_DURATION);
                 progress = easeOutCubic(progress); // 使用缓动函数
-                // 直接渐入，不移动位置
                 alpha = progress;
+                // 渐入动画时不使用Y偏移，保持固定位置
+                yOffset = 0.0f;
                 break;
             case STAY:
                 // 保持原位，完全不透明
+                alpha = 1.0f;
+                yOffset = 0.0f;
                 break;
             case OUT:
                 progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_OUT_DURATION);
                 progress = easeInCubic(progress); // 使用缓动函数
-                yOffset = (int) (-15 * progress); // 修复闪烁问题，使用正确的负数计算方法
+                yOffset = -15.0f * progress; // 使用浮点数计算，避免整数截断导致的闪烁
                 alpha = 1.0f - progress;
                 break;
             case NONE:
                 return; // 不渲染
+        }
+        
+        // 应用平滑插值，减少闪烁
+        // 对于渐入动画，直接使用计算值，不进行插值处理
+        if (animationState == AnimationState.IN && elapsedTime < 100) {
+            // 渐入动画开始阶段，直接使用计算值
+            lastYOffset = yOffset;
+            lastAlpha = alpha;
+        } else {
+            // 其他情况使用插值
+            yOffset = lastYOffset * (1.0f - INTERPOLATION_FACTOR) + yOffset * INTERPOLATION_FACTOR;
+            alpha = lastAlpha * (1.0f - INTERPOLATION_FACTOR) + alpha * INTERPOLATION_FACTOR;
+            
+            // 保存当前值用于下一帧插值
+            lastYOffset = yOffset;
+            lastAlpha = alpha;
         }
         
         // 渲染文本
@@ -122,6 +149,7 @@ public class CPURender implements RenderManager.IRender {
         // 应用缩放来增大文本尺寸
         MatrixStack matrixStack = drawContext.getMatrices();
         matrixStack.push();
+        // 使用浮点数直接传递给矩阵变换，避免整数转换
         matrixStack.translate(x, y + yOffset, 0);
         matrixStack.scale(TEXT_SCALE, TEXT_SCALE, 1.0f);
         
@@ -145,7 +173,10 @@ public class CPURender implements RenderManager.IRender {
         matrixStack.pop();
         
         // 输出调试信息
-        AreashintClient.LOGGER.debug("CPURender: 实际渲染区域标题: {}, 动画状态: {}, 透明度: {}", currentText, animationState, alpha);
+        if (animationState == AnimationState.IN) {
+            AreashintClient.LOGGER.debug("CPURender: 渐入动画 - 区域标题: {}, 进度: {}, 透明度: {}", 
+                currentText, progress, alpha);
+        }
     }
     
     /**
@@ -168,6 +199,9 @@ public class CPURender implements RenderManager.IRender {
         } else if (animationState == AnimationState.STAY && elapsedTime >= ANIMATION_STAY_DURATION) {
             animationState = AnimationState.OUT;
             animationStartTime = currentTime;
+            // 重置插值变量以确保平滑过渡
+            lastYOffset = 0.0f;
+            lastAlpha = 1.0f;
             AreashintClient.LOGGER.debug("CPURender: 动画状态更新 STAY → OUT");
         } else if (animationState == AnimationState.OUT && elapsedTime >= ANIMATION_OUT_DURATION) {
             animationState = AnimationState.NONE;
@@ -243,6 +277,10 @@ public class CPURender implements RenderManager.IRender {
         currentText = title;
         animationState = AnimationState.IN;
         animationStartTime = System.currentTimeMillis();
+        
+        // 初始化插值变量为0，确保渐入动画从完全透明开始
+        lastYOffset = 0.0f;
+        lastAlpha = 0.0f;
         
         // 异步预渲染文本图像
         CompletableFuture.supplyAsync(() -> renderTextToBitmap(title), renderThreadPool)
