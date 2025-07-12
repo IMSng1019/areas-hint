@@ -32,6 +32,9 @@ public class VulkanRender implements RenderManager.IRender {
     private static final long ANIMATION_STAY_DURATION = 3000; // 显示持续时间
     private static final long ANIMATION_OUT_DURATION = 300; // 退出动画持续时间
     
+    // 文本大小缩放比例
+    private static final float TEXT_SCALE = 1.5f; // 增大文本大小
+    
     /**
      * 构造方法
      * @param client Minecraft客户端实例
@@ -76,7 +79,7 @@ public class VulkanRender implements RenderManager.IRender {
             case IN:
                 progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_IN_DURATION);
                 progress = easeOutCubic(progress); // 使用缓动函数
-                yOffset = (int) ((1.0f - progress) * 50); // 从上方50像素移动到原位
+                // 直接渐入，不移动位置
                 alpha = progress;
                 break;
             case STAY:
@@ -85,7 +88,7 @@ public class VulkanRender implements RenderManager.IRender {
             case OUT:
                 progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_OUT_DURATION);
                 progress = easeInCubic(progress); // 使用缓动函数
-                yOffset = (int) (progress * -30); // 向上移动30像素
+                yOffset = (int) (-15 * progress); // 修复闪烁问题，使用正确的负数计算方法
                 alpha = 1.0f - progress;
                 break;
             case NONE:
@@ -95,11 +98,19 @@ public class VulkanRender implements RenderManager.IRender {
         // 渲染文本
         Text text = Text.of(currentText);
         TextRenderer textRenderer = client.textRenderer;
+        
+        // 应用缩放来增大文本尺寸
+        MatrixStack matrixStack = drawContext.getMatrices();
+        matrixStack.push();
+        matrixStack.translate(x, y + yOffset, 0);
+        matrixStack.scale(TEXT_SCALE, TEXT_SCALE, 1.0f);
+        
+        // 获取未缩放的文本宽度
         int textWidth = textRenderer.getWidth(text);
         
-        // 计算最终位置
-        int finalX = x - textWidth / 2;
-        int finalY = y + yOffset;
+        // 计算最终位置 (正确计算居中位置)
+        int finalX = -textWidth / 2;
+        int finalY = 0;
         
         // 为Vulkan渲染添加额外效果
         // 注意：这仅是模拟，实际上没有使用Vulkan API
@@ -111,6 +122,9 @@ public class VulkanRender implements RenderManager.IRender {
         // 绘制文本阴影
         int color = getAlphaColor(0xFFFFFF, alpha);
         drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
+        
+        // 恢复矩阵状态
+        matrixStack.pop();
         
         // 输出调试信息
         AreashintClient.LOGGER.debug("VulkanRender: 实际渲染区域标题: {}, 动画状态: {}, 透明度: {}", currentText, animationState, alpha);
