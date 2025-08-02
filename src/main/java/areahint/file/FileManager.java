@@ -38,7 +38,7 @@ public class FileManager {
         }
 
         // 获取模组JAR文件所在目录
-        Path gameDir = FabricLoader.getInstance().getGameDir();
+        Path gameDir = FabricLoader.getInstance().getGameDir().normalize();
         // gameDir指向.minecraft目录，我们需要areas-hint目录
         Path configDir = gameDir.resolve("areas-hint");
         

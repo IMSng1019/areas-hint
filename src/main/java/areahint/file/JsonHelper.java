@@ -1,183 +1,178 @@
 package areahint.file;
 
-import areahint.Areashint;
 import areahint.data.AreaData;
+import areahint.data.AreaData.Vertex;
+import areahint.data.AreaData.AltitudeData;
+import areahint.data.ConfigData;
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
- * JSON处理工具类
- * 用于解析和转换JSON数据
+ * JSON辅助工具类
+ * 用于序列化和反序列化AreaData和ConfigData对象
  */
 public class JsonHelper {
-    private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(AreaData.class, new AreaDataDeserializer())
-            .registerTypeAdapter(AreaData.Vertex.class, new VertexDeserializer())
-            .setPrettyPrinting()
-            .create();
+    
+    private static final Gson gson = new GsonBuilder()
+        .registerTypeAdapter(AreaData.class, new AreaDataDeserializer())
+        .registerTypeAdapter(Vertex.class, new VertexDeserializer())
+        .registerTypeAdapter(AltitudeData.class, new AltitudeDataDeserializer())
+        .setPrettyPrinting()
+        .create();
     
     /**
-     * 将JSON字符串转换为区域数据
-     * @param json JSON字符串
-     * @return 区域数据，如果解析失败则返回null
-     */
-    public static AreaData fromJson(String json) {
-        try {
-            return GSON.fromJson(json, AreaData.class);
-        } catch (JsonSyntaxException e) {
-            Areashint.LOGGER.error("JSON解析错误: " + e.getMessage());
-            return null;
-        }
-    }
-    
-    /**
-     * 将区域数据转换为JSON字符串
-     * @param areaData 区域数据
-     * @return JSON字符串
-     */
-    public static String toJson(AreaData areaData) {
-        return GSON.toJson(areaData);
-    }
-    
-    /**
-     * 将区域数据列表转换为JSON字符串
-     * @param areaDataList 区域数据列表
-     * @return JSON字符串
+     * 将AreaData列表序列化为JSON字符串
      */
     public static String toJson(List<AreaData> areaDataList) {
-        return GSON.toJson(areaDataList);
+        return gson.toJson(areaDataList);
     }
     
     /**
-     * 区域数据反序列化器
-     * 用于将JSON对象转换为区域数据对象
+     * 将JSON字符串反序列化为AreaData列表
+     */
+    public static List<AreaData> fromJson(String json) {
+        Type listType = new TypeToken<List<AreaData>>(){}.getType();
+        return gson.fromJson(json, listType);
+    }
+    
+    /**
+     * 将JSON字符串反序列化为单个AreaData对象
+     */
+    public static AreaData fromJsonSingle(String json) {
+        return gson.fromJson(json, AreaData.class);
+    }
+    
+    /**
+     * 将ConfigData序列化为JSON字符串
+     */
+    public static String toJson(ConfigData configData) {
+        return gson.toJson(configData);
+    }
+    
+    /**
+     * 将JSON字符串反序列化为ConfigData
+     */
+    public static ConfigData configFromJson(String json) {
+        return gson.fromJson(json, ConfigData.class);
+    }
+    
+    /**
+     * AreaData自定义反序列化器
      */
     private static class AreaDataDeserializer implements JsonDeserializer<AreaData> {
         @Override
-        public AreaData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        public AreaData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) 
+                throws JsonParseException {
             JsonObject jsonObject = json.getAsJsonObject();
             
-            String name = null;
-            List<AreaData.Vertex> vertices = new ArrayList<>();
-            List<AreaData.Vertex> secondVertices = new ArrayList<>();
-            int level = 0;
-            String baseName = null;
+            AreaData areaData = new AreaData();
             
-            try {
-                // 解析名称
-                if (jsonObject.has("name")) {
-                    name = jsonObject.get("name").getAsString();
-                }
-                
-                // 解析一级顶点
-                if (jsonObject.has("vertices") && jsonObject.get("vertices").isJsonArray()) {
-                    JsonArray verticesArray = jsonObject.getAsJsonArray("vertices");
-                    for (JsonElement element : verticesArray) {
-                        if (element.isJsonObject()) {
-                            JsonObject vertexObject = element.getAsJsonObject();
-                            double x = 0;
-                            double z = 0;
-                            
-                            // 标准格式: {"x": 值, "z": 值}
-                            if (vertexObject.has("x") && vertexObject.has("z")) {
-                                x = vertexObject.get("x").getAsDouble();
-                                z = vertexObject.get("z").getAsDouble();
-                                vertices.add(new AreaData.Vertex(x, z));
-                            } else {
-                                Areashint.LOGGER.warn("顶点缺少x或z坐标: " + vertexObject);
-                            }
-                        } else if (element.isJsonArray()) {
-                            // 数组格式 [x, z] - 转换为标准格式
-                            JsonArray vertexArray = element.getAsJsonArray();
-                            if (vertexArray.size() >= 2) {
-                                double x = vertexArray.get(0).getAsDouble();
-                                double z = vertexArray.get(1).getAsDouble();
-                                vertices.add(new AreaData.Vertex(x, z));
-                                Areashint.LOGGER.info("转换数组格式顶点 [" + x + "," + z + "] 为标准格式");
-                            }
-                        }
-                    }
-                }
-                
-                // 解析二级顶点
-                if (jsonObject.has("second-vertices") && jsonObject.get("second-vertices").isJsonArray()) {
-                    JsonArray secondVerticesArray = jsonObject.getAsJsonArray("second-vertices");
-                    for (JsonElement element : secondVerticesArray) {
-                        if (element.isJsonObject()) {
-                            JsonObject vertexObject = element.getAsJsonObject();
-                            double x = 0;
-                            double z = 0;
-                            
-                            // 标准格式: {"x": 值, "z": 值}
-                            if (vertexObject.has("x") && vertexObject.has("z")) {
-                                x = vertexObject.get("x").getAsDouble();
-                                z = vertexObject.get("z").getAsDouble();
-                                secondVertices.add(new AreaData.Vertex(x, z));
-                            } else {
-                                Areashint.LOGGER.warn("二级顶点缺少x或z坐标: " + vertexObject);
-                            }
-                        } else if (element.isJsonArray()) {
-                            // 数组格式 [x, z] - 转换为标准格式
-                            JsonArray vertexArray = element.getAsJsonArray();
-                            if (vertexArray.size() >= 2) {
-                                double x = vertexArray.get(0).getAsDouble();
-                                double z = vertexArray.get(1).getAsDouble();
-                                secondVertices.add(new AreaData.Vertex(x, z));
-                                Areashint.LOGGER.info("转换数组格式二级顶点 [" + x + "," + z + "] 为标准格式");
-                            }
-                        }
-                    }
-                }
-                
-                // 解析等级
-                if (jsonObject.has("level")) {
-                    level = jsonObject.get("level").getAsInt();
-                }
-                
-                // 解析上级域名
-                if (jsonObject.has("base-name") && !jsonObject.get("base-name").isJsonNull()) {
-                    baseName = jsonObject.get("base-name").getAsString();
-                }
-                
-            } catch (Exception e) {
-                throw new JsonParseException("解析区域数据时出错: " + e.getMessage());
+            // 反序列化基本字段
+            if (jsonObject.has("name")) {
+                areaData.setName(jsonObject.get("name").getAsString());
             }
             
-            return new AreaData(name, vertices, secondVertices, level, baseName);
+            if (jsonObject.has("level")) {
+                areaData.setLevel(jsonObject.get("level").getAsInt());
+            }
+            
+            if (jsonObject.has("base-name") && !jsonObject.get("base-name").isJsonNull()) {
+                areaData.setBaseName(jsonObject.get("base-name").getAsString());
+            }
+            
+            // 反序列化vertices
+            if (jsonObject.has("vertices")) {
+                JsonArray verticesArray = jsonObject.getAsJsonArray("vertices");
+                List<Vertex> vertices = context.deserialize(verticesArray, new TypeToken<List<Vertex>>(){}.getType());
+                areaData.setVertices(vertices);
+            }
+            
+            // 反序列化second-vertices
+            if (jsonObject.has("second-vertices")) {
+                JsonArray secondVerticesArray = jsonObject.getAsJsonArray("second-vertices");
+                List<Vertex> secondVertices = context.deserialize(secondVerticesArray, new TypeToken<List<Vertex>>(){}.getType());
+                areaData.setSecondVertices(secondVertices);
+            }
+            
+            // 反序列化altitude（新增）
+            if (jsonObject.has("altitude")) {
+                JsonElement altitudeElement = jsonObject.get("altitude");
+                if (!altitudeElement.isJsonNull()) {
+                    AltitudeData altitude = context.deserialize(altitudeElement, AltitudeData.class);
+                    areaData.setAltitude(altitude);
+                }
+            }
+            
+            return areaData;
         }
     }
     
     /**
-     * 顶点反序列化器
-     * 用于将JSON对象转换为顶点对象
+     * Vertex自定义反序列化器
+     * 支持两种格式：[x, z] 数组格式和 {"x": x, "z": z} 对象格式
      */
-    private static class VertexDeserializer implements JsonDeserializer<AreaData.Vertex> {
+    private static class VertexDeserializer implements JsonDeserializer<Vertex> {
         @Override
-        public AreaData.Vertex deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        public Vertex deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) 
+                throws JsonParseException {
             if (json.isJsonArray()) {
                 // 处理数组格式 [x, z]
                 JsonArray array = json.getAsJsonArray();
                 if (array.size() >= 2) {
                     double x = array.get(0).getAsDouble();
                     double z = array.get(1).getAsDouble();
-                    Areashint.LOGGER.info("从数组格式转换顶点: [" + x + "," + z + "]");
-                    return new AreaData.Vertex(x, z);
+                    System.out.println("JsonHelper: 转换数组格式顶点 [" + x + ", " + z + "] 为对象格式");
+                    return new Vertex(x, z);
                 }
             } else if (json.isJsonObject()) {
-                // 处理对象格式 {"x": 值, "z": 值}
-                JsonObject object = json.getAsJsonObject();
-                if (object.has("x") && object.has("z")) {
-                    double x = object.get("x").getAsDouble();
-                    double z = object.get("z").getAsDouble();
-                    return new AreaData.Vertex(x, z);
+                // 处理对象格式 {"x": x, "z": z}
+                JsonObject obj = json.getAsJsonObject();
+                if (obj.has("x") && obj.has("z")) {
+                    double x = obj.get("x").getAsDouble();
+                    double z = obj.get("z").getAsDouble();
+                    return new Vertex(x, z);
                 }
             }
             
-            throw new JsonParseException("无法解析顶点数据，请使用标准格式 {\"x\": 值, \"z\": 值}");
+            throw new JsonParseException("无效的顶点格式: " + json.toString());
+        }
+    }
+    
+    /**
+     * AltitudeData自定义反序列化器
+     * 处理altitude字段，支持null值
+     */
+    private static class AltitudeDataDeserializer implements JsonDeserializer<AltitudeData> {
+        @Override
+        public AltitudeData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) 
+                throws JsonParseException {
+            if (json.isJsonNull()) {
+                return null;
+            }
+            
+            JsonObject jsonObject = json.getAsJsonObject();
+            AltitudeData altitude = new AltitudeData();
+            
+            // 处理max字段
+            if (jsonObject.has("max")) {
+                JsonElement maxElement = jsonObject.get("max");
+                if (!maxElement.isJsonNull()) {
+                    altitude.setMax(maxElement.getAsDouble());
+                }
+            }
+            
+            // 处理min字段
+            if (jsonObject.has("min")) {
+                JsonElement minElement = jsonObject.get("min");
+                if (!minElement.isJsonNull()) {
+                    altitude.setMin(minElement.getAsDouble());
+                }
+            }
+            
+            return altitude;
         }
     }
 } 

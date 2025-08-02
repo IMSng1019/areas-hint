@@ -4,152 +4,102 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * 区域数据模型类
- * 用于表示一个区域的数据，包括名称、顶点、等级等
+ * 区域数据模型
+ * 包含区域的基本信息：名称、顶点、边界框、高度范围、等级和基础名称
  */
 public class AreaData {
-    private String name; // 区域名称
-    private List<Vertex> vertices; // 一级顶点（多边形的边界点）
-    private List<Vertex> secondVertices; // 二级顶点（AABB包围盒的四个点）
-    private int level; // 域名等级（1为顶级域名，2为二级域名，以此类推）
-    private String baseName; // 上级域名（指向的域名等级必须等于该域名等级-1）
+    private String name;                    // 区域名称
+    private List<Vertex> vertices;          // 多边形顶点列表
+    private List<Vertex> secondVertices;    // AABB边界框顶点
+    private AltitudeData altitude;          // 高度范围（新增）
+    private int level;                      // 区域等级
+    private String baseName;               // 基础名称（上级区域）
 
-    /**
-     * 构造方法
-     * @param name 区域名称
-     * @param vertices 一级顶点列表
-     * @param secondVertices 二级顶点列表
-     * @param level 域名等级
-     * @param baseName 上级域名
-     */
-    public AreaData(String name, List<Vertex> vertices, List<Vertex> secondVertices, int level, String baseName) {
+    // 构造函数
+    public AreaData() {}
+
+    public AreaData(String name, List<Vertex> vertices, List<Vertex> secondVertices, 
+                   AltitudeData altitude, int level, String baseName) {
         this.name = name;
         this.vertices = vertices;
         this.secondVertices = secondVertices;
+        this.altitude = altitude;
         this.level = level;
         this.baseName = baseName;
     }
 
-    /**
-     * 默认构造方法
-     */
-    public AreaData() {
-        this.vertices = new ArrayList<>();
-        this.secondVertices = new ArrayList<>();
-    }
-
-    /**
-     * 获取区域名称
-     * @return 区域名称
-     */
+    // Getter和Setter方法
     public String getName() {
         return name;
     }
 
-    /**
-     * 设置区域名称
-     * @param name 区域名称
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     * 获取一级顶点列表
-     * @return 一级顶点列表
-     */
     public List<Vertex> getVertices() {
         return vertices;
     }
 
-    /**
-     * 设置一级顶点列表
-     * @param vertices 一级顶点列表
-     */
     public void setVertices(List<Vertex> vertices) {
         this.vertices = vertices;
     }
 
-    /**
-     * 获取二级顶点列表
-     * @return 二级顶点列表
-     */
     public List<Vertex> getSecondVertices() {
         return secondVertices;
     }
 
-    /**
-     * 设置二级顶点列表
-     * @param secondVertices 二级顶点列表
-     */
     public void setSecondVertices(List<Vertex> secondVertices) {
         this.secondVertices = secondVertices;
     }
 
-    /**
-     * 获取域名等级
-     * @return 域名等级
-     */
+    public AltitudeData getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(AltitudeData altitude) {
+        this.altitude = altitude;
+    }
+
     public int getLevel() {
         return level;
     }
 
-    /**
-     * 设置域名等级
-     * @param level 域名等级
-     */
     public void setLevel(int level) {
         this.level = level;
     }
 
-    /**
-     * 获取上级域名
-     * @return 上级域名
-     */
     public String getBaseName() {
         return baseName;
     }
 
-    /**
-     * 设置上级域名
-     * @param baseName 上级域名
-     */
     public void setBaseName(String baseName) {
         this.baseName = baseName;
     }
 
     /**
-     * 检查数据是否有效
-     * @return 如果数据有效返回true，否则返回false
+     * 验证区域数据的有效性
+     * @return 验证是否通过
      */
     public boolean isValid() {
-        // 名称不能为空
-        if (name == null || name.isEmpty()) {
+        if (name == null || name.trim().isEmpty()) {
             return false;
         }
         
-        // 一级顶点至少需要3个点
         if (vertices == null || vertices.size() < 3) {
             return false;
         }
         
-        // 二级顶点必须正好是4个点（AABB包围盒）
         if (secondVertices == null || secondVertices.size() != 4) {
             return false;
         }
         
-        // 域名等级必须大于0
-        if (level <= 0) {
+        if (level < 1) {
             return false;
         }
         
-        // 一级域名的baseName必须为null
-        if (level == 1 && baseName != null) {
-            return false;
-        }
-        
-        // 非一级域名的baseName不能为null
-        if (level > 1 && (baseName == null || baseName.isEmpty())) {
+        // 验证高度数据
+        if (altitude != null && !altitude.isValid()) {
             return false;
         }
         
@@ -157,58 +107,109 @@ public class AreaData {
     }
 
     /**
-     * 顶点类，表示一个二维坐标点
+     * 顶点数据模型
      */
     public static class Vertex {
-        private double x; // X坐标
-        private double z; // Z坐标 (在Minecraft中Y轴是高度，这里使用X,Z作为平面坐标)
+        private double x;
+        private double z;
 
-        /**
-         * 构造方法
-         * @param x X坐标
-         * @param z Z坐标
-         */
+        public Vertex() {}
+
         public Vertex(double x, double z) {
             this.x = x;
             this.z = z;
         }
 
-        /**
-         * 默认构造方法
-         */
-        public Vertex() {
-        }
-
-        /**
-         * 获取X坐标
-         * @return X坐标
-         */
         public double getX() {
             return x;
         }
 
-        /**
-         * 设置X坐标
-         * @param x X坐标
-         */
         public void setX(double x) {
             this.x = x;
         }
 
-        /**
-         * 获取Z坐标
-         * @return Z坐标
-         */
         public double getZ() {
             return z;
         }
 
-        /**
-         * 设置Z坐标
-         * @param z Z坐标
-         */
         public void setZ(double z) {
             this.z = z;
         }
+
+        @Override
+        public String toString() {
+            return String.format("Vertex{x=%.1f, z=%.1f}", x, z);
+        }
+    }
+
+    /**
+     * 高度范围数据模型
+     */
+    public static class AltitudeData {
+        private Double max;  // 最大高度，null表示无限制
+        private Double min;  // 最小高度，null表示无限制
+
+        public AltitudeData() {}
+
+        public AltitudeData(Double max, Double min) {
+            this.max = max;
+            this.min = min;
+        }
+
+        public Double getMax() {
+            return max;
+        }
+
+        public void setMax(Double max) {
+            this.max = max;
+        }
+
+        public Double getMin() {
+            return min;
+        }
+
+        public void setMin(Double min) {
+            this.min = min;
+        }
+
+        /**
+         * 验证高度数据的有效性
+         * @return 验证是否通过
+         */
+        public boolean isValid() {
+            // 如果max和min都不为null，max必须大于等于min
+            if (max != null && min != null) {
+                return max >= min;
+            }
+            return true;
+        }
+
+        /**
+         * 检查给定高度是否在范围内
+         * @param y 要检查的高度
+         * @return 是否在范围内
+         */
+        public boolean isInRange(double y) {
+            if (min != null && y < min) {
+                return false;
+            }
+            if (max != null && y > max) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("AltitudeData{max=%s, min=%s}", 
+                max != null ? max.toString() : "null", 
+                min != null ? min.toString() : "null");
+        }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("AreaData{name='%s', level=%d, altitude=%s, vertices=%d, baseName='%s'}", 
+            name, level, altitude, vertices != null ? vertices.size() : 0, baseName);
     }
 } 

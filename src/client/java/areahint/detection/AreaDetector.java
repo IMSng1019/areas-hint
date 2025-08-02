@@ -59,20 +59,21 @@ public class AreaDetector {
     /**
      * 检测玩家所在的区域
      * @param x 玩家的X坐标
+     * @param y 玩家的Y坐标（高度）
      * @param z 玩家的Z坐标
      * @return 玩家所在的区域名称（根据配置的样式格式化），如果不在任何区域内则返回null
      */
-    public String detectPlayerArea(double x, double z) {
+    public String detectPlayerArea(double x, double y, double z) {
         // 更新最后一次检测时间
         lastDetectionTime = System.currentTimeMillis();
         
         // 获取玩家当前所在的区域
         if (ClientDebugManager.isDebugEnabled()) {
             ClientDebugManager.sendDebugInfo(DebugCategory.PLAYER_POSITION, 
-                String.format("检测玩家位置: (%.2f, %.2f)", x, z));
+                String.format("检测玩家位置: (%.2f, %.2f, %.2f)", x, y, z));
         }
         
-        AreaData currentArea = findArea(x, z);
+        AreaData currentArea = findArea(x, y, z);
         
         // 如果没有找到区域
         if (currentArea == null) {
@@ -109,22 +110,36 @@ public class AreaDetector {
     /**
      * 查找玩家所在的区域
      * @param x 玩家的X坐标
+     * @param y 玩家的Y坐标（高度）
      * @param z 玩家的Z坐标
      * @return 玩家所在的区域，如果不在任何区域内则返回null
      */
-    private AreaData findArea(double x, double z) {
+    private AreaData findArea(double x, double y, double z) {
         // 如果没有加载任何区域数据，直接返回null
         if (areas.isEmpty()) {
             AreashintClient.LOGGER.debug("没有加载任何区域数据，无法检测");
             return null;
         }
         
+        // 步骤1: 高度预筛选
+        List<AreaData> filteredAreas = AltitudeFilter.filterByAltitude(y, areas);
+        if (filteredAreas.isEmpty()) {
+            AreashintClient.LOGGER.debug("经过高度预筛选后，没有符合条件的区域");
+            return null;
+        }
+        
+        // 重新按等级分组筛选后的区域
+        Map<Integer, List<AreaData>> filteredAreasByLevel = new HashMap<>();
+        for (AreaData area : filteredAreas) {
+            filteredAreasByLevel.computeIfAbsent(area.getLevel(), k -> new ArrayList<>()).add(area);
+        }
+        
         // 按照区域等级排序（1为顶级域名，2为二级域名，以此类推）
-        List<Integer> levels = new ArrayList<>(areasByLevel.keySet());
+        List<Integer> levels = new ArrayList<>(filteredAreasByLevel.keySet());
         Collections.sort(levels);
         
         // 先检查玩家是否在一级域名内
-        List<AreaData> levelOneAreas = areasByLevel.getOrDefault(1, Collections.emptyList());
+        List<AreaData> levelOneAreas = filteredAreasByLevel.getOrDefault(1, Collections.emptyList());
         AreaData inLevelOne = null;
         
         AreashintClient.LOGGER.debug("检查玩家({}, {})是否在一级域名内，一级域名数量: {}", x, z, levelOneAreas.size());
@@ -163,7 +178,7 @@ public class AreaDetector {
         
         for (int i = 1; i < levels.size(); i++) {
             int currentLevel = levels.get(i);
-            List<AreaData> currentLevelAreas = areasByLevel.getOrDefault(currentLevel, Collections.emptyList());
+            List<AreaData> currentLevelAreas = filteredAreasByLevel.getOrDefault(currentLevel, Collections.emptyList());
             
             // 只检查基于当前域名的下一级域名
             final String finalBaseName = baseName; // 创建final副本供lambda表达式使用

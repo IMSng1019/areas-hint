@@ -102,7 +102,8 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));
-        source.sendMessage(Text.of("§7{\"name\": \"区域名称\", \"vertices\": [{\"x\":0,\"z\":10},{\"x\":10,\"z\":0},...], \"second-vertices\": [{\"x\":-10,\"z\":10},...], \"level\": 1, \"base-name\": null}"));
+        source.sendMessage(Text.of("§7{\"name\": \"区域名称\", \"vertices\": [{\"x\":0,\"z\":10},{\"x\":10,\"z\":0},...], \"second-vertices\": [{\"x\":-10,\"z\":10},...], \"altitude\": {\"max\":100,\"min\":0}, \"level\": 1, \"base-name\": null}"));
+        source.sendMessage(Text.of("§7altitude字段可选: max/min可为null表示无限制，如{\"max\":null,\"min\":64}"));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -136,11 +137,33 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         // 解析JSON数据
-        AreaData areaData = JsonHelper.fromJson(json);
+        AreaData areaData = JsonHelper.fromJsonSingle(json);
         
         if (areaData == null) {
             source.sendMessage(Text.of("§c无效的JSON数据，请检查格式"));
             return 0;
+        }
+        
+        // 验证高度数据（如果存在）
+        if (areaData.getAltitude() != null) {
+            if (!areaData.getAltitude().isValid()) {
+                source.sendMessage(Text.of("§c高度数据无效: 最大高度不能小于最小高度"));
+                return 0;
+            }
+            
+            // 检查高度值的合理性（Minecraft世界高度通常在-64到320之间）
+            Double minAlt = areaData.getAltitude().getMin();
+            Double maxAlt = areaData.getAltitude().getMax();
+            
+            if (minAlt != null && (minAlt < -64 || minAlt > 320)) {
+                source.sendMessage(Text.of(String.format("§c最小高度 %.1f 超出合理范围 [-64, 320]", minAlt)));
+                return 0;
+            }
+            
+            if (maxAlt != null && (maxAlt < -64 || maxAlt > 320)) {
+                source.sendMessage(Text.of(String.format("§c最大高度 %.1f 超出合理范围 [-64, 320]", maxAlt)));
+                return 0;
+            }
         }
         
         if (!areaData.isValid()) {

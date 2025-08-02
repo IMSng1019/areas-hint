@@ -3,13 +3,13 @@
 	"id": "areas-hint",
 	"version": "${version}",
 	"name": "区域提示",
-	"description": "一个可以在玩家进入特定区域时显示区域名称的Minecraft模组",
+	"description": "一个可以在玩家进入区域时显示域名的Minecraft模组 A mod that displays the domain name when a player enters an area",
 	"authors": [
 		"IMSng"
 	],
 	"contact": {
-		"homepage": "https://github.com/",
-		"sources": "https://github.com/"
+		"homepage": "https://imsng1019.github.io/",
+		"sources": "https://github.com/IMSng1019/areas-hint"
 	},
 	"license": "MIT",
 	"icon": "assets/areas-hint/icon.png",

@@ -75,58 +75,90 @@
 
 ```
 areas-hint-mod/
-├── src/
-│   ├── main/
+├── gradle/                          # Gradle构建工具
+│   └── wrapper/
+│       ├── gradle-wrapper.jar       # Gradle包装器JAR文件
+│       └── gradle-wrapper.properties # Gradle包装器配置
+├── src/                             # 源代码目录
+│   ├── main/                        # 服务端代码
 │   │   ├── java/
 │   │   │   └── areahint/
-│   │   │       ├── Areashint.java  # 服务端主类
-│   │   │       ├── data/
-│   │   │       │   ├── AreaData.java  # 区域数据模型
-│   │   │       │   └── ConfigData.java  # 配置数据模型
-│   │   │       ├── debug/
-│   │   │       │   └── DebugManager.java  # 服务端调试管理器（处理调试模式和向玩家发送调试信息）
-│   │   │       ├── file/
-│   │   │       │   ├── FileManager.java  # 文件管理工具
-│   │   │       │   └── JsonHelper.java  # JSON处理工具
-│   │   │       ├── network/
-│   │   │       │   ├── ServerNetworking.java  # 服务端网络处理
-│   │   │       │   └── Packets.java  # 网络数据包定义
-│   │   │       └── command/
-│   │   │           ├── ServerCommands.java  # 服务端命令
-│   │   │           └── DebugCommand.java  # 调试命令处理器（实现/areahint debug命令）
-│   │   └── resources/
-│   │       ├── fabric.mod.json  # 模组元数据
+│   │   │       ├── Areashint.java   # 服务端主类（模组入口）
+│   │   │       ├── command/         # 命令处理
+│   │   │       │   ├── ServerCommands.java # 统一命令处理器（服务端+客户端命令）
+│   │   │       │   └── DebugCommand.java   # 调试命令处理器
+│   │   │       ├── data/            # 数据模型
+│   │   │       │   ├── AreaData.java       # 区域数据模型（含altitude高度字段）
+│   │   │       │   └── ConfigData.java     # 配置数据模型
+│   │   │       ├── debug/           # 调试功能
+│   │   │       │   └── DebugManager.java   # 服务端调试管理器
+│   │   │       ├── file/            # 文件操作
+│   │   │       │   ├── FileManager.java    # 文件管理器（读写配置和区域数据）
+│   │   │       │   └── JsonHelper.java     # JSON序列化工具（支持altitude）
+│   │   │       ├── mixin/           # Mixin注入
+│   │   │       │   └── ExampleMixin.java   # 服务端Mixin示例
+│   │   │       └── network/         # 网络通信
+│   │   │           ├── Packets.java        # 网络包定义和通道标识符
+│   │   │           └── ServerNetworking.java # 服务端网络处理
+│   │   └── resources/               # 服务端资源
+│   │       ├── fabric.mod.json      # Fabric模组配置文件
+│   │       ├── areas-hint.mixins.json # 服务端Mixin配置
 │   │       └── assets/
 │   │           └── areas-hint/
-│   │               └── lang/
-│   │                   └── zh_cn.json  # 中文语言文件
-│   └── client/
+│   │               └── icon.png     # 模组图标
+│   └── client/                      # 客户端代码
 │       ├── java/
 │       │   └── areahint/
-│       │       ├── AreashintClient.java  # 客户端主类
-│       │       ├── debug/
-│       │       │   └── ClientDebugManager.java  # 客户端调试管理器（处理客户端调试显示和消息）
-│       │       ├── detection/
-│       │       │   ├── AreaDetector.java  # 区域检测逻辑
-│       │       │   └── RayCasting.java  # 射线法实现
-│       │       ├── render/
-│       │       │   ├── RenderManager.java  # 渲染管理
-│       │       │   ├── CPURender.java  # CPU渲染实现
-│       │       │   ├── GLRender.java  # OpenGL渲染实现
-│       │       │   └── VulkanRender.java  # Vulkan渲染实现
-│       │       ├── config/
-│       │       │   └── ClientConfig.java  # 客户端配置处理
-│       │       ├── network/
-│       │       │   └── ClientNetworking.java  # 客户端网络处理
-│       │       └── command/
-│       │           └── ClientCommands.java  # 客户端命令
-│       └── resources/
-│           └── areas-hint.client.mixins.json  # 客户端Mixin配置
-└── ../areas-hint/  # 外部配置和数据目录（不在mod JAR中）
-    ├── config.json  # 配置文件
-    ├── overworld.json  # 主世界域名文件
-    ├── the_nether.json  # 地狱域名文件
-    └── the_end.json  # 末地域名文件
+│       │       ├── AreashintClient.java     # 客户端主类
+│       │       ├── AreashintDataGenerator.java # 数据生成器
+│       │       ├── command/         # 客户端命令（已弃用）
+│       │       │   └── ClientCommands.java # 客户端命令处理（已弃用）
+│       │       ├── config/          # 配置管理
+│       │       │   └── ClientConfig.java   # 客户端配置处理
+│       │       ├── debug/           # 调试功能
+│       │       │   ├── ClientDebugManager.java # 客户端调试管理器
+│       │       │   └── DebugManager.java        # 调试管理器（空文件）
+│       │       ├── detection/       # 区域检测（核心功能）
+│       │       │   ├── AreaDetector.java   # 区域检测器（集成高度预筛选）
+│       │       │   ├── AltitudeFilter.java # 高度预筛选器（新增功能）
+│       │       │   └── RayCasting.java     # 射线检测和AABB算法
+│       │       ├── mixin/           # 客户端Mixin
+│       │       │   └── client/
+│       │       │       └── ExampleClientMixin.java # 客户端Mixin示例
+│       │       ├── network/         # 网络通信
+│       │       │   └── ClientNetworking.java # 客户端网络处理
+│       │       └── render/          # 渲染系统
+│       │           ├── RenderManager.java  # 渲染管理器
+│       │           ├── CPURender.java      # CPU渲染实现
+│       │           ├── GLRender.java       # OpenGL渲染实现
+│       │           └── VulkanRender.java   # Vulkan渲染实现（模拟）
+│       └── resources/               # 客户端资源
+│           └── areas-hint.client.mixins.json # 客户端Mixin配置
+├── build.gradle                     # Gradle构建脚本
+├── gradle.properties               # Gradle配置属性
+├── gradlew                         # Unix/Linux Gradle包装器脚本
+├── gradlew.bat                     # Windows Gradle包装器脚本
+├── settings.gradle                 # Gradle设置文件
+├── LICENSE                         # MIT许可证文件
+├── README.md                       # 项目说明文档
+├── .gitignore                      # Git忽略文件配置
+├── .gitattributes                  # Git属性配置
+├── prompt.txt                      # 原始需求文档
+├── prompt_implementation.txt       # 实现方案文档
+├── overworld.json                  # 主世界区域数据示例
+└── areas-hint-template-1.20.4.zip # 模组压缩包模板
+
+build/                              # 构建输出目录（自动生成）
+├── libs/
+│   ├── areas-hint-1.0.0.jar       # 主模组JAR文件
+│   └── areas-hint-1.0.0-sources.jar # 源代码JAR文件
+└── ...                             # 其他构建文件
+
+.minecraft/areas-hint/              # 运行时配置和数据目录
+├── config.json                     # 模组配置文件
+├── overworld.json                  # 主世界区域数据
+├── the_nether.json                 # 地狱区域数据
+└── the_end.json                    # 末地区域数据
 ```
 
 ## 实现细节
@@ -148,10 +180,20 @@ areas-hint-mod/
     {"x": 10, "z": -10},
     {"x": -10, "z": -10}
   ],
+  "altitude": {
+    "max": 100,
+    "min": 0
+  },
   "level": 1,
   "base-name": null
 }
 ```
+
+**新增字段说明：**
+- `altitude`: 高度范围设置（可选）
+  - `max`: 最大高度，null表示无上限
+  - `min`: 最小高度，null表示无下限
+  - 玩家只有在指定高度范围内才会检测到该区域
 
 ### 配置文件格式 (JSON)
 
@@ -224,4 +266,61 @@ areas-hint-mod/
 - `src/client/java/areahint/debug/ClientDebugManager.java` - 客户端调试管理器
 - `src/main/java/areahint/command/DebugCommand.java` - 调试命令处理器
 
-调试功能设计为仅在需要时消耗资源，不使用调试命令时不会影响游戏性能。 
+调试功能设计为仅在需要时消耗资源，不使用调试命令时不会影响游戏性能。
+
+## 高度预筛选机制
+
+### 概述
+
+高度预筛选是一个新增的性能优化功能，通过在射线检测和AABB检测之前预先筛选符合高度条件的区域，提高区域检测效率。
+
+### 工作原理
+
+1. **3D扩展原理**：将原本的2D多边形区域扩展为3D柱体
+2. **横截面不变**：在玩家所在高度的横截面仍然是原来的2D多边形
+3. **向量兼容**：多边形的顶点坐标在XZ平面上保持不变，完全兼容现有算法
+
+### 处理流程
+
+```
+玩家位置检测
+     ↓
+获取玩家Y坐标（高度）
+     ↓
+高度预筛选 (AltitudeFilter)
+     ↓
+筛选后的区域列表
+     ↓
+原有检测机制（AABB + 射线法）
+     ↓
+最终结果
+```
+
+### 高度数据格式
+
+```json
+"altitude": {
+    "max": 100,    // 最大高度，null表示无上限
+    "min": 0       // 最小高度，null表示无下限
+}
+```
+
+### 实现文件
+
+- `src/client/java/areahint/detection/AltitudeFilter.java` - 高度预筛选器
+  - `filterByAltitude()` - 根据玩家高度筛选区域
+  - `validateAltitude()` - 验证高度数据有效性
+  - 集成调试信息输出
+
+### 性能优势
+
+- **减少计算量**：预筛选可显著减少需要进行射线检测的区域数量
+- **向后兼容**：altitude字段为可选，现有数据无需修改
+- **模块化设计**：独立的预筛选模块，易于维护和扩展
+
+### 高度验证
+
+系统会验证高度数据的合理性：
+- 最大高度不能小于最小高度
+- 高度值建议在Minecraft合理范围内（-64到320）
+- 在`/areahint add`命令中自动验证 

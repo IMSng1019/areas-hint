@@ -99,22 +99,23 @@ public class AreashintClient implements ClientModInitializer {
 			// 按照配置的频率检测玩家位置
 			if (areaDetector.shouldDetect()) {
 				double playerX = player.getX();
+				double playerY = player.getY();
 				double playerZ = player.getZ();
-				String areaName = areaDetector.detectPlayerArea(playerX, playerZ);
+				String areaName = areaDetector.detectPlayerArea(playerX, playerY, playerZ);
 				
 				// 添加调试日志，无论是否有变化都记录当前检测结果
-				LOGGER.debug("玩家位置检测 - 坐标：({}, {})，检测到区域：{}，之前区域：{}", 
-						playerX, playerZ, areaName, currentAreaName);
+				LOGGER.debug("玩家位置检测 - 坐标：({}, {}, {})，检测到区域：{}，之前区域：{}", 
+						playerX, playerY, playerZ, areaName, currentAreaName);
 				
 				// 如果区域发生变化，显示新的区域名称
 				if ((areaName == null && currentAreaName != null) || 
 					(areaName != null && !areaName.equals(currentAreaName))) {
 					if (areaName == null) {
-						LOGGER.info("玩家（{}, {}）离开区域：{}", playerX, playerZ, currentAreaName);
+						LOGGER.info("玩家（{}, {}, {}）离开区域：{}", playerX, playerY, playerZ, currentAreaName);
 					} else if (currentAreaName == null) {
-						LOGGER.info("玩家（{}, {}）进入区域：{}", playerX, playerZ, areaName);
+						LOGGER.info("玩家（{}, {}, {}）进入区域：{}", playerX, playerY, playerZ, areaName);
 					} else {
-						LOGGER.info("玩家（{}, {}）从区域 {} 进入区域：{}", playerX, playerZ, currentAreaName, areaName);
+						LOGGER.info("玩家（{}, {}, {}）从区域 {} 进入区域：{}", playerX, playerY, playerZ, currentAreaName, areaName);
 					}
 					
 					currentAreaName = areaName;
