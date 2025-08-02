@@ -14,18 +14,20 @@ public class AreaData {
     private AltitudeData altitude;          // 高度范围（新增）
     private int level;                      // 区域等级
     private String baseName;               // 基础名称（上级区域）
+    private String signature;              // 域名创建者签名
 
     // 构造函数
     public AreaData() {}
 
     public AreaData(String name, List<Vertex> vertices, List<Vertex> secondVertices, 
-                   AltitudeData altitude, int level, String baseName) {
+                   AltitudeData altitude, int level, String baseName, String signature) {
         this.name = name;
         this.vertices = vertices;
         this.secondVertices = secondVertices;
         this.altitude = altitude;
         this.level = level;
         this.baseName = baseName;
+        this.signature = signature;
     }
 
     // Getter和Setter方法
@@ -75,6 +77,14 @@ public class AreaData {
 
     public void setBaseName(String baseName) {
         this.baseName = baseName;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 
     /**
@@ -209,7 +219,7 @@ public class AreaData {
 
     @Override
     public String toString() {
-        return String.format("AreaData{name='%s', level=%d, altitude=%s, vertices=%d, baseName='%s'}", 
-            name, level, altitude, vertices != null ? vertices.size() : 0, baseName);
+        return String.format("AreaData{name='%s', level=%d, altitude=%s, vertices=%d, baseName='%s', signature='%s'}", 
+            name, level, altitude, vertices != null ? vertices.size() : 0, baseName, signature);
     }
 } 

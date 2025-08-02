@@ -67,7 +67,7 @@ public class VulkanRender implements RenderManager.IRender {
         if (animationState == AnimationState.NONE || currentText == null || client.player == null) {
             return;
         }
-
+        
         int screenWidth = client.getWindow().getScaledWidth();
         int screenHeight = client.getWindow().getScaledHeight();
         
@@ -123,8 +123,8 @@ public class VulkanRender implements RenderManager.IRender {
         }
         
         // 渲染文本
-        Text text = Text.of(currentText);
-        TextRenderer textRenderer = client.textRenderer;
+            Text text = Text.of(currentText);
+            TextRenderer textRenderer = client.textRenderer;
         
         // 应用缩放来增大文本尺寸
         MatrixStack matrixStack = drawContext.getMatrices();
@@ -134,25 +134,25 @@ public class VulkanRender implements RenderManager.IRender {
         matrixStack.scale(TEXT_SCALE, TEXT_SCALE, 1.0f);
         
         // 获取未缩放的文本宽度
-        int textWidth = textRenderer.getWidth(text);
-        
+            int textWidth = textRenderer.getWidth(text);
+            
         // 计算最终位置 (正确计算居中位置)
         int finalX = -textWidth / 2;
         int finalY = 0;
-        
-        // 为Vulkan渲染添加额外效果
-        // 注意：这仅是模拟，实际上没有使用Vulkan API
-        
-        // 绘制发光背景（简单模拟高级效果）
+            
+            // 为Vulkan渲染添加额外效果
+            // 注意：这仅是模拟，实际上没有使用Vulkan API
+            
+            // 绘制发光背景（简单模拟高级效果）
         int bgColor = getAlphaColor(0x2266FF, alpha * 0.3f);
-        drawContext.fill(finalX - 10, finalY - 5, finalX + textWidth + 10, finalY + 15, bgColor);
-        
-        // 绘制文本阴影
+            drawContext.fill(finalX - 10, finalY - 5, finalX + textWidth + 10, finalY + 15, bgColor);
+            
+            // 绘制文本阴影
         int color = getAlphaColor(0xFFFFFF, alpha);
-        drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
-        
+            drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
+            
         // 恢复矩阵状态
-        matrixStack.pop();
+            matrixStack.pop();
         
         // 输出调试信息
         if (animationState == AnimationState.IN) {

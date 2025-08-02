@@ -106,6 +106,14 @@ public class JsonHelper {
                 }
             }
             
+            // 反序列化signature（签名）
+            if (jsonObject.has("signature")) {
+                JsonElement signatureElement = jsonObject.get("signature");
+                if (!signatureElement.isJsonNull()) {
+                    areaData.setSignature(signatureElement.getAsString());
+                }
+            }
+            
             return areaData;
         }
     }

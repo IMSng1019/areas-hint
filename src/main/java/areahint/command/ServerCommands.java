@@ -12,14 +12,21 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.world.World;
 
 import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -64,6 +71,14 @@ public class ServerCommands {
                     .executes(context -> executeAdd(context, StringArgumentType.getString(context, "json"))))
             )
             
+            // delete 命令 (任何玩家都可以使用，但有权限检查)
+            .then(literal("delete")
+                .then(argument("areaName", StringArgumentType.greedyString())
+                    .suggests(DELETABLE_AREA_SUGGESTIONS)
+                    .executes(context -> executeDelete(context, StringArgumentType.getString(context, "areaName"))))
+                .executes(ServerCommands::executeDeleteList)
+            )
+            
             // frequency 命令
             .then(literal("frequency")
                 .then(argument("value", IntegerArgumentType.integer(1, 60))
@@ -95,6 +110,8 @@ public class ServerCommands {
         source.sendMessage(Text.of("§6===== 区域提示模组命令帮助 ====="));
         source.sendMessage(Text.of("§a/areahint help §7- 显示此帮助"));
         source.sendMessage(Text.of("§a/areahint reload §7- 重新加载配置和域名文件"));
+        source.sendMessage(Text.of("§a/areahint delete §7- 列出所有可删除的域名"));
+        source.sendMessage(Text.of("§a/areahint delete <域名> §7- 删除指定域名"));
         source.sendMessage(Text.of("§a/areahint frequency [值] §7- 设置或显示检测频率"));
         source.sendMessage(Text.of("§a/areahint subtitlerender [cpu|opengl|vulkan] §7- 设置或显示字幕渲染方式"));
         source.sendMessage(Text.of("§a/areahint subtitlestyle [full|simple|mixed] §7- 设置或显示字幕样式"));
@@ -102,7 +119,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));
-        source.sendMessage(Text.of("§7{\"name\": \"区域名称\", \"vertices\": [{\"x\":0,\"z\":10},{\"x\":10,\"z\":0},...], \"second-vertices\": [{\"x\":-10,\"z\":10},...], \"altitude\": {\"max\":100,\"min\":0}, \"level\": 1, \"base-name\": null}"));
+        source.sendMessage(Text.of("§7{\"name\": \"区域名称\", \"vertices\": [{\"x\":0,\"z\":10},{\"x\":10,\"z\":0},...], \"second-vertices\": [{\"x\":-10,\"z\":10},...], \"altitude\": {\"max\":100,\"min\":0}, \"level\": 1, \"base-name\": null, \"signature\": null}"));
         source.sendMessage(Text.of("§7altitude字段可选: max/min可为null表示无限制，如{\"max\":null,\"min\":64}"));
         
         return Command.SINGLE_SUCCESS;
@@ -186,6 +203,11 @@ public class ServerCommands {
         
         Path filePath = FileManager.getDimensionFile(fileName);
         
+        // 自动设置创建者签名（如果没有设置的话）
+        if (areaData.getSignature() == null) {
+            areaData.setSignature(source.getName());
+        }
+        
         // 添加区域数据
         if (FileManager.addAreaData(filePath, areaData)) {
             source.sendMessage(Text.of("§a成功添加域名: " + areaData.getName()));
@@ -213,6 +235,7 @@ public class ServerCommands {
             return null;
         }
     }
+    
     
     /**
      * 发送客户端命令
@@ -342,4 +365,211 @@ public class ServerCommands {
             return 0;
         }
     }
+    
+    /**
+     * 执行delete命令列表（显示所有可删除的域名）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeDeleteList(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        // 获取当前维度
+        String dimensionId = getDimensionFromSource(source);
+        if (dimensionId == null) {
+            source.sendMessage(Text.of("§c无法确定当前维度"));
+            return 0;
+        }
+        
+        String fileName = Packets.getFileNameForDimension(dimensionId);
+        if (fileName == null) {
+            source.sendMessage(Text.of("§c无法确定文件名，维度ID: " + dimensionId));
+            return 0;
+        }
+        
+        Path areaFile = FileManager.getDimensionFile(fileName);
+        
+        // 读取区域数据
+        java.util.List<AreaData> areas = FileManager.readAreaData(areaFile);
+        
+        if (areas.isEmpty()) {
+            source.sendMessage(Text.of("§7当前维度没有任何域名"));
+            return Command.SINGLE_SUCCESS;
+        }
+        
+        source.sendMessage(Text.of("§6===== 可删除的域名列表 ====="));
+        
+        for (AreaData area : areas) {
+            String signature = area.getSignature();
+            String playerName = source.getName();
+            boolean hasOp = source.hasPermissionLevel(2);
+            boolean canDelete = false;
+            
+            if (signature == null) {
+                // 没有签名的旧域名：只有管理员可以删除
+                if (hasOp) {
+                    source.sendMessage(Text.of("§a" + area.getName() + " §7- 可删除 (旧版本域名，管理员权限)"));
+                    canDelete = true;
+                } else {
+                    source.sendMessage(Text.of("§c" + area.getName() + " §7- 不可删除 (旧版本域名，需要管理员权限)"));
+                }
+            } else if (signature.equals(playerName) || hasOp) {
+                // 可以删除
+                source.sendMessage(Text.of("§a" + area.getName() + " §7- 可删除 (创建者: " + signature + ")"));
+                canDelete = true;
+            } else {
+                // 不可删除
+                source.sendMessage(Text.of("§c" + area.getName() + " §7- 不可删除 (创建者: " + signature + ")"));
+            }
+        }
+        
+        source.sendMessage(Text.of("§7使用 §a/areahint delete <域名> §7来删除指定域名"));
+        return Command.SINGLE_SUCCESS;
+    }
+    
+    /**
+     * 执行delete命令（删除指定域名）
+     * @param context 命令上下文
+     * @param areaName 要删除的域名
+     * @return 执行结果
+     */
+    private static int executeDelete(CommandContext<ServerCommandSource> context, String areaName) {
+        ServerCommandSource source = context.getSource();
+        String playerName = source.getName();
+        boolean hasOp = source.hasPermissionLevel(2);
+        
+        // 获取当前维度
+        String dimensionId = getDimensionFromSource(source);
+        if (dimensionId == null) {
+            source.sendMessage(Text.of("§c无法确定当前维度"));
+            return 0;
+        }
+        
+        String fileName = Packets.getFileNameForDimension(dimensionId);
+        if (fileName == null) {
+            source.sendMessage(Text.of("§c无法确定文件名，维度ID: " + dimensionId));
+            return 0;
+        }
+        
+        Path areaFile = FileManager.getDimensionFile(fileName);
+        
+        // 读取区域数据
+        java.util.List<AreaData> areas = FileManager.readAreaData(areaFile);
+        
+        // 查找要删除的域名
+        AreaData targetArea = null;
+        for (AreaData area : areas) {
+            if (area.getName().equals(areaName)) {
+                targetArea = area;
+                break;
+            }
+        }
+        
+        if (targetArea == null) {
+            source.sendMessage(Text.of("§c未找到域名: §6" + areaName));
+            return 0;
+        }
+        
+        // 检查签名权限
+        String signature = targetArea.getSignature();
+        if (signature == null) {
+            // 没有签名的旧域名：只有管理员可以删除
+            if (!hasOp) {
+                source.sendMessage(Text.of("§c该域名没有签名（旧版本域名），只有管理员可以删除"));
+                return 0;
+            }
+        } else {
+            // 有签名的新域名：创建者或管理员可以删除
+            if (!signature.equals(playerName) && !hasOp) {
+                source.sendMessage(Text.of("§c你不是该域名的创建者，无法删除"));
+                return 0;
+            }
+        }
+        
+        // 检查是否有次级域名引用此域名
+        for (AreaData area : areas) {
+            if (areaName.equals(area.getBaseName())) {
+                source.sendMessage(Text.of("§c不能删除该域名，因为存在次级域名 §6" + area.getName() + " §c引用了它"));
+                return 0;
+            }
+        }
+        
+        // 执行删除
+        areas.remove(targetArea);
+        
+        // 保存文件
+        try {
+            FileManager.writeAreaData(areaFile, areas);
+            source.sendMessage(Text.of("§a成功删除域名: §6" + areaName));
+            
+            // 向所有客户端发送更新后的区域数据
+            ServerNetworking.sendAllAreaDataToAll();
+            
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c删除域名时发生错误: " + e.getMessage()));
+            Areashint.LOGGER.error("删除域名时发生错误", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * 获取当前玩家可以删除的域名列表
+     * @param source 命令源
+     * @param dimension 维度
+     * @return 可删除的域名列表
+     */
+    private static List<String> getDeletableAreaNames(ServerCommandSource source, String dimension) {
+        try {
+            String fileName = Packets.getFileNameForDimension(dimension);
+            if (fileName == null) {
+                return List.of();
+            }
+            
+            Path areaFile = FileManager.getDimensionFile(fileName);
+            if (!areaFile.toFile().exists()) {
+                return List.of();
+            }
+            
+            List<AreaData> areas = FileManager.readAreaData(areaFile);
+            String playerName = source.getName();
+            boolean hasOp = source.hasPermissionLevel(2);
+            
+            return areas.stream()
+                .filter(area -> {
+                    String signature = area.getSignature();
+                    if (signature == null) {
+                        // 旧域名只有管理员可以删除
+                        return hasOp;
+                    } else {
+                        // 新域名创建者或管理员可以删除
+                        return signature.equals(playerName) || hasOp;
+                    }
+                })
+                .map(AreaData::getName)
+                .toList();
+        } catch (Exception e) {
+            Areashint.LOGGER.error("获取可删除域名列表时发生错误", e);
+            return List.of();
+        }
+    }
+    
+    /**
+     * 可删除域名的建议提供器
+     */
+    private static final SuggestionProvider<ServerCommandSource> DELETABLE_AREA_SUGGESTIONS = 
+        (context, builder) -> {
+            ServerCommandSource source = context.getSource();
+            String dimension = getDimensionFromSource(source);
+            List<String> deletableAreas = getDeletableAreaNames(source, dimension);
+            
+            // 添加所有可删除的域名到建议列表
+            for (String areaName : deletableAreas) {
+                if (areaName.toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
+                    builder.suggest(areaName);
+                }
+            }
+            
+            return builder.buildFuture();
+        };
 } 
