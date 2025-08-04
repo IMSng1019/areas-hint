@@ -121,14 +121,14 @@ public class ClientNetworking {
             try {
                 AreashintClient.LOGGER.info("接收到服务端命令: " + command);
                 
-                // 解析命令
-                String[] parts = command.split(":");
-                if (parts.length < 2) {
+                // 解析命令（只在第一个冒号处分割，保留参数）
+                int firstColonIndex = command.indexOf(":");
+                if (firstColonIndex == -1) {
                     return;
                 }
                 
-                String type = parts[0];
-                String action = parts[1];
+                String type = command.substring(0, firstColonIndex);
+                String action = command.substring(firstColonIndex + 1);
                 
                 // 根据命令类型处理
                 if (type.equals("areahint")) {
@@ -177,11 +177,56 @@ public class ClientNetworking {
                             }
                         }
                     }
+                    // 处理EasyAdd命令
+                    else if (action.startsWith("easyadd")) {
+                        handleEasyAddCommand(action);
+                    }
                 }
             } catch (Exception e) {
                 AreashintClient.LOGGER.error("处理客户端命令时出错: " + e.getMessage());
             }
         });
+    }
+    
+    /**
+     * 处理EasyAdd命令
+     * @param action 命令动作
+     */
+    private static void handleEasyAddCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理EasyAdd命令: " + action);
+            areahint.easyadd.EasyAddManager manager = areahint.easyadd.EasyAddManager.getInstance();
+            
+            if (action.equals("easyadd_start")) {
+                AreashintClient.LOGGER.info("执行easyadd_start");
+                manager.startEasyAdd();
+            } else if (action.equals("easyadd_cancel")) {
+                AreashintClient.LOGGER.info("执行easyadd_cancel");
+                manager.cancelEasyAdd();
+            } else if (action.startsWith("easyadd_level:")) {
+                String levelStr = action.substring("easyadd_level:".length());
+                int level = Integer.parseInt(levelStr);
+                AreashintClient.LOGGER.info("执行easyadd_level: " + level);
+                manager.handleLevelInput(level);
+            } else if (action.startsWith("easyadd_base:")) {
+                String baseName = action.substring("easyadd_base:".length());
+                AreashintClient.LOGGER.info("执行easyadd_base: " + baseName);
+                manager.handleBaseSelection(baseName);
+            } else if (action.equals("easyadd_continue")) {
+                AreashintClient.LOGGER.info("执行easyadd_continue");
+                // 继续记录的逻辑在按键处理中，这里不需要做特殊处理
+            } else if (action.equals("easyadd_finish")) {
+                AreashintClient.LOGGER.info("执行easyadd_finish");
+                manager.finishPointRecording();
+            } else if (action.equals("easyadd_save")) {
+                AreashintClient.LOGGER.info("执行easyadd_save");
+                manager.confirmSave();
+            } else {
+                AreashintClient.LOGGER.warn("未知的EasyAdd命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理EasyAdd命令时出错: " + e.getMessage(), e);
+        }
     }
     
     /**

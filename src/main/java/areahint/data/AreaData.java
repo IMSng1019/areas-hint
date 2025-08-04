@@ -2,6 +2,7 @@ package areahint.data;
 
 import java.util.List;
 import java.util.ArrayList;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * 区域数据模型
@@ -10,9 +11,11 @@ import java.util.ArrayList;
 public class AreaData {
     private String name;                    // 区域名称
     private List<Vertex> vertices;          // 多边形顶点列表
+    @SerializedName("second-vertices")
     private List<Vertex> secondVertices;    // AABB边界框顶点
     private AltitudeData altitude;          // 高度范围（新增）
     private int level;                      // 区域等级
+    @SerializedName("base-name")
     private String baseName;               // 基础名称（上级区域）
     private String signature;              // 域名创建者签名
 

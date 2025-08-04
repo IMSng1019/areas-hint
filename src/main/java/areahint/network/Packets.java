@@ -27,6 +27,10 @@ public class Packets {
     // 客户端到服务端的包ID
     public static final String C2S_REQUEST_AREA_DATA = Areashint.MOD_ID + ":c2s_request_area_data";
     
+    // EasyAdd功能相关的包ID
+    public static final Identifier C2S_EASYADD_AREA_DATA = new Identifier(Areashint.MOD_ID, "c2s_easyadd_area_data");
+    public static final Identifier S2C_EASYADD_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_easyadd_response");
+    
     /**
      * 将维度路径转换为维度类型字符串
      * @param dimensionPath 维度路径

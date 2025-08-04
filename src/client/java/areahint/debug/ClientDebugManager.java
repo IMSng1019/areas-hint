@@ -81,6 +81,7 @@ public class ClientDebugManager {
         NETWORK(Formatting.LIGHT_PURPLE),
         RENDER(Formatting.BLUE),
         COMMAND(Formatting.WHITE),
+        EASY_ADD(Formatting.GOLD),
         GENERAL(Formatting.GRAY);
         
         private final Formatting formatting;

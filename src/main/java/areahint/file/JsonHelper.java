@@ -17,17 +17,24 @@ import java.util.List;
 public class JsonHelper {
     
     private static final Gson gson = new GsonBuilder()
-        .registerTypeAdapter(AreaData.class, new AreaDataDeserializer())
+            .registerTypeAdapter(AreaData.class, new AreaDataDeserializer())
         .registerTypeAdapter(Vertex.class, new VertexDeserializer())
         .registerTypeAdapter(AltitudeData.class, new AltitudeDataDeserializer())
-        .setPrettyPrinting()
-        .create();
+            .setPrettyPrinting()
+            .create();
     
     /**
      * 将AreaData列表序列化为JSON字符串
      */
     public static String toJson(List<AreaData> areaDataList) {
         return gson.toJson(areaDataList);
+    }
+    
+    /**
+     * 将单个AreaData对象序列化为JSON字符串
+     */
+    public static String toJsonSingle(AreaData areaData) {
+        return gson.toJson(areaData);
     }
     
     /**
@@ -71,28 +78,28 @@ public class JsonHelper {
             AreaData areaData = new AreaData();
             
             // 反序列化基本字段
-            if (jsonObject.has("name")) {
+                if (jsonObject.has("name")) {
                 areaData.setName(jsonObject.get("name").getAsString());
-            }
-            
+                }
+                
             if (jsonObject.has("level")) {
                 areaData.setLevel(jsonObject.get("level").getAsInt());
             }
             
             if (jsonObject.has("base-name") && !jsonObject.get("base-name").isJsonNull()) {
                 areaData.setBaseName(jsonObject.get("base-name").getAsString());
-            }
+                                    }
             
             // 反序列化vertices
             if (jsonObject.has("vertices")) {
                 JsonArray verticesArray = jsonObject.getAsJsonArray("vertices");
                 List<Vertex> vertices = context.deserialize(verticesArray, new TypeToken<List<Vertex>>(){}.getType());
                 areaData.setVertices(vertices);
-            }
-            
+                }
+                
             // 反序列化second-vertices
             if (jsonObject.has("second-vertices")) {
-                JsonArray secondVerticesArray = jsonObject.getAsJsonArray("second-vertices");
+                    JsonArray secondVerticesArray = jsonObject.getAsJsonArray("second-vertices");
                 List<Vertex> secondVertices = context.deserialize(secondVerticesArray, new TypeToken<List<Vertex>>(){}.getType());
                 areaData.setSecondVertices(secondVertices);
             }
@@ -103,9 +110,9 @@ public class JsonHelper {
                 if (!altitudeElement.isJsonNull()) {
                     AltitudeData altitude = context.deserialize(altitudeElement, AltitudeData.class);
                     areaData.setAltitude(altitude);
+                    }
                 }
-            }
-            
+                
             // 反序列化signature（签名）
             if (jsonObject.has("signature")) {
                 JsonElement signatureElement = jsonObject.get("signature");
@@ -169,8 +176,8 @@ public class JsonHelper {
                 JsonElement maxElement = jsonObject.get("max");
                 if (!maxElement.isJsonNull()) {
                     altitude.setMax(maxElement.getAsDouble());
-                }
-            }
+                        }
+                    }
             
             // 处理min字段
             if (jsonObject.has("min")) {

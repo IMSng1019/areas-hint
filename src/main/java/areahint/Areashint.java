@@ -53,6 +53,9 @@ public class Areashint implements ModInitializer {
 		// 初始化服务端网络处理
 		ServerNetworking.init();
 		
+		// 初始化EasyAdd服务端网络处理
+		areahint.easyadd.EasyAddServerNetworking.registerServerReceivers();
+		
 		// 注册命令
 		ServerCommands.register();
 		

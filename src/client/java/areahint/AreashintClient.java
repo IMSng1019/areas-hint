@@ -56,10 +56,30 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化网络处理
 		ClientNetworking.init();
 		
+		// 初始化EasyAdd功能
+		initEasyAdd();
+		
 		// 注册客户端tick事件
 		registerTickEvents();
 		
 		LOGGER.info("区域提示模组客户端初始化完成!");
+	}
+	
+	/**
+	 * 初始化EasyAdd功能
+	 */
+	private void initEasyAdd() {
+		try {
+			// 注册按键处理器
+			areahint.easyadd.EasyAddKeyHandler.register();
+			
+			// 注册客户端网络接收器
+			areahint.easyadd.EasyAddNetworking.registerClientReceivers();
+			
+			LOGGER.info("EasyAdd功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化EasyAdd功能时发生错误", e);
+		}
 	}
 	
 	/**

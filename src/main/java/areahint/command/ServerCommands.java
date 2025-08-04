@@ -96,6 +96,24 @@ public class ServerCommands {
                 .then(argument("style", StringArgumentType.word())
                     .executes(context -> executeSubtitleStyle(context, StringArgumentType.getString(context, "style"))))
                 .executes(ServerCommands::executeSubtitleStyleInfo))
+                
+            // easyadd 命令（带多个子命令）
+            .then(literal("easyadd")
+                .executes(ServerCommands::executeEasyAddStart)
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeEasyAddCancel))
+                .then(literal("level")
+                    .then(argument("levelValue", IntegerArgumentType.integer(1, 3))
+                        .executes(context -> executeEasyAddLevel(context, IntegerArgumentType.getInteger(context, "levelValue")))))
+                .then(literal("base")
+                    .then(argument("baseName", StringArgumentType.greedyString())
+                        .executes(context -> executeEasyAddBase(context, StringArgumentType.getString(context, "baseName")))))
+                .then(literal("continue")
+                    .executes(ServerCommands::executeEasyAddContinue))
+                .then(literal("finish")
+                    .executes(ServerCommands::executeEasyAddFinish))
+                .then(literal("save")
+                    .executes(ServerCommands::executeEasyAddSave)))
         );
     }
     
@@ -116,6 +134,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint subtitlerender [cpu|opengl|vulkan] §7- 设置或显示字幕渲染方式"));
         source.sendMessage(Text.of("§a/areahint subtitlestyle [full|simple|mixed] §7- 设置或显示字幕样式"));
         source.sendMessage(Text.of("§a/areahint add <JSON> §7- 添加新的域名 (管理员专用)"));
+        source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 (普通玩家可用)"));
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));
@@ -572,4 +591,149 @@ public class ServerCommands {
             
             return builder.buildFuture();
         };
+    
+    // ===== EasyAdd 命令处理方法 =====
+    
+    /**
+     * 处理EasyAdd开始命令（仅客户端）
+     */
+    private static int executeEasyAddStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        // 检查是否为客户端命令
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        // 发送客户端命令
+        try {
+            // 通过网络发送到客户端处理
+            sendClientCommand(source, "areahint:easyadd_start");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c启动EasyAdd时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 处理EasyAdd取消命令（仅客户端）
+     */
+    private static int executeEasyAddCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c取消EasyAdd时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 处理EasyAdd等级选择命令（仅客户端）
+     */
+    private static int executeEasyAddLevel(CommandContext<ServerCommandSource> context, int level) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_level:" + level);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c设置域名等级时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 处理EasyAdd上级域名选择命令（仅客户端）
+     */
+    private static int executeEasyAddBase(CommandContext<ServerCommandSource> context, String baseName) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_base:" + baseName);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择上级域名时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 处理EasyAdd继续记录命令（仅客户端）
+     */
+    private static int executeEasyAddContinue(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_continue");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c继续记录时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 处理EasyAdd完成记录命令（仅客户端）
+     */
+    private static int executeEasyAddFinish(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_finish");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c完成记录时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 处理EasyAdd保存命令（仅客户端）
+     */
+    private static int executeEasyAddSave(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_save");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c保存域名时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
 } 
