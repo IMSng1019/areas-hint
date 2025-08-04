@@ -45,6 +45,12 @@ public class Areashint implements ModInitializer {
 		// 初始化文件管理
 		initConfigDir();
 		
+		// 初始化维度域名管理器
+		areahint.dimensional.DimensionalNameManager.init();
+		
+		// 初始化维度域名网络处理
+		areahint.network.DimensionalNameNetworking.init();
+		
 		// 注册服务器启动事件监听器
 		ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStarting);
 		// 注册服务器停止事件监听器

@@ -7,6 +7,7 @@ import areahint.file.FileManager;
 import areahint.file.JsonHelper;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
+import areahint.dimensional.DimensionalNameManager;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -63,6 +64,16 @@ public class ServerCommands {
             // reload 命令
             .then(literal("reload")
                 .executes(ServerCommands::executeReload))
+            
+            // dimensionalityname 命令 (维度域名管理)
+            .then(literal("dimensionalityname")
+                .requires(source -> source.hasPermissionLevel(2)) // 需要OP权限
+                .executes(DimensionalNameCommands::listAllDimensions)
+                .then(argument("dimension", StringArgumentType.string())
+                    .suggests(DimensionalNameCommands.createDimensionSuggestionProvider())
+                    .executes(DimensionalNameCommands::showCurrentDimensionalName)
+                    .then(argument("newName", StringArgumentType.greedyString())
+                        .executes(DimensionalNameCommands::setDimensionalName))))
             
             // add 命令 (仅服务端)
             .then(literal("add")

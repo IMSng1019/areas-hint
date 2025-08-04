@@ -36,6 +36,7 @@ public class AreashintClient implements ClientModInitializer {
 	
 	// 当前区域名称（用于比较变化）
 	private static String currentAreaName = null;
+	private static boolean hasShownDimensionalName = false; // 是否已经显示过维度域名
 	
 	@Override
 	public void onInitializeClient() {
@@ -53,8 +54,14 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化渲染管理器
 		renderManager = new RenderManager();
 		
+		// 初始化维度域名管理器
+		areahint.dimensional.ClientDimensionalNameManager.init();
+		
 		// 初始化网络处理
 		ClientNetworking.init();
+		
+		// 初始化维度域名网络处理
+		areahint.network.ClientDimensionalNameNetworking.init();
 		
 		// 初始化EasyAdd功能
 		initEasyAdd();
@@ -114,6 +121,30 @@ public class AreashintClient implements ClientModInitializer {
 				String dimensionFileName = getDimensionFileName(currentDimension);
 				LOGGER.info("检测到维度变化为：{}，加载对应的区域文件：{}", dimension.toString(), dimensionFileName);
 				areaDetector.loadAreaData(dimensionFileName);
+				
+				// 每次进入世界/切换维度都重置状态并立即检测
+				currentAreaName = null;
+				hasShownDimensionalName = false; // 重置维度域名显示标记
+				
+				// 立即检测一次当前位置
+				double playerX = player.getX();
+				double playerY = player.getY();
+				double playerZ = player.getZ();
+				String areaName = areaDetector.detectPlayerArea(playerX, playerY, playerZ);
+				
+				// 立即显示结果
+				if (areaName != null) {
+					currentAreaName = areaName;
+					renderManager.showAreaTitle(areaName);
+					LOGGER.info("进入世界时位于区域：{}", areaName);
+				} else {
+					// 如果不在区域内，显示维度域名
+					String dimensionId = currentDimension.toString();
+					String dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
+					renderManager.showAreaTitle(dimensionalName);
+					hasShownDimensionalName = true;
+					LOGGER.info("进入世界时显示维度域名：{}", dimensionalName);
+				}
 			}
 			
 			// 按照配置的频率检测玩家位置
@@ -142,6 +173,16 @@ public class AreashintClient implements ClientModInitializer {
 					if (areaName != null) {
 						LOGGER.info("尝试显示区域名称：{}", areaName);
 						renderManager.showAreaTitle(areaName);
+						hasShownDimensionalName = false; // 重置维度域名显示标记
+					} else {
+						// 离开所有区域时，只显示一次维度域名，避免闪烁
+						if (!hasShownDimensionalName) {
+							String dimensionId = currentDimension != null ? currentDimension.toString() : "minecraft:overworld";
+							String dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
+							LOGGER.info("离开所有区域，显示维度域名：{}", dimensionalName);
+							renderManager.showAreaTitle(dimensionalName);
+							hasShownDimensionalName = true;
+						}
 					}
 				}
 			}
@@ -186,6 +227,11 @@ public class AreashintClient implements ClientModInitializer {
 	public static void reload() {
 		LOGGER.info("重新加载区域提示模组配置和区域数据...");
 		ClientConfig.load();
+		
+		// 重新加载维度域名配置
+		areahint.dimensional.ClientDimensionalNameManager.resetToDefaults();
+		LOGGER.info("维度域名配置已重置");
+		
 		if (currentDimension != null) {
 			String dimensionFileName = getDimensionFileName(currentDimension);
 			LOGGER.info("重新加载维度{}的区域文件：{}", currentDimension.toString(), dimensionFileName);

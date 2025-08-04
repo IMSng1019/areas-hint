@@ -68,10 +68,19 @@
 - 服务端向客户端发送区域数据
 - 处理网络数据包和同步
 
-### 7. 命令模块 (Commands)
+### 7. 维度域名模块 (Dimensional Names)
+
+- 管理维度（世界）的自定义名称
+- 维度域名等级为0.5，介于普通区域之外
+- 离开所有区域时显示维度域名
+- 进入世界时如果不在任何区域内显示维度域名
+- 支持动态配置和同步
+
+### 8. 命令模块 (Commands)
 
 - 实现各种命令功能
 - 命令参数处理和验证
+- 维度域名管理命令
 
 ## 文件结构
 
@@ -88,12 +97,16 @@ areas-hint-mod/
 │   │   │       ├── Areashint.java   # 服务端主类（模组入口）
 │   │   │       ├── command/         # 命令处理
 │   │   │       │   ├── ServerCommands.java # 统一命令处理器（服务端+客户端命令）
-│   │   │       │   └── DebugCommand.java   # 调试命令处理器
+│   │   │       │   ├── DebugCommand.java   # 调试命令处理器
+│   │   │       │   └── DimensionalNameCommands.java # 维度域名命令处理器
 │   │   │       ├── data/            # 数据模型
 │   │   │       │   ├── AreaData.java       # 区域数据模型（含altitude高度字段）
-│   │   │       │   └── ConfigData.java     # 配置数据模型
+│   │   │       │   ├── ConfigData.java     # 配置数据模型
+│   │   │       │   └── DimensionalNameData.java # 维度域名数据模型
 │   │   │       ├── debug/           # 调试功能
 │   │   │       │   └── DebugManager.java   # 服务端调试管理器
+│   │   │       ├── dimensional/     # 维度域名管理
+│   │   │       │   └── DimensionalNameManager.java # 服务端维度域名管理器
 │   │   │       ├── easyadd/         # EasyAdd服务端支持
 │   │   │       │   └── EasyAddServerNetworking.java # 服务端网络处理器
 │   │   │       ├── file/            # 文件操作
@@ -103,7 +116,8 @@ areas-hint-mod/
 │   │   │       │   └── ExampleMixin.java   # 服务端Mixin示例
 │   │   │       └── network/         # 网络通信
 │   │   │           ├── Packets.java        # 网络包定义和通道标识符
-│   │   │           └── ServerNetworking.java # 服务端网络处理
+│   │   │           ├── ServerNetworking.java # 服务端网络处理
+│   │   │           └── DimensionalNameNetworking.java # 维度域名网络传输
 │   │   └── resources/               # 服务端资源
 │   │       ├── fabric.mod.json      # Fabric模组配置文件
 │   │       ├── areas-hint.mixins.json # 服务端Mixin配置
@@ -122,6 +136,8 @@ areas-hint-mod/
 │       │       ├── debug/           # 调试功能
 │       │       │   ├── ClientDebugManager.java # 客户端调试管理器
 │       │       │   └── DebugManager.java        # 调试管理器（空文件）
+│       │       ├── dimensional/     # 维度域名管理
+│       │       │   └── ClientDimensionalNameManager.java # 客户端维度域名管理器
 │       │       ├── detection/       # 区域检测（核心功能）
 │       │       │   ├── AreaDetector.java   # 区域检测器（集成高度预筛选）
 │       │       │   ├── AltitudeFilter.java # 高度预筛选器（新增功能）
@@ -137,7 +153,8 @@ areas-hint-mod/
 │       │       │   └── client/
 │       │       │       └── ExampleClientMixin.java # 客户端Mixin示例
 │       │       ├── network/         # 网络通信
-│       │       │   └── ClientNetworking.java # 客户端网络处理
+│       │       │   ├── ClientNetworking.java # 客户端网络处理
+│       │       │   └── ClientDimensionalNameNetworking.java # 客户端维度域名网络处理
 │       │       └── render/          # 渲染系统
 │       │           ├── RenderManager.java  # 渲染管理器
 │       │           ├── CPURender.java      # CPU渲染实现
@@ -167,6 +184,7 @@ build/                              # 构建输出目录（自动生成）
 
 .minecraft/areas-hint/              # 运行时配置和数据目录
 ├── config.json                     # 模组配置文件
+├── dimensional_names.json          # 维度域名配置文件
 ├── overworld.json                  # 主世界区域数据
 ├── the_nether.json                 # 地狱区域数据
 └── the_end.json                    # 末地区域数据
@@ -234,6 +252,34 @@ build/                              # 构建输出目录（自动生成）
 2. simple：仅显示当前所在级别的域名
 3. mixed：根据层级显示适当的域名组合（默认）
 
+### 维度域名配置格式 (dimensional_names.json)
+
+```json
+[
+  {
+    "dimensionId": "minecraft:overworld",
+    "displayName": "蛮荒大陆"
+  },
+  {
+    "dimensionId": "minecraft:the_nether", 
+    "displayName": "恶堕之域"
+  },
+  {
+    "dimensionId": "minecraft:the_end",
+    "displayName": "终末之地"
+  }
+]
+```
+
+**字段说明**：
+- `dimensionId`: 维度标识符（如 minecraft:overworld）
+- `displayName`: 显示名称（玩家看到的维度域名）
+
+**特殊说明**：
+- 维度域名等级为0.5，优先级低于所有普通区域
+- 离开所有区域时自动显示维度域名
+- 进入世界时如果不在任何区域内显示维度域名
+
 ## 命令系统
 
 - `/areahint help` - 显示所有命令及其用法
@@ -248,6 +294,9 @@ build/                              # 构建输出目录（自动生成）
 - `/areahint easyadd` - 启动交互式域名添加（普通玩家可用）
 - `/areahint debug` - 切换调试模式（需要管理员权限）
 - `/areahint debug on|off|status` - 启用/禁用/查看调试模式状态（需要管理员权限）
+- `/areahint dimensionalityname` - 列出所有维度及其域名配置（需要管理员权限）
+- `/areahint dimensionalityname <维度>` - 显示指定维度的当前域名
+- `/areahint dimensionalityname <维度> <新名称>` - 设置维度的域名
 
 ## EasyAdd 交互式域名添加
 
