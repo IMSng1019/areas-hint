@@ -217,6 +217,68 @@ public class EasyAddUI {
     }
     
     /**
+     * 显示高度选择界面
+     */
+    public static void showAltitudeSelectionScreen(List<BlockPos> recordedPoints) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+        
+        // 计算当前坐标点的高度范围用于显示
+        int minY = recordedPoints.stream().mapToInt(BlockPos::getY).min().orElse(0);
+        int maxY = recordedPoints.stream().mapToInt(BlockPos::getY).max().orElse(0);
+        
+        client.player.sendMessage(Text.of("§6=== 高度设置 ==="), false);
+        client.player.sendMessage(Text.of("§a请选择高度设置方式："), false);
+        client.player.sendMessage(Text.of("§7当前记录点高度范围：" + minY + " ~ " + maxY), false);
+        client.player.sendMessage(Text.of(""), false);
+        
+        // 自动计算按钮
+        MutableText autoButton = Text.literal("§b[确认域名信息]")
+            .setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd altitude auto"))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
+                    Text.of("自动计算高度范围\n基于记录点高度±扩展值")))
+                .withColor(Formatting.AQUA));
+        
+        // 自定义按钮
+        MutableText customButton = Text.literal("§d[自定义高度]")
+            .setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd altitude custom"))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
+                    Text.of("自定义高度范围\n手动输入最低和最高高度")))
+                .withColor(Formatting.LIGHT_PURPLE));
+        
+        // 不限制高度按钮
+        MutableText unlimitedButton = Text.literal("§e[不限制高度]")
+            .setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd altitude unlimited"))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
+                    Text.of("不限制高度范围\n域名在所有Y坐标生效")))
+                .withColor(Formatting.YELLOW));
+        
+        // 取消按钮
+        MutableText cancelButton = Text.literal("§c[取消本次操作]")
+            .setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withColor(Formatting.RED));
+        
+        // 组合按钮行
+        MutableText buttonRow = Text.empty()
+            .append(autoButton)
+            .append(Text.of("  "))
+            .append(customButton)
+            .append(Text.of("  "))
+            .append(unlimitedButton)
+            .append(Text.of("  "))
+            .append(cancelButton);
+        
+        client.player.sendMessage(buttonRow, false);
+        client.player.sendMessage(Text.of("§7自动计算会基于记录点扩展高度范围"), false);
+        client.player.sendMessage(Text.of("§7自定义可以精确控制域名的高度边界"), false);
+    }
+    
+    /**
      * 显示错误消息
      */
     public static void showError(String message) {

@@ -121,10 +121,17 @@ public class ServerCommands {
                         .executes(context -> executeEasyAddBase(context, StringArgumentType.getString(context, "baseName")))))
                 .then(literal("continue")
                     .executes(ServerCommands::executeEasyAddContinue))
-                .then(literal("finish")
-                    .executes(ServerCommands::executeEasyAddFinish))
-                .then(literal("save")
-                    .executes(ServerCommands::executeEasyAddSave)))
+                                        .then(literal("finish")
+                            .executes(ServerCommands::executeEasyAddFinish))
+                        .then(literal("altitude")
+                            .then(literal("auto")
+                                .executes(ServerCommands::executeEasyAddAltitudeAuto))
+                            .then(literal("custom")
+                                .executes(ServerCommands::executeEasyAddAltitudeCustom))
+                            .then(literal("unlimited")
+                                .executes(ServerCommands::executeEasyAddAltitudeUnlimited)))
+                        .then(literal("save")
+                            .executes(ServerCommands::executeEasyAddSave)))
         );
     }
     
@@ -744,6 +751,66 @@ public class ServerCommands {
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.of("§c保存域名时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 处理EasyAdd自动高度选择命令（仅客户端）
+     */
+    private static int executeEasyAddAltitudeAuto(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_altitude_auto");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择自动高度时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 处理EasyAdd自定义高度选择命令（仅客户端）
+     */
+    private static int executeEasyAddAltitudeCustom(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_altitude_custom");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择自定义高度时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 处理EasyAdd不限制高度选择命令（仅客户端）
+     */
+    private static int executeEasyAddAltitudeUnlimited(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_altitude_unlimited");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择不限制高度时发生错误: " + e.getMessage()));
             return 0;
         }
     }

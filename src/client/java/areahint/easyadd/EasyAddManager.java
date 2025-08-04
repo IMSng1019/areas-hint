@@ -28,6 +28,7 @@ public class EasyAddManager {
         INPUT_LEVEL,    // 输入域名等级
         SELECT_BASE,    // 选择上级域名
         RECORDING_POINTS, // 记录坐标点
+        HEIGHT_SELECTION, // 高度选择
         CONFIRM_SAVE    // 确认保存
     }
     
@@ -44,6 +45,7 @@ public class EasyAddManager {
     private List<BlockPos> recordedPoints = new ArrayList<>();
     private String currentDimension = null;
     private List<AreaData> availableParentAreas = new ArrayList<>();
+    private AreaData.AltitudeData customAltitudeData = null; // 自定义高度数据
     
     // 聊天监听器注册状态
     private boolean chatListenerRegistered = false;
@@ -122,6 +124,13 @@ public class EasyAddManager {
                     // 进入等级选择
                     currentState = EasyAddState.INPUT_LEVEL;
                     EasyAddUI.showLevelInputScreen();
+                }
+                break;
+                
+            case HEIGHT_SELECTION:
+                // 处理高度输入
+                if (EasyAddAltitudeManager.isInputtingAltitude()) {
+                    EasyAddAltitudeManager.handleAltitudeInput(input);
                 }
                 break;
                 
@@ -255,7 +264,7 @@ public class EasyAddManager {
     }
     
     /**
-     * 完成坐标记录，进入确认阶段
+     * 完成坐标记录，进入高度选择阶段
      */
     public void finishPointRecording() {
         if (currentState != EasyAddState.RECORDING_POINTS) {
@@ -268,6 +277,26 @@ public class EasyAddManager {
             return;
         }
         
+        // 进入高度选择状态
+        currentState = EasyAddState.HEIGHT_SELECTION;
+        
+        // 开始高度选择流程
+        EasyAddAltitudeManager.startAltitudeSelection(recordedPoints);
+    }
+    
+    /**
+     * 继续高度选择后的流程
+     * @param altitudeData 高度数据，null表示使用自动计算
+     */
+    public void proceedWithAltitudeData(AreaData.AltitudeData altitudeData) {
+        if (currentState != EasyAddState.HEIGHT_SELECTION) {
+            return;
+        }
+        
+        // 保存高度数据
+        customAltitudeData = altitudeData;
+        
+        // 进入确认保存状态
         currentState = EasyAddState.CONFIRM_SAVE;
         
         // 计算二级顶点和其他数据
@@ -302,13 +331,16 @@ public class EasyAddManager {
             vertices.add(new AreaData.Vertex(pos.getX(), pos.getZ()));
         }
         
-        // 计算高度范围
-        AreaData.AltitudeData altitude = EasyAddGeometry.calculateAltitudeRange(recordedPoints);
+        // 选择高度数据：自定义优先，否则自动计算
+        AreaData.AltitudeData altitude;
+        if (customAltitudeData != null) {
+            altitude = customAltitudeData;
+        } else {
+            altitude = EasyAddGeometry.calculateAltitudeRange(recordedPoints);
+        }
         
         // 获取玩家名字作为签名
         String signature = MinecraftClient.getInstance().player.getName().getString();
-        
-
         
         return new AreaData(areaName, vertices, secondVertices, altitude, areaLevel, baseName, signature);
     }
@@ -391,6 +423,10 @@ public class EasyAddManager {
         recordedPoints.clear();
         currentDimension = null;
         availableParentAreas.clear();
+        customAltitudeData = null;
+        
+        // 重置高度管理器
+        EasyAddAltitudeManager.reset();
     }
     
     /**

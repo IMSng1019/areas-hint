@@ -218,12 +218,24 @@ public class ClientNetworking {
             } else if (action.equals("easyadd_finish")) {
                 AreashintClient.LOGGER.info("执行easyadd_finish");
                 manager.finishPointRecording();
-            } else if (action.equals("easyadd_save")) {
-                AreashintClient.LOGGER.info("执行easyadd_save");
-                manager.confirmSave();
-            } else {
-                AreashintClient.LOGGER.warn("未知的EasyAdd命令: " + action);
-            }
+                    } else if (action.equals("easyadd_save")) {
+            AreashintClient.LOGGER.info("执行easyadd_save");
+            manager.confirmSave();
+        } else if (action.equals("easyadd_altitude_auto")) {
+            AreashintClient.LOGGER.info("执行easyadd_altitude_auto");
+            areahint.easyadd.EasyAddAltitudeManager.handleAltitudeTypeSelection(
+                areahint.easyadd.EasyAddAltitudeManager.AltitudeType.AUTOMATIC);
+        } else if (action.equals("easyadd_altitude_custom")) {
+            AreashintClient.LOGGER.info("执行easyadd_altitude_custom");
+            areahint.easyadd.EasyAddAltitudeManager.handleAltitudeTypeSelection(
+                areahint.easyadd.EasyAddAltitudeManager.AltitudeType.CUSTOM);
+        } else if (action.equals("easyadd_altitude_unlimited")) {
+            AreashintClient.LOGGER.info("执行easyadd_altitude_unlimited");
+            areahint.easyadd.EasyAddAltitudeManager.handleAltitudeTypeSelection(
+                areahint.easyadd.EasyAddAltitudeManager.AltitudeType.UNLIMITED);
+        } else {
+            AreashintClient.LOGGER.warn("未知的EasyAdd命令: " + action);
+        }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理EasyAdd命令时出错: " + e.getMessage(), e);
         }
