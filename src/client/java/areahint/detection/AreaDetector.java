@@ -31,7 +31,8 @@ public class AreaDetector {
      * @param fileName 区域数据文件名
      */
     public void loadAreaData(String fileName) {
-        Path areaFile = FileManager.getDimensionFile(fileName);
+        // 使用客户端世界文件夹管理器获取文件路径
+        Path areaFile = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(fileName);
         areas = FileManager.readAreaData(areaFile);
         AreashintClient.LOGGER.info("已加载区域数据: {} 个区域", areas.size());
         

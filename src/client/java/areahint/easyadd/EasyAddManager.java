@@ -203,7 +203,7 @@ public class EasyAddManager {
         try {
             String fileName = getFileNameForCurrentDimension();
             if (fileName != null) {
-                List<AreaData> allAreas = FileManager.readAreaData(FileManager.getDimensionFile(fileName));
+                List<AreaData> allAreas = FileManager.readAreaData(areahint.world.ClientWorldFolderManager.getWorldDimensionFile(fileName));
                 
                 // 筛选出等级为当前等级-1的域名
                 int targetLevel = areaLevel - 1;
@@ -436,11 +436,11 @@ public class EasyAddManager {
         if (currentDimension == null) return null;
         
         if (currentDimension.contains("overworld")) {
-            return "overworld.json";
+            return areahint.Areashint.OVERWORLD_FILE;
         } else if (currentDimension.contains("nether")) {
-            return "nether.json";
+            return areahint.Areashint.NETHER_FILE;
         } else if (currentDimension.contains("end")) {
-            return "end.json";
+            return areahint.Areashint.END_FILE;
         }
         return null;
     }

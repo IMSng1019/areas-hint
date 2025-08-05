@@ -68,7 +68,44 @@
 - 服务端向客户端发送区域数据
 - 处理网络数据包和同步
 
-### 7. 维度域名模块 (Dimensional Names)
+### 7. 世界文件夹管理 (World Folder Management)
+
+每个世界（服务器）都有独立的文件夹来存储域名和维度域名配置，实现多世界支持。
+
+#### 特性
+- **独立世界文件夹**：每个世界使用 `IP地址_世界名称` 格式的文件夹
+- **自动创建**：连接世界时自动检测并创建对应文件夹
+- **智能路径管理**：服务端和客户端自动使用正确的世界文件夹
+- **配置分离**：全局配置在根目录，世界特定数据在世界文件夹
+
+#### 文件夹结构示例
+
+```
+.minecraft/areas-hint/
+├── config.json                    # 全局配置文件
+├── 192.168.1.100_MyServer/        # 世界文件夹（多人游戏）
+│   ├── overworld.json             # 主世界域名文件
+│   ├── nether.json                # 地狱域名文件
+│   ├── end.json                   # 末地域名文件
+│   └── dimensional_names.json     # 维度域名文件
+├── localhost_SinglePlayer/        # 单人游戏世界
+│   ├── overworld.json
+│   └── dimensional_names.json
+└── localhost_Server/               # 本地服务器
+    ├── overworld.json
+    ├── nether.json
+    ├── end.json
+    └── dimensional_names.json
+```
+
+#### 工作原理
+1. **连接检测**：每次加入世界时检测IP地址和世界名称
+2. **文件夹创建**：如果对应文件夹不存在则自动创建
+3. **文件初始化**：在新文件夹中创建默认的配置文件
+4. **路径重定向**：所有域名文件操作重定向到当前世界文件夹
+5. **网络同步**：服务端向客户端发送世界信息以确保一致性
+
+### 8. 维度域名模块 (Dimensional Names)
 
 - 管理维度（世界）的自定义名称
 - 维度域名等级为0.5，介于普通区域之外
@@ -76,7 +113,7 @@
 - 进入世界时如果不在任何区域内显示维度域名
 - 支持动态配置和同步
 
-### 8. 命令模块 (Commands)
+### 9. 命令模块 (Commands)
 
 - 实现各种命令功能
 - 命令参数处理和验证
@@ -109,6 +146,8 @@ areas-hint-mod/
 │   │   │       │   └── DimensionalNameManager.java # 服务端维度域名管理器
 │   │   │       ├── easyadd/         # EasyAdd服务端支持
 │   │   │       │   └── EasyAddServerNetworking.java # 服务端网络处理器
+│   │   │       ├── world/           # 世界文件夹管理（新增）
+│   │   │       │   └── WorldFolderManager.java # 服务端世界文件夹管理器
 │   │   │       ├── file/            # 文件操作
 │   │   │       │   ├── FileManager.java    # 文件管理器（读写配置和区域数据）
 │   │   │       │   └── JsonHelper.java     # JSON序列化工具（支持altitude）
@@ -117,7 +156,8 @@ areas-hint-mod/
 │   │   │       └── network/         # 网络通信
 │   │   │           ├── Packets.java        # 网络包定义和通道标识符
 │   │   │           ├── ServerNetworking.java # 服务端网络处理
-│   │   │           └── DimensionalNameNetworking.java # 维度域名网络传输
+│   │   │           ├── DimensionalNameNetworking.java # 维度域名网络传输
+│   │   │           └── ServerWorldNetworking.java # 服务端世界网络处理（新增）
 │   │   └── resources/               # 服务端资源
 │   │       ├── fabric.mod.json      # Fabric模组配置文件
 │   │       ├── areas-hint.mixins.json # 服务端Mixin配置
@@ -155,7 +195,10 @@ areas-hint-mod/
 │       │       │       └── ExampleClientMixin.java # 客户端Mixin示例
 │       │       ├── network/         # 网络通信
 │       │       │   ├── ClientNetworking.java # 客户端网络处理
-│       │       │   └── ClientDimensionalNameNetworking.java # 客户端维度域名网络处理
+│       │       │   ├── ClientDimensionalNameNetworking.java # 客户端维度域名网络处理
+│       │       │   └── ClientWorldNetworking.java # 客户端世界网络处理（新增）
+│       │       ├── world/           # 世界文件夹管理（新增）
+│       │       │   └── ClientWorldFolderManager.java # 客户端世界文件夹管理器
 │       │       └── render/          # 渲染系统
 │       │           ├── RenderManager.java  # 渲染管理器
 │       │           ├── CPURender.java      # CPU渲染实现

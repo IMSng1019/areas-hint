@@ -72,7 +72,7 @@ public class ClientNetworking {
                 }
                 
                 // 获取文件路径
-                Path filePath = FileManager.getDimensionFile(fileName);
+                Path filePath = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(fileName);
                 AreashintClient.LOGGER.info("[调试] 客户端保存区域数据到文件: " + filePath.toAbsolutePath());
                 
                 // 确保目录存在

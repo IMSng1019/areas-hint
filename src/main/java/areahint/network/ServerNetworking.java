@@ -26,11 +26,18 @@ public class ServerNetworking {
         // 注册网络通道和处理器
         Areashint.LOGGER.info("初始化服务端网络处理");
         
-        // 注册玩家连接事件，当玩家加入服务器时发送区域数据
+        // 注册玩家连接事件，当玩家加入服务器时发送区域数据和维度域名数据
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
-            Areashint.LOGGER.info("玩家 " + player.getName().getString() + " 已连接，发送区域数据");
+            Areashint.LOGGER.info("玩家 " + player.getName().getString() + " 已连接，发送区域数据和维度域名数据");
+            
+            // 发送所有维度的区域数据
             sendAllAreaDataToClient(player);
+            
+            // 发送维度域名配置
+            areahint.network.DimensionalNameNetworking.sendDimensionalNamesToClient(player);
+            
+            Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送完整的游戏数据");
         });
     }
     
@@ -47,8 +54,8 @@ public class ServerNetworking {
                 return;
             }
             
-            // 读取区域数据文件
-            Path filePath = FileManager.getDimensionFile(fileName);
+            // 使用世界文件夹管理器获取文件路径
+            Path filePath = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             Areashint.LOGGER.info("[调试] 区域文件路径: " + filePath.toAbsolutePath());
             
             if (!Files.exists(filePath)) {

@@ -121,7 +121,8 @@ public class DimensionalNameManager {
      * @return 配置文件路径
      */
     private static Path getDimensionalNamesFile() {
-        return FileManager.getConfigFile(DIMENSIONAL_NAMES_FILE);
+        // 使用世界文件夹管理器获取路径
+        return areahint.world.WorldFolderManager.getWorldDimensionalNamesFile();
     }
     
     /**

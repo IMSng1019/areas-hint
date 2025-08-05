@@ -56,15 +56,16 @@ public class EasyAddServerNetworking {
                 return;
             }
             
-            // 获取维度文件名
-            String fileName = getFileNameForDimension(dimension);
+            // 获取维度文件名 - 使用统一的命名规则
+            String dimensionType = convertDimensionIdToType(dimension);
+            String fileName = areahint.network.Packets.getFileNameForDimension(dimensionType);
             if (fileName == null) {
                 sendResponseToClient(player, false, "无效的维度: " + dimension);
                 return;
             }
             
             // 保存域名数据
-            Path areaFile = FileManager.getDimensionFile(fileName);
+            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             
             // 读取现有域名数据
             List<AreaData> existingAreas = FileManager.readAreaData(areaFile);
@@ -124,17 +125,17 @@ public class EasyAddServerNetworking {
     }
     
     /**
-     * 根据维度获取文件名
+     * 将维度ID转换为Packets期望的维度类型
      */
-    private static String getFileNameForDimension(String dimension) {
+    private static String convertDimensionIdToType(String dimension) {
         if (dimension == null) return null;
         
         if (dimension.contains("overworld")) {
-            return "overworld.json";
+            return areahint.network.Packets.DIMENSION_OVERWORLD;
         } else if (dimension.contains("nether")) {
-            return "nether.json";
+            return areahint.network.Packets.DIMENSION_NETHER;
         } else if (dimension.contains("end")) {
-            return "end.json";
+            return areahint.network.Packets.DIMENSION_END;
         }
         return null;
     }

@@ -9,6 +9,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ServerInfo;
 import net.minecraft.util.Identifier;
 
 import org.slf4j.Logger;
@@ -36,6 +37,10 @@ public class AreashintClient implements ClientModInitializer {
 	
 	// 当前区域名称（用于比较变化）
 	private static String currentAreaName = null;
+	// 当前服务器地址（用于检测服务器变化）
+	private static String currentServerAddress = null;
+	// 上一次tick时玩家是否为null（用于检测进入世界）
+	private static boolean wasPlayerNull = true;
 	private static boolean hasShownDimensionalName = false; // 是否已经显示过维度域名
 	
 	@Override
@@ -62,6 +67,9 @@ public class AreashintClient implements ClientModInitializer {
 		
 		// 初始化维度域名网络处理
 		areahint.network.ClientDimensionalNameNetworking.init();
+		
+		// 初始化客户端世界网络处理
+		areahint.network.ClientWorldNetworking.init();
 		
 		// 初始化EasyAdd功能
 		initEasyAdd();
@@ -105,24 +113,88 @@ public class AreashintClient implements ClientModInitializer {
 	}
 	
 	/**
+	 * 获取当前服务器地址，用于检测服务器变化
+	 * @param client Minecraft客户端实例
+	 * @return 当前服务器地址
+	 */
+	private static String getCurrentServerAddress(MinecraftClient client) {
+		try {
+			if (client.isIntegratedServerRunning()) {
+				// 单人游戏
+				return "localhost";
+			}
+			
+			// 多人游戏
+			ServerInfo serverInfo = client.getCurrentServerEntry();
+			if (serverInfo != null && serverInfo.address != null) {
+				// 移除端口号（如果有的话）
+				String address = serverInfo.address;
+				int colonIndex = address.lastIndexOf(':');
+				if (colonIndex > 0) {
+					address = address.substring(0, colonIndex);
+				}
+				return address;
+			}
+			
+			// 备用
+			return "unknown";
+			
+		} catch (Exception e) {
+			LOGGER.warn("获取当前服务器地址失败", e);
+			return "unknown";
+		}
+	}
+	
+	/**
 	 * 注册客户端tick事件，用于检测玩家位置
 	 */
 	private void registerTickEvents() {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			ClientPlayerEntity player = client.player;
+			
+			// 检测玩家状态变化（从null变为非null = 刚进入世界）
+			boolean justEnteredWorld = wasPlayerNull && (player != null && client.world != null);
+			wasPlayerNull = (player == null || client.world == null);
+			
 			if (player == null || client.world == null) {
 				return;
 			}
 			
-			// 检查当前维度，如果改变则重新加载区域数据
+			// 检查当前维度和服务器地址，如果改变则重新加载区域数据
 			Identifier dimension = client.world.getDimensionKey().getValue();
-			if (currentDimension == null || !currentDimension.equals(dimension)) {
-				currentDimension = dimension;
-				String dimensionFileName = getDimensionFileName(currentDimension);
-				LOGGER.info("检测到维度变化为：{}，加载对应的区域文件：{}", dimension.toString(), dimensionFileName);
-				areaDetector.loadAreaData(dimensionFileName);
+			String serverAddress = getCurrentServerAddress(client);
+			
+			boolean dimensionChanged = currentDimension == null || !currentDimension.equals(dimension);
+			boolean serverChanged = currentServerAddress == null || !currentServerAddress.equals(serverAddress);
+			
+			// 如果刚进入世界、维度变化或服务器变化，则执行检测和显示逻辑
+			if (justEnteredWorld || dimensionChanged || serverChanged) {
+				LOGGER.info("触发域名显示 - 刚进入世界: {}, 维度变化: {}, 服务器变化: {}", 
+					justEnteredWorld, dimensionChanged, serverChanged);
 				
-				// 每次进入世界/切换维度都重置状态并立即检测
+				// 只有在维度或服务器变化时才重新加载数据和初始化
+				if (dimensionChanged || serverChanged) {
+					// 如果服务器变化了，重置状态并重新初始化客户端世界文件夹
+					if (serverChanged) {
+						LOGGER.info("检测到服务器变化: '{}' -> '{}', 重新初始化世界文件夹", currentServerAddress, serverAddress);
+						currentServerAddress = serverAddress;
+						// 重置ClientWorldFolderManager状态
+						areahint.world.ClientWorldFolderManager.resetState();
+						areahint.world.ClientWorldFolderManager.initializeClientWorld();
+					} else if (currentDimension == null) {
+						// 如果是第一次进入世界，初始化客户端世界文件夹
+						areahint.world.ClientWorldFolderManager.initializeClientWorld();
+					}
+					
+					String dimensionFileName = getDimensionFileName(dimension);
+					LOGGER.info("检测到维度变化为：{}，加载对应的区域文件：{}", dimension.toString(), dimensionFileName);
+					areaDetector.loadAreaData(dimensionFileName);
+				}
+				
+				// 更新当前状态
+				currentDimension = dimension;
+				
+				// 每次触发时都重置状态并立即检测（包括刚进入世界的情况）
 				currentAreaName = null;
 				hasShownDimensionalName = false; // 重置维度域名显示标记
 				
@@ -136,14 +208,22 @@ public class AreashintClient implements ClientModInitializer {
 				if (areaName != null) {
 					currentAreaName = areaName;
 					renderManager.showAreaTitle(areaName);
-					LOGGER.info("进入世界时位于区域：{}", areaName);
+					if (justEnteredWorld) {
+						LOGGER.info("进入世界时位于区域：{}", areaName);
+					} else {
+						LOGGER.info("切换维度时位于区域：{}", areaName);
+					}
 				} else {
 					// 如果不在区域内，显示维度域名
 					String dimensionId = currentDimension.toString();
 					String dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
 					renderManager.showAreaTitle(dimensionalName);
 					hasShownDimensionalName = true;
-					LOGGER.info("进入世界时显示维度域名：{}", dimensionalName);
+					if (justEnteredWorld) {
+						LOGGER.info("进入世界时显示维度域名：{}", dimensionalName);
+					} else {
+						LOGGER.info("切换维度时显示维度域名：{}", dimensionalName);
+					}
 				}
 			}
 			
@@ -222,6 +302,51 @@ public class AreashintClient implements ClientModInitializer {
 	}
 	
 	/**
+	 * 强制重新检测当前区域（在网络同步完成后调用）
+	 */
+	public static void forceRedetectCurrentArea() {
+		try {
+			MinecraftClient client = MinecraftClient.getInstance();
+			ClientPlayerEntity player = client.player;
+			
+			if (player == null || client.world == null) {
+				LOGGER.warn("无法进行强制重新检测：玩家或世界为null");
+				return;
+			}
+			
+			// 重新加载当前维度的区域数据
+			if (currentDimension != null) {
+				String dimensionFileName = getDimensionFileName(currentDimension);
+				LOGGER.info("强制重新加载维度{}的区域文件：{}", currentDimension.toString(), dimensionFileName);
+				areaDetector.loadAreaData(dimensionFileName);
+				
+				// 立即检测当前位置
+				double playerX = player.getX();
+				double playerY = player.getY();
+				double playerZ = player.getZ();
+				String areaName = areaDetector.detectPlayerArea(playerX, playerY, playerZ);
+				
+				// 立即显示结果
+				if (areaName != null) {
+					currentAreaName = areaName;
+					renderManager.showAreaTitle(areaName);
+					LOGGER.info("网络同步后检测到位于区域：{}", areaName);
+				} else {
+					// 如果不在区域内，显示维度域名
+					String dimensionId = currentDimension.toString();
+					String dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
+					renderManager.showAreaTitle(dimensionalName);
+					hasShownDimensionalName = true;
+					LOGGER.info("网络同步后显示维度域名：{}", dimensionalName);
+				}
+			}
+			
+		} catch (Exception e) {
+			LOGGER.error("强制重新检测当前区域时发生错误", e);
+		}
+	}
+	
+	/**
 	 * 重新加载配置和区域数据
 	 */
 	public static void reload() {
@@ -237,7 +362,7 @@ public class AreashintClient implements ClientModInitializer {
 			LOGGER.info("重新加载维度{}的区域文件：{}", currentDimension.toString(), dimensionFileName);
 			
 			// 获取文件路径并检查是否存在
-			Path areaFile = FileManager.getDimensionFile(dimensionFileName);
+			Path areaFile = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(dimensionFileName);
 			LOGGER.info("[调试] 重新加载区域文件路径: {}", areaFile.toAbsolutePath());
 			if (java.nio.file.Files.exists(areaFile)) {
 				try {

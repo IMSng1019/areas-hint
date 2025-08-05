@@ -51,6 +51,9 @@ public class Areashint implements ModInitializer {
 		// 初始化维度域名网络处理
 		areahint.network.DimensionalNameNetworking.init();
 		
+		// 初始化服务端世界网络处理
+		areahint.network.ServerWorldNetworking.init();
+		
 		// 注册服务器启动事件监听器
 		ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStarting);
 		// 注册服务器停止事件监听器
@@ -75,13 +78,12 @@ public class Areashint implements ModInitializer {
 		try {
 			// 使用FileManager获取配置目录
 			Path configDirPath = FileManager.checkFolderExist();
+			LOGGER.info("配置目录初始化完成: {}", configDirPath);
 			
-			// 在目录中创建默认的空区域文件
-			FileManager.createEmptyAreaFile(FileManager.getDimensionFile(OVERWORLD_FILE));
-			FileManager.createEmptyAreaFile(FileManager.getDimensionFile(NETHER_FILE));
-			FileManager.createEmptyAreaFile(FileManager.getDimensionFile(END_FILE));
-		} catch (IOException e) {
-			LOGGER.error("创建区域文件失败: " + e.getMessage());
+			// 注意：默认区域文件现在将在世界文件夹初始化时创建
+			
+		} catch (Exception e) {
+			LOGGER.error("初始化配置目录失败: " + e.getMessage());
 		}
 	}
 	
@@ -92,6 +94,9 @@ public class Areashint implements ModInitializer {
 	private void onServerStarting(MinecraftServer minecraftServer) {
 		server = minecraftServer;
 		LOGGER.info("区域提示模组: 服务器启动中");
+		
+		// 初始化世界文件夹管理器
+		areahint.world.WorldFolderManager.initializeServerWorld(minecraftServer);
 	}
 	
 	/**

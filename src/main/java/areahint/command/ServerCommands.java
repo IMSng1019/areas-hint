@@ -18,6 +18,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -173,10 +174,19 @@ public class ServerCommands {
         // 重新加载区域数据并发送给所有客户端
         ServerNetworking.sendAllAreaDataToAll();
         
+        // 重新发送维度域名配置给所有客户端
+        try {
+            MinecraftServer server = source.getServer();
+            areahint.network.DimensionalNameNetworking.sendDimensionalNamesToAllClients(server);
+            Areashint.LOGGER.info("已重新发送维度域名配置给所有客户端");
+        } catch (Exception e) {
+            Areashint.LOGGER.error("重新发送维度域名配置失败", e);
+        }
+        
         // 通知客户端重载配置
         sendClientCommand(source, "areahint:reload");
         
-        source.sendMessage(Text.of("§a区域数据已重新加载并发送给所有客户端"));
+        source.sendMessage(Text.of("§a区域数据和维度域名配置已重新加载并发送给所有客户端"));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -238,7 +248,7 @@ public class ServerCommands {
             return 0;
         }
         
-        Path filePath = FileManager.getDimensionFile(fileName);
+        Path filePath = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
         
         // 自动设置创建者签名（如果没有设置的话）
         if (areaData.getSignature() == null) {
@@ -424,7 +434,7 @@ public class ServerCommands {
             return 0;
         }
         
-        Path areaFile = FileManager.getDimensionFile(fileName);
+        Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
         
         // 读取区域数据
         java.util.List<AreaData> areas = FileManager.readAreaData(areaFile);
@@ -488,7 +498,7 @@ public class ServerCommands {
             return 0;
         }
         
-        Path areaFile = FileManager.getDimensionFile(fileName);
+        Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
         
         // 读取区域数据
         java.util.List<AreaData> areas = FileManager.readAreaData(areaFile);
@@ -563,7 +573,7 @@ public class ServerCommands {
                 return List.of();
             }
             
-            Path areaFile = FileManager.getDimensionFile(fileName);
+            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             if (!areaFile.toFile().exists()) {
                 return List.of();
             }
