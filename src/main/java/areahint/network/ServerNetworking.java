@@ -26,6 +26,9 @@ public class ServerNetworking {
         // 注册网络通道和处理器
         Areashint.LOGGER.info("初始化服务端网络处理");
         
+        // 注册网络请求处理器
+        registerNetworkHandlers();
+        
         // 注册玩家连接事件，当玩家加入服务器时发送区域数据和维度域名数据
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
@@ -168,5 +171,42 @@ public class ServerNetworking {
         } catch (Exception e) {
             Areashint.LOGGER.error("发送调试命令到客户端时出错: " + e.getMessage());
         }
+    }
+    
+    /**
+     * 注册网络请求处理器
+     */
+    private static void registerNetworkHandlers() {
+        // 注册recolor请求处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_RECOLOR_REQUEST,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    String areaName = buf.readString();
+                    String color = buf.readString();
+                    String dimension = buf.readString();
+                    
+                    server.execute(() -> {
+                        areahint.command.RecolorCommand.handleRecolorRequest(player, areaName, color, dimension);
+                    });
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理recolor请求时发生错误", e);
+                }
+            });
+        
+        // 注册rename请求处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_RENAME_REQUEST,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    String oldName = buf.readString();
+                    String newName = buf.readString();
+                    String dimension = buf.readString();
+                    
+                    server.execute(() -> {
+                        areahint.command.RenameAreaCommand.handleRenameRequest(player, oldName, newName, dimension);
+                    });
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理rename请求时发生错误", e);
+                }
+            });
     }
 } 

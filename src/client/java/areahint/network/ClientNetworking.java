@@ -5,6 +5,7 @@ import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import areahint.file.FileManager;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -49,6 +50,12 @@ public class ClientNetworking {
         ClientPlayNetworking.registerGlobalReceiver(
                 Packets.S2C_RECOLOR_RESPONSE,
                 ClientNetworking::handleRecolorResponse
+        );
+        
+        // 注册rename响应接收处理器
+        ClientPlayNetworking.registerGlobalReceiver(
+                Packets.S2C_RENAME_RESPONSE,
+                ClientNetworking::handleRenameResponse
         );
     }
     
@@ -372,5 +379,171 @@ public class ClientNetworking {
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理recolor响应时出错: " + e.getMessage());
         }
+    }
+    
+    /**
+     * 处理rename响应
+     */
+    private static void handleRenameResponse(MinecraftClient client, ClientPlayNetworkHandler handler,
+                                           PacketByteBuf buf, PacketSender responseSender) {
+        try {
+            String action = buf.readString();
+            
+            if ("rename_list".equals(action)) {
+                // 处理可重命名域名列表响应
+                int count = buf.readInt();
+                String errorMessage = buf.readString();
+                
+                client.execute(() -> {
+                    if (client.player != null) {
+                        if (count == 0) {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§c" + errorMessage), false);
+                        } else {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§a可重命名的域名列表:"), false);
+                            
+                            for (int i = 0; i < count; i++) {
+                                try {
+                                    String areaName = buf.readString();
+                                    String signature = buf.readString();
+                                    
+                                    client.player.sendMessage(net.minecraft.text.Text.of(
+                                        String.format("§7%d. §f%s §8(创建者: %s)", 
+                                            i + 1, areaName, signature)
+                                    ), false);
+                                } catch (Exception e) {
+                                    AreashintClient.LOGGER.error("读取域名信息时出错", e);
+                                }
+                            }
+                            
+                            client.player.sendMessage(net.minecraft.text.Text.of(
+                                "§a请使用 §e/areahint renamearea <域名> <新名称> §a来重命名域名"
+                            ), false);
+                        }
+                    }
+                });
+                
+            } else if ("rename_confirm".equals(action)) {
+                // 处理重命名确认请求
+                String oldName = buf.readString();
+                String newName = buf.readString();
+                
+                client.execute(() -> {
+                    if (client.player != null) {
+                        // 显示确认对话框
+                        client.player.sendMessage(net.minecraft.text.Text.of("§6===== 域名重命名确认 ====="), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of("§f您确认将域名重命名吗？"), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of("§7原域名: §f" + oldName), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of("§7新域名: §f" + newName), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of(""), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of("§a点击确认: §e[是] §7或输入 §e/areahint renamearea confirm"), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of("§c点击取消: §e[否] §7或输入 §e/areahint renamearea cancel"), false);
+                        
+                        // 这里可以实现可点击的确认按钮（需要额外的网络包处理）
+                        // 为简化实现，暂时使用命令确认方式
+                        
+                        // 保存待确认的重命名信息（可以使用静态变量或客户端状态管理）
+                        storePendingRename(oldName, newName);
+                    }
+                });
+                
+            } else if ("rename_response".equals(action)) {
+                // 处理重命名结果响应
+                boolean success = buf.readBoolean();
+                String message = buf.readString();
+                
+                client.execute(() -> {
+                    if (client.player != null) {
+                        if (success) {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§a" + message), false);
+                        } else {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§c" + message), false);
+                        }
+                        // 清除待确认的重命名信息
+                        clearPendingRename();
+                    }
+                });
+                
+            } else if ("rename_confirm_action".equals(action)) {
+                // 处理确认/取消操作
+                boolean confirm = buf.readBoolean();
+                
+                client.execute(() -> {
+                    String[] pendingRename = getPendingRename();
+                    if (pendingRename == null) {
+                        if (client.player != null) {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§c没有待确认的重命名操作"), false);
+                        }
+                        return;
+                    }
+                    
+                    if (confirm) {
+                        // 确认重命名，发送重命名请求到服务器
+                        String oldName = pendingRename[0];
+                        String newName = pendingRename[1];
+                        String dimension = "minecraft:" + client.world.getRegistryKey().getValue().getPath();
+                        
+                        sendRenameRequest(oldName, newName, dimension);
+                        
+                        if (client.player != null) {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§a正在处理重命名请求..."), false);
+                        }
+                    } else {
+                        // 取消重命名
+                        clearPendingRename();
+                        if (client.player != null) {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§c重命名操作已取消"), false);
+                        }
+                    }
+                });
+            }
+            
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理rename响应时出错: " + e.getMessage());
+        }
+    }
+    
+    // 静态变量保存待确认的重命名信息
+    private static String pendingRenameOldName = null;
+    private static String pendingRenameNewName = null;
+    
+    /**
+     * 保存待确认的重命名信息
+     */
+    private static void storePendingRename(String oldName, String newName) {
+        pendingRenameOldName = oldName;
+        pendingRenameNewName = newName;
+    }
+    
+    /**
+     * 清除待确认的重命名信息
+     */
+    private static void clearPendingRename() {
+        pendingRenameOldName = null;
+        pendingRenameNewName = null;
+    }
+    
+    /**
+     * 获取待确认的重命名信息
+     */
+    public static String[] getPendingRename() {
+        if (pendingRenameOldName != null && pendingRenameNewName != null) {
+            return new String[]{pendingRenameOldName, pendingRenameNewName};
+        }
+        return null;
+    }
+    
+    /**
+     * 发送重命名请求到服务器
+     * @param oldName 原域名
+     * @param newName 新域名
+     * @param dimension 维度ID
+     */
+    private static void sendRenameRequest(String oldName, String newName, String dimension) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeString(oldName);
+        buf.writeString(newName);
+        buf.writeString(dimension);
+        
+        ClientPlayNetworking.send(Packets.C2S_RENAME_REQUEST, buf);
     }
 } 

@@ -142,6 +142,19 @@ public class ServerCommands {
                         .executes(context -> RecolorCommand.executeRecolorChange(context, 
                             StringArgumentType.getString(context, "areaName"),
                             StringArgumentType.getString(context, "color"))))))
+            
+            // renamearea 命令
+            .then(literal("renamearea")
+                .executes(RenameAreaCommand::executeRenameArea)
+                .then(literal("confirm")
+                    .executes(RenameAreaCommand::executeRenameConfirm))
+                .then(literal("cancel")
+                    .executes(RenameAreaCommand::executeRenameCancel))
+                .then(argument("areaName", StringArgumentType.word())
+                    .then(argument("newName", StringArgumentType.greedyString())
+                        .executes(context -> RenameAreaCommand.executeRenameAreaChange(context,
+                            StringArgumentType.getString(context, "areaName"),
+                            StringArgumentType.getString(context, "newName"))))))
         );
     }
     
@@ -165,6 +178,8 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 (普通玩家可用)"));
         source.sendMessage(Text.of("§a/areahint recolor §7- 列出当前维度可编辑的域名"));
         source.sendMessage(Text.of("§a/areahint recolor <域名> <颜色> §7- 修改指定域名的颜色"));
+        source.sendMessage(Text.of("§a/areahint renamearea §7- 列出当前维度可重命名的域名"));
+        source.sendMessage(Text.of("§a/areahint renamearea <域名> <新名称> §7- 重命名指定域名"));
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));

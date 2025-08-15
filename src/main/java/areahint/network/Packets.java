@@ -28,6 +28,10 @@ public class Packets {
     public static final Identifier C2S_RECOLOR_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_recolor_request");
     public static final Identifier S2C_RECOLOR_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_recolor_response");
     
+    // Rename功能相关的包ID
+    public static final Identifier C2S_RENAME_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_rename_request");
+    public static final Identifier S2C_RENAME_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_rename_response");
+    
     // 客户端到服务端的包ID
     public static final String C2S_REQUEST_AREA_DATA = Areashint.MOD_ID + ":c2s_request_area_data";
     
