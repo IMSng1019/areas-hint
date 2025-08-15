@@ -113,4 +113,21 @@ public class ClientConfig {
         config.setSubtitleStyle(normalizedStyle);
         save();
     }
+
+    /**
+     * 获取模组启用状态
+     * @return 模组是否启用
+     */
+    public static boolean isEnabled() {
+        return config.isEnabled();
+    }
+    
+    /**
+     * 设置模组启用状态
+     * @param enabled 模组启用状态
+     */
+    public static void setEnabled(boolean enabled) {
+        config.setEnabled(enabled);
+        save(); // 立即保存配置
+    }
 } 

@@ -14,6 +14,9 @@ public class ConfigData {
     // 字幕样式：full、simple、mixed
     private String subtitleStyle;
     
+    // 模组启用状态：true为开启，false为关闭
+    private boolean enabled;
+    
     /**
      * 默认构造方法，使用默认配置
      */
@@ -22,6 +25,7 @@ public class ConfigData {
         this.frequency = 1;
         this.subtitleRender = "OpenGL";
         this.subtitleStyle = "mixed";
+        this.enabled = true; // 默认开启模组
     }
     
     /**
@@ -34,6 +38,21 @@ public class ConfigData {
         this.frequency = frequency;
         this.subtitleRender = subtitleRender;
         this.subtitleStyle = subtitleStyle;
+        this.enabled = true; // 默认开启模组
+    }
+    
+    /**
+     * 完整构造方法
+     * @param frequency 检测频率
+     * @param subtitleRender 字幕渲染方式
+     * @param subtitleStyle 字幕样式
+     * @param enabled 模组启用状态
+     */
+    public ConfigData(int frequency, String subtitleRender, String subtitleStyle, boolean enabled) {
+        this.frequency = frequency;
+        this.subtitleRender = subtitleRender;
+        this.subtitleStyle = subtitleStyle;
+        this.enabled = enabled;
     }
     
     /**
@@ -89,6 +108,22 @@ public class ConfigData {
         if (isValidStyleMode(subtitleStyle)) {
             this.subtitleStyle = subtitleStyle;
         }
+    }
+    
+    /**
+     * 获取模组启用状态
+     * @return 模组是否启用
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+    
+    /**
+     * 设置模组启用状态
+     * @param enabled 模组启用状态
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
     
     /**

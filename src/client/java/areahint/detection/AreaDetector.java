@@ -65,6 +65,11 @@ public class AreaDetector {
      * @return 玩家所在的区域名称（根据配置的样式格式化），如果不在任何区域内则返回null
      */
     public String detectPlayerArea(double x, double y, double z) {
+        // 如果模组被禁用，直接返回null，不进行任何检测
+        if (!ClientConfig.isEnabled()) {
+            return null;
+        }
+        
         // 更新最后一次检测时间
         lastDetectionTime = System.currentTimeMillis();
         

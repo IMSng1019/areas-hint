@@ -204,31 +204,39 @@ public class AreashintClient implements ClientModInitializer {
 				double playerZ = player.getZ();
 				String areaName = areaDetector.detectPlayerArea(playerX, playerY, playerZ);
 				
-				// 立即显示结果
-				if (areaName != null) {
-					currentAreaName = areaName;
-					renderManager.showAreaTitle(areaName);
-					if (justEnteredWorld) {
-						LOGGER.info("进入世界时位于区域：{}", areaName);
+				// 立即显示结果（仅在模组启用时）
+				if (ClientConfig.isEnabled()) {
+					if (areaName != null) {
+						currentAreaName = areaName;
+						renderManager.showAreaTitle(areaName);
+						if (justEnteredWorld) {
+							LOGGER.info("进入世界时位于区域：{}", areaName);
+						} else {
+							LOGGER.info("切换维度时位于区域：{}", areaName);
+						}
 					} else {
-						LOGGER.info("切换维度时位于区域：{}", areaName);
+						// 如果不在区域内，显示维度域名
+						String dimensionId = currentDimension.toString();
+						String dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
+						renderManager.showAreaTitle(dimensionalName);
+						hasShownDimensionalName = true;
+						if (justEnteredWorld) {
+							LOGGER.info("进入世界时显示维度域名：{}", dimensionalName);
+						} else {
+							LOGGER.info("切换维度时显示维度域名：{}", dimensionalName);
+						}
 					}
 				} else {
-					// 如果不在区域内，显示维度域名
-					String dimensionId = currentDimension.toString();
-					String dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
-					renderManager.showAreaTitle(dimensionalName);
-					hasShownDimensionalName = true;
 					if (justEnteredWorld) {
-						LOGGER.info("进入世界时显示维度域名：{}", dimensionalName);
+						LOGGER.info("进入世界时模组已禁用，不显示域名");
 					} else {
-						LOGGER.info("切换维度时显示维度域名：{}", dimensionalName);
+						LOGGER.info("切换维度时模组已禁用，不显示域名");
 					}
 				}
 			}
 			
-			// 按照配置的频率检测玩家位置
-			if (areaDetector.shouldDetect()) {
+			// 按照配置的频率检测玩家位置（仅在模组启用时）
+			if (ClientConfig.isEnabled() && areaDetector.shouldDetect()) {
 				double playerX = player.getX();
 				double playerY = player.getY();
 				double playerZ = player.getZ();
@@ -265,6 +273,10 @@ public class AreashintClient implements ClientModInitializer {
 						}
 					}
 				}
+			} else if (!ClientConfig.isEnabled()) {
+				// 模组禁用时，仍然需要记录当前状态但不显示
+				currentAreaName = null;
+				hasShownDimensionalName = false;
 			}
 		});
 	}

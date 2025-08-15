@@ -194,6 +194,10 @@ public class ClientNetworking {
                     else if (action.startsWith("easyadd")) {
                         handleEasyAddCommand(action);
                     }
+                    // 处理模组开关命令
+                    else if (action.equals("on") || action.equals("off")) {
+                        areahint.command.ModToggleCommand.handleToggleCommand(action);
+                    }
                 }
             } catch (Exception e) {
                 AreashintClient.LOGGER.error("处理客户端命令时出错: " + e.getMessage());
