@@ -39,6 +39,11 @@ public class Packets {
     public static final Identifier C2S_EASYADD_AREA_DATA = new Identifier(Areashint.MOD_ID, "c2s_easyadd_area_data");
     public static final Identifier S2C_EASYADD_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_easyadd_response");
     
+    // SetHigh功能相关的包ID
+    public static final Identifier C2S_SETHIGH_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_sethigh_request");
+    public static final Identifier S2C_SETHIGH_AREA_LIST = new Identifier(Areashint.MOD_ID, "s2c_sethigh_area_list");
+    public static final Identifier S2C_SETHIGH_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_sethigh_response");
+    
     /**
      * 将维度路径转换为维度类型字符串
      * @param dimensionPath 维度路径

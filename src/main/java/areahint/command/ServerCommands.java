@@ -32,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.server.command.CommandManager.literal;
 
 /**
  * 统一命令处理类
@@ -155,6 +156,10 @@ public class ServerCommands {
                         .executes(context -> RenameAreaCommand.executeRenameAreaChange(context,
                             StringArgumentType.getString(context, "areaName"),
                             StringArgumentType.getString(context, "newName"))))))
+                            
+            // sethigh 命令
+            .then(literal("sethigh")
+                .executes(SetHighCommand::executeSetHigh))
         );
     }
     
@@ -180,6 +185,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint recolor <域名> <颜色> §7- 修改指定域名的颜色"));
         source.sendMessage(Text.of("§a/areahint renamearea §7- 列出当前维度可重命名的域名"));
         source.sendMessage(Text.of("§a/areahint renamearea <域名> <新名称> §7- 重命名指定域名"));
+        source.sendMessage(Text.of("§a/areahint sethigh §7- 列出当前维度可修改高度的域名"));
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));

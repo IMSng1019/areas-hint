@@ -208,5 +208,39 @@ public class ServerNetworking {
                     Areashint.LOGGER.error("处理rename请求时发生错误", e);
                 }
             });
+        
+        // 注册高度设置请求处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_SETHIGH_REQUEST,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    String areaName = buf.readString();
+                    boolean hasCustomHeight = buf.readBoolean();
+                    Double maxHeight = hasCustomHeight && buf.readBoolean() ? buf.readDouble() : null;
+                    Double minHeight = hasCustomHeight && buf.readBoolean() ? buf.readDouble() : null;
+                    
+                    server.execute(() -> {
+                        areahint.command.SetHighCommand.handleSetHeightRequest(player, areaName, hasCustomHeight, maxHeight, minHeight);
+                    });
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理高度设置请求时发生错误", e);
+                }
+            });
+        
+        // 注册高度设置请求处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_SETHIGH_REQUEST,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    String areaName = buf.readString();
+                    boolean hasCustomHeight = buf.readBoolean();
+                    Double maxHeight = hasCustomHeight && buf.readBoolean() ? buf.readDouble() : null;
+                    Double minHeight = hasCustomHeight && buf.readBoolean() ? buf.readDouble() : null;
+                    
+                    server.execute(() -> {
+                        areahint.command.SetHighCommand.handleSetHeightRequest(player, areaName, hasCustomHeight, maxHeight, minHeight);
+                    });
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理高度设置请求时发生错误", e);
+                }
+            });
     }
 } 
