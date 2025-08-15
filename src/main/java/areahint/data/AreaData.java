@@ -19,6 +19,7 @@ public class AreaData {
     private String baseName;               // 基础名称（上级区域）
     private String signature;              // 域名创建者签名
     private String color;                  // 域名颜色（十六进制格式）
+    private String surfacename;            // 联合域名（表面域名）
 
     // 构造函数
     public AreaData() {}
@@ -45,6 +46,20 @@ public class AreaData {
         this.baseName = baseName;
         this.signature = signature;
         this.color = color;
+        this.surfacename = null; // 默认无联合域名
+    }
+
+    public AreaData(String name, List<Vertex> vertices, List<Vertex> secondVertices, 
+                   AltitudeData altitude, int level, String baseName, String signature, String color, String surfacename) {
+        this.name = name;
+        this.vertices = vertices;
+        this.secondVertices = secondVertices;
+        this.altitude = altitude;
+        this.level = level;
+        this.baseName = baseName;
+        this.signature = signature;
+        this.color = color;
+        this.surfacename = surfacename;
     }
 
     // Getter和Setter方法
@@ -110,6 +125,14 @@ public class AreaData {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getSurfacename() {
+        return surfacename;
+    }
+
+    public void setSurfacename(String surfacename) {
+        this.surfacename = surfacename;
     }
 
     /**
@@ -249,7 +272,7 @@ public class AreaData {
 
     @Override
     public String toString() {
-        return String.format("AreaData{name='%s', level=%d, altitude=%s, vertices=%d, baseName='%s', signature='%s', color='%s'}", 
-            name, level, altitude, vertices != null ? vertices.size() : 0, baseName, signature, color);
+        return String.format("AreaData{name='%s', level=%d, altitude=%s, vertices=%d, baseName='%s', signature='%s', color='%s', surfacename='%s'}", 
+            name, level, altitude, vertices != null ? vertices.size() : 0, baseName, signature, color, surfacename);
     }
 } 

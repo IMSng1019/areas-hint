@@ -25,6 +25,7 @@ public class EasyAddManager {
     public enum EasyAddState {
         IDLE,           // 空闲状态
         INPUT_NAME,     // 输入域名名称
+        INPUT_SURFACE_NAME, // 输入联合域名名称
         INPUT_LEVEL,    // 输入域名等级
         SELECT_BASE,    // 选择上级域名
         RECORDING_POINTS, // 记录坐标点
@@ -40,6 +41,7 @@ public class EasyAddManager {
     
     // 域名数据收集
     private String areaName = null;
+    private String surfaceName = null;  // 联合域名
     private int areaLevel = 1;
     private String baseName = null;
     private List<BlockPos> recordedPoints = new ArrayList<>();
@@ -121,10 +123,24 @@ public class EasyAddManager {
                     areaName = input.trim();
                     client.player.sendMessage(Text.of("§a已设置域名名称：§6" + areaName), false);
                     
-                    // 进入等级选择
-                    currentState = EasyAddState.INPUT_LEVEL;
-                    EasyAddUI.showLevelInputScreen();
+                    // 进入联合域名输入
+                    currentState = EasyAddState.INPUT_SURFACE_NAME;
+                    EasyAddUI.showSurfaceNameInputScreen();
                 }
+                break;
+                
+            case INPUT_SURFACE_NAME:
+                // 联合域名可以为空
+                surfaceName = input.trim().isEmpty() ? null : input.trim();
+                if (surfaceName != null) {
+                    client.player.sendMessage(Text.of("§a已设置联合域名：§6" + surfaceName), false);
+                } else {
+                    client.player.sendMessage(Text.of("§7跳过联合域名设置"), false);
+                }
+                
+                // 进入等级选择
+                currentState = EasyAddState.INPUT_LEVEL;
+                EasyAddUI.showLevelInputScreen();
                 break;
                 
             case HEIGHT_SELECTION:
@@ -342,7 +358,7 @@ public class EasyAddManager {
         // 获取玩家名字作为签名
         String signature = MinecraftClient.getInstance().player.getName().getString();
         
-        return new AreaData(areaName, vertices, secondVertices, altitude, areaLevel, baseName, signature, "#FFFFFF");
+        return new AreaData(areaName, vertices, secondVertices, altitude, areaLevel, baseName, signature, "#FFFFFF", surfaceName);
     }
     
     /**
@@ -418,6 +434,7 @@ public class EasyAddManager {
     private void resetState() {
         currentState = EasyAddState.IDLE;
         areaName = null;
+        surfaceName = null;
         areaLevel = 1;
         baseName = null;
         recordedPoints.clear();

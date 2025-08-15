@@ -70,7 +70,7 @@ public class EasyAddServerNetworking {
             // 读取现有域名数据
             List<AreaData> existingAreas = FileManager.readAreaData(areaFile);
             
-            // 检查域名是否已存在
+            // 检查域名名称（name字段）是否已存在
             for (AreaData existing : existingAreas) {
                 if (existing.getName().equals(areaData.getName())) {
                     sendResponseToClient(player, false, "域名 \"" + areaData.getName() + "\" 已存在");

@@ -2,6 +2,7 @@ package areahint.render;
 
 import areahint.data.AreaData;
 import areahint.util.ColorUtil;
+import areahint.util.AreaDataConverter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,8 +85,9 @@ public class DomainRenderer {
         for (int i = 0; i < domainChain.size(); i++) {
             AreaData area = domainChain.get(i);
             
-            // 添加域名（带颜色）
-            String domainText = ColorUtil.colorText(area.getName(), area.getColor());
+            // 添加域名（带颜色，优先显示surfacename）
+            String displayName = AreaDataConverter.getDisplayName(area);
+            String domainText = ColorUtil.colorText(displayName, area.getColor());
             result.append(domainText);
             
             // 如果不是最后一个域名，添加分隔符
@@ -107,7 +109,8 @@ public class DomainRenderer {
             return "";
         }
         
-        return ColorUtil.colorText(area.getName(), area.getColor());
+        String displayName = AreaDataConverter.getDisplayName(area);
+        return ColorUtil.colorText(displayName, area.getColor());
     }
     
     /**

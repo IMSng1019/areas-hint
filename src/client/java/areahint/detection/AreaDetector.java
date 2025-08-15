@@ -4,6 +4,7 @@ import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.util.AreaDataConverter;
 import areahint.debug.ClientDebugManager;
 import areahint.debug.ClientDebugManager.DebugCategory;
 
@@ -304,29 +305,29 @@ public class AreaDetector {
                 result = buildFullPath(area);
                 break;
             case "simple":
-                // 仅显示当前级别
-                result = area.getName();
+                // 仅显示当前级别（优先显示surfacename）
+                result = AreaDataConverter.getDisplayName(area);
                 break;
             case "mixed":
                 // 混合模式
                 if (area.getLevel() == 1) {
-                    // 一级域名只显示自身
-                    result = area.getName();
+                    // 一级域名只显示自身（优先显示surfacename）
+                    result = AreaDataConverter.getDisplayName(area);
                 } else if (area.getLevel() == 2) {
-                    // 二级域名显示一级+二级
+                    // 二级域名显示一级+二级（优先显示surfacename）
                     AreaData parent = findAreaByName(area.getBaseName());
                     if (parent != null) {
-                        result = parent.getName() + "·" + area.getName();
+                        result = AreaDataConverter.getDisplayName(parent) + "·" + AreaDataConverter.getDisplayName(area);
                     } else {
-                        result = area.getName();
+                        result = AreaDataConverter.getDisplayName(area);
                     }
                 } else {
-                    // 三级及以上只显示当前级别
-                    result = area.getName();
+                    // 三级及以上只显示当前级别（优先显示surfacename）
+                    result = AreaDataConverter.getDisplayName(area);
                 }
                 break;
             default:
-                result = area.getName();
+                result = AreaDataConverter.getDisplayName(area);
                 break;
         }
         
@@ -344,7 +345,7 @@ public class AreaDetector {
         }
         
         List<String> path = new ArrayList<>();
-        path.add(area.getName());
+        path.add(AreaDataConverter.getDisplayName(area));
         
         AreaData current = area;
         while (current.getLevel() > 1 && current.getBaseName() != null) {
