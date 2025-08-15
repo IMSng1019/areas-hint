@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * 区域数据模型
- * 包含区域的基本信息：名称、顶点、边界框、高度范围、等级和基础名称
+ * 包含区域的基本信息：名称、顶点、边界框、高度范围、等级、基础名称和颜色
  */
 public class AreaData {
     private String name;                    // 区域名称
@@ -18,6 +18,7 @@ public class AreaData {
     @SerializedName("base-name")
     private String baseName;               // 基础名称（上级区域）
     private String signature;              // 域名创建者签名
+    private String color;                  // 域名颜色（十六进制格式）
 
     // 构造函数
     public AreaData() {}
@@ -31,6 +32,19 @@ public class AreaData {
         this.level = level;
         this.baseName = baseName;
         this.signature = signature;
+        this.color = "#FFFFFF"; // 默认为白色
+    }
+
+    public AreaData(String name, List<Vertex> vertices, List<Vertex> secondVertices, 
+                   AltitudeData altitude, int level, String baseName, String signature, String color) {
+        this.name = name;
+        this.vertices = vertices;
+        this.secondVertices = secondVertices;
+        this.altitude = altitude;
+        this.level = level;
+        this.baseName = baseName;
+        this.signature = signature;
+        this.color = color;
     }
 
     // Getter和Setter方法
@@ -90,6 +104,14 @@ public class AreaData {
         this.signature = signature;
     }
 
+    public String getColor() {
+        return color != null ? color : "#FFFFFF"; // 如果为null，默认返回白色
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
     /**
      * 验证区域数据的有效性
      * @return 验证是否通过
@@ -113,6 +135,11 @@ public class AreaData {
         
         // 验证高度数据
         if (altitude != null && !altitude.isValid()) {
+            return false;
+        }
+        
+        // 验证颜色格式（如果存在）
+        if (color != null && !color.matches("^#[0-9A-Fa-f]{6}$")) {
             return false;
         }
         
@@ -222,7 +249,7 @@ public class AreaData {
 
     @Override
     public String toString() {
-        return String.format("AreaData{name='%s', level=%d, altitude=%s, vertices=%d, baseName='%s', signature='%s'}", 
-            name, level, altitude, vertices != null ? vertices.size() : 0, baseName, signature);
+        return String.format("AreaData{name='%s', level=%d, altitude=%s, vertices=%d, baseName='%s', signature='%s', color='%s'}", 
+            name, level, altitude, vertices != null ? vertices.size() : 0, baseName, signature, color);
     }
 } 

@@ -133,6 +133,15 @@ public class ServerCommands {
                                 .executes(ServerCommands::executeEasyAddAltitudeUnlimited)))
                         .then(literal("save")
                             .executes(ServerCommands::executeEasyAddSave)))
+            
+            // recolor 命令
+            .then(literal("recolor")
+                .executes(RecolorCommand::executeRecolor)
+                .then(argument("areaName", StringArgumentType.word())
+                    .then(argument("color", StringArgumentType.greedyString())
+                        .executes(context -> RecolorCommand.executeRecolorChange(context, 
+                            StringArgumentType.getString(context, "areaName"),
+                            StringArgumentType.getString(context, "color"))))))
         );
     }
     
@@ -154,6 +163,8 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint subtitlestyle [full|simple|mixed] §7- 设置或显示字幕样式"));
         source.sendMessage(Text.of("§a/areahint add <JSON> §7- 添加新的域名 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 (普通玩家可用)"));
+        source.sendMessage(Text.of("§a/areahint recolor §7- 列出当前维度可编辑的域名"));
+        source.sendMessage(Text.of("§a/areahint recolor <域名> <颜色> §7- 修改指定域名的颜色"));
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));

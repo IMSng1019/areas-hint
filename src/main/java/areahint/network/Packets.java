@@ -24,6 +24,10 @@ public class Packets {
     public static final String S2C_CLIENT_COMMAND = Areashint.MOD_ID + ":s2c_client_command";
     public static final String S2C_DEBUG_COMMAND = Areashint.MOD_ID + ":s2c_debug_command";
     
+    // Recolor功能相关的包ID
+    public static final Identifier C2S_RECOLOR_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_recolor_request");
+    public static final Identifier S2C_RECOLOR_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_recolor_response");
+    
     // 客户端到服务端的包ID
     public static final String C2S_REQUEST_AREA_DATA = Areashint.MOD_ID + ":c2s_request_area_data";
     

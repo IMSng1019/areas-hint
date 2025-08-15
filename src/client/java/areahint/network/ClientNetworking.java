@@ -44,6 +44,12 @@ public class ClientNetworking {
                 new Identifier(Packets.S2C_DEBUG_COMMAND),
                 ClientNetworking::handleDebugCommand
         );
+        
+        // 注册recolor响应接收处理器
+        ClientPlayNetworking.registerGlobalReceiver(
+                Packets.S2C_RECOLOR_RESPONSE,
+                ClientNetworking::handleRecolorResponse
+        );
     }
     
     /**
@@ -303,5 +309,68 @@ public class ClientNetworking {
                 AreashintClient.LOGGER.error("处理调试命令时出错: " + e.getMessage());
             }
         });
+    }
+    
+    /**
+     * 处理recolor响应
+     */
+    private static void handleRecolorResponse(MinecraftClient client, ClientPlayNetworkHandler handler, 
+                                            PacketByteBuf buf, PacketSender responseSender) {
+        try {
+            String action = buf.readString();
+            
+            if ("recolor_list".equals(action)) {
+                // 处理域名列表响应
+                String dimension = buf.readString();
+                int count = buf.readInt();
+                
+                client.execute(() -> {
+                    if (client.player != null) {
+                        client.player.sendMessage(net.minecraft.text.Text.of("§a可编辑的域名列表:"), false);
+                        
+                        for (int i = 0; i < count; i++) {
+                            try {
+                                String areaName = buf.readString();
+                                String currentColor = buf.readString();
+                                int level = buf.readInt();
+                                String baseName = buf.readString();
+                                
+                                client.player.sendMessage(net.minecraft.text.Text.of(
+                                    String.format("§7%d. §r%s §7(等级%d) §8- 当前颜色: %s", 
+                                        i + 1, areaName, level, currentColor)
+                                ), false);
+                            } catch (Exception e) {
+                                AreashintClient.LOGGER.error("读取域名信息时出错", e);
+                            }
+                        }
+                        
+                        client.player.sendMessage(net.minecraft.text.Text.of(
+                            "§a请使用 §e/areahint recolor <域名> <颜色> §a来修改颜色"
+                        ), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of(
+                            "§7可用颜色: 白色, 红色, 粉红色, 橙色, 黄色, 棕色, 浅绿色, 深绿色, 浅蓝色, 深蓝色, 浅紫色, 紫色, 灰色, 黑色, 或自定义十六进制码(如 #FF0000)"
+                        ), false);
+                    }
+                });
+                
+            } else if ("recolor_response".equals(action)) {
+                // 处理修改颜色响应
+                boolean success = buf.readBoolean();
+                String message = buf.readString();
+                
+                client.execute(() -> {
+                    if (client.player != null) {
+                        if (success) {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§a" + message), false);
+                        } else {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§c" + message), false);
+                        }
+                    }
+                });
+            }
+            
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理recolor响应时出错: " + e.getMessage());
+        }
     }
 } 

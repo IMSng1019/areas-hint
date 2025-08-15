@@ -135,9 +135,10 @@ areas-hint-mod/
 │   │   │       ├── command/         # 命令处理
 │   │   │       │   ├── ServerCommands.java # 统一命令处理器（服务端+客户端命令）
 │   │   │       │   ├── DebugCommand.java   # 调试命令处理器
+│   │   │       │   ├── RecolorCommand.java # 域名重新着色指令处理器（新增）
 │   │   │       │   └── DimensionalNameCommands.java # 维度域名命令处理器
 │   │   │       ├── data/            # 数据模型
-│   │   │       │   ├── AreaData.java       # 区域数据模型（含altitude高度字段）
+│   │   │       │   ├── AreaData.java       # 区域数据模型（含altitude高度字段和color颜色字段）
 │   │   │       │   ├── ConfigData.java     # 配置数据模型
 │   │   │       │   └── DimensionalNameData.java # 维度域名数据模型
 │   │   │       ├── debug/           # 调试功能
@@ -146,6 +147,10 @@ areas-hint-mod/
 │   │   │       │   └── DimensionalNameManager.java # 服务端维度域名管理器
 │   │   │       ├── easyadd/         # EasyAdd服务端支持
 │   │   │       │   └── EasyAddServerNetworking.java # 服务端网络处理器
+│   │   │       ├── render/          # 渲染工具（新增）
+│   │   │       │   └── DomainRenderer.java # 域名渲染工具类（处理颜色显示和层级关系）
+│   │   │       ├── util/            # 工具类（新增）
+│   │   │       │   └── ColorUtil.java      # 颜色工具类（颜色验证、转换和预定义颜色）
 │   │   │       ├── world/           # 世界文件夹管理（新增）
 │   │   │       │   └── WorldFolderManager.java # 服务端世界文件夹管理器
 │   │   │       ├── file/            # 文件操作
@@ -336,6 +341,8 @@ build/                              # 构建输出目录（自动生成）
 - `/areahint subtitlestyle <full|simple|mixed>` - 设置字幕样式
 - `/areahint add <域名JSON>` - 添加新的域名（需要管理员权限） 
 - `/areahint easyadd` - 启动交互式域名添加（普通玩家可用）
+- `/areahint recolor` - 列出当前维度可编辑的域名
+- `/areahint recolor <域名> <颜色>` - 修改指定域名的颜色（支持颜色名称或十六进制代码）
 - `/areahint debug` - 切换调试模式（需要管理员权限）
 - `/areahint debug on|off|status` - 启用/禁用/查看调试模式状态（需要管理员权限）
 - `/areahint dimensionalityname` - 列出所有维度及其域名配置（需要管理员权限）
@@ -483,6 +490,82 @@ EasyAdd创建的域名会：
 
 **字段说明**：
 - `signature`: 域名创建者的用户名，自动设置，可以为null（适配旧版本）
+
+## 域名颜色系统
+
+模组支持为每个域名设置自定义颜色，实现个性化的域名显示效果。
+
+### 颜色功能特点
+
+- **层级着色**：不同等级的域名可以设置不同颜色
+- **智能显示**：域名链显示时，各级域名使用各自的颜色，分隔符为白色
+- **预定义颜色**：提供14种常用颜色供快速选择
+- **自定义颜色**：支持十六进制颜色代码自定义
+- **兼容性**：未设置颜色的域名默认显示为白色
+
+### 颜色管理命令
+
+#### 查看可编辑域名
+```bash
+/areahint recolor
+```
+列出当前维度中您有权限编辑的域名及其当前颜色。
+
+#### 修改域名颜色
+```bash
+/areahint recolor <域名> <颜色>
+```
+
+**颜色参数支持**：
+- **颜色名称**：白色、红色、粉红色、橙色、黄色、棕色、浅绿色、深绿色、浅蓝色、深蓝色、浅紫色、紫色、灰色、黑色
+- **十六进制代码**：如 `#FF0000`（红色）、`#00FF00`（绿色）
+
+### 使用示例
+
+```bash
+# 设置商业区为金色
+/areahint recolor 商业区 黄色
+
+# 使用十六进制设置自定义颜色
+/areahint recolor 居住区 #87CEEB
+
+# 查看当前可编辑的域名
+/areahint recolor
+```
+
+### 权限说明
+
+- **普通玩家**：只能修改自己创建的域名颜色
+- **管理员**：可以修改所有域名的颜色
+
+### 域名显示效果
+
+当域名存在层级关系时，显示格式为：
+```
+顶级域名（金色）·二级域名（绿色）·三级域名（蓝色）
+```
+
+其中"·"符号始终为白色，起分隔作用。
+
+### JSON格式扩展
+
+新的域名JSON格式包含`color`字段：
+
+```json
+{
+  "name": "商业区",
+  "vertices": [...],
+  "second-vertices": [...],
+  "altitude": {"max": 100, "min": 0},
+  "level": 1,
+  "base-name": null,
+  "signature": "player_name",
+  "color": "#FFD700"
+}
+```
+
+**字段说明**：
+- `color`: 域名颜色，十六进制格式（如#FFFFFF），可以为null（默认白色）
 
 ## 调试功能
 

@@ -342,7 +342,7 @@ public class EasyAddManager {
         // 获取玩家名字作为签名
         String signature = MinecraftClient.getInstance().player.getName().getString();
         
-        return new AreaData(areaName, vertices, secondVertices, altitude, areaLevel, baseName, signature);
+        return new AreaData(areaName, vertices, secondVertices, altitude, areaLevel, baseName, signature, "#FFFFFF");
     }
     
     /**
