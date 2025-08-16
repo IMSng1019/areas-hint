@@ -74,6 +74,12 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化EasyAdd功能
 		initEasyAdd();
 		
+		// 初始化ExpandArea功能
+		initExpandArea();
+		
+		// 初始化ShrinkArea功能
+		initShrinkArea();
+		
 		// 注册客户端tick事件
 		registerTickEvents();
 		
@@ -88,12 +94,46 @@ public class AreashintClient implements ClientModInitializer {
 			// 注册按键处理器
 			areahint.easyadd.EasyAddKeyHandler.register();
 			
-			// 注册客户端网络接收器
-			areahint.easyadd.EasyAddNetworking.registerClientReceivers();
+					// 注册网络接收器
+		areahint.easyadd.EasyAddNetworking.registerClientReceivers();
 			
 			LOGGER.info("EasyAdd功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化EasyAdd功能时发生错误", e);
+		}
+	}
+	
+	/**
+	 * 初始化ExpandArea功能
+	 */
+	private void initExpandArea() {
+		try {
+			// 注册按键处理器
+			areahint.expandarea.ExpandAreaKeyHandler.register();
+			
+			// 注册网络接收器
+			areahint.expandarea.ExpandAreaServerNetworking.registerClientNetworking();
+			
+			LOGGER.info("ExpandArea功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化ExpandArea功能时发生错误", e);
+		}
+	}
+	
+	/**
+	 * 初始化ShrinkArea功能
+	 */
+	private void initShrinkArea() {
+		try {
+			// 注册按键处理器
+			areahint.shrinkarea.ShrinkAreaKeyHandler.register();
+			
+			// 注册网络接收器
+			areahint.shrinkarea.ShrinkAreaServerNetworking.registerClientNetworking();
+			
+			LOGGER.info("ShrinkArea功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化ShrinkArea功能时发生错误", e);
 		}
 	}
 	

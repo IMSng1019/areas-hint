@@ -217,6 +217,24 @@ public class ClientNetworking {
             if (action.equals("easyadd_start")) {
                 AreashintClient.LOGGER.info("执行easyadd_start");
                 manager.startEasyAdd();
+            } else if (action.equals("expandarea_start")) {
+                AreashintClient.LOGGER.info("执行expandarea_start");
+                areahint.expandarea.ExpandAreaManager.getInstance().startExpandArea();
+            } else if (action.equals("expandarea_continue")) {
+                AreashintClient.LOGGER.info("执行expandarea_continue");
+                areahint.expandarea.ExpandAreaManager.getInstance().continueRecording();
+            } else if (action.equals("expandarea_save")) {
+                AreashintClient.LOGGER.info("执行expandarea_save");
+                areahint.expandarea.ExpandAreaManager.getInstance().finishAndSave();
+            } else if (action.equals("shrinkarea_start")) {
+                AreashintClient.LOGGER.info("执行shrinkarea_start");
+                areahint.shrinkarea.ShrinkAreaManager.getInstance().start();
+            } else if (action.equals("shrinkarea_continue")) {
+                AreashintClient.LOGGER.info("执行shrinkarea_continue");
+                areahint.shrinkarea.ShrinkAreaManager.getInstance().continueRecording();
+            } else if (action.equals("shrinkarea_save")) {
+                AreashintClient.LOGGER.info("执行shrinkarea_save");
+                areahint.shrinkarea.ShrinkAreaManager.getInstance().finishAndSave();
             } else if (action.equals("easyadd_cancel")) {
                 AreashintClient.LOGGER.info("执行easyadd_cancel");
                 manager.cancelEasyAdd();

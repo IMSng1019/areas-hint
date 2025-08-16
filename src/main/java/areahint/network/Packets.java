@@ -44,6 +44,14 @@ public class Packets {
     public static final Identifier S2C_SETHIGH_AREA_LIST = new Identifier(Areashint.MOD_ID, "s2c_sethigh_area_list");
     public static final Identifier S2C_SETHIGH_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_sethigh_response");
     
+    // ExpandArea功能相关的包ID
+    public static final Identifier EXPAND_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "expand_area");
+    public static final Identifier EXPAND_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "expand_area_response");
+    
+    // ShrinkArea功能相关的包ID
+    public static final Identifier SHRINK_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "shrink_area");
+    public static final Identifier SHRINK_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "shrink_area_response");
+    
     /**
      * 将维度路径转换为维度类型字符串
      * @param dimensionPath 维度路径

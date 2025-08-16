@@ -134,6 +134,26 @@ public class ServerCommands {
                                 .executes(ServerCommands::executeEasyAddAltitudeUnlimited)))
                         .then(literal("save")
                             .executes(ServerCommands::executeEasyAddSave)))
+                            
+            // expandarea 命令 (域名扩展)
+            .then(literal("expandarea")
+                .executes(ServerCommands::executeExpandAreaStart))
+            .then(literal("expandarea")
+                .then(literal("continue")
+                    .executes(ServerCommands::executeExpandAreaContinue)))
+            .then(literal("expandarea") 
+                .then(literal("save")
+                    .executes(ServerCommands::executeExpandAreaSave)))
+            
+            // shrinkarea 命令 (域名收缩)
+            .then(literal("shrinkarea")
+                .executes(ServerCommands::executeShrinkAreaStart))
+            .then(literal("shrinkarea")
+                .then(literal("continue")
+                    .executes(ServerCommands::executeShrinkAreaContinue)))
+            .then(literal("shrinkarea") 
+                .then(literal("save")
+                    .executes(ServerCommands::executeShrinkAreaSave)))
             
             // recolor 命令
             .then(literal("recolor")
@@ -853,6 +873,156 @@ public class ServerCommands {
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.of("§c选择不限制高度时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 执行expandarea命令
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeExpandAreaStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        try {
+            // 检查是否为玩家执行
+            if (source.getPlayer() == null) {
+                source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+                return 0;
+            }
+            
+            // 发送客户端命令，启动域名扩展流程
+            source.sendMessage(Text.of("§a启动域名扩展模式..."));
+            source.sendMessage(Text.of("§e请在客户端界面中选择要扩展的域名"));
+            
+            // 通过客户端命令通道发送启动命令
+            sendClientCommand(source, "areahint:expandarea_start");
+            
+            return Command.SINGLE_SUCCESS;
+            
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c启动域名扩展失败: " + e.getMessage()));
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    
+    /**
+     * 执行expandarea命令（继续）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeExpandAreaContinue(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:expandarea_continue");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c继续域名扩展时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 执行expandarea命令（保存）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeExpandAreaSave(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:expandarea_save");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c保存域名扩展时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 执行shrinkarea命令
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeShrinkAreaStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        try {
+            // 检查是否为玩家执行
+            if (source.getPlayer() == null) {
+                source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+                return 0;
+            }
+            
+            // 发送客户端命令，启动域名收缩流程
+            source.sendMessage(Text.of("§a启动域名收缩模式..."));
+            source.sendMessage(Text.of("§e请在客户端界面中选择要收缩的域名"));
+            
+            // 通过客户端命令通道发送启动命令
+            sendClientCommand(source, "areahint:shrinkarea_start");
+            
+            return Command.SINGLE_SUCCESS;
+            
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c启动域名收缩失败: " + e.getMessage()));
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    
+    /**
+     * 执行shrinkarea命令（继续）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeShrinkAreaContinue(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:shrinkarea_continue");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c继续域名收缩时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 执行shrinkarea命令（保存）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeShrinkAreaSave(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:shrinkarea_save");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c保存域名收缩时发生错误: " + e.getMessage()));
             return 0;
         }
     }
