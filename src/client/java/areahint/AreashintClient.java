@@ -112,7 +112,7 @@ public class AreashintClient implements ClientModInitializer {
 			areahint.expandarea.ExpandAreaKeyHandler.register();
 			
 			// 注册网络接收器
-			areahint.expandarea.ExpandAreaServerNetworking.registerClientNetworking();
+			areahint.expandarea.ExpandAreaClientNetworking.registerClientNetworking();
 			
 			LOGGER.info("ExpandArea功能初始化完成");
 		} catch (Exception e) {
@@ -129,7 +129,7 @@ public class AreashintClient implements ClientModInitializer {
 			areahint.shrinkarea.ShrinkAreaKeyHandler.register();
 			
 			// 注册网络接收器
-			areahint.shrinkarea.ShrinkAreaServerNetworking.registerClientNetworking();
+			areahint.shrinkarea.ShrinkAreaClientNetworking.registerClientNetworking();
 			
 			LOGGER.info("ShrinkArea功能初始化完成");
 		} catch (Exception e) {
