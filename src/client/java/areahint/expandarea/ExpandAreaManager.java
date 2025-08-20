@@ -3,6 +3,7 @@ package areahint.expandarea;
 import areahint.data.AreaData;
 import areahint.util.SurfaceNameHandler;
 import areahint.file.FileManager;
+import areahint.expandarea.ExpandAreaClientNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
@@ -241,8 +242,9 @@ public class ExpandAreaManager {
         }
         
         // 3. 发送给服务端
-        ExpandAreaServerNetworking.sendExpandedAreaToServer(expandedArea);
+        ExpandAreaClientNetworking.sendExpandedAreaToServer(expandedArea);
         
+
         sendMessage("§a域名扩展完成！", Formatting.GREEN);
         
         // 重置状态

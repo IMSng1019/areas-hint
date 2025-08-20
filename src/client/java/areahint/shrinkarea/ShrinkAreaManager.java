@@ -3,6 +3,7 @@ package areahint.shrinkarea;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.util.AreaDataConverter;
+import areahint.shrinkarea.ShrinkAreaClientNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
@@ -318,7 +319,7 @@ public class ShrinkAreaManager {
         }
         
         // 3. 发送给服务端
-        ShrinkAreaServerNetworking.sendShrunkAreaToServer(shrunkArea);
+        ShrinkAreaClientNetworking.sendShrunkAreaToServer(shrunkArea);
         
         sendMessage("§a域名收缩完成！", Formatting.GREEN);
         

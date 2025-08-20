@@ -6,13 +6,14 @@ import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
 import com.google.gson.JsonObject;
 
 /**
  * 收缩域名客户端网络通信
  * 负责客户端与服务端之间的收缩域名数据传输
  */
-public class ShrinkAreaServerNetworking {
+public class ShrinkAreaClientNetworking {
     
     /**
      * 发送收缩后的域名数据到服务端

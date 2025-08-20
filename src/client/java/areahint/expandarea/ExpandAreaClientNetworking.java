@@ -9,7 +9,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import com.google.gson.JsonObject;
 
-public class ExpandAreaServerNetworking {
+public class ExpandAreaClientNetworking {
     
     /**
      * 发送扩展后的域名数据到服务端
