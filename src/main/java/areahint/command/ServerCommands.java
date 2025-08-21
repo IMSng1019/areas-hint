@@ -32,7 +32,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
-import static net.minecraft.server.command.CommandManager.literal;
 
 /**
  * 统一命令处理类
@@ -57,6 +56,9 @@ public class ServerCommands {
                                         CommandManager.RegistrationEnvironment environment) {
         // 注册调试命令
         DebugCommand.register(dispatcher, registryAccess, environment);
+        
+        // 注册check命令
+        CheckCommand.register(dispatcher, registryAccess, environment);
         
         dispatcher.register(literal("areahint")
             // help 命令
