@@ -25,7 +25,7 @@ public class ShrinkAreaKeyHandler {
             "key.areashint.shrinkarea.record", 
             InputUtil.Type.KEYSYM, 
             GLFW.GLFW_KEY_X, 
-            "category.areashint.shrinkarea"
+            "category.areahint.shrinkarea"
         ));
         
         // 注册客户端tick事件
@@ -35,6 +35,12 @@ public class ShrinkAreaKeyHandler {
             }
             
             ShrinkAreaManager manager = ShrinkAreaManager.getInstance();
+            
+            // 只有在ShrinkArea模式活动时才处理按键
+            if (!manager.isActive()) {
+                wasRecordPressed = recordKey.isPressed();
+                return;
+            }
             
             // 处理记录按键
             if (recordKey.isPressed() && !wasRecordPressed) {

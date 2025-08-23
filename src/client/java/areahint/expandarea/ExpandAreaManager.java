@@ -22,6 +22,7 @@ public class ExpandAreaManager {
     private AreaData selectedArea;
     private List<Double[]> newVertices;
     private boolean isRecording = false;
+    private boolean isActive = false;  // 添加活动状态跟踪
     private ExpandAreaUI ui;
     
     public static ExpandAreaManager getInstance() {
@@ -45,6 +46,7 @@ public class ExpandAreaManager {
             return;
         }
         
+        isActive = true;  // 设置为活动状态
         // 显示域名询问界面
         ui.showAreaNameInput();
     }
@@ -288,6 +290,7 @@ public class ExpandAreaManager {
         this.selectedArea = null;
         this.newVertices.clear();
         this.isRecording = false;
+        this.isActive = false;  // 重置活动状态
         ui.hide();
     }
     
@@ -328,6 +331,31 @@ public class ExpandAreaManager {
     }
     
     /**
+     * 检查是否处于活动状态
+     */
+    public boolean isActive() {
+        return isActive;
+    }
+    
+    /**
+     * 检查是否处于记录状态
+     */
+    public boolean isRecording() {
+        return isRecording;
+    }
+    
+    /**
+     * 停止扩展流程
+     */
+    public void stopExpand() {
+        isActive = false;
+        isRecording = false;
+        selectedArea = null;
+        selectedAreaName = null;
+        newVertices.clear();
+    }
+    
+    /**
      * 根据名称查找域名
      */
     private AreaData findAreaByName(String name) {
@@ -364,7 +392,6 @@ public class ExpandAreaManager {
     }
     
     // Getter方法
-    public boolean isRecording() { return isRecording; }
     public AreaData getSelectedArea() { return selectedArea; }
     public List<Double[]> getNewVertices() { return newVertices; }
 } 

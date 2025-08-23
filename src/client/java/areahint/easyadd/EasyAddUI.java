@@ -47,7 +47,7 @@ public class EasyAddUI {
         if (client.player == null) return;
         
         client.player.sendMessage(Text.of("§6=== 联合域名设置 ==="), false);
-        client.player.sendMessage(Text.of("§a请输入联合域名（表面域名）："), false);
+        client.player.sendMessage(Text.of("§a请输入联合域名："), false);
         client.player.sendMessage(Text.of("§7联合域名是显示给玩家看的名称，可以与实际域名不同"), false);
         client.player.sendMessage(Text.of("§7留空则使用实际域名作为显示名称"), false);
         client.player.sendMessage(Text.of("§e提示：两个不同的实际域名可以使用相同的联合域名"), false);
@@ -256,7 +256,7 @@ public class EasyAddUI {
         client.player.sendMessage(Text.of(""), false);
         
         // 自动计算按钮
-        MutableText autoButton = Text.literal("§b[确认域名信息]")
+        MutableText autoButton = Text.literal("§b[智能高度]")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd altitude auto"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 

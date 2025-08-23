@@ -42,6 +42,13 @@ public class ExpandAreaKeyHandler {
             
             ExpandAreaManager manager = ExpandAreaManager.getInstance();
             
+            // 只有在ExpandArea模式活动时才处理按键
+            if (!manager.isActive()) {
+                wasRecordPressed = recordKey.isPressed();
+                wasConfirmPressed = confirmKey.isPressed();
+                return;
+            }
+            
             // 处理记录按键
             if (recordKey.isPressed() && !wasRecordPressed) {
                 if (manager.isRecording()) {
