@@ -121,6 +121,22 @@ public class JsonHelper {
                 }
             }
             
+            // 反序列化color（颜色）
+            if (jsonObject.has("color")) {
+                JsonElement colorElement = jsonObject.get("color");
+                if (!colorElement.isJsonNull()) {
+                    areaData.setColor(colorElement.getAsString());
+                }
+            }
+            
+            // 反序列化surfacename（联合域名）
+            if (jsonObject.has("surfacename")) {
+                JsonElement surfacenameElement = jsonObject.get("surfacename");
+                if (!surfacenameElement.isJsonNull()) {
+                    areaData.setSurfacename(surfacenameElement.getAsString());
+                }
+            }
+            
             return areaData;
         }
     }

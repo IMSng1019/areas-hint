@@ -7,6 +7,7 @@ import areahint.file.FileManager;
 import areahint.util.AreaDataConverter;
 import areahint.debug.ClientDebugManager;
 import areahint.debug.ClientDebugManager.DebugCategory;
+import areahint.render.DomainRenderer;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -290,7 +291,7 @@ public class AreaDetector {
      * 根据配置的样式格式化区域名称
      * @param area 区域
      * @param style 样式（full、simple、mixed）
-     * @return 格式化后的区域名称
+     * @return 格式化后的区域名称（带颜色）
      */
     private String formatAreaName(AreaData area, String style) {
         if (area == null) {
@@ -301,33 +302,28 @@ public class AreaDetector {
         
         switch (style) {
             case "full":
-                // 显示完整路径
-                result = buildFullPath(area);
+                // 显示完整路径（带颜色）
+                result = DomainRenderer.buildDomainDisplayText(area, areas);
                 break;
             case "simple":
-                // 仅显示当前级别（优先显示surfacename）
-                result = AreaDataConverter.getDisplayName(area);
+                // 仅显示当前级别（带颜色）
+                result = DomainRenderer.getSimpleDomainText(area);
                 break;
             case "mixed":
-                // 混合模式
+                // 混合模式（带颜色）
                 if (area.getLevel() == 1) {
-                    // 一级域名只显示自身（优先显示surfacename）
-                    result = AreaDataConverter.getDisplayName(area);
+                    // 一级域名只显示自身
+                    result = DomainRenderer.getSimpleDomainText(area);
                 } else if (area.getLevel() == 2) {
-                    // 二级域名显示一级+二级（优先显示surfacename）
-                    AreaData parent = findAreaByName(area.getBaseName());
-                    if (parent != null) {
-                        result = AreaDataConverter.getDisplayName(parent) + "·" + AreaDataConverter.getDisplayName(area);
-                    } else {
-                        result = AreaDataConverter.getDisplayName(area);
-                    }
+                    // 二级域名显示一级+二级
+                    result = DomainRenderer.buildDomainDisplayText(area, areas);
                 } else {
-                    // 三级及以上只显示当前级别（优先显示surfacename）
-                    result = AreaDataConverter.getDisplayName(area);
+                    // 三级及以上只显示当前级别
+                    result = DomainRenderer.getSimpleDomainText(area);
                 }
                 break;
             default:
-                result = AreaDataConverter.getDisplayName(area);
+                result = DomainRenderer.getSimpleDomainText(area);
                 break;
         }
         

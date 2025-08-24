@@ -268,6 +268,14 @@ public class ClientNetworking {
             AreashintClient.LOGGER.info("执行easyadd_altitude_unlimited");
             areahint.easyadd.EasyAddAltitudeManager.handleAltitudeTypeSelection(
                 areahint.easyadd.EasyAddAltitudeManager.AltitudeType.UNLIMITED);
+        } else if (action.startsWith("easyadd_color:")) {
+            String colorHex = action.substring("easyadd_color:".length());
+            try {
+                AreashintClient.LOGGER.info("执行easyadd_color: " + colorHex);
+                manager.handleColorSelection(colorHex);
+            } catch (Exception e) {
+                AreashintClient.LOGGER.error("处理颜色选择时出错: " + e.getMessage());
+            }
         } else {
             AreashintClient.LOGGER.warn("未知的EasyAdd命令: " + action);
         }
@@ -382,6 +390,16 @@ public class ClientNetworking {
                     }
                 });
                 
+            } else if ("recolor_interactive".equals(action)) {
+                // 处理交互式recolor界面
+                String dimension = buf.readString();
+                int count = buf.readInt();
+                
+                client.execute(() -> {
+                    if (client.player != null) {
+                        showInteractiveRecolorScreen(count, buf);
+                    }
+                });
             } else if ("recolor_response".equals(action)) {
                 // 处理修改颜色响应
                 boolean success = buf.readBoolean();
@@ -567,5 +585,53 @@ public class ClientNetworking {
         buf.writeString(dimension);
         
         ClientPlayNetworking.send(Packets.C2S_RENAME_REQUEST, buf);
+    }
+
+    /**
+     * 显示交互式recolor界面
+     */
+    private static void showInteractiveRecolorScreen(int count, PacketByteBuf buf) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+        
+        client.player.sendMessage(net.minecraft.text.Text.of("§6=== 域名颜色修改 ==="), false);
+        client.player.sendMessage(net.minecraft.text.Text.of("§a请选择要修改颜色的域名："), false);
+        client.player.sendMessage(net.minecraft.text.Text.of(""), false);
+        
+        for (int i = 0; i < count; i++) {
+            try {
+                String areaName = buf.readString();
+                String currentColor = buf.readString();
+                int level = buf.readInt();
+                String baseName = buf.readString();
+                
+                // 创建域名选择按钮
+                net.minecraft.text.MutableText areaButton = net.minecraft.text.Text.literal(
+                    String.format("§6[%s] §7(等级%d) §8当前颜色: %s", areaName, level, currentColor)
+                ).setStyle(net.minecraft.text.Style.EMPTY
+                    .withClickEvent(new net.minecraft.text.ClickEvent(
+                        net.minecraft.text.ClickEvent.Action.RUN_COMMAND, 
+                        "/areahint recolor " + areaName))
+                    .withHoverEvent(new net.minecraft.text.HoverEvent(
+                        net.minecraft.text.HoverEvent.Action.SHOW_TEXT, 
+                        net.minecraft.text.Text.of("选择 " + areaName + " 进行颜色修改"))));
+                
+                client.player.sendMessage(areaButton, false);
+                
+            } catch (Exception e) {
+                AreashintClient.LOGGER.error("读取域名信息时出错", e);
+            }
+        }
+        
+        client.player.sendMessage(net.minecraft.text.Text.of(""), false);
+        client.player.sendMessage(net.minecraft.text.Text.of(
+            "§7点击域名按钮后，使用 §e/areahint recolor <域名> <颜色> §7来修改颜色"
+        ), false);
+        client.player.sendMessage(net.minecraft.text.Text.of(
+            "§7可用颜色: 白色, 红色, 粉红色, 橙色, 黄色, 棕色, 浅绿色, 深绿色, 浅蓝色, 深蓝色, 浅紫色, 紫色, 灰色, 黑色"
+        ), false);
+        client.player.sendMessage(net.minecraft.text.Text.of(
+            "§7或使用十六进制格式，如: #FF0000"
+        ), false);
     }
 } 

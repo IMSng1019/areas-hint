@@ -120,12 +120,13 @@ public class EasyAddUI {
         client.player.sendMessage(Text.of("§a请选择上级域名："), false);
         
         for (AreaData area : availableParentAreas) {
-            MutableText areaButton = Text.literal("§6[" + area.getName() + "]")
+            String displayName = areahint.util.AreaDataConverter.getDisplayName(area);
+            MutableText areaButton = Text.literal("§6[" + displayName + "]")
                 .setStyle(Style.EMPTY
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, 
                         "/areahint easyadd base \"" + area.getName() + "\""))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                        Text.of("选择 " + area.getName() + " 作为上级域名")))
+                        Text.of("选择 " + displayName + " 作为上级域名")))
                     .withColor(Formatting.GOLD));
             
             client.player.sendMessage(areaButton, false);
@@ -200,6 +201,9 @@ public class EasyAddUI {
         
         client.player.sendMessage(Text.of("§6=== 域名信息确认 ==="), false);
         client.player.sendMessage(Text.of("§a域名名称：§6" + areaData.getName()), false);
+        if (areaData.getSurfacename() != null && !areaData.getSurfacename().trim().isEmpty()) {
+            client.player.sendMessage(Text.of("§a联合域名：§6" + areaData.getSurfacename()), false);
+        }
         client.player.sendMessage(Text.of("§a域名等级：§6" + areaData.getLevel()), false);
         
         if (areaData.getBaseName() != null) {
@@ -215,6 +219,11 @@ public class EasyAddUI {
                 areaData.getAltitude().getMin() + " ~ " + areaData.getAltitude().getMax()), false);
         }
         
+        // 显示颜色信息（新增）
+        String colorHex = areaData.getColor();
+        String colorDisplay = colorHex != null ? colorHex : "#FFFFFF";
+        client.player.sendMessage(Text.of("§a域名颜色：§6" + colorDisplay), false);
+        
         client.player.sendMessage(Text.of("§a创建者：§6" + areaData.getSignature()), false);
         
         // 显示确认和取消按钮
@@ -227,7 +236,7 @@ public class EasyAddUI {
         MutableText cancelButton = Text.literal("§c[取消]")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消保存，放弃该域名")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
                 .withColor(Formatting.RED));
         
         MutableText buttonRow = Text.empty()
@@ -235,8 +244,9 @@ public class EasyAddUI {
             .append(Text.of("  "))
             .append(cancelButton);
         
+        client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(buttonRow, false);
-        client.player.sendMessage(Text.of("§7请确认域名信息无误后选择保存"), false);
+        client.player.sendMessage(Text.of("§7请确认以上信息无误后点击保存"), false);
     }
     
     /**
@@ -299,6 +309,87 @@ public class EasyAddUI {
         client.player.sendMessage(buttonRow, false);
         client.player.sendMessage(Text.of("§7自动计算会基于记录点扩展高度范围"), false);
         client.player.sendMessage(Text.of("§7自定义可以精确控制域名的高度边界"), false);
+    }
+    
+    /**
+     * 显示颜色选择界面
+     */
+    public static void showColorSelectionScreen() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+        
+        client.player.sendMessage(Text.of("§6=== 域名颜色设置 ==="), false);
+        client.player.sendMessage(Text.of("§a请选择域名颜色："), false);
+        client.player.sendMessage(Text.of("§7颜色将用于域名显示时的视觉效果"), false);
+        client.player.sendMessage(Text.of(""), false);
+        
+        // 第一行颜色按钮
+        MutableText row1 = Text.empty()
+            .append(createColorButton("白色", "#FFFFFF", "§f"))
+            .append(Text.of("  "))
+            .append(createColorButton("红色", "#FF0000", "§c"))
+            .append(Text.of("  "))
+            .append(createColorButton("粉红色", "#FF69B4", "§d"))
+            .append(Text.of("  "))
+            .append(createColorButton("橙色", "#FFA500", "§6"));
+        
+        // 第二行颜色按钮
+        MutableText row2 = Text.empty()
+            .append(createColorButton("黄色", "#FFFF00", "§e"))
+            .append(Text.of("  "))
+            .append(createColorButton("棕色", "#8B4513", "§3"))
+            .append(Text.of("  "))
+            .append(createColorButton("浅绿色", "#90EE90", "§a"))
+            .append(Text.of("  "))
+            .append(createColorButton("深绿色", "#006400", "§2"));
+        
+        // 第三行颜色按钮
+        MutableText row3 = Text.empty()
+            .append(createColorButton("浅蓝色", "#87CEEB", "§b"))
+            .append(Text.of("  "))
+            .append(createColorButton("深蓝色", "#000080", "§1"))
+            .append(Text.of("  "))
+            .append(createColorButton("浅紫色", "#DDA0DD", "§5"))
+            .append(Text.of("  "))
+            .append(createColorButton("紫色", "#800080", "§5"));
+        
+        // 第四行颜色按钮
+        MutableText row4 = Text.empty()
+            .append(createColorButton("灰色", "#808080", "§7"))
+            .append(Text.of("  "))
+            .append(createColorButton("黑色", "#000000", "§0"))
+            .append(Text.of("  "))
+            .append(createColorButton("自定义颜色", "custom", "§6"));
+        
+        // 取消按钮
+        MutableText cancelButton = Text.literal("§c[取消本次操作]")
+            .setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withColor(Formatting.RED));
+        
+        client.player.sendMessage(row1, false);
+        client.player.sendMessage(row2, false);
+        client.player.sendMessage(row3, false);
+        client.player.sendMessage(row4, false);
+        client.player.sendMessage(Text.of(""), false);
+        client.player.sendMessage(cancelButton, false);
+        client.player.sendMessage(Text.of("§7选择自定义颜色需要输入十六进制代码（如 #FF0000）"), false);
+    }
+    
+    /**
+     * 创建颜色选择按钮
+     */
+    private static MutableText createColorButton(String colorName, String colorValue, String minecraftColor) {
+        String command = colorValue.equals("custom") ? 
+            "/areahint easyadd color custom" : 
+            "/areahint easyadd color " + colorValue;
+        
+        return Text.literal(minecraftColor + "[" + colorName + "]")
+            .setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
+                    Text.of("选择 " + colorName + " 作为域名颜色"))));
     }
     
     /**

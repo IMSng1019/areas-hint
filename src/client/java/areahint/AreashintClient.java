@@ -80,6 +80,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化ShrinkArea功能
 		initShrinkArea();
 		
+		// 注册统一的X键处理器
+		areahint.keyhandler.UnifiedKeyHandler.register();
+		
 		// 注册客户端tick事件
 		registerTickEvents();
 		
@@ -94,8 +97,8 @@ public class AreashintClient implements ClientModInitializer {
 			// 注册按键处理器
 			areahint.easyadd.EasyAddKeyHandler.register();
 			
-					// 注册网络接收器
-		areahint.easyadd.EasyAddNetworking.registerClientReceivers();
+			// 注册网络接收器
+			areahint.easyadd.EasyAddNetworking.registerClientReceivers();
 			
 			LOGGER.info("EasyAdd功能初始化完成");
 		} catch (Exception e) {

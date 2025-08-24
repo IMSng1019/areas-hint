@@ -30,6 +30,8 @@ public class EasyAddManager {
         SELECT_BASE,    // 选择上级域名
         RECORDING_POINTS, // 记录坐标点
         HEIGHT_SELECTION, // 高度选择
+        COLOR_SELECTION, // 颜色选择（新增）
+        COLOR_INPUT,    // 自定义颜色输入（新增）
         CONFIRM_SAVE    // 确认保存
     }
     
@@ -48,6 +50,7 @@ public class EasyAddManager {
     private String currentDimension = null;
     private List<AreaData> availableParentAreas = new ArrayList<>();
     private AreaData.AltitudeData customAltitudeData = null; // 自定义高度数据
+    private String selectedColor = "#FFFFFF"; // 选择的颜色（新增）
     
     // 聊天监听器注册状态
     private boolean chatListenerRegistered = false;
@@ -148,6 +151,11 @@ public class EasyAddManager {
                 if (EasyAddAltitudeManager.isInputtingAltitude()) {
                     EasyAddAltitudeManager.handleAltitudeInput(input);
                 }
+                break;
+                
+            case COLOR_INPUT:
+                // 处理自定义颜色输入
+                handleCustomColorInput(input);
                 break;
                 
             default:
@@ -312,6 +320,25 @@ public class EasyAddManager {
         // 保存高度数据
         customAltitudeData = altitudeData;
         
+        // 进入颜色选择状态（新增）
+        currentState = EasyAddState.COLOR_SELECTION;
+        
+        // 显示颜色选择界面
+        EasyAddUI.showColorSelectionScreen();
+    }
+    
+    /**
+     * 处理颜色选择后的流程
+     * @param selectedColor 选择的颜色
+     */
+    public void proceedWithColorSelection(String selectedColor) {
+        if (currentState != EasyAddState.COLOR_SELECTION) {
+            return;
+        }
+        
+        // 保存选择的颜色
+        this.selectedColor = selectedColor;
+        
         // 进入确认保存状态
         currentState = EasyAddState.CONFIRM_SAVE;
         
@@ -330,8 +357,60 @@ public class EasyAddManager {
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
                 Text.of("§c构建域名数据时发生错误: " + e.getMessage()), false);
-            cancelEasyAdd();
+                cancelEasyAdd();
         }
+    }
+    
+    /**
+     * 处理颜色选择命令
+     * @param colorInput 颜色输入
+     */
+    public void handleColorSelection(String colorInput) {
+        if (currentState != EasyAddState.COLOR_SELECTION) {
+            return;
+        }
+        
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+        
+        // 处理自定义颜色输入
+        if ("custom".equals(colorInput)) {
+            currentState = EasyAddState.COLOR_INPUT;
+            client.player.sendMessage(Text.of("§a请输入自定义颜色（十六进制格式，如 #FF0000）："), false);
+            client.player.sendMessage(Text.of("§7格式要求：以#开头，后跟6位十六进制数字"), false);
+            client.player.sendMessage(Text.of("§c[取消本次操作]"), false);
+            return;
+        }
+        
+        // 验证颜色格式
+        String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
+        if (normalizedColor == null) {
+            client.player.sendMessage(Text.of("§c无效的颜色格式，请重新选择"), false);
+            return;
+        }
+        
+        // 处理颜色选择
+        proceedWithColorSelection(normalizedColor);
+    }
+    
+    /**
+     * 处理自定义颜色输入
+     * @param colorInput 用户输入的颜色
+     */
+    private void handleCustomColorInput(String colorInput) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+        
+        // 验证颜色格式
+        String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
+        if (normalizedColor == null) {
+            client.player.sendMessage(Text.of("§c无效的颜色格式，请重新输入"), false);
+            client.player.sendMessage(Text.of("§7格式要求：以#开头，后跟6位十六进制数字（如 #FF0000）"), false);
+            return;
+        }
+        
+        // 处理颜色选择
+        proceedWithColorSelection(normalizedColor);
     }
     
     /**
@@ -358,7 +437,7 @@ public class EasyAddManager {
         // 获取玩家名字作为签名
         String signature = MinecraftClient.getInstance().player.getName().getString();
         
-        return new AreaData(areaName, vertices, secondVertices, altitude, areaLevel, baseName, signature, "#FFFFFF", surfaceName);
+        return new AreaData(areaName, vertices, secondVertices, altitude, areaLevel, baseName, signature, selectedColor, surfaceName);
     }
     
     /**
@@ -441,6 +520,7 @@ public class EasyAddManager {
         currentDimension = null;
         availableParentAreas.clear();
         customAltitudeData = null;
+        selectedColor = "#FFFFFF"; // 重置颜色
         
         // 重置高度管理器
         EasyAddAltitudeManager.reset();
@@ -469,4 +549,5 @@ public class EasyAddManager {
     public String getBaseName() { return baseName; }
     public List<BlockPos> getRecordedPoints() { return new ArrayList<>(recordedPoints); }
     public String getCurrentDimension() { return currentDimension; }
+    public String getSelectedColor() { return selectedColor; }
 } 

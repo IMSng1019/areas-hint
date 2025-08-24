@@ -134,6 +134,9 @@ public class ServerCommands {
                                 .executes(ServerCommands::executeEasyAddAltitudeCustom))
                             .then(literal("unlimited")
                                 .executes(ServerCommands::executeEasyAddAltitudeUnlimited)))
+                        .then(literal("color")
+                            .then(argument("colorValue", StringArgumentType.greedyString())
+                                .executes(context -> executeEasyAddColor(context, StringArgumentType.getString(context, "colorValue")))))
                         .then(literal("save")
                             .executes(ServerCommands::executeEasyAddSave)))
                             
@@ -875,6 +878,26 @@ public class ServerCommands {
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.of("§c选择不限制高度时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    /**
+     * 处理EasyAdd颜色选择命令（仅客户端）
+     */
+    private static int executeEasyAddColor(CommandContext<ServerCommandSource> context, String color) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:easyadd_color:" + color);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择颜色时发生错误: " + e.getMessage()));
             return 0;
         }
     }

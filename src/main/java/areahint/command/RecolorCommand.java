@@ -57,8 +57,8 @@ public class RecolorCommand {
             return 0;
         }
         
-        // 发送域名列表到客户端
-        sendAreaListToClient(player, editableAreas, dimensionType);
+        // 发送域名列表到客户端，包含交互式颜色选择界面
+        sendInteractiveRecolorToClient(player, editableAreas, dimensionType);
         
         source.sendMessage(Text.of("§a已向您发送可编辑的域名列表，请在客户端选择要重新着色的域名"));
         return 1;
@@ -239,6 +239,30 @@ public class RecolorCommand {
             
         } catch (Exception e) {
             Areashint.LOGGER.error("发送重新着色响应时发生错误", e);
+        }
+    }
+    
+    /**
+     * 发送交互式recolor界面到客户端
+     */
+    private static void sendInteractiveRecolorToClient(ServerPlayerEntity player, List<AreaData> areas, String dimension) {
+        try {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeString("recolor_interactive");
+            buf.writeString(dimension);
+            buf.writeInt(areas.size());
+            
+            for (AreaData area : areas) {
+                buf.writeString(area.getName());
+                buf.writeString(area.getColor());
+                buf.writeInt(area.getLevel());
+                buf.writeString(area.getBaseName() != null ? area.getBaseName() : "");
+            }
+            
+            ServerPlayNetworking.send(player, Packets.S2C_RECOLOR_RESPONSE, buf);
+            
+        } catch (Exception e) {
+            Areashint.LOGGER.error("发送交互式recolor界面到客户端时发生错误", e);
         }
     }
     

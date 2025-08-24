@@ -149,10 +149,14 @@ public class ColorUtil {
     /**
      * 创建带颜色的文本
      * @param text 文本内容
-     * @param hexColor 十六进制颜色
+     * @param hexColor 十六进制颜色（可以为null，默认使用白色）
      * @return 带颜色代码的文本
      */
     public static String colorText(String text, String hexColor) {
+        // 如果颜色为null或空字符串，使用默认白色
+        if (hexColor == null || hexColor.trim().isEmpty()) {
+            return "§f" + text + "§r";
+        }
         return hexToMinecraftColor(hexColor) + text + "§r";
     }
 } 
