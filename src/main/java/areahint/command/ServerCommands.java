@@ -184,6 +184,17 @@ public class ServerCommands {
                             
             // sethigh 命令
             .then(literal("sethigh")
+                .then(literal("custom")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> SetHighCommand.executeSetHighCustom(context, StringArgumentType.getString(context, "areaName")))))
+                .then(literal("unlimited")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> SetHighCommand.executeSetHighUnlimited(context, StringArgumentType.getString(context, "areaName")))))
+                .then(literal("cancel")
+                    .executes(context -> SetHighCommand.executeSetHighCancel(context)))
+                .then(argument("areaName", StringArgumentType.greedyString())
+                    .suggests(SETHIGH_AREA_SUGGESTIONS)
+                    .executes(context -> SetHighCommand.executeSetHighWithArea(context, StringArgumentType.getString(context, "areaName"))))
                 .executes(SetHighCommand::executeSetHigh))
         );
     }
@@ -1051,4 +1062,64 @@ public class ServerCommands {
             return 0;
         }
     }
+
+    /**
+     * 获取当前玩家可以设置高度的域名列表
+     * @param source 命令源
+     * @param dimension 维度
+     * @return 可设置高度的域名列表
+     */
+    private static List<String> getSettableAreaNames(ServerCommandSource source, String dimension) {
+        try {
+            String fileName = Packets.getFileNameForDimension(dimension);
+            if (fileName == null) {
+                return List.of();
+            }
+            
+            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+            if (!areaFile.toFile().exists()) {
+                return List.of();
+            }
+            
+            List<AreaData> areas = FileManager.readAreaData(areaFile);
+            String playerName = source.getName();
+            boolean hasOp = source.hasPermissionLevel(2);
+            
+            return areas.stream()
+                .filter(area -> {
+                    String signature = area.getSignature();
+                    if (signature == null) {
+                        // 旧域名只有管理员可以设置高度
+                        return hasOp;
+                    } else {
+                        // 新域名创建者或管理员可以设置高度
+                        return signature.equals(playerName) || hasOp;
+                    }
+                })
+                .map(AreaData::getName)
+                .toList();
+        } catch (Exception e) {
+            Areashint.LOGGER.error("获取可设置高度的域名列表时发生错误", e);
+            return List.of();
+        }
+    }
+
+    /**
+     * 可设置高度的域名的建议提供器
+     */
+    private static final SuggestionProvider<ServerCommandSource> SETHIGH_AREA_SUGGESTIONS = 
+        (context, builder) -> {
+            ServerCommandSource source = context.getSource();
+            String dimension = getDimensionFromSource(source);
+            List<String> settableAreas = getSettableAreaNames(source, dimension);
+            
+            // 添加所有可设置高度的域名到建议列表
+            for (String areaName : settableAreas) {
+                if (areaName.toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
+                    builder.suggest(areaName);
+                }
+            }
+            
+            return builder.buildFuture();
+        };
 } 

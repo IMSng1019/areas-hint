@@ -174,6 +174,33 @@ public class ServerNetworking {
     }
     
     /**
+     * 向所有在线玩家发送指定维度的区域数据
+     * @param dimensionType 维度类型
+     */
+    public static void sendAreaDataToAllPlayers(String dimensionType) {
+        try {
+            // 获取所有在线玩家
+            List<ServerPlayerEntity> players = Areashint.getServer().getPlayerManager().getPlayerList();
+            
+            for (ServerPlayerEntity player : players) {
+                // 检查玩家是否在指定维度中
+                String playerDimension = player.getWorld().getRegistryKey().getValue().toString();
+                String playerDimensionType = Packets.convertDimensionPathToType(playerDimension);
+                
+                if (playerDimensionType != null && playerDimensionType.equals(dimensionType)) {
+                    // 发送区域数据到该玩家
+                    sendAreaDataToClient(player, dimensionType);
+                }
+            }
+            
+            Areashint.LOGGER.info("已向所有在 {} 维度的玩家重新分发区域数据", dimensionType);
+            
+        } catch (Exception e) {
+            Areashint.LOGGER.error("向所有玩家发送区域数据时发生错误: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
      * 注册网络请求处理器
      */
     private static void registerNetworkHandlers() {
@@ -209,38 +236,34 @@ public class ServerNetworking {
                 }
             });
         
-        // 注册高度设置请求处理器
+        // 注册SetHigh请求处理器
         ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_SETHIGH_REQUEST,
             (server, player, handler, buf, responseSender) -> {
                 try {
-                    String areaName = buf.readString();
-                    boolean hasCustomHeight = buf.readBoolean();
-                    Double maxHeight = hasCustomHeight && buf.readBoolean() ? buf.readDouble() : null;
-                    Double minHeight = hasCustomHeight && buf.readBoolean() ? buf.readDouble() : null;
+                    final String areaName = buf.readString();
+                    final boolean hasCustomHeight = buf.readBoolean();
+                    final Double maxHeight;
+                    final Double minHeight;
+                    
+                    if (hasCustomHeight) {
+                        boolean hasMax = buf.readBoolean();
+                        maxHeight = hasMax ? buf.readDouble() : null;
+                        boolean hasMin = buf.readBoolean();
+                        minHeight = hasMin ? buf.readDouble() : null;
+                    } else {
+                        maxHeight = null;
+                        minHeight = null;
+                    }
                     
                     server.execute(() -> {
-                        areahint.command.SetHighCommand.handleSetHeightRequest(player, areaName, hasCustomHeight, maxHeight, minHeight);
+                        areahint.command.SetHighCommand.handleHeightRequest(player, areaName, hasCustomHeight, maxHeight, minHeight);
                     });
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理高度设置请求时发生错误", e);
+                    Areashint.LOGGER.error("处理SetHigh请求时发生错误", e);
                 }
             });
         
-        // 注册高度设置请求处理器
-        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_SETHIGH_REQUEST,
-            (server, player, handler, buf, responseSender) -> {
-                try {
-                    String areaName = buf.readString();
-                    boolean hasCustomHeight = buf.readBoolean();
-                    Double maxHeight = hasCustomHeight && buf.readBoolean() ? buf.readDouble() : null;
-                    Double minHeight = hasCustomHeight && buf.readBoolean() ? buf.readDouble() : null;
-                    
-                    server.execute(() -> {
-                        areahint.command.SetHighCommand.handleSetHeightRequest(player, areaName, hasCustomHeight, maxHeight, minHeight);
-                    });
-                } catch (Exception e) {
-                    Areashint.LOGGER.error("处理高度设置请求时发生错误", e);
-                }
-            });
+        // 注意：高度设置功能已简化，不再需要网络处理器
+        // 玩家直接使用 /areahint sethigh 命令即可
     }
 } 

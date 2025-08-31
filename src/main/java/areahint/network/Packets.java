@@ -42,6 +42,7 @@ public class Packets {
     // SetHigh功能相关的包ID
     public static final Identifier C2S_SETHIGH_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_sethigh_request");
     public static final Identifier S2C_SETHIGH_AREA_LIST = new Identifier(Areashint.MOD_ID, "s2c_sethigh_area_list");
+    public static final Identifier S2C_SETHIGH_AREA_SELECTION = new Identifier(Areashint.MOD_ID, "s2c_sethigh_area_selection");
     public static final Identifier S2C_SETHIGH_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_sethigh_response");
     
     // ExpandArea功能相关的包ID

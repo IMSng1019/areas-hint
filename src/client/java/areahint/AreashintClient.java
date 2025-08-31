@@ -71,6 +71,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化客户端世界网络处理
 		areahint.network.ClientWorldNetworking.init();
 		
+		// 初始化SetHigh客户端命令
+		areahint.command.SetHighClientCommand.init();
+		
 		// 初始化EasyAdd功能
 		initEasyAdd();
 		

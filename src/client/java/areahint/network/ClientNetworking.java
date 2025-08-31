@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 客户端网络处理类
@@ -56,6 +58,28 @@ public class ClientNetworking {
         ClientPlayNetworking.registerGlobalReceiver(
                 Packets.S2C_RENAME_RESPONSE,
                 ClientNetworking::handleRenameResponse
+        );
+        
+        // 注册SetHigh相关的网络处理器
+        ClientPlayNetworking.registerGlobalReceiver(
+                Packets.S2C_SETHIGH_AREA_LIST,
+                ClientNetworking::handleSetHighAreaList
+        );
+        
+        ClientPlayNetworking.registerGlobalReceiver(
+                Packets.S2C_SETHIGH_AREA_SELECTION,
+                ClientNetworking::handleSetHighAreaSelection
+        );
+        
+        ClientPlayNetworking.registerGlobalReceiver(
+                Packets.S2C_SETHIGH_RESPONSE,
+                ClientNetworking::handleSetHighResponse
+        );
+        
+        // 注册客户端命令处理器
+        ClientPlayNetworking.registerGlobalReceiver(
+                new Identifier(Packets.S2C_CLIENT_COMMAND),
+                ClientNetworking::handleClientCommand
         );
     }
     
@@ -197,6 +221,24 @@ public class ClientNetworking {
                     // 处理模组开关命令
                     else if (action.equals("on") || action.equals("off")) {
                         areahint.command.ModToggleCommand.handleToggleCommand(action);
+                    }
+                    // 处理SetHigh命令
+                    else if (action.equals("sethigh_start")) {
+                        AreashintClient.LOGGER.info("执行sethigh_start");
+                        // SetHigh命令由服务端直接处理，客户端只需要等待服务端发送域名列表
+                        if (client.player != null) {
+                            client.player.sendMessage(net.minecraft.text.Text.of("§a正在获取可修改高度的域名列表..."), false);
+                        }
+                    }
+                    // 处理SetHigh自定义高度命令
+                    else if (action.equals("sethigh_custom")) {
+                        AreashintClient.LOGGER.info("执行sethigh_custom");
+                        // 读取域名名称参数
+                        int argCount = buf.readInt();
+                        if (argCount > 0) {
+                            String areaName = buf.readString();
+                            areahint.command.SetHighClientCommand.startCustomHeightInput(areaName);
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -633,5 +675,154 @@ public class ClientNetworking {
         client.player.sendMessage(net.minecraft.text.Text.of(
             "§7或使用十六进制格式，如: #FF0000"
         ), false);
+    }
+    
+    /**
+     * 处理SetHigh域名列表
+     */
+    private static void handleSetHighAreaList(MinecraftClient client, 
+                                            ClientPlayNetworkHandler handler,
+                                            PacketByteBuf buf, 
+                                            PacketSender responseSender) {
+        client.execute(() -> {
+            try {
+                // 读取域名列表数据
+                List<String> areaNames = new ArrayList<>();
+                List<Boolean> hasAltitudeList = new ArrayList<>();
+                List<Double> maxHeightList = new ArrayList<>();
+                List<Double> minHeightList = new ArrayList<>();
+                
+                // 读取服务端发送的数据格式
+                String commandType = buf.readString(); // "sethigh_area_list"
+                String dimensionType = buf.readString(); // 维度类型
+                int areaCount = buf.readInt(); // 域名数量
+                
+                AreashintClient.LOGGER.info("接收到SetHigh域名列表: 命令类型={}, 维度={}, 域名数量={}", 
+                    commandType, dimensionType, areaCount);
+                
+                // 读取每个域名的信息
+                for (int i = 0; i < areaCount; i++) {
+                    String areaName = buf.readString();
+                    areaNames.add(areaName);
+                    
+                    boolean hasAltitude = buf.readBoolean();
+                    hasAltitudeList.add(hasAltitude);
+                    
+                    if (hasAltitude) {
+                        boolean hasMax = buf.readBoolean();
+                        Double maxHeight = hasMax ? buf.readDouble() : null;
+                        maxHeightList.add(maxHeight);
+                        
+                        boolean hasMin = buf.readBoolean();
+                        Double minHeight = hasMin ? buf.readDouble() : null;
+                        minHeightList.add(minHeight);
+                    } else {
+                        maxHeightList.add(null);
+                        minHeightList.add(null);
+                    }
+                }
+                
+                AreashintClient.LOGGER.info("成功解析域名列表: {}", areaNames);
+                
+                // 调用SetHighClientCommand处理
+                areahint.command.SetHighClientCommand.handleAreaList(areaNames, dimensionType);
+                
+            } catch (Exception e) {
+                AreashintClient.LOGGER.error("处理SetHigh域名列表时出错: " + e.getMessage(), e);
+            }
+        });
+    }
+    
+    /**
+     * 处理SetHigh域名选择
+     */
+    private static void handleSetHighAreaSelection(MinecraftClient client, 
+                                                 ClientPlayNetworkHandler handler,
+                                                 PacketByteBuf buf, 
+                                                 PacketSender responseSender) {
+        client.execute(() -> {
+            try {
+                // 读取指定域名的数据
+                String areaName = buf.readString();
+                
+                // 读取当前高度信息
+                boolean hasAltitude = buf.readBoolean();
+                Double maxHeight = null;
+                Double minHeight = null;
+                
+                if (hasAltitude) {
+                    boolean hasMax = buf.readBoolean();
+                    if (hasMax) {
+                        maxHeight = buf.readDouble();
+                    }
+                    boolean hasMin = buf.readBoolean();
+                    if (hasMin) {
+                        minHeight = buf.readDouble();
+                    }
+                }
+                
+                AreashintClient.LOGGER.info("接收到SetHigh域名选择: 域名={}, 有高度限制={}, 最大高度={}, 最小高度={}", 
+                    areaName, hasAltitude, maxHeight, minHeight);
+                
+                // 调用SetHighClientCommand处理
+                areahint.command.SetHighClientCommand.handleAreaSelection(areaName, hasAltitude, maxHeight, minHeight);
+                
+            } catch (Exception e) {
+                AreashintClient.LOGGER.error("处理SetHigh域名选择时出错: " + e.getMessage(), e);
+            }
+        });
+    }
+    
+    /**
+     * 处理SetHigh响应
+     */
+    private static void handleSetHighResponse(MinecraftClient client, 
+                                            ClientPlayNetworkHandler handler,
+                                            PacketByteBuf buf, 
+                                            PacketSender responseSender) {
+        client.execute(() -> {
+            try {
+                boolean success = buf.readBoolean();
+                String message = buf.readString();
+                areahint.command.SetHighClientCommand.handleServerResponse(success, message);
+            } catch (Exception e) {
+                AreashintClient.LOGGER.error("处理SetHigh响应时出错: " + e.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * 发送SetHigh高度设置请求到服务器
+     * @param areaName 域名名称
+     * @param hasAltitude 是否有高度限制
+     * @param maxHeight 最大高度
+     * @param minHeight 最小高度
+     */
+    public static void sendSetHighRequest(String areaName, boolean hasAltitude, 
+                                        Double maxHeight, Double minHeight) {
+        try {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeString(areaName);
+            buf.writeBoolean(hasAltitude);
+            
+            if (hasAltitude) {
+                buf.writeBoolean(maxHeight != null);
+                if (maxHeight != null) {
+                    buf.writeDouble(maxHeight);
+                }
+                buf.writeBoolean(minHeight != null);
+                if (minHeight != null) {
+                    buf.writeDouble(minHeight);
+                }
+            }
+            
+            ClientPlayNetworking.send(Packets.C2S_SETHIGH_REQUEST, buf);
+            
+            AreashintClient.LOGGER.info("发送SetHigh请求: 域名={}, 有高度限制={}, 最大高度={}, 最小高度={}", 
+                areaName, hasAltitude, maxHeight, minHeight);
+                
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("发送SetHigh请求时发生错误: " + e.getMessage(), e);
+        }
     }
 } 

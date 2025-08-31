@@ -242,16 +242,24 @@ areas-hint-mod/
 ├── README.md                       # 项目说明文档
 ├── .gitignore                      # Git忽略文件配置
 ├── .gitattributes                  # Git属性配置
-├── prompt.txt                      # 原始需求文档
-├── prompt_implementation.txt       # 实现方案文档
+├── prompt.txt                      # 原始需求文档（包含模组基本功能需求）
+├── prompt_implementation.txt       # 实现方案文档（详细的功能实现说明）
+├── second-prompt.txt               # 第二阶段功能需求文档（高级功能需求，如高度系统、域名签名、EasyAdd交互系统、维度域名等）
+├── CLAUDE.md                       # Claude AI开发指导文档（项目架构、构建命令、开发工作流说明）
 ├── overworld.json                  # 主世界区域数据示例
-└── areas-hint-template-1.20.4.zip # 模组压缩包模板
-
-build/                              # 构建输出目录（自动生成）
-├── libs/
-│   ├── areas-hint-1.0.0.jar       # 主模组JAR文件
-│   └── areas-hint-1.0.0-sources.jar # 源代码JAR文件
-└── ...                             # 其他构建文件
+├── areas-hint-template-1.20.4.zip # 模组压缩包模板
+├── modicon.psd                     # 模组图标源文件（Photoshop格式）
+├── .idea/                          # IntelliJ IDEA项目配置目录
+├── .vscode/                        # Visual Studio Code配置目录
+├── .github/                        # GitHub工作流和配置文件目录
+├── build/                          # 构建输出目录（自动生成）
+│   ├── libs/
+│   │   ├── areas-hint-1.0.0.jar       # 主模组JAR文件
+│   │   └── areas-hint-1.0.0-sources.jar # 源代码JAR文件
+│   └── ...                             # 其他构建文件
+├── bin/                            # 编译输出目录（自动生成）
+├── run/                            # 运行时目录（自动生成）
+└── .gradle/                        # Gradle缓存目录（自动生成）
 
 .minecraft/areas-hint/              # 运行时配置和数据目录
 ├── config.json                     # 模组配置文件
@@ -260,6 +268,69 @@ build/                              # 构建输出目录（自动生成）
 ├── the_nether.json                 # 地狱区域数据
 └── the_end.json                    # 末地区域数据
 ```
+
+## 新增文件功能说明
+
+### 开发指导文档
+
+#### `CLAUDE.md`
+- **功能**：为Claude AI提供项目开发指导
+- **内容**：包含项目概述、构建系统命令、架构说明、关键系统介绍、开发工作流等
+- **用途**：帮助开发者快速理解项目结构和实现细节
+
+#### `prompt.txt`
+- **功能**：原始需求文档
+- **内容**：包含模组基本功能需求，如区域检测、渲染系统、命令系统等
+- **用途**：记录项目初始需求，作为开发基础
+
+#### `prompt_implementation.txt`
+- **功能**：实现方案文档
+- **内容**：详细的功能实现说明，包括代码结构、文件用途、实现原理等
+- **用途**：指导具体代码实现，确保功能完整性
+
+#### `second-prompt.txt`
+- **功能**：第二阶段功能需求文档
+- **内容**：包含高级功能需求，如高度系统、域名签名、EasyAdd交互系统、维度域名等
+- **用途**：指导后续功能开发和扩展
+
+### 项目配置文件
+
+#### `modicon.psd`
+- **功能**：模组图标源文件
+- **格式**：Photoshop PSD格式
+- **用途**：模组图标的原始设计文件，可导出为不同格式
+
+#### `.idea/` 和 `.vscode/`
+- **功能**：IDE配置文件目录
+- **内容**：IntelliJ IDEA和Visual Studio Code的项目配置
+- **用途**：确保开发环境的一致性和项目配置的完整性
+
+#### `.github/`
+- **功能**：GitHub工作流和配置文件目录
+- **内容**：CI/CD配置、Issue模板、Pull Request模板等
+- **用途**：自动化构建、测试和部署流程
+
+### 构建和运行时目录
+
+#### `build/`
+- **功能**：Gradle构建输出目录
+- **内容**：编译后的JAR文件、类文件、资源文件等
+- **用途**：存放最终的可执行模组文件
+
+#### `bin/`
+- **功能**：编译输出目录
+- **内容**：Java编译后的.class文件
+- **用途**：开发过程中的临时编译结果
+
+#### `run/`
+- **功能**：运行时目录
+- **内容**：Minecraft运行时的临时文件和配置
+- **用途**：开发和测试时的运行环境
+
+#### `.gradle/`
+- **功能**：Gradle缓存目录
+- **内容**：依赖下载、构建缓存等
+- **用途**：加速构建过程，避免重复下载依赖
 
 ## 实现细节
 
