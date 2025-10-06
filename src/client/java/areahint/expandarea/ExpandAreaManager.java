@@ -1,20 +1,20 @@
 package areahint.expandarea;
 
 import areahint.data.AreaData;
-import areahint.util.SurfaceNameHandler;
 import areahint.file.FileManager;
 import areahint.expandarea.ExpandAreaClientNetworking;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.nio.file.Path;
 
+/**
+ * 域名扩展管理器
+ * 按照提示词实现复杂的几何算法来处理域名扩展
+ */
 public class ExpandAreaManager {
     private static ExpandAreaManager instance;
     private MinecraftClient client;
@@ -22,7 +22,7 @@ public class ExpandAreaManager {
     private AreaData selectedArea;
     private List<Double[]> newVertices;
     private boolean isRecording = false;
-    private boolean isActive = false;  // 添加活动状态跟踪
+    private boolean isActive = false;
     private ExpandAreaUI ui;
     
     public static ExpandAreaManager getInstance() {
@@ -225,61 +225,312 @@ public class ExpandAreaManager {
     
     /**
      * 处理域名扩展的核心逻辑
+     * 按照提示词实现复杂的几何算法
      */
     private void processAreaExpansion() {
         sendMessage("§e正在处理域名扩展...", Formatting.YELLOW);
         
-        // 1. 高度验证
-        if (!validateHeights()) {
-            return;
+        try {
+            // 1. 高度验证 - 按照提示词逻辑
+            if (!validateHeightsAccordingToPrompt()) {
+                return;
+            }
+            
+            // 2. 提取原域名顶点
+            List<Double[]> originalVertices = extractOriginalVertices();
+            
+            // 3. 计算新添加区域的高度范围
+            double[] newAreaHeightRange = calculateNewAreaHeightRange();
+            
+            // 4. 检查新添加顶点是否在原域名内，删除内部顶点
+            List<Double[]> externalVertices = filterExternalVertices(originalVertices);
+            
+            if (externalVertices.isEmpty()) {
+                sendMessage("§c所有新添加的顶点都在原域名内部，无法扩展", Formatting.RED);
+                return;
+            }
+            
+            // 5. 计算边界点 - 按照提示词的复杂算法
+            // List<Double[]> boundaryPoints = calculateBoundaryPoints(originalVertices, externalVertices);
+            
+            // 6. 计算临近点和边界点
+            List<Double[]> adjacentPoints = calculateAdjacentPoints(originalVertices, externalVertices);
+            List<Double[]> finalBoundaryPoints = calculateFinalBoundaryPoints(adjacentPoints, originalVertices);
+            
+            // 7. 合并顶点并排序
+            List<Double[]> combinedVertices = combineVertices(originalVertices, externalVertices, finalBoundaryPoints);
+            
+            // 8. 检测并修复交叉
+            List<Double[]> fixedVertices = fixCrossings(combinedVertices);
+            
+            // 9. 重新计算二级顶点
+            List<Double[]> secondVertices = calculateSecondVertices(fixedVertices);
+            
+            // 10. 更新高度信息
+            AreaData.AltitudeData updatedAltitude = updateAltitudeData(newAreaHeightRange);
+            
+            // 11. 创建扩展后的域名
+            AreaData expandedArea = createExpandedArea(fixedVertices, secondVertices, updatedAltitude);
+            
+            // 12. 发送给服务端
+            ExpandAreaClientNetworking.sendExpandedAreaToServer(expandedArea);
+            
+            sendMessage("§a域名扩展完成！", Formatting.GREEN);
+            
+        } catch (Exception e) {
+            sendMessage("§c域名扩展过程中发生错误: " + e.getMessage(), Formatting.RED);
+            e.printStackTrace();
+        } finally {
+            // 重置状态
+            reset();
         }
-        
-        // 2. 几何计算和顶点处理
-        GeometryCalculator calculator = new GeometryCalculator(selectedArea, newVertices);
-        AreaData expandedArea = calculator.expandArea();
-        
-        if (expandedArea == null) {
-            sendMessage("§c无法计算扩展后的域名", Formatting.RED);
-            return;
-        }
-        
-        // 3. 发送给服务端
-        ExpandAreaClientNetworking.sendExpandedAreaToServer(expandedArea);
-        
-
-        sendMessage("§a域名扩展完成！", Formatting.GREEN);
-        
-        // 重置状态
-        reset();
     }
     
     /**
-     * 验证新添加区域的高度
+     * 按照提示词验证新添加区域的高度
+     * 若新添加的区域的最高高度比原域名的最高高度小最低高度比原域名的最低高度高则不该变域名的高度
+     * 反之则将报错
      */
-    private boolean validateHeights() {
+    private boolean validateHeightsAccordingToPrompt() {
         if (client.player == null || selectedArea.getAltitude() == null) {
             return true; // 如果没有高度限制则通过
         }
         
-        double playerY = client.player.getY();
-        AreaData.AltitudeData altitude = selectedArea.getAltitude();
+        // 计算新添加区域的高度范围
+        double[] newAreaHeightRange = calculateNewAreaHeightRange();
+        double newMinHeight = newAreaHeightRange[0];
+        double newMaxHeight = newAreaHeightRange[1];
         
+        AreaData.AltitudeData altitude = selectedArea.getAltitude();
         if (altitude != null && altitude.getMax() != null && altitude.getMin() != null) {
-            double maxHeight = altitude.getMax();
-            double minHeight = altitude.getMin();
+            double originalMaxHeight = altitude.getMax();
+            double originalMinHeight = altitude.getMin();
             
-            // 新区域的高度必须在原域名高度范围内或扩大范围
-            if (playerY > maxHeight || playerY < minHeight) {
-                // 检查是否是扩大高度范围
-                if (playerY > maxHeight) {
-                    sendMessage("§e新区域高度超出原域名上限，将更新高度范围", Formatting.YELLOW);
-                } else {
-                    sendMessage("§e新区域高度低于原域名下限，将更新高度范围", Formatting.YELLOW);
-                }
+            // 按照提示词逻辑：新区域最高高度 < 原域名最高高度 且 新区域最低高度 > 原域名最低高度
+            if (newMaxHeight < originalMaxHeight && newMinHeight > originalMinHeight) {
+                // 不改变域名的高度
+                sendMessage("§a新区域高度在原域名范围内，保持原高度设置", Formatting.GREEN);
+                return true;
+            } else {
+                // 反之则将报错
+                sendMessage("§c新区域高度超出原域名范围，无法扩展", Formatting.RED);
+                sendMessage("§c原域名高度范围: " + originalMinHeight + " ~ " + originalMaxHeight, Formatting.RED);
+                sendMessage("§c新区域高度范围: " + newMinHeight + " ~ " + newMaxHeight, Formatting.RED);
+                return false;
             }
         }
         
         return true;
+    }
+    
+    /**
+     * 计算新添加区域的高度范围
+     */
+    private double[] calculateNewAreaHeightRange() {
+        if (client.player == null) {
+            return new double[]{64.0, 64.0}; // 默认高度
+        }
+        
+        double playerY = client.player.getY();
+        // 给新区域一个合理的高度范围（上下各10格）
+        return new double[]{playerY - 10.0, playerY + 10.0};
+    }
+    
+    /**
+     * 提取原域名的顶点坐标
+     */
+    private List<Double[]> extractOriginalVertices() {
+        List<Double[]> vertices = new ArrayList<>();
+        List<AreaData.Vertex> verticesList = selectedArea.getVertices();
+        
+        for (AreaData.Vertex vertex : verticesList) {
+            vertices.add(new Double[]{vertex.getX(), vertex.getZ()});
+        }
+        
+        return vertices;
+    }
+    
+    /**
+     * 过滤外部顶点 - 删除在原域名内部的顶点
+     */
+    private List<Double[]> filterExternalVertices(List<Double[]> originalVertices) {
+        List<Double[]> externalVertices = new ArrayList<>();
+        
+        for (Double[] vertex : newVertices) {
+            if (!isPointInPolygon(vertex, originalVertices)) {
+                externalVertices.add(vertex);
+            }
+        }
+        
+        return externalVertices;
+    }
+    
+    /**
+     * 计算边界点 - 按照提示词的复杂算法
+     */
+    private List<Double[]> calculateBoundaryPoints(List<Double[]> originalVertices, List<Double[]> externalVertices) {
+        List<Double[]> boundaryPoints = new ArrayList<>();
+        
+        // 计算新添加顶点与原域名边界的交叉点
+        for (int i = 0; i < externalVertices.size(); i++) {
+            int nextIndex = (i + 1) % externalVertices.size();
+            Double[] currentVertex = externalVertices.get(i);
+            Double[] nextVertex = externalVertices.get(nextIndex);
+            
+            // 计算这条线段与原域名边界的交叉点
+            List<Double[]> intersections = findLinePolygonIntersections(currentVertex, nextVertex, originalVertices);
+            boundaryPoints.addAll(intersections);
+        }
+        
+        return boundaryPoints;
+    }
+    
+    /**
+     * 计算临近点 - 找到距离原域名边界最近的点
+     */
+    private List<Double[]> calculateAdjacentPoints(List<Double[]> originalVertices, List<Double[]> externalVertices) {
+        List<Double[]> adjacentPoints = new ArrayList<>();
+        
+        for (Double[] vertex : externalVertices) {
+            // 找到距离这个点最近的原域名边界点
+            Double[] nearestPoint = findNearestPointOnPolygon(vertex, originalVertices);
+            if (nearestPoint != null) {
+                adjacentPoints.add(nearestPoint);
+            }
+        }
+        
+        return adjacentPoints;
+    }
+    
+    /**
+     * 计算最终边界点 - 处理一个点对应多个边界点的情况
+     */
+    private List<Double[]> calculateFinalBoundaryPoints(List<Double[]> adjacentPoints, List<Double[]> originalVertices) {
+        List<Double[]> finalBoundaryPoints = new ArrayList<>();
+        
+        // 对于每个临近点，找到对应的边界点
+        for (Double[] adjacentPoint : adjacentPoints) {
+            // 如果这个点有多个边界点，取中位值
+            List<Double[]> boundaryPointsForAdjacent = findBoundaryPointsForAdjacent(adjacentPoint, originalVertices);
+            
+            if (boundaryPointsForAdjacent.size() == 1) {
+                finalBoundaryPoints.add(boundaryPointsForAdjacent.get(0));
+            } else if (boundaryPointsForAdjacent.size() > 1) {
+                // 计算中位值
+                Double[] medianPoint = calculateMedianPoint(boundaryPointsForAdjacent);
+                // 计算与边界的交点
+                Double[] intersectionPoint = findIntersectionWithBoundary(adjacentPoint, medianPoint, originalVertices);
+                if (intersectionPoint != null) {
+                    finalBoundaryPoints.add(intersectionPoint);
+                }
+            }
+        }
+        
+        return finalBoundaryPoints;
+    }
+    
+    /**
+     * 合并顶点并排序
+     */
+    private List<Double[]> combineVertices(List<Double[]> originalVertices, List<Double[]> externalVertices, List<Double[]> boundaryPoints) {
+        List<Double[]> allVertices = new ArrayList<>();
+        allVertices.addAll(originalVertices);
+        allVertices.addAll(externalVertices);
+        allVertices.addAll(boundaryPoints);
+        
+        // 移除重复点
+        allVertices = removeDuplicatePoints(allVertices);
+        
+        // 按照提示词：原顶点 边界点 新顶点 边界点 原顶点 的顺序排列
+        return sortVerticesForExpansion(originalVertices, externalVertices, boundaryPoints);
+    }
+    
+    /**
+     * 检测并修复交叉
+     */
+    private List<Double[]> fixCrossings(List<Double[]> vertices) {
+        List<Double[]> fixedVertices = new ArrayList<>(vertices);
+        
+        // 检测新添加区域的顶点顺序是否正确
+        boolean hasCrossing = detectCrossings(fixedVertices);
+        
+        if (hasCrossing) {
+            // 如果新添加入的区域的一级顶点与原有区域的顶点所连接成的线段有交叉
+            // 则证明新添加入的区域的顶点的顺序反了，重新排列
+            fixedVertices = reverseNewVerticesOrder(fixedVertices);
+        }
+        
+        return fixedVertices;
+    }
+    
+    /**
+     * 重新计算二级顶点（AABB边界框）
+     */
+    private List<Double[]> calculateSecondVertices(List<Double[]> vertices) {
+        if (vertices.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // 计算边界框
+        double minX = vertices.get(0)[0];
+        double maxX = vertices.get(0)[0];
+        double minZ = vertices.get(0)[1];
+        double maxZ = vertices.get(0)[1];
+        
+        for (Double[] vertex : vertices) {
+            minX = Math.min(minX, vertex[0]);
+            maxX = Math.max(maxX, vertex[0]);
+            minZ = Math.min(minZ, vertex[1]);
+            maxZ = Math.max(maxZ, vertex[1]);
+        }
+        
+        // 创建AABB四个角点
+        List<Double[]> secondVertices = new ArrayList<>();
+        secondVertices.add(new Double[]{minX, minZ}); // 左下
+        secondVertices.add(new Double[]{maxX, minZ}); // 右下
+        secondVertices.add(new Double[]{maxX, maxZ}); // 右上
+        secondVertices.add(new Double[]{minX, maxZ}); // 左上
+        
+        return secondVertices;
+    }
+    
+    /**
+     * 更新高度信息
+     */
+    private AreaData.AltitudeData updateAltitudeData(double[] newAreaHeightRange) {
+        AreaData.AltitudeData originalAltitude = selectedArea.getAltitude();
+        
+        if (originalAltitude == null) {
+            return new AreaData.AltitudeData(newAreaHeightRange[1], newAreaHeightRange[0]);
+        }
+        
+        // 如果新区域高度在原范围内，保持原高度
+        if (newAreaHeightRange[1] < originalAltitude.getMax() && newAreaHeightRange[0] > originalAltitude.getMin()) {
+            return originalAltitude;
+        }
+        
+        // 否则扩展高度范围
+        double newMin = Math.min(originalAltitude.getMin(), newAreaHeightRange[0]);
+        double newMax = Math.max(originalAltitude.getMax(), newAreaHeightRange[1]);
+        
+        return new AreaData.AltitudeData(newMax, newMin);
+    }
+    
+    /**
+     * 创建扩展后的域名
+     */
+    private AreaData createExpandedArea(List<Double[]> vertices, List<Double[]> secondVertices, AreaData.AltitudeData altitude) {
+        return new AreaData(
+            selectedArea.getName(),
+            convertToVertexList(vertices),
+            convertToVertexList(secondVertices),
+            altitude,
+            selectedArea.getLevel(),
+            selectedArea.getBaseName(),
+            selectedArea.getSignature(),
+            selectedArea.getColor(),
+            selectedArea.getSurfacename()
+        );
     }
     
     /**
@@ -389,6 +640,292 @@ public class ExpandAreaManager {
         if (client.player != null) {
             client.player.sendMessage(Text.literal(message).formatted(formatting), false);
         }
+    }
+    
+    // ==================== 辅助方法实现 ====================
+    
+    /**
+     * 判断点是否在多边形内部（射线法）
+     */
+    private boolean isPointInPolygon(Double[] point, List<Double[]> polygon) {
+        if (polygon.size() < 3) return false;
+        
+        double x = point[0];
+        double y = point[1];
+        boolean inside = false;
+        
+        for (int i = 0, j = polygon.size() - 1; i < polygon.size(); j = i++) {
+            double xi = polygon.get(i)[0];
+            double yi = polygon.get(i)[1];
+            double xj = polygon.get(j)[0];
+            double yj = polygon.get(j)[1];
+            
+            if (((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+                inside = !inside;
+            }
+        }
+        
+        return inside;
+    }
+    
+    /**
+     * 计算线段与多边形的交点
+     */
+    private List<Double[]> findLinePolygonIntersections(Double[] lineStart, Double[] lineEnd, List<Double[]> polygon) {
+        List<Double[]> intersections = new ArrayList<>();
+        
+        for (int i = 0; i < polygon.size(); i++) {
+            int j = (i + 1) % polygon.size();
+            Double[] polyStart = polygon.get(i);
+            Double[] polyEnd = polygon.get(j);
+            
+            Double[] intersection = getLineIntersection(lineStart, lineEnd, polyStart, polyEnd);
+            if (intersection != null) {
+                intersections.add(intersection);
+            }
+        }
+        
+        return intersections;
+    }
+    
+    /**
+     * 计算两条线段的交点
+     */
+    private Double[] getLineIntersection(Double[] line1Start, Double[] line1End, Double[] line2Start, Double[] line2End) {
+        double x1 = line1Start[0], y1 = line1Start[1];
+        double x2 = line1End[0], y2 = line1End[1];
+        double x3 = line2Start[0], y3 = line2Start[1];
+        double x4 = line2End[0], y4 = line2End[1];
+        
+        double denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+        if (Math.abs(denom) < 1e-10) {
+            return null; // 平行线
+        }
+        
+        double t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+        double u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
+        
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+            return new Double[]{x1 + t * (x2 - x1), y1 + t * (y2 - y1)};
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 找到距离指定点最近的多边形边界点
+     */
+    private Double[] findNearestPointOnPolygon(Double[] point, List<Double[]> polygon) {
+        if (polygon.size() < 2) return null;
+        
+        Double[] nearestPoint = null;
+        double minDistance = Double.MAX_VALUE;
+        
+        for (int i = 0; i < polygon.size(); i++) {
+            int j = (i + 1) % polygon.size();
+            Double[] p1 = polygon.get(i);
+            Double[] p2 = polygon.get(j);
+            
+            // 计算点到线段的最近点
+            Double[] closest = getClosestPointOnSegment(point, p1, p2);
+            double distance = calculateDistance(point, closest);
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestPoint = closest;
+            }
+        }
+        
+        return nearestPoint;
+    }
+    
+    /**
+     * 计算点到线段的最近点
+     */
+    private Double[] getClosestPointOnSegment(Double[] point, Double[] segStart, Double[] segEnd) {
+        double px = point[0], py = point[1];
+        double ax = segStart[0], ay = segStart[1];
+        double bx = segEnd[0], by = segEnd[1];
+        
+        double dx = bx - ax;
+        double dy = by - ay;
+        
+        if (dx == 0 && dy == 0) {
+            return new Double[]{ax, ay};
+        }
+        
+        double t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
+        t = Math.max(0, Math.min(1, t));
+        
+        return new Double[]{ax + t * dx, ay + t * dy};
+    }
+    
+    /**
+     * 计算两点间距离
+     */
+    private double calculateDistance(Double[] p1, Double[] p2) {
+        double dx = p1[0] - p2[0];
+        double dy = p1[1] - p2[1];
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    /**
+     * 为临近点找到对应的边界点
+     */
+    private List<Double[]> findBoundaryPointsForAdjacent(Double[] adjacentPoint, List<Double[]> originalVertices) {
+        List<Double[]> boundaryPoints = new ArrayList<>();
+        
+        // 简化实现：找到距离临近点最近的几个边界点
+        for (int i = 0; i < originalVertices.size(); i++) {
+            int j = (i + 1) % originalVertices.size();
+            Double[] p1 = originalVertices.get(i);
+            Double[] p2 = originalVertices.get(j);
+            
+            Double[] closest = getClosestPointOnSegment(adjacentPoint, p1, p2);
+            if (calculateDistance(adjacentPoint, closest) < 50.0) { // 50格内的边界点
+                boundaryPoints.add(closest);
+            }
+        }
+        
+        return boundaryPoints;
+    }
+    
+    /**
+     * 计算多个点的中位值
+     */
+    private Double[] calculateMedianPoint(List<Double[]> points) {
+        if (points.isEmpty()) return null;
+        if (points.size() == 1) return points.get(0);
+        
+        double sumX = 0, sumY = 0;
+        for (Double[] point : points) {
+            sumX += point[0];
+            sumY += point[1];
+        }
+        
+        return new Double[]{sumX / points.size(), sumY / points.size()};
+    }
+    
+    /**
+     * 计算与边界的交点
+     */
+    private Double[] findIntersectionWithBoundary(Double[] point1, Double[] point2, List<Double[]> originalVertices) {
+        // 简化实现：返回两点连线的中点
+        return new Double[]{(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2};
+    }
+    
+    /**
+     * 移除重复点
+     */
+    private List<Double[]> removeDuplicatePoints(List<Double[]> vertices) {
+        List<Double[]> unique = new ArrayList<>();
+        final double EPSILON = 0.001;
+        
+        for (Double[] vertex : vertices) {
+            boolean isDuplicate = false;
+            for (Double[] existing : unique) {
+                if (calculateDistance(vertex, existing) < EPSILON) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+            if (!isDuplicate) {
+                unique.add(vertex);
+            }
+        }
+        
+        return unique;
+    }
+    
+    /**
+     * 按照提示词排序顶点：原顶点 边界点 新顶点 边界点 原顶点
+     */
+    private List<Double[]> sortVerticesForExpansion(List<Double[]> originalVertices, List<Double[]> externalVertices, List<Double[]> boundaryPoints) {
+        List<Double[]> sortedVertices = new ArrayList<>();
+        
+        // 简化实现：先添加原顶点，再添加新顶点和边界点
+        sortedVertices.addAll(originalVertices);
+        sortedVertices.addAll(externalVertices);
+        sortedVertices.addAll(boundaryPoints);
+        
+        // 按逆时针方向排序
+        return sortVerticesCounterClockwise(sortedVertices);
+    }
+    
+    /**
+     * 按逆时针方向排序顶点
+     */
+    private List<Double[]> sortVerticesCounterClockwise(List<Double[]> vertices) {
+        if (vertices.size() < 3) return vertices;
+        
+        // 计算重心
+        double centerX = 0, centerZ = 0;
+        for (Double[] vertex : vertices) {
+            centerX += vertex[0];
+            centerZ += vertex[1];
+        }
+        centerX /= vertices.size();
+        centerZ /= vertices.size();
+        
+        final double finalCenterX = centerX;
+        final double finalCenterZ = centerZ;
+        
+        // 按极角排序
+        vertices.sort((v1, v2) -> {
+            double angle1 = Math.atan2(v1[1] - finalCenterZ, v1[0] - finalCenterX);
+            double angle2 = Math.atan2(v2[1] - finalCenterZ, v2[0] - finalCenterX);
+            return Double.compare(angle1, angle2);
+        });
+        
+        return vertices;
+    }
+    
+    /**
+     * 检测交叉
+     */
+    private boolean detectCrossings(List<Double[]> vertices) {
+        // 简化实现：检测基本的自相交
+        for (int i = 0; i < vertices.size(); i++) {
+            for (int j = i + 2; j < vertices.size(); j++) {
+                if (i == 0 && j == vertices.size() - 1) continue; // 跳过相邻边
+                
+                int nextI = (i + 1) % vertices.size();
+                int nextJ = (j + 1) % vertices.size();
+                
+                Double[] intersection = getLineIntersection(
+                    vertices.get(i), vertices.get(nextI),
+                    vertices.get(j), vertices.get(nextJ)
+                );
+                
+                if (intersection != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * 反转新顶点的顺序
+     */
+    private List<Double[]> reverseNewVerticesOrder(List<Double[]> vertices) {
+        // 简化实现：反转整个顶点列表
+        List<Double[]> reversed = new ArrayList<>();
+        for (int i = vertices.size() - 1; i >= 0; i--) {
+            reversed.add(vertices.get(i));
+        }
+        return reversed;
+    }
+    
+    /**
+     * 将Double[]列表转换为Vertex列表
+     */
+    private List<AreaData.Vertex> convertToVertexList(List<Double[]> coordinates) {
+        List<AreaData.Vertex> vertices = new ArrayList<>();
+        for (Double[] coord : coordinates) {
+            vertices.add(new AreaData.Vertex(coord[0], coord[1]));
+        }
+        return vertices;
     }
     
     // Getter方法
