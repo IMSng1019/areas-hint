@@ -109,10 +109,34 @@ public class ShrinkAreaManager {
         // 清理状态
         reset();
         
-        // 关闭UI
-        ui.closeAllScreens();
+        ui.showCancelMessage();
+    }
+    
+    /**
+     * 根据域名名称选择域名
+     */
+    public void selectAreaByName(String areaName) {
+        if (areaName == null || areaName.trim().isEmpty()) {
+            sendMessage("§c无效的域名", Formatting.RED);
+            return;
+        }
         
-        sendMessage("§c域名收缩功能已停止", Formatting.RED);
+        // 查找域名
+        AreaData area = null;
+        for (AreaData a : availableAreas) {
+            if (a.getName().equals(areaName.trim())) {
+                area = a;
+                break;
+            }
+        }
+        
+        if (area == null) {
+            sendMessage("§c域名 '" + areaName + "' 不存在或无法收缩", Formatting.RED);
+            return;
+        }
+        
+        // 选择该域名
+        selectArea(area);
     }
     
     /**
@@ -177,11 +201,8 @@ public class ShrinkAreaManager {
         currentState = ShrinkState.RECORDING;
         
         sendMessage("§a已选择域名: " + AreaDataConverter.getDisplayName(area), Formatting.GREEN);
-        sendMessage("§e请按下 X 键开始记录收缩区域的顶点", Formatting.YELLOW);
-        sendMessage("§e完成后再次按下 X 键结束记录", Formatting.YELLOW);
-        
-        // 关闭选择界面
-        ui.closeAreaSelectionScreen();
+        sendMessage("§e请按 §6X §e键记录收缩区域的顶点", Formatting.YELLOW);
+        sendMessage("§7记录完成后点击 §6[保存域名] §7按钮完成收缩", Formatting.GRAY);
     }
     
     /**
@@ -216,8 +237,8 @@ public class ShrinkAreaManager {
         shrinkVertices.clear();
         
         sendMessage("§a开始记录收缩区域顶点", Formatting.GREEN);
-        sendMessage("§e移动到各个顶点位置并按下 X 键记录", Formatting.YELLOW);
-        sendMessage("§e完成后再次按下 X 键结束记录", Formatting.YELLOW);
+        sendMessage("§e按 §6X §e键记录当前位置", Formatting.YELLOW);
+        sendMessage("§7至少需要记录3个顶点", Formatting.GRAY);
     }
     
     /**

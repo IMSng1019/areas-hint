@@ -45,16 +45,21 @@ public class UnifiedKeyHandler {
      * 根据当前激活的模块分发事件
      */
     private static void handleXKeyPress() {
+        System.out.println("DEBUG: X键被按下");
+        
         // 检查EasyAdd是否活跃且在记录状态
         EasyAddManager easyAddManager = EasyAddManager.getInstance();
         if (easyAddManager.getCurrentState() == EasyAddManager.EasyAddState.RECORDING_POINTS) {
+            System.out.println("DEBUG: EasyAdd 处理 X 键");
             easyAddManager.recordCurrentPosition();
             return;
         }
         
         // 检查ExpandArea是否活跃且在记录状态
         ExpandAreaManager expandAreaManager = ExpandAreaManager.getInstance();
+        System.out.println("DEBUG: ExpandArea - isActive: " + expandAreaManager.isActive() + ", isRecording: " + expandAreaManager.isRecording());
         if (expandAreaManager.isActive() && expandAreaManager.isRecording()) {
+            System.out.println("DEBUG: ExpandArea 处理 X 键");
             expandAreaManager.recordCurrentPosition();
             return;
         }
@@ -62,10 +67,12 @@ public class UnifiedKeyHandler {
         // 检查ShrinkArea是否活跃且在记录状态
         ShrinkAreaManager shrinkAreaManager = ShrinkAreaManager.getInstance();
         if (shrinkAreaManager.isActive() && shrinkAreaManager.isRecording()) {
+            System.out.println("DEBUG: ShrinkArea 处理 X 键");
             shrinkAreaManager.handleXKeyPress();
             return;
         }
         
+        System.out.println("DEBUG: 没有模块处理 X 键");
         // 如果没有模块处于记录状态，则忽略按键
         // （避免误操作）
     }

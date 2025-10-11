@@ -8,7 +8,9 @@ import java.util.*;
 /**
  * 几何计算工具类
  * 处理域名扩展的复杂几何算法
+ * 注意：此类的功能已迁移到ExpandAreaManager中，保留此类以保持向后兼容性
  */
+@Deprecated
 public class GeometryCalculator {
     
     private final AreaData originalArea;
@@ -24,50 +26,13 @@ public class GeometryCalculator {
     /**
      * 执行域名扩展计算
      * @return 扩展后的域名数据
+     * @deprecated 此方法已迁移到ExpandAreaManager中
      */
+    @Deprecated
     public AreaData expandArea() {
-        try {
-            // 1. 提取原域名的顶点
-            List<Double[]> originalVertices = extractVerticesFromArea(originalArea);
-            
-            // 2. 计算边界点
-            List<Double[]> boundaryPoints = calculateBoundaryPoints(originalVertices);
-            
-            // 3. 过滤外部顶点
-            List<Double[]> externalVertices = filterExternalVertices(originalVertices);
-            
-            // 4. 合并顶点并排序
-            List<Double[]> finalVertices = combineAndSortVertices(originalVertices, externalVertices, boundaryPoints);
-            
-            // 5. 检测并修复交叉
-            finalVertices = fixCrossings(finalVertices);
-            
-            // 6. 重新计算二级顶点
-            List<Double[]> secondVertices = calculateSecondVertices(finalVertices);
-            
-            // 7. 更新高度信息
-            AreaData.AltitudeData altitude = updateAltitude();
-            
-            // 8. 创建扩展后的域名
-            AreaData expanded = new AreaData(
-                originalArea.getName(),
-                convertToVertexList(finalVertices),
-                convertToVertexList(secondVertices),
-                altitude,
-                originalArea.getLevel(),
-                originalArea.getBaseName(),
-                originalArea.getSignature(),
-                originalArea.getColor(),
-                originalArea.getSurfacename()
-            );
-            
-            return expanded;
-            
-        } catch (Exception e) {
-            System.err.println("几何计算失败: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
+        // 返回null，提示使用新的实现
+        System.err.println("警告：GeometryCalculator.expandArea() 已弃用，请使用 ExpandAreaManager 中的新实现");
+        return null;
     }
     
     /**

@@ -142,23 +142,45 @@ public class ServerCommands {
                             
             // expandarea 命令 (域名扩展)
             .then(literal("expandarea")
-                .executes(ServerCommands::executeExpandAreaStart))
-            .then(literal("expandarea")
+                .executes(ServerCommands::executeExpandAreaStart)
+                // 直接指定域名：/areahint expandarea "域名"
+                .then(argument("areaName", StringArgumentType.greedyString())
+                    .suggests(EXPANDABLE_AREA_SUGGESTIONS)
+                    .executes(context -> executeExpandAreaSelect(context, 
+                        StringArgumentType.getString(context, "areaName"))))
+                // 子命令（保持向后兼容）
+                .then(literal("select")
+                    .then(argument("selectAreaName", StringArgumentType.greedyString())
+                        .suggests(EXPANDABLE_AREA_SUGGESTIONS)
+                        .executes(context -> executeExpandAreaSelect(context, 
+                            StringArgumentType.getString(context, "selectAreaName")))))
                 .then(literal("continue")
-                    .executes(ServerCommands::executeExpandAreaContinue)))
-            .then(literal("expandarea") 
+                    .executes(ServerCommands::executeExpandAreaContinue))
                 .then(literal("save")
-                    .executes(ServerCommands::executeExpandAreaSave)))
+                    .executes(ServerCommands::executeExpandAreaSave))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeExpandAreaCancel)))
             
             // shrinkarea 命令 (域名收缩)
             .then(literal("shrinkarea")
-                .executes(ServerCommands::executeShrinkAreaStart))
-            .then(literal("shrinkarea")
+                .executes(ServerCommands::executeShrinkAreaStart)
+                // 直接指定域名：/areahint shrinkarea "域名"
+                .then(argument("areaName", StringArgumentType.greedyString())
+                    .suggests(SHRINKABLE_AREA_SUGGESTIONS)
+                    .executes(context -> executeShrinkAreaSelect(context, 
+                        StringArgumentType.getString(context, "areaName"))))
+                // 子命令（保持向后兼容）
+                .then(literal("select")
+                    .then(argument("selectAreaName", StringArgumentType.greedyString())
+                        .suggests(SHRINKABLE_AREA_SUGGESTIONS)
+                        .executes(context -> executeShrinkAreaSelect(context, 
+                            StringArgumentType.getString(context, "selectAreaName")))))
                 .then(literal("continue")
-                    .executes(ServerCommands::executeShrinkAreaContinue)))
-            .then(literal("shrinkarea") 
+                    .executes(ServerCommands::executeShrinkAreaContinue))
                 .then(literal("save")
-                    .executes(ServerCommands::executeShrinkAreaSave)))
+                    .executes(ServerCommands::executeShrinkAreaSave))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeShrinkAreaCancel)))
             
             // recolor 命令
             .then(literal("recolor")
@@ -1062,6 +1084,96 @@ public class ServerCommands {
             return 0;
         }
     }
+    
+    /**
+     * 执行expandarea命令（选择域名）
+     * @param context 命令上下文
+     * @param areaName 域名名称
+     * @return 执行结果
+     */
+    private static int executeExpandAreaSelect(CommandContext<ServerCommandSource> context, String areaName) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:expandarea_select:" + areaName);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择域名时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 执行expandarea命令（取消）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeExpandAreaCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:expandarea_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c取消扩展时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 执行shrinkarea命令（选择域名）
+     * @param context 命令上下文
+     * @param areaName 域名名称
+     * @return 执行结果
+     */
+    private static int executeShrinkAreaSelect(CommandContext<ServerCommandSource> context, String areaName) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:shrinkarea_select:" + areaName);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择域名时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+    
+    /**
+     * 执行shrinkarea命令（取消）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeShrinkAreaCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        
+        try {
+            sendClientCommand(source, "areahint:shrinkarea_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c取消收缩时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
 
     /**
      * 获取当前玩家可以设置高度的域名列表
@@ -1115,6 +1227,126 @@ public class ServerCommands {
             
             // 添加所有可设置高度的域名到建议列表
             for (String areaName : settableAreas) {
+                if (areaName.toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
+                    builder.suggest(areaName);
+                }
+            }
+            
+            return builder.buildFuture();
+        };
+    
+    /**
+     * 获取当前玩家可扩展的域名列表
+     * @param source 命令源
+     * @param dimension 维度名称
+     * @return 可扩展的域名名称列表
+     */
+    private static List<String> getExpandableAreaNames(ServerCommandSource source, String dimension) {
+        try {
+            String fileName = Packets.getFileNameForDimension(dimension);
+            if (fileName == null) {
+                return List.of();
+            }
+            
+            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+            if (!areaFile.toFile().exists()) {
+                return List.of();
+            }
+            
+            List<AreaData> areas = FileManager.readAreaData(areaFile);
+            String playerName = source.getName();
+            boolean hasOp = source.hasPermissionLevel(2);
+            
+            return areas.stream()
+                .filter(area -> {
+                    String signature = area.getSignature();
+                    if (signature == null) {
+                        // 旧域名只有管理员可以扩展
+                        return hasOp;
+                    } else {
+                        // 新域名创建者或管理员可以扩展
+                        return signature.equals(playerName) || hasOp;
+                    }
+                })
+                .map(AreaData::getName)
+                .toList();
+        } catch (Exception e) {
+            Areashint.LOGGER.error("获取可扩展域名列表时发生错误", e);
+            return List.of();
+        }
+    }
+    
+    /**
+     * 可扩展域名的建议提供器
+     */
+    private static final SuggestionProvider<ServerCommandSource> EXPANDABLE_AREA_SUGGESTIONS = 
+        (context, builder) -> {
+            ServerCommandSource source = context.getSource();
+            String dimension = getDimensionFromSource(source);
+            List<String> expandableAreas = getExpandableAreaNames(source, dimension);
+            
+            // 添加所有可扩展的域名到建议列表
+            for (String areaName : expandableAreas) {
+                if (areaName.toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
+                    builder.suggest(areaName);
+                }
+            }
+            
+            return builder.buildFuture();
+        };
+    
+    /**
+     * 获取当前玩家可收缩的域名列表
+     * @param source 命令源
+     * @param dimension 维度名称
+     * @return 可收缩的域名名称列表
+     */
+    private static List<String> getShrinkableAreaNames(ServerCommandSource source, String dimension) {
+        try {
+            String fileName = Packets.getFileNameForDimension(dimension);
+            if (fileName == null) {
+                return List.of();
+            }
+            
+            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+            if (!areaFile.toFile().exists()) {
+                return List.of();
+            }
+            
+            List<AreaData> areas = FileManager.readAreaData(areaFile);
+            String playerName = source.getName();
+            boolean hasOp = source.hasPermissionLevel(2);
+            
+            return areas.stream()
+                .filter(area -> {
+                    String signature = area.getSignature();
+                    if (signature == null) {
+                        // 旧域名只有管理员可以收缩
+                        return hasOp;
+                    } else {
+                        // 新域名创建者或管理员可以收缩
+                        return signature.equals(playerName) || hasOp;
+                    }
+                })
+                .map(AreaData::getName)
+                .toList();
+        } catch (Exception e) {
+            Areashint.LOGGER.error("获取可收缩域名列表时发生错误", e);
+            return List.of();
+        }
+    }
+    
+    /**
+     * 可收缩域名的建议提供器
+     */
+    private static final SuggestionProvider<ServerCommandSource> SHRINKABLE_AREA_SUGGESTIONS = 
+        (context, builder) -> {
+            ServerCommandSource source = context.getSource();
+            String dimension = getDimensionFromSource(source);
+            List<String> shrinkableAreas = getShrinkableAreaNames(source, dimension);
+            
+            // 添加所有可收缩的域名到建议列表
+            for (String areaName : shrinkableAreas) {
                 if (areaName.toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
                     builder.suggest(areaName);
                 }

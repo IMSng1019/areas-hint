@@ -218,6 +218,14 @@ public class ClientNetworking {
                     else if (action.startsWith("easyadd")) {
                         handleEasyAddCommand(action);
                     }
+                    // 处理ExpandArea命令
+                    else if (action.startsWith("expandarea")) {
+                        handleEasyAddCommand(action);
+                    }
+                    // 处理ShrinkArea命令
+                    else if (action.startsWith("shrinkarea")) {
+                        handleEasyAddCommand(action);
+                    }
                     // 处理模组开关命令
                     else if (action.equals("on") || action.equals("off")) {
                         areahint.command.ModToggleCommand.handleToggleCommand(action);
@@ -261,22 +269,38 @@ public class ClientNetworking {
                 manager.startEasyAdd();
             } else if (action.equals("expandarea_start")) {
                 AreashintClient.LOGGER.info("执行expandarea_start");
+                System.out.println("DEBUG: 开始执行 expandarea_start");
                 areahint.expandarea.ExpandAreaManager.getInstance().startExpandArea();
+                System.out.println("DEBUG: expandarea_start 执行完成");
+            } else if (action.startsWith("expandarea_select:")) {
+                String areaName = action.substring("expandarea_select:".length());
+                AreashintClient.LOGGER.info("执行expandarea_select: " + areaName);
+                areahint.expandarea.ExpandAreaManager.getInstance().selectAreaByName(areaName);
             } else if (action.equals("expandarea_continue")) {
                 AreashintClient.LOGGER.info("执行expandarea_continue");
                 areahint.expandarea.ExpandAreaManager.getInstance().continueRecording();
             } else if (action.equals("expandarea_save")) {
                 AreashintClient.LOGGER.info("执行expandarea_save");
                 areahint.expandarea.ExpandAreaManager.getInstance().finishAndSave();
+            } else if (action.equals("expandarea_cancel")) {
+                AreashintClient.LOGGER.info("执行expandarea_cancel");
+                areahint.expandarea.ExpandAreaManager.getInstance().cancel();
             } else if (action.equals("shrinkarea_start")) {
                 AreashintClient.LOGGER.info("执行shrinkarea_start");
                 areahint.shrinkarea.ShrinkAreaManager.getInstance().start();
+            } else if (action.startsWith("shrinkarea_select:")) {
+                String areaName = action.substring("shrinkarea_select:".length());
+                AreashintClient.LOGGER.info("执行shrinkarea_select: " + areaName);
+                areahint.shrinkarea.ShrinkAreaManager.getInstance().selectAreaByName(areaName);
             } else if (action.equals("shrinkarea_continue")) {
                 AreashintClient.LOGGER.info("执行shrinkarea_continue");
                 areahint.shrinkarea.ShrinkAreaManager.getInstance().continueRecording();
             } else if (action.equals("shrinkarea_save")) {
                 AreashintClient.LOGGER.info("执行shrinkarea_save");
                 areahint.shrinkarea.ShrinkAreaManager.getInstance().finishAndSave();
+            } else if (action.equals("shrinkarea_cancel")) {
+                AreashintClient.LOGGER.info("执行shrinkarea_cancel");
+                areahint.shrinkarea.ShrinkAreaManager.getInstance().stop();
             } else if (action.equals("easyadd_cancel")) {
                 AreashintClient.LOGGER.info("执行easyadd_cancel");
                 manager.cancelEasyAdd();

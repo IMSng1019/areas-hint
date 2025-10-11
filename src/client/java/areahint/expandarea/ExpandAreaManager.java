@@ -42,43 +42,32 @@ public class ExpandAreaManager {
      * 开始域名扩展流程
      */
     public void startExpandArea() {
+        System.out.println("DEBUG: startExpandArea() 被调用");
         if (client.player == null) {
+            System.out.println("DEBUG: client.player 为 null");
             return;
         }
         
+        System.out.println("DEBUG: 设置 isActive = true");
         isActive = true;  // 设置为活动状态
-        // 显示域名询问界面
-        ui.showAreaNameInput();
-    }
-    
-    /**
-     * 处理用户输入的域名名称
-     */
-    public void handleAreaNameInput(String areaName) {
-        if (areaName == null || areaName.trim().isEmpty()) {
-            sendMessage("§c请输入有效的域名", Formatting.RED);
+        
+        // 获取可修改的域名列表
+        System.out.println("DEBUG: 开始获取可修改的域名列表");
+        List<AreaData> modifiableAreas = getModifiableAreas();
+        System.out.println("DEBUG: 找到 " + modifiableAreas.size() + " 个可修改的域名");
+        
+        if (modifiableAreas.isEmpty()) {
+            System.out.println("DEBUG: 没有可扩展的域名");
+            sendMessage("§c没有可扩展的域名", Formatting.RED);
+            sendMessage("§7您只能扩展自己创建的域名", Formatting.GRAY);
+            isActive = false;
             return;
         }
         
-        // 检查域名是否存在
-        AreaData area = findAreaByName(areaName.trim());
-        if (area == null) {
-            sendMessage("§c域名 '" + areaName + "' 不存在", Formatting.RED);
-            ui.showAreaNameInput(); // 重新显示输入界面
-            return;
-        }
-        
-        // 检查权限
-        if (!checkPermission(area)) {
-            sendMessage("§c您没有权限扩展此域名", Formatting.RED);
-            return;
-        }
-        
-        this.selectedAreaName = areaName.trim();
-        this.selectedArea = area;
-        
-        // 显示可修改的域名列表
-        showModifiableAreas();
+        // 直接显示域名选择界面
+        System.out.println("DEBUG: 显示域名选择界面");
+        ui.showAreaSelection(modifiableAreas);
+        System.out.println("DEBUG: startExpandArea() 执行完成");
     }
     
     /**
@@ -109,21 +98,46 @@ public class ExpandAreaManager {
     }
     
     /**
-     * 显示可修改的域名列表
+     * 根据域名名称选择域名
      */
-    private void showModifiableAreas() {
-        if (client.player == null) {
+    public void selectAreaByName(String areaName) {
+        if (areaName == null || areaName.trim().isEmpty()) {
+            sendMessage("§c无效的域名", Formatting.RED);
             return;
         }
         
-        List<AreaData> modifiableAreas = getModifiableAreas();
-        
-        if (modifiableAreas.isEmpty()) {
-            sendMessage("§c没有可修改的域名", Formatting.RED);
+        // 查找域名
+        AreaData area = findAreaByName(areaName.trim());
+        if (area == null) {
+            sendMessage("§c域名 '" + areaName + "' 不存在", Formatting.RED);
             return;
         }
         
-        ui.showAreaSelection(modifiableAreas);
+        // 检查权限
+        if (!checkPermission(area)) {
+            sendMessage("§c您没有权限扩展此域名", Formatting.RED);
+            return;
+        }
+        
+        // 选择该域名
+        handleAreaSelection(area);
+    }
+    
+    /**
+     * 取消扩展流程
+     */
+    public void cancel() {
+        if (!isActive) {
+            return;
+        }
+        
+        isActive = false;
+        isRecording = false;
+        selectedArea = null;
+        selectedAreaName = null;
+        newVertices.clear();
+        
+        ui.showCancelMessage();
     }
     
     /**
@@ -134,26 +148,33 @@ public class ExpandAreaManager {
         String playerName = client.player.getGameProfile().getName();
         boolean isAdmin = client.player.hasPermissionLevel(2);
         
+        System.out.println("DEBUG: 玩家名称: " + playerName + ", 是否管理员: " + isAdmin);
+        
         // 获取所有域名
         List<AreaData> allAreas = loadAllAreas();
         
         for (AreaData area : allAreas) {
+            System.out.println("DEBUG: 检查域名: " + area.getName() + ", 签名: " + area.getSignature() + ", 基础域名: " + area.getBaseName());
             if (isAdmin) {
                 // 管理员可以修改所有域名
                 result.add(area);
+                System.out.println("DEBUG: 管理员权限，添加域名: " + area.getName());
             } else {
                 // 普通玩家只能修改自己创建的或basename引用自己的域名
                 if (playerName.equals(area.getSignature())) {
                     result.add(area);
+                    System.out.println("DEBUG: 玩家创建的域名，添加: " + area.getName());
                 } else if (area.getBaseName() != null) {
                     AreaData baseArea = findAreaByName(area.getBaseName());
                     if (baseArea != null && playerName.equals(baseArea.getSignature())) {
                         result.add(area);
+                        System.out.println("DEBUG: 基于玩家域名的扩展，添加: " + area.getName());
                     }
                 }
             }
         }
         
+        System.out.println("DEBUG: 找到 " + result.size() + " 个可修改的域名");
         return result;
     }
     
@@ -165,8 +186,8 @@ public class ExpandAreaManager {
         this.selectedAreaName = selectedArea.getName();
         
         sendMessage("§a已选择域名: " + areahint.util.AreaDataConverter.getDisplayName(selectedArea), Formatting.GREEN);
-        sendMessage("§e请按 X 键开始记录新区域的顶点位置", Formatting.YELLOW);
-        sendMessage("§e记录完成后按确认键完成扩展", Formatting.YELLOW);
+        sendMessage("§e请按 §6X §e键开始记录新区域的顶点位置", Formatting.YELLOW);
+        sendMessage("§7记录完成后点击 §6[保存域名] §7按钮完成扩展", Formatting.GRAY);
         
         // 开始记录模式
         startRecording();
@@ -176,6 +197,7 @@ public class ExpandAreaManager {
      * 开始记录新顶点
      */
     private void startRecording() {
+        this.isActive = true;
         this.isRecording = true;
         this.newVertices.clear();
         ui.showRecordingInterface();
@@ -504,14 +526,23 @@ public class ExpandAreaManager {
             return new AreaData.AltitudeData(newAreaHeightRange[1], newAreaHeightRange[0]);
         }
         
+        // 检查原始高度数据是否完整（不为null）
+        Double originalMin = originalAltitude.getMin();
+        Double originalMax = originalAltitude.getMax();
+        
+        if (originalMin == null || originalMax == null) {
+            // 如果原始高度数据不完整，使用新区域的高度数据
+            return new AreaData.AltitudeData(newAreaHeightRange[1], newAreaHeightRange[0]);
+        }
+        
         // 如果新区域高度在原范围内，保持原高度
-        if (newAreaHeightRange[1] < originalAltitude.getMax() && newAreaHeightRange[0] > originalAltitude.getMin()) {
+        if (newAreaHeightRange[1] < originalMax && newAreaHeightRange[0] > originalMin) {
             return originalAltitude;
         }
         
         // 否则扩展高度范围
-        double newMin = Math.min(originalAltitude.getMin(), newAreaHeightRange[0]);
-        double newMax = Math.max(originalAltitude.getMax(), newAreaHeightRange[1]);
+        double newMin = Math.min(originalMin, newAreaHeightRange[0]);
+        double newMax = Math.max(originalMax, newAreaHeightRange[1]);
         
         return new AreaData.AltitudeData(newMax, newMin);
     }
@@ -542,7 +573,6 @@ public class ExpandAreaManager {
         this.newVertices.clear();
         this.isRecording = false;
         this.isActive = false;  // 重置活动状态
-        ui.hide();
     }
     
     /**
@@ -620,17 +650,54 @@ public class ExpandAreaManager {
     }
     
     /**
-     * 加载所有域名
+     * 加载当前维度的所有域名
      */
     private List<AreaData> loadAllAreas() {
         List<AreaData> areas = new ArrayList<>();
         try {
-            Path areaPath = FileManager.checkFolderExist().resolve("overworld.json");
-            areas = FileManager.readAreaData(areaPath);
+            // 获取当前维度
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client.world != null) {
+                String currentDimension = client.world.getRegistryKey().getValue().toString();
+                String fileName = getFileNameForCurrentDimension(currentDimension);
+                
+                if (fileName != null) {
+                    Path areaPath = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(fileName);
+                    System.out.println("DEBUG: 尝试加载域名文件: " + areaPath);
+                    
+                    if (areaPath.toFile().exists()) {
+                        areas = FileManager.readAreaData(areaPath);
+                        System.out.println("DEBUG: 从 " + fileName + " 加载了 " + areas.size() + " 个域名");
+                    } else {
+                        System.out.println("DEBUG: 文件不存在: " + fileName);
+                    }
+                } else {
+                    System.out.println("DEBUG: 无法确定当前维度的文件名");
+                }
+            } else {
+                System.out.println("DEBUG: 无法获取当前世界信息");
+            }
         } catch (Exception e) {
+            System.out.println("DEBUG: 加载域名文件失败: " + e.getMessage());
             e.printStackTrace();
         }
         return areas;
+    }
+    
+    /**
+     * 根据维度ID获取对应的文件名
+     */
+    private String getFileNameForCurrentDimension(String dimensionId) {
+        if (dimensionId == null) return null;
+        
+        if (dimensionId.contains("overworld")) {
+            return areahint.Areashint.OVERWORLD_FILE;
+        } else if (dimensionId.contains("nether")) {
+            return areahint.Areashint.NETHER_FILE;
+        } else if (dimensionId.contains("end")) {
+            return areahint.Areashint.END_FILE;
+        }
+        return null;
     }
     
     /**
