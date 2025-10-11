@@ -385,12 +385,15 @@ public class ShrinkGeometryCalculator {
      * 创建收缩后的域名数据
      */
     private AreaData createShrunkAreaData(List<AreaData.Vertex> finalVertices, List<AreaData.Vertex> secondVertices) {
-        // 使用原域名的基本信息，但更新顶点列表
+        // 计算收缩区域的高度范围
+        AreaData.AltitudeData mergedAltitude = calculateMergedAltitude(finalVertices);
+        
+        // 使用原域名的基本信息，但更新顶点列表和高度
         AreaData shrunkArea = new AreaData(
             originalArea.getName(),        // 保持原名称
             finalVertices,                 // 新的顶点列表
             secondVertices,                // 新的边界框
-            originalArea.getAltitude(),    // 保持原高度设置
+            mergedAltitude,                // 合并后的高度设置
             originalArea.getLevel(),       // 保持原等级
             originalArea.getBaseName(),    // 保持原basename
             originalArea.getSignature(),   // 保持原签名
@@ -399,6 +402,71 @@ public class ShrinkGeometryCalculator {
         );
         
         return shrunkArea;
+    }
+    
+    /**
+     * 计算合并后的高度信息
+     * 合并收缩区域的高度与原区域的高度：
+     * - 最高高度：取两个区域中更高的那一个（null表示无限制，比任何数值都大）
+     * - 最低高度：取两个区域中更低的那一个（null表示无限制，比任何数值都小）
+     */
+    private AreaData.AltitudeData calculateMergedAltitude(List<AreaData.Vertex> finalVertices) {
+        AreaData.AltitudeData originalAltitude = originalArea.getAltitude();
+        
+        if (originalAltitude == null) {
+            // 如果原域名没有高度信息，使用收缩区域的高度
+            return calculateShrinkAreaAltitude(finalVertices);
+        }
+        
+        // 检查原始高度数据是否完整（不为null）
+        Double originalMin = originalAltitude.getMin();
+        Double originalMax = originalAltitude.getMax();
+        
+        // 计算收缩区域的高度范围
+        AreaData.AltitudeData shrinkAltitude = calculateShrinkAreaAltitude(finalVertices);
+        if (shrinkAltitude == null) {
+            // 如果无法计算收缩区域高度，保持原高度
+            return originalAltitude;
+        }
+        
+        // 处理null高度的情况（null表示无限制）
+        Double mergedMin;
+        Double mergedMax;
+        
+        if (originalMin == null) {
+            // 原域名最低高度无限制，合并后也应该无限制
+            mergedMin = null;
+        } else if (shrinkAltitude.getMin() == null) {
+            // 收缩区域最低高度无限制，合并后也应该无限制
+            mergedMin = null;
+        } else {
+            // 两个区域都有具体的最低高度，取更低的
+            mergedMin = Math.min(originalMin, shrinkAltitude.getMin());
+        }
+        
+        if (originalMax == null) {
+            // 原域名最高高度无限制，合并后也应该无限制
+            mergedMax = null;
+        } else if (shrinkAltitude.getMax() == null) {
+            // 收缩区域最高高度无限制，合并后也应该无限制
+            mergedMax = null;
+        } else {
+            // 两个区域都有具体的最高高度，取更高的
+            mergedMax = Math.max(originalMax, shrinkAltitude.getMax());
+        }
+        
+        return new AreaData.AltitudeData(mergedMax, mergedMin);
+    }
+    
+    /**
+     * 计算收缩区域的高度范围
+     * 这里简化处理，使用原域名的高度设置
+     * 在实际应用中，可以根据收缩区域的顶点位置计算实际高度
+     */
+    private AreaData.AltitudeData calculateShrinkAreaAltitude(List<AreaData.Vertex> finalVertices) {
+        // 简化实现：直接使用原域名的高度设置
+        // 在实际应用中，这里可以根据finalVertices的位置计算实际的高度范围
+        return originalArea.getAltitude();
     }
     
     // ==================== 辅助工具方法 ====================

@@ -518,6 +518,9 @@ public class ExpandAreaManager {
     
     /**
      * 更新高度信息
+     * 合并新添加区域的高度与原区域的高度：
+     * - 最高高度：取两个区域中更高的那一个（null表示无限制，比任何数值都大）
+     * - 最低高度：取两个区域中更低的那一个（null表示无限制，比任何数值都小）
      */
     private AreaData.AltitudeData updateAltitudeData(double[] newAreaHeightRange) {
         AreaData.AltitudeData originalAltitude = selectedArea.getAltitude();
@@ -530,21 +533,27 @@ public class ExpandAreaManager {
         Double originalMin = originalAltitude.getMin();
         Double originalMax = originalAltitude.getMax();
         
-        if (originalMin == null || originalMax == null) {
-            // 如果原始高度数据不完整，使用新区域的高度数据
-            return new AreaData.AltitudeData(newAreaHeightRange[1], newAreaHeightRange[0]);
+        // 处理null高度的情况（null表示无限制）
+        Double mergedMin;
+        Double mergedMax;
+        
+        if (originalMin == null) {
+            // 原域名最低高度无限制，合并后也应该无限制
+            mergedMin = null;
+        } else {
+            // 原域名有具体的最低高度，与新区域比较
+            mergedMin = Math.min(originalMin, newAreaHeightRange[0]);
         }
         
-        // 如果新区域高度在原范围内，保持原高度
-        if (newAreaHeightRange[1] < originalMax && newAreaHeightRange[0] > originalMin) {
-            return originalAltitude;
+        if (originalMax == null) {
+            // 原域名最高高度无限制，合并后也应该无限制
+            mergedMax = null;
+        } else {
+            // 原域名有具体的最高高度，与新区域比较
+            mergedMax = Math.max(originalMax, newAreaHeightRange[1]);
         }
         
-        // 否则扩展高度范围
-        double newMin = Math.min(originalMin, newAreaHeightRange[0]);
-        double newMax = Math.max(originalMax, newAreaHeightRange[1]);
-        
-        return new AreaData.AltitudeData(newMax, newMin);
+        return new AreaData.AltitudeData(mergedMax, mergedMin);
     }
     
     /**
