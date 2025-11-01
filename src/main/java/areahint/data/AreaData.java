@@ -22,7 +22,10 @@ public class AreaData {
     private String surfacename;            // 联合域名（表面域名）
 
     // 构造函数
-    public AreaData() {}
+    public AreaData() {
+        this.vertices = new ArrayList<>();
+        this.secondVertices = new ArrayList<>();
+    }
 
     public AreaData(String name, List<Vertex> vertices, List<Vertex> secondVertices, 
                    AltitudeData altitude, int level, String baseName, String signature) {

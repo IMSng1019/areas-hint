@@ -365,6 +365,12 @@ public class ExpandAreaManager {
         List<Double[]> vertices = new ArrayList<>();
         List<AreaData.Vertex> verticesList = selectedArea.getVertices();
         
+        // 检查顶点列表是否为null
+        if (verticesList == null) {
+            System.err.println("警告: 原域名的顶点列表为null，无法进行扩展操作");
+            return vertices; // 返回空列表
+        }
+        
         for (AreaData.Vertex vertex : verticesList) {
             vertices.add(new Double[]{vertex.getX(), vertex.getZ()});
         }
@@ -456,9 +462,17 @@ public class ExpandAreaManager {
      */
     private List<Double[]> combineVertices(List<Double[]> originalVertices, List<Double[]> externalVertices, List<Double[]> boundaryPoints) {
         List<Double[]> allVertices = new ArrayList<>();
-        allVertices.addAll(originalVertices);
-        allVertices.addAll(externalVertices);
-        allVertices.addAll(boundaryPoints);
+        
+        // 检查输入参数是否为null
+        if (originalVertices != null) {
+            allVertices.addAll(originalVertices);
+        }
+        if (externalVertices != null) {
+            allVertices.addAll(externalVertices);
+        }
+        if (boundaryPoints != null) {
+            allVertices.addAll(boundaryPoints);
+        }
         
         // 移除重复点
         allVertices = removeDuplicatePoints(allVertices);
@@ -526,6 +540,7 @@ public class ExpandAreaManager {
         AreaData.AltitudeData originalAltitude = selectedArea.getAltitude();
         
         if (originalAltitude == null) {
+            // 如果原域名没有高度信息，使用新区域的高度
             return new AreaData.AltitudeData(newAreaHeightRange[1], newAreaHeightRange[0]);
         }
         
@@ -534,22 +549,29 @@ public class ExpandAreaManager {
         Double originalMax = originalAltitude.getMax();
         
         // 处理null高度的情况（null表示无限制）
+        // null比任何数值都大（最高高度）或小（最低高度）
         Double mergedMin;
         Double mergedMax;
         
+        // 最低高度：取两个区域中更低的那一个
+        // 如果任一区域为null（无限制），合并后也应该是null（无限制）
         if (originalMin == null) {
             // 原域名最低高度无限制，合并后也应该无限制
             mergedMin = null;
         } else {
             // 原域名有具体的最低高度，与新区域比较
+            // 由于新区域总是有具体数值（从calculateNewAreaHeightRange获取），直接比较
             mergedMin = Math.min(originalMin, newAreaHeightRange[0]);
         }
         
+        // 最高高度：取两个区域中更高的那一个
+        // 如果任一区域为null（无限制），合并后也应该是null（无限制）
         if (originalMax == null) {
             // 原域名最高高度无限制，合并后也应该无限制
             mergedMax = null;
         } else {
             // 原域名有具体的最高高度，与新区域比较
+            // 由于新区域总是有具体数值（从calculateNewAreaHeightRange获取），直接比较
             mergedMax = Math.max(originalMax, newAreaHeightRange[1]);
         }
         
@@ -919,10 +941,16 @@ public class ExpandAreaManager {
     private List<Double[]> sortVerticesForExpansion(List<Double[]> originalVertices, List<Double[]> externalVertices, List<Double[]> boundaryPoints) {
         List<Double[]> sortedVertices = new ArrayList<>();
         
-        // 简化实现：先添加原顶点，再添加新顶点和边界点
-        sortedVertices.addAll(originalVertices);
-        sortedVertices.addAll(externalVertices);
-        sortedVertices.addAll(boundaryPoints);
+        // 检查输入参数是否为null
+        if (originalVertices != null) {
+            sortedVertices.addAll(originalVertices);
+        }
+        if (externalVertices != null) {
+            sortedVertices.addAll(externalVertices);
+        }
+        if (boundaryPoints != null) {
+            sortedVertices.addAll(boundaryPoints);
+        }
         
         // 按逆时针方向排序
         return sortVerticesCounterClockwise(sortedVertices);
@@ -998,8 +1026,17 @@ public class ExpandAreaManager {
      */
     private List<AreaData.Vertex> convertToVertexList(List<Double[]> coordinates) {
         List<AreaData.Vertex> vertices = new ArrayList<>();
+        
+        // 检查输入参数是否为null
+        if (coordinates == null) {
+            System.err.println("警告: convertToVertexList 接收到null坐标列表");
+            return vertices; // 返回空列表
+        }
+        
         for (Double[] coord : coordinates) {
-            vertices.add(new AreaData.Vertex(coord[0], coord[1]));
+            if (coord != null && coord.length >= 2) {
+                vertices.add(new AreaData.Vertex(coord[0], coord[1]));
+            }
         }
         return vertices;
     }

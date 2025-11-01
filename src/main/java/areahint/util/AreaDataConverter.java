@@ -3,6 +3,7 @@ package areahint.util;
 import areahint.data.AreaData;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
+import java.util.ArrayList;
 
 /**
  * AreaData与JsonObject之间的转换工具类
@@ -104,6 +105,10 @@ public class AreaDataConverter {
         // vertices数组
         if (jsonObject.has("vertices") && jsonObject.get("vertices").isJsonArray()) {
             JsonArray verticesArray = jsonObject.getAsJsonArray("vertices");
+            // 确保vertices列表已初始化
+            if (areaData.getVertices() == null) {
+                areaData.setVertices(new ArrayList<>());
+            }
             for (int i = 0; i < verticesArray.size(); i++) {
                 JsonObject vertexObj = verticesArray.get(i).getAsJsonObject();
                 double x = vertexObj.get("x").getAsDouble();
@@ -115,6 +120,10 @@ public class AreaDataConverter {
         // second-vertices数组
         if (jsonObject.has("second-vertices") && jsonObject.get("second-vertices").isJsonArray()) {
             JsonArray secondVerticesArray = jsonObject.getAsJsonArray("second-vertices");
+            // 确保secondVertices列表已初始化
+            if (areaData.getSecondVertices() == null) {
+                areaData.setSecondVertices(new ArrayList<>());
+            }
             for (int i = 0; i < secondVerticesArray.size(); i++) {
                 JsonObject vertexObj = secondVerticesArray.get(i).getAsJsonObject();
                 double x = vertexObj.get("x").getAsDouble();
