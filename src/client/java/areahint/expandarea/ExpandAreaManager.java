@@ -205,6 +205,7 @@ public class ExpandAreaManager {
     
     /**
      * 记录当前位置作为新顶点
+     * 坐标会被取整为整数
      */
     public void recordCurrentPosition() {
         if (!isRecording || client.player == null) {
@@ -215,10 +216,13 @@ public class ExpandAreaManager {
         double y = client.player.getY();
         double z = client.player.getZ();
         
-        newVertices.add(new Double[]{x, z});
+        // 取整为整数
+        int roundedX = (int) Math.round(x);
+        int roundedZ = (int) Math.round(z);
+        newVertices.add(new Double[]{(double) roundedX, (double) roundedZ});
         
         sendMessage("§a已记录位置 #" + newVertices.size() + ": §6(" + 
-                   String.format("%.1f", x) + ", " + String.format("%.1f", y) + ", " + String.format("%.1f", z) + ")", 
+                   roundedX + ", " + String.format("%.1f", y) + ", " + roundedZ + ")", 
                    Formatting.GREEN);
         
         // 显示选项按钮（参考EasyAdd的实现）
@@ -425,16 +429,36 @@ public class ExpandAreaManager {
     }
     
     /**
-     * 计算临近点 - 找到距离原域名边界最近的点
+     * 计算临近点 - 按照提示词：只计算初始点和末尾点的临近点
+     * 一个点只能对应一个临近点
+     * 初始点和末尾点是最开始玩家的起点和终点（可能因为在域名内而被删除）
      */
     private List<Double[]> calculateAdjacentPoints(List<Double[]> originalVertices, List<Double[]> externalVertices) {
         List<Double[]> adjacentPoints = new ArrayList<>();
         
-        for (Double[] vertex : externalVertices) {
-            // 找到距离这个点最近的原域名边界点
-            Double[] nearestPoint = findNearestPointOnPolygon(vertex, originalVertices);
-            if (nearestPoint != null) {
-                adjacentPoints.add(nearestPoint);
+        if (externalVertices == null || externalVertices.isEmpty()) {
+            return adjacentPoints;
+        }
+        
+        // 按照提示词：只计算初始点和末尾点的临近点
+        // 初始点：外部顶点的第一个点
+        Double[] initialPoint = externalVertices.get(0);
+        // 末尾点：外部顶点的最后一个点
+        Double[] endPoint = externalVertices.get(externalVertices.size() - 1);
+        
+        // 为初始点找到最近的临近点（原域名边界上的点）
+        Double[] initialAdjacent = findNearestPointOnPolygon(initialPoint, originalVertices);
+        if (initialAdjacent != null) {
+            adjacentPoints.add(initialAdjacent);
+        }
+        
+        // 为末尾点找到最近的临近点（原域名边界上的点）
+        // 如果初始点和末尾点是同一个点，只添加一次
+        if (initialPoint != endPoint && 
+            (initialPoint[0] != endPoint[0] || initialPoint[1] != endPoint[1])) {
+            Double[] endAdjacent = findNearestPointOnPolygon(endPoint, originalVertices);
+            if (endAdjacent != null) {
+                adjacentPoints.add(endAdjacent);
             }
         }
         
@@ -443,6 +467,7 @@ public class ExpandAreaManager {
     
     /**
      * 计算最终边界点 - 处理一个点对应多个边界点的情况
+     * 所有返回的边界点坐标都会被取整为整数
      */
     private List<Double[]> calculateFinalBoundaryPoints(List<Double[]> adjacentPoints, List<Double[]> originalVertices) {
         List<Double[]> finalBoundaryPoints = new ArrayList<>();
@@ -453,11 +478,12 @@ public class ExpandAreaManager {
             List<Double[]> boundaryPointsForAdjacent = findBoundaryPointsForAdjacent(adjacentPoint, originalVertices);
             
             if (boundaryPointsForAdjacent.size() == 1) {
+                // 单个边界点也要确保取整（getClosestPointOnSegment已经取整了）
                 finalBoundaryPoints.add(boundaryPointsForAdjacent.get(0));
             } else if (boundaryPointsForAdjacent.size() > 1) {
-                // 计算中位值
+                // 计算中位值（已取整）
                 Double[] medianPoint = calculateMedianPoint(boundaryPointsForAdjacent);
-                // 计算与边界的交点
+                // 计算与边界的交点（已取整）
                 Double[] intersectionPoint = findIntersectionWithBoundary(adjacentPoint, medianPoint, originalVertices);
                 if (intersectionPoint != null) {
                     finalBoundaryPoints.add(intersectionPoint);
@@ -494,24 +520,18 @@ public class ExpandAreaManager {
     
     /**
      * 检测并修复交叉
+     * 注意：新顶点与原顶点的交叉检测已在sortVerticesForExpansion中完成
+     * 这里只检测整体顶点列表的自相交（作为备用检查）
      */
     private List<Double[]> fixCrossings(List<Double[]> vertices) {
-        List<Double[]> fixedVertices = new ArrayList<>(vertices);
-        
-        // 检测新添加区域的顶点顺序是否正确
-        boolean hasCrossing = detectCrossings(fixedVertices);
-        
-        if (hasCrossing) {
-            // 如果新添加入的区域的一级顶点与原有区域的顶点所连接成的线段有交叉
-            // 则证明新添加入的区域的顶点的顺序反了，重新排列
-            fixedVertices = reverseNewVerticesOrder(fixedVertices);
-        }
-        
-        return fixedVertices;
+        // 由于新顶点与原顶点的交叉检测已在sortVerticesForExpansion中完成
+        // 这里只返回原列表（如果需要，可以添加额外的自相交检测）
+        return new ArrayList<>(vertices);
     }
     
     /**
      * 重新计算二级顶点（AABB边界框）
+     * 坐标会被取整为整数
      */
     private List<Double[]> calculateSecondVertices(List<Double[]> vertices) {
         if (vertices.isEmpty()) {
@@ -531,12 +551,12 @@ public class ExpandAreaManager {
             maxZ = Math.max(maxZ, vertex[1]);
         }
         
-        // 创建AABB四个角点
+        // 创建AABB四个角点，坐标取整为整数
         List<Double[]> secondVertices = new ArrayList<>();
-        secondVertices.add(new Double[]{minX, minZ}); // 左下
-        secondVertices.add(new Double[]{maxX, minZ}); // 右下
-        secondVertices.add(new Double[]{maxX, maxZ}); // 右上
-        secondVertices.add(new Double[]{minX, maxZ}); // 左上
+        secondVertices.add(new Double[]{(double) Math.round(minX), (double) Math.round(minZ)}); // 左下
+        secondVertices.add(new Double[]{(double) Math.round(maxX), (double) Math.round(minZ)}); // 右下
+        secondVertices.add(new Double[]{(double) Math.round(maxX), (double) Math.round(maxZ)}); // 右上
+        secondVertices.add(new Double[]{(double) Math.round(minX), (double) Math.round(maxZ)}); // 左上
         
         return secondVertices;
     }
@@ -799,6 +819,7 @@ public class ExpandAreaManager {
     
     /**
      * 计算两条线段的交点
+     * 返回的坐标会被取整为整数
      */
     private Double[] getLineIntersection(Double[] line1Start, Double[] line1End, Double[] line2Start, Double[] line2End) {
         double x1 = line1Start[0], y1 = line1Start[1];
@@ -815,7 +836,10 @@ public class ExpandAreaManager {
         double u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
         
         if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
-            return new Double[]{x1 + t * (x2 - x1), y1 + t * (y2 - y1)};
+            double x = x1 + t * (x2 - x1);
+            double z = y1 + t * (y2 - y1);
+            // 取整为整数
+            return new Double[]{(double) Math.round(x), (double) Math.round(z)};
         }
         
         return null;
@@ -850,6 +874,7 @@ public class ExpandAreaManager {
     
     /**
      * 计算点到线段的最近点
+     * 返回的坐标会被取整为整数
      */
     private Double[] getClosestPointOnSegment(Double[] point, Double[] segStart, Double[] segEnd) {
         double px = point[0], py = point[1];
@@ -860,13 +885,17 @@ public class ExpandAreaManager {
         double dy = by - ay;
         
         if (dx == 0 && dy == 0) {
-            return new Double[]{ax, ay};
+            // 取整为整数
+            return new Double[]{(double) Math.round(ax), (double) Math.round(ay)};
         }
         
         double t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
         t = Math.max(0, Math.min(1, t));
         
-        return new Double[]{ax + t * dx, ay + t * dy};
+        double x = ax + t * dx;
+        double z = ay + t * dy;
+        // 取整为整数
+        return new Double[]{(double) Math.round(x), (double) Math.round(z)};
     }
     
     /**
@@ -901,10 +930,15 @@ public class ExpandAreaManager {
     
     /**
      * 计算多个点的中位值
+     * 返回的坐标会被取整为整数
      */
     private Double[] calculateMedianPoint(List<Double[]> points) {
         if (points.isEmpty()) return null;
-        if (points.size() == 1) return points.get(0);
+        if (points.size() == 1) {
+            // 单个点也要取整
+            Double[] point = points.get(0);
+            return new Double[]{(double) Math.round(point[0]), (double) Math.round(point[1])};
+        }
         
         double sumX = 0, sumY = 0;
         for (Double[] point : points) {
@@ -912,15 +946,22 @@ public class ExpandAreaManager {
             sumY += point[1];
         }
         
-        return new Double[]{sumX / points.size(), sumY / points.size()};
+        double x = sumX / points.size();
+        double z = sumY / points.size();
+        // 取整为整数
+        return new Double[]{(double) Math.round(x), (double) Math.round(z)};
     }
     
     /**
      * 计算与边界的交点
+     * 返回的坐标会被取整为整数
      */
     private Double[] findIntersectionWithBoundary(Double[] point1, Double[] point2, List<Double[]> originalVertices) {
         // 简化实现：返回两点连线的中点
-        return new Double[]{(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2};
+        double x = (point1[0] + point2[0]) / 2;
+        double z = (point1[1] + point2[1]) / 2;
+        // 取整为整数
+        return new Double[]{(double) Math.round(x), (double) Math.round(z)};
     }
     
     /**
@@ -948,23 +989,187 @@ public class ExpandAreaManager {
     
     /**
      * 按照提示词排序顶点：原顶点 边界点 新顶点 边界点 原顶点
+     * 正确实现：找到边界点应该插入的位置，然后按照顺序插入
      */
     private List<Double[]> sortVerticesForExpansion(List<Double[]> originalVertices, List<Double[]> externalVertices, List<Double[]> boundaryPoints) {
-        List<Double[]> sortedVertices = new ArrayList<>();
-        
-        // 检查输入参数是否为null
-        if (originalVertices != null) {
-            sortedVertices.addAll(originalVertices);
-        }
-        if (externalVertices != null) {
-            sortedVertices.addAll(externalVertices);
-        }
-        if (boundaryPoints != null) {
-            sortedVertices.addAll(boundaryPoints);
+        if (originalVertices == null || originalVertices.isEmpty()) {
+            return externalVertices != null ? new ArrayList<>(externalVertices) : new ArrayList<>();
         }
         
-        // 按逆时针方向排序
-        return sortVerticesCounterClockwise(sortedVertices);
+        if (externalVertices == null || externalVertices.isEmpty()) {
+            return new ArrayList<>(originalVertices);
+        }
+        
+        if (boundaryPoints == null || boundaryPoints.isEmpty()) {
+            // 如果没有边界点，简单合并后按逆时针排序
+            List<Double[]> allVertices = new ArrayList<>(originalVertices);
+            allVertices.addAll(externalVertices);
+            return sortVerticesCounterClockwise(allVertices);
+        }
+        
+        // 找到两个主要的边界点（对应新顶点的起点和终点）
+        Double[] startBoundaryPoint = null;
+        Double[] endBoundaryPoint = null;
+        
+        if (boundaryPoints.size() >= 2) {
+            // 找到距离新顶点起点和终点最近的边界点
+            Double[] newStart = externalVertices.get(0);
+            Double[] newEnd = externalVertices.get(externalVertices.size() - 1);
+            
+            double minDistToStart = Double.MAX_VALUE;
+            double minDistToEnd = Double.MAX_VALUE;
+            
+            for (Double[] bp : boundaryPoints) {
+                double distToStart = calculateDistance(newStart, bp);
+                double distToEnd = calculateDistance(newEnd, bp);
+                
+                if (distToStart < minDistToStart) {
+                    minDistToStart = distToStart;
+                    startBoundaryPoint = bp;
+                }
+                if (distToEnd < minDistToEnd) {
+                    minDistToEnd = distToEnd;
+                    endBoundaryPoint = bp;
+                }
+            }
+        } else if (boundaryPoints.size() == 1) {
+            // 只有一个边界点，使用同一个点作为起点和终点
+            startBoundaryPoint = boundaryPoints.get(0);
+            endBoundaryPoint = boundaryPoints.get(0);
+        }
+        
+        // 如果找不到边界点，回退到简单排序
+        if (startBoundaryPoint == null || endBoundaryPoint == null) {
+            List<Double[]> allVertices = new ArrayList<>(originalVertices);
+            allVertices.addAll(externalVertices);
+            if (boundaryPoints != null) {
+                allVertices.addAll(boundaryPoints);
+            }
+            return sortVerticesCounterClockwise(allVertices);
+        }
+        
+        // 找到边界点应该插入的位置（在原域名的哪两个顶点之间）
+        int startBoundaryIndex = findBoundaryPointInsertIndex(startBoundaryPoint, originalVertices);
+        int endBoundaryIndex = findBoundaryPointInsertIndex(endBoundaryPoint, originalVertices);
+        
+        // 确保索引顺序正确
+        if (startBoundaryIndex > endBoundaryIndex) {
+            int temp = startBoundaryIndex;
+            startBoundaryIndex = endBoundaryIndex;
+            endBoundaryIndex = temp;
+            Double[] tempBP = startBoundaryPoint;
+            startBoundaryPoint = endBoundaryPoint;
+            endBoundaryPoint = tempBP;
+        }
+        
+        // 判断新顶点的插入方向（正向或反向）
+        List<Double[]> orderedNewVertices = determineNewVerticesOrder(externalVertices, startBoundaryPoint, endBoundaryPoint);
+        
+        // 检测新顶点与原顶点之间的交叉
+        // 如果新添加入的区域的一级顶点与原有区域的顶点所连接成的线段有交叉
+        // 则证明新添加入的区域的顶点的顺序反了，重新排列
+        if (hasCrossingBetweenNewAndOriginal(originalVertices, orderedNewVertices, startBoundaryPoint, endBoundaryPoint)) {
+            // 反转新顶点顺序
+            List<Double[]> reversed = new ArrayList<>();
+            for (int i = orderedNewVertices.size() - 1; i >= 0; i--) {
+                reversed.add(orderedNewVertices.get(i));
+            }
+            orderedNewVertices = reversed;
+        }
+        
+        // 构造最终顶点列表：原顶点 → 边界点1 → 新顶点 → 边界点2 → 原顶点
+        List<Double[]> finalVertices = new ArrayList<>();
+        
+        // 计算两个边界点之间的距离（两种路径）
+        int shortPath = endBoundaryIndex - startBoundaryIndex;
+        int longPath = originalVertices.size() - shortPath;
+        
+        // 删除两个边界点之间较短路径的点
+        if (shortPath <= longPath) {
+            // 保留 [0, startBoundaryIndex] 的原顶点
+            for (int i = 0; i <= startBoundaryIndex; i++) {
+                finalVertices.add(originalVertices.get(i));
+            }
+            // 添加第一个边界点
+            finalVertices.add(startBoundaryPoint);
+            // 添加新顶点
+            finalVertices.addAll(orderedNewVertices);
+            // 添加第二个边界点
+            finalVertices.add(endBoundaryPoint);
+            // 保留 [endBoundaryIndex+1, end] 的原顶点
+            for (int i = endBoundaryIndex + 1; i < originalVertices.size(); i++) {
+                finalVertices.add(originalVertices.get(i));
+            }
+        } else {
+            // 保留较长路径
+            // 保留 [endBoundaryIndex+1, end] 和 [0, startBoundaryIndex] 的原顶点
+            for (int i = endBoundaryIndex + 1; i < originalVertices.size(); i++) {
+                finalVertices.add(originalVertices.get(i));
+            }
+            for (int i = 0; i <= startBoundaryIndex; i++) {
+                finalVertices.add(originalVertices.get(i));
+            }
+            // 添加第一个边界点
+            finalVertices.add(startBoundaryPoint);
+            // 添加新顶点
+            finalVertices.addAll(orderedNewVertices);
+            // 添加第二个边界点
+            finalVertices.add(endBoundaryPoint);
+        }
+        
+        return finalVertices;
+    }
+    
+    /**
+     * 找到边界点应该插入的位置（在原域名的哪两个顶点之间）
+     * 返回边界点所在边的起始顶点索引
+     */
+    private int findBoundaryPointInsertIndex(Double[] boundaryPoint, List<Double[]> originalVertices) {
+        double minDistance = Double.MAX_VALUE;
+        int edgeIndex = -1;
+        
+        for (int i = 0; i < originalVertices.size(); i++) {
+            int j = (i + 1) % originalVertices.size();
+            Double[] p1 = originalVertices.get(i);
+            Double[] p2 = originalVertices.get(j);
+            
+            // 计算边界点到线段的距离
+            Double[] closest = getClosestPointOnSegment(boundaryPoint, p1, p2);
+            double distance = calculateDistance(boundaryPoint, closest);
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                edgeIndex = i;
+            }
+        }
+        
+        return edgeIndex >= 0 ? edgeIndex : 0;
+    }
+    
+    /**
+     * 判断新顶点的插入顺序（正向或反向）
+     */
+    private List<Double[]> determineNewVerticesOrder(List<Double[]> newVertices, Double[] boundaryStart, Double[] boundaryEnd) {
+        if (newVertices == null || newVertices.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // 检查第一个顶点离哪个边界点更近
+        Double[] firstVertex = newVertices.get(0);
+        double distToStart = calculateDistance(firstVertex, boundaryStart);
+        double distToEnd = calculateDistance(firstVertex, boundaryEnd);
+        
+        // 如果第一个顶点离起始边界点更近，保持正向
+        if (distToStart < distToEnd) {
+            return new ArrayList<>(newVertices);
+        } else {
+            // 否则反向
+            List<Double[]> reversed = new ArrayList<>();
+            for (int i = newVertices.size() - 1; i >= 0; i--) {
+                reversed.add(newVertices.get(i));
+            }
+            return reversed;
+        }
     }
     
     /**
@@ -1021,19 +1226,81 @@ public class ExpandAreaManager {
     }
     
     /**
-     * 反转新顶点的顺序
+     * 检测新顶点与原顶点之间的交叉
+     * 如果新添加入的区域的一级顶点与原有区域的顶点所连接成的线段有交叉
+     * 则证明新添加入的区域的顶点的顺序反了
      */
-    private List<Double[]> reverseNewVerticesOrder(List<Double[]> vertices) {
-        // 简化实现：反转整个顶点列表
-        List<Double[]> reversed = new ArrayList<>();
-        for (int i = vertices.size() - 1; i >= 0; i--) {
-            reversed.add(vertices.get(i));
+    private boolean hasCrossingBetweenNewAndOriginal(List<Double[]> originalVertices, List<Double[]> newVertices, 
+                                                      Double[] startBoundary, Double[] endBoundary) {
+        if (newVertices == null || newVertices.size() < 2) {
+            return false;
         }
-        return reversed;
+        
+        // 检测新顶点之间的线段与原顶点之间的线段是否有交叉
+        for (int i = 0; i < newVertices.size(); i++) {
+            int nextNewIndex = (i + 1) % newVertices.size();
+            Double[] newStart = newVertices.get(i);
+            Double[] newEnd = newVertices.get(nextNewIndex);
+            
+            // 检查这条新顶点线段是否与原顶点线段交叉
+            for (int j = 0; j < originalVertices.size(); j++) {
+                int nextOriginalIndex = (j + 1) % originalVertices.size();
+                Double[] originalStart = originalVertices.get(j);
+                Double[] originalEnd = originalVertices.get(nextOriginalIndex);
+                
+                // 跳过边界点所在的边（避免误判）
+                if (isPointOnSegment(startBoundary, originalStart, originalEnd) || 
+                    isPointOnSegment(endBoundary, originalStart, originalEnd)) {
+                    continue;
+                }
+                
+                // 检查线段是否交叉
+                Double[] intersection = getLineIntersection(newStart, newEnd, originalStart, originalEnd);
+                if (intersection != null) {
+                    return true; // 发现交叉
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 判断点是否在线段上
+     */
+    private boolean isPointOnSegment(Double[] point, Double[] segStart, Double[] segEnd) {
+        if (point == null || segStart == null || segEnd == null) {
+            return false;
+        }
+        
+        // 计算点到线段起点的向量和线段向量
+        double dx1 = point[0] - segStart[0];
+        double dy1 = point[1] - segStart[1];
+        double dx2 = segEnd[0] - segStart[0];
+        double dy2 = segEnd[1] - segStart[1];
+        
+        // 如果线段长度为0，检查点是否与起点重合
+        if (Math.abs(dx2) < 1e-10 && Math.abs(dy2) < 1e-10) {
+            return Math.abs(dx1) < 1e-10 && Math.abs(dy1) < 1e-10;
+        }
+        
+        // 计算点积和叉积
+        double dot = dx1 * dx2 + dy1 * dy2;
+        double cross = dx1 * dy2 - dy1 * dx2;
+        
+        // 如果叉积不为0，点不在线段上
+        if (Math.abs(cross) > 1e-10) {
+            return false;
+        }
+        
+        // 检查点是否在线段范围内
+        double t = dot / (dx2 * dx2 + dy2 * dy2);
+        return t >= 0 && t <= 1;
     }
     
     /**
      * 将Double[]列表转换为Vertex列表
+     * 坐标会被取整为整数
      */
     private List<AreaData.Vertex> convertToVertexList(List<Double[]> coordinates) {
         List<AreaData.Vertex> vertices = new ArrayList<>();
@@ -1046,7 +1313,10 @@ public class ExpandAreaManager {
         
         for (Double[] coord : coordinates) {
             if (coord != null && coord.length >= 2) {
-                vertices.add(new AreaData.Vertex(coord[0], coord[1]));
+                // 将坐标取整为整数
+                int x = (int) Math.round(coord[0]);
+                int z = (int) Math.round(coord[1]);
+                vertices.add(new AreaData.Vertex(x, z));
             }
         }
         return vertices;
