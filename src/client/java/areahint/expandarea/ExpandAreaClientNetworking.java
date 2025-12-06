@@ -14,21 +14,22 @@ public class ExpandAreaClientNetworking {
     /**
      * 发送扩展后的域名数据到服务端
      */
-    public static void sendExpandedAreaToServer(AreaData expandedArea) {
+    public static void sendExpandedAreaToServer(AreaData expandedArea, String dimension) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
-            
+
             // 将AreaData转换为JsonObject
             JsonObject areaJson = AreaDataConverter.toJsonObject(expandedArea);
-            
+
             // 写入数据
             buf.writeString(areaJson.toString());
-            
+            buf.writeString(dimension);  // 添加维度信息
+
             // 发送到服务端
             ClientPlayNetworking.send(Packets.EXPAND_AREA_CHANNEL, buf);
-            
-            System.out.println("已发送扩展域名数据到服务端: " + expandedArea.getName());
-            
+
+            System.out.println("已发送扩展域名数据到服务端: " + expandedArea.getName() + " (维度: " + dimension + ")");
+
         } catch (Exception e) {
             System.err.println("发送扩展域名数据失败: " + e.getMessage());
             e.printStackTrace();

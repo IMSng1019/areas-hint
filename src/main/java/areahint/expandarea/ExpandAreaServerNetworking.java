@@ -29,11 +29,12 @@ public class ExpandAreaServerNetworking {
             (server, player, handler, buf, responseSender) -> {
                 try {
                     String areaJsonString = buf.readString(32767);
-                    
+                    String dimension = buf.readString(32767);  // 接收维度信息
+
                     server.execute(() -> {
-                        handleExpandAreaRequest(player, areaJsonString);
+                        handleExpandAreaRequest(player, areaJsonString, dimension);
                     });
-                    
+
                 } catch (Exception e) {
                     System.err.println("处理扩展域名请求时发生错误: " + e.getMessage());
                     e.printStackTrace();
@@ -46,41 +47,41 @@ public class ExpandAreaServerNetworking {
     /**
      * 处理扩展域名请求
      */
-    private static void handleExpandAreaRequest(ServerPlayerEntity player, String areaJsonString) {
+    private static void handleExpandAreaRequest(ServerPlayerEntity player, String areaJsonString, String dimension) {
         try {
             // 解析接收到的域名数据
             JsonObject areaJson = JsonParser.parseString(areaJsonString).getAsJsonObject();
             AreaData expandedArea = AreaDataConverter.fromJsonObject(areaJson);
-            
+
             // 验证权限
             if (!validatePermission(player, expandedArea)) {
                 sendErrorResponse(player, "您没有权限扩展此域名");
                 return;
             }
-            
+
             // 验证域名数据
             if (!validateAreaData(expandedArea)) {
                 sendErrorResponse(player, "域名数据验证失败");
                 return;
             }
-            
+
             // 保存扩展后的域名
-            boolean success = saveExpandedArea(expandedArea);
+            boolean success = saveExpandedArea(expandedArea, dimension);
             if (!success) {
                 sendErrorResponse(player, "保存域名失败");
                 return;
             }
-            
+
             // 重新分发给所有玩家
             redistributeAreasToAllPlayers(player.getServer());
-            
+
             // 发送成功响应
             sendSuccessResponse(player, "域名 '" + expandedArea.getName() + "' 扩展成功");
-            
+
             // 服务端日志
-            System.out.println("玩家 " + player.getGameProfile().getName() + 
+            System.out.println("玩家 " + player.getGameProfile().getName() +
                              " 成功扩展域名: " + expandedArea.getName());
-            
+
         } catch (Exception e) {
             System.err.println("处理扩展域名请求失败: " + e.getMessage());
             e.printStackTrace();
@@ -142,14 +143,23 @@ public class ExpandAreaServerNetworking {
     /**
      * 保存扩展后的域名
      */
-    private static boolean saveExpandedArea(AreaData expandedArea) {
+    private static boolean saveExpandedArea(AreaData expandedArea, String dimension) {
         try {
+            // 将维度ID转换为Packets期望的维度类型（参考EasyAdd的实现）
+            String dimensionType = convertDimensionIdToType(dimension);
+            String fileName = Packets.getFileNameForDimension(dimensionType);
+
+            if (fileName == null) {
+                System.err.println("无效的维度: " + dimension);
+                return false;
+            }
+
             // 获取当前区域文件路径
-            Path areaPath = FileManager.checkFolderExist().resolve("overworld.json");
-            
+            Path areaPath = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+
             // 加载现有域名
             List<AreaData> existingAreas = FileManager.readAreaData(areaPath);
-            
+
             // 查找并更新现有域名
             boolean found = false;
             for (int i = 0; i < existingAreas.size(); i++) {
@@ -161,20 +171,37 @@ public class ExpandAreaServerNetworking {
                     break;
                 }
             }
-            
+
             if (!found) {
                 System.err.println("未找到要扩展的域名: " + expandedArea.getName());
                 return false;
             }
-            
+
             // 保存更新后的域名列表
             return FileManager.writeAreaData(areaPath, existingAreas);
-            
+
         } catch (Exception e) {
             System.err.println("保存扩展域名失败: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * 将维度ID转换为Packets期望的维度类型
+     * 参考EasyAdd的实现
+     */
+    private static String convertDimensionIdToType(String dimension) {
+        if (dimension == null) return null;
+
+        if (dimension.contains("overworld")) {
+            return Packets.DIMENSION_OVERWORLD;
+        } else if (dimension.contains("nether")) {
+            return Packets.DIMENSION_NETHER;
+        } else if (dimension.contains("end")) {
+            return Packets.DIMENSION_END;
+        }
+        return null;
     }
     
     /**

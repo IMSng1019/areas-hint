@@ -293,10 +293,21 @@ public class ExpandAreaManager {
             
             // 11. 创建扩展后的域名
             AreaData expandedArea = createExpandedArea(fixedVertices, secondVertices, updatedAltitude);
-            
-            // 12. 发送给服务端
-            ExpandAreaClientNetworking.sendExpandedAreaToServer(expandedArea);
-            
+
+            // 12. 获取当前维度信息
+            String currentDimension = null;
+            if (client.world != null) {
+                currentDimension = client.world.getRegistryKey().getValue().toString();
+            }
+
+            if (currentDimension == null) {
+                sendMessage("§c无法获取当前维度信息", Formatting.RED);
+                return;
+            }
+
+            // 13. 发送给服务端
+            ExpandAreaClientNetworking.sendExpandedAreaToServer(expandedArea, currentDimension);
+
             sendMessage("§a域名扩展完成！", Formatting.GREEN);
             
         } catch (Exception e) {
