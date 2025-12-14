@@ -1001,10 +1001,10 @@ public class ExpandAreaManager {
         }
         
         if (boundaryPoints == null || boundaryPoints.isEmpty()) {
-            // 如果没有边界点，保留所有原顶点，然后添加新顶点，最后按逆时针排序
+            // 如果没有边界点，保留所有原顶点，然后添加新顶点，最后排序防止交叉
             List<Double[]> allVertices = new ArrayList<>(originalVertices);
             allVertices.addAll(externalVertices);
-            return sortVerticesCounterClockwise(allVertices);
+            return sortVerticesWithoutCrossing(allVertices);
         }
         
         // 找到两个主要的边界点（对应新顶点的起点和终点）
@@ -1045,7 +1045,8 @@ public class ExpandAreaManager {
             if (boundaryPoints != null) {
                 allVertices.addAll(boundaryPoints);
             }
-            return sortVerticesCounterClockwise(allVertices);
+            // 对所有顶点重新排序，防止交叉
+            return sortVerticesWithoutCrossing(allVertices);
         }
         
         // 找到边界点应该插入的位置（在原域名的哪两个顶点之间）
@@ -1071,7 +1072,8 @@ public class ExpandAreaManager {
             allVertices.add(startBoundaryIndex + 1, startBoundaryPoint);
             allVertices.addAll(startBoundaryIndex + 2, externalVertices);
             allVertices.add(startBoundaryIndex + 2 + externalVertices.size(), endBoundaryPoint);
-            return allVertices;
+            // 对所有顶点重新排序，防止交叉
+            return sortVerticesWithoutCrossing(allVertices);
         }
         
         // 判断新顶点的插入方向（正向或反向）
@@ -1162,10 +1164,13 @@ public class ExpandAreaManager {
             if (boundaryPoints != null) {
                 fallbackVertices.addAll(boundaryPoints);
             }
-            return sortVerticesCounterClockwise(fallbackVertices);
+            // 对所有顶点重新排序，防止交叉
+            return sortVerticesWithoutCrossing(fallbackVertices);
         }
         
-        return finalVertices;
+        // 按照提示词：将新添加顶点插入原域名后，需要对全部顶点重新进行一次排序
+        // 确保所有顶点（原顶点 + 新顶点 + 边界点）按照多边形边界的正确顺序排列，防止交叉
+        return sortVerticesWithoutCrossing(finalVertices);
     }
     
     /**
@@ -1239,13 +1244,189 @@ public class ExpandAreaManager {
         final double finalCenterZ = centerZ;
         
         // 按极角排序
-        vertices.sort((v1, v2) -> {
+        List<Double[]> sorted = new ArrayList<>(vertices);
+        sorted.sort((v1, v2) -> {
             double angle1 = Math.atan2(v1[1] - finalCenterZ, v1[0] - finalCenterX);
             double angle2 = Math.atan2(v2[1] - finalCenterZ, v2[0] - finalCenterX);
             return Double.compare(angle1, angle2);
         });
         
-        return vertices;
+        return sorted;
+    }
+    
+    /**
+     * 对所有顶点重新排序，防止线段交叉
+     * 按照提示词：如果新添加入的区域的一级顶点与原有区域的顶点所连接成的线段有交叉则证明新添加入的区域的顶点的顺序反了
+     * 需要重新排列新加入的区域的一级顶点，再进行插入
+     */
+    private List<Double[]> sortVerticesWithoutCrossing(List<Double[]> vertices) {
+        if (vertices.size() < 3) return vertices;
+        
+        // 先按逆时针排序
+        List<Double[]> sorted = sortVerticesCounterClockwise(vertices);
+        
+        // 检测并修复交叉
+        int maxIterations = 20; // 最多迭代20次
+        for (int iteration = 0; iteration < maxIterations; iteration++) {
+            boolean hasCrossing = false;
+            int crossingI = -1, crossingJ = -1;
+            
+            // 检测所有线段对是否有交叉
+            for (int i = 0; i < sorted.size(); i++) {
+                int nextI = (i + 1) % sorted.size();
+                Double[] p1 = sorted.get(i);
+                Double[] p2 = sorted.get(nextI);
+                
+                for (int j = i + 2; j < sorted.size(); j++) {
+                    int nextJ = (j + 1) % sorted.size();
+                    // 跳过相邻边和闭合边
+                    if (nextI == j || nextJ == i) continue;
+                    if (i == 0 && nextJ == 0) continue;
+                    if (nextI == 0 && j == sorted.size() - 1) continue;
+                    
+                    Double[] p3 = sorted.get(j);
+                    Double[] p4 = sorted.get(nextJ);
+                    
+                    // 检查线段是否交叉（不包括端点）
+                    if (doSegmentsCross(p1, p2, p3, p4)) {
+                        hasCrossing = true;
+                        crossingI = i;
+                        crossingJ = j;
+                        break;
+                    }
+                }
+                if (hasCrossing) break;
+            }
+            
+            // 如果没有交叉，排序完成
+            if (!hasCrossing) {
+                break;
+            }
+            
+            // 修复交叉：反转交叉段之间的顶点顺序
+            if (crossingI >= 0 && crossingJ >= 0) {
+                // 反转从 crossingI+1 到 crossingJ 之间的顶点
+                int start = (crossingI + 1) % sorted.size();
+                int end = crossingJ;
+                
+                if (start < end) {
+                    // 正常情况：反转 [start, end] 区间
+                    reverseSegment(sorted, start, end);
+                } else {
+                    // 跨越边界：反转两段
+                    // 反转 [start, size-1] 和 [0, end]
+                    reverseSegment(sorted, start, sorted.size() - 1);
+                    reverseSegment(sorted, 0, end);
+                }
+            }
+        }
+        
+        // 如果仍然有交叉，使用基于凸包的排序算法作为最后手段
+        if (detectCrossings(sorted)) {
+            sorted = sortVerticesByConvexHull(vertices);
+        }
+        
+        return sorted;
+    }
+    
+    /**
+     * 检查两条线段是否交叉（不包括端点）
+     */
+    private boolean doSegmentsCross(Double[] p1, Double[] p2, Double[] p3, Double[] p4) {
+        // 使用现有的getLineIntersection方法检测交叉
+        Double[] intersection = getLineIntersection(p1, p2, p3, p4);
+        if (intersection == null) {
+            return false;
+        }
+        
+        // 检查交点是否在线段内部（不包括端点）
+        double eps = 1e-6;
+        boolean onSegment1 = isPointOnSegmentStrict(intersection, p1, p2, eps);
+        boolean onSegment2 = isPointOnSegmentStrict(intersection, p3, p4, eps);
+        
+        return onSegment1 && onSegment2;
+    }
+    
+    /**
+     * 检查点是否在线段内部（不包括端点）
+     */
+    private boolean isPointOnSegmentStrict(Double[] point, Double[] segStart, Double[] segEnd, double epsilon) {
+        // 检查点是否在线段所在的直线上
+        double dx = segEnd[0] - segStart[0];
+        double dy = segEnd[1] - segStart[1];
+        double dx1 = point[0] - segStart[0];
+        double dy1 = point[1] - segStart[1];
+        
+        // 叉积检查是否共线
+        double cross = dx * dy1 - dy * dx1;
+        if (Math.abs(cross) > epsilon) {
+            return false; // 不共线
+        }
+        
+        // 检查点是否在线段内部（不包括端点）
+        double dot = dx1 * dx + dy1 * dy;
+        double lenSq = dx * dx + dy * dy;
+        
+        if (lenSq < epsilon) {
+            // 线段长度为0，检查点是否与起点重合
+            return false; // 端点不算交叉
+        }
+        
+        double t = dot / lenSq;
+        // t必须在(0, 1)范围内，不包括端点
+        return t > epsilon && t < 1.0 - epsilon;
+    }
+    
+    
+    /**
+     * 反转列表中指定区间的元素
+     */
+    private void reverseSegment(List<Double[]> list, int start, int end) {
+        while (start < end) {
+            Double[] temp = list.get(start);
+            list.set(start, list.get(end));
+            list.set(end, temp);
+            start++;
+            end--;
+        }
+    }
+    
+    /**
+     * 基于凸包的排序算法，确保没有交叉
+     */
+    private List<Double[]> sortVerticesByConvexHull(List<Double[]> vertices) {
+        if (vertices.size() < 3) return vertices;
+        
+        // 找到最下方的点（如果y相同，取最左边的）
+        int bottomIndex = 0;
+        for (int i = 1; i < vertices.size(); i++) {
+            Double[] current = vertices.get(i);
+            Double[] bottom = vertices.get(bottomIndex);
+            if (current[1] < bottom[1] || (current[1] == bottom[1] && current[0] < bottom[0])) {
+                bottomIndex = i;
+            }
+        }
+        
+        // 以最下方的点为起点，按极角排序
+        Double[] bottomPoint = vertices.get(bottomIndex);
+        List<Double[]> sorted = new ArrayList<>(vertices);
+        
+        sorted.sort((v1, v2) -> {
+            // 计算相对于bottomPoint的极角
+            double angle1 = Math.atan2(v1[1] - bottomPoint[1], v1[0] - bottomPoint[0]);
+            double angle2 = Math.atan2(v2[1] - bottomPoint[1], v2[0] - bottomPoint[0]);
+            
+            // 如果角度相同，按距离排序
+            if (Math.abs(angle1 - angle2) < 1e-10) {
+                double dist1 = calculateDistance(v1, bottomPoint);
+                double dist2 = calculateDistance(v2, bottomPoint);
+                return Double.compare(dist1, dist2);
+            }
+            
+            return Double.compare(angle1, angle2);
+        });
+        
+        return sorted;
     }
     
     /**
