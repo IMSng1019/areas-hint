@@ -496,25 +496,24 @@ public class ExpandAreaManager {
     
     /**
      * 合并顶点并排序
+     * 关键：必须保留所有原顶点，只删除两个边界点之间的原顶点
      */
     private List<Double[]> combineVertices(List<Double[]> originalVertices, List<Double[]> externalVertices, List<Double[]> boundaryPoints) {
-        List<Double[]> allVertices = new ArrayList<>();
-        
         // 检查输入参数是否为null
-        if (originalVertices != null) {
-            allVertices.addAll(originalVertices);
+        if (originalVertices == null || originalVertices.isEmpty()) {
+            // 如果没有原顶点，只返回新顶点
+            List<Double[]> result = new ArrayList<>();
+            if (externalVertices != null) {
+                result.addAll(externalVertices);
+            }
+            if (boundaryPoints != null) {
+                result.addAll(boundaryPoints);
+            }
+            return result;
         }
-        if (externalVertices != null) {
-            allVertices.addAll(externalVertices);
-        }
-        if (boundaryPoints != null) {
-            allVertices.addAll(boundaryPoints);
-        }
-        
-        // 移除重复点
-        allVertices = removeDuplicatePoints(allVertices);
         
         // 按照提示词：原顶点 边界点 新顶点 边界点 原顶点 的顺序排列
+        // 关键：sortVerticesForExpansion 必须保留所有原顶点（除了被删除的两个边界点之间的点）
         return sortVerticesForExpansion(originalVertices, externalVertices, boundaryPoints);
     }
     
@@ -990,6 +989,7 @@ public class ExpandAreaManager {
     /**
      * 按照提示词排序顶点：原顶点 边界点 新顶点 边界点 原顶点
      * 正确实现：找到边界点应该插入的位置，然后按照顺序插入
+     * 关键：必须保留所有原顶点，只删除两个边界点之间的原顶点
      */
     private List<Double[]> sortVerticesForExpansion(List<Double[]> originalVertices, List<Double[]> externalVertices, List<Double[]> boundaryPoints) {
         if (originalVertices == null || originalVertices.isEmpty()) {
@@ -1001,7 +1001,7 @@ public class ExpandAreaManager {
         }
         
         if (boundaryPoints == null || boundaryPoints.isEmpty()) {
-            // 如果没有边界点，简单合并后按逆时针排序
+            // 如果没有边界点，保留所有原顶点，然后添加新顶点，最后按逆时针排序
             List<Double[]> allVertices = new ArrayList<>(originalVertices);
             allVertices.addAll(externalVertices);
             return sortVerticesCounterClockwise(allVertices);
@@ -1038,7 +1038,7 @@ public class ExpandAreaManager {
             endBoundaryPoint = boundaryPoints.get(0);
         }
         
-        // 如果找不到边界点，回退到简单排序
+        // 如果找不到边界点，保留所有原顶点，然后添加新顶点
         if (startBoundaryPoint == null || endBoundaryPoint == null) {
             List<Double[]> allVertices = new ArrayList<>(originalVertices);
             allVertices.addAll(externalVertices);
@@ -1060,6 +1060,18 @@ public class ExpandAreaManager {
             Double[] tempBP = startBoundaryPoint;
             startBoundaryPoint = endBoundaryPoint;
             endBoundaryPoint = tempBP;
+        }
+        
+        // 验证边界点索引的有效性：如果索引相同或非常接近，可能导致删除所有原顶点
+        // 在这种情况下，保留所有原顶点，只添加新顶点
+        if (startBoundaryIndex == endBoundaryIndex) {
+            // 如果两个边界点在同一位置，保留所有原顶点，然后添加边界点和新顶点
+            List<Double[]> allVertices = new ArrayList<>(originalVertices);
+            // 在边界点位置插入新顶点
+            allVertices.add(startBoundaryIndex + 1, startBoundaryPoint);
+            allVertices.addAll(startBoundaryIndex + 2, externalVertices);
+            allVertices.add(startBoundaryIndex + 2 + externalVertices.size(), endBoundaryPoint);
+            return allVertices;
         }
         
         // 判断新顶点的插入方向（正向或反向）
@@ -1085,6 +1097,7 @@ public class ExpandAreaManager {
         int longPath = originalVertices.size() - shortPath;
         
         // 删除两个边界点之间较短路径的点
+        // 关键：必须确保至少保留一些原顶点，不能删除所有原顶点
         if (shortPath <= longPath) {
             // 保留 [0, startBoundaryIndex] 的原顶点
             for (int i = 0; i <= startBoundaryIndex; i++) {
@@ -1115,6 +1128,41 @@ public class ExpandAreaManager {
             finalVertices.addAll(orderedNewVertices);
             // 添加第二个边界点
             finalVertices.add(endBoundaryPoint);
+        }
+        
+        // 验证：确保最终顶点列表包含足够的原顶点
+        // 应该保留的原顶点数量 = 原顶点总数 - 被删除的两个边界点之间的点数量
+        // 被删除的点数量 = endBoundaryIndex - startBoundaryIndex - 1（如果 shortPath <= longPath）
+        // 或者 = originalVertices.size() - (endBoundaryIndex - startBoundaryIndex) - 1（如果 shortPath > longPath）
+        int deletedOriginalCount;
+        if (shortPath <= longPath) {
+            deletedOriginalCount = endBoundaryIndex - startBoundaryIndex - 1;
+        } else {
+            deletedOriginalCount = originalVertices.size() - (endBoundaryIndex - startBoundaryIndex) - 1;
+        }
+        int expectedOriginalCount = originalVertices.size() - deletedOriginalCount;
+        
+        // 统计最终顶点列表中的原顶点数量
+        int actualOriginalCount = 0;
+        for (Double[] vertex : finalVertices) {
+            // 检查这个点是否在原顶点列表中（允许小的浮点误差）
+            for (Double[] original : originalVertices) {
+                if (Math.abs(vertex[0] - original[0]) < 0.001 && Math.abs(vertex[1] - original[1]) < 0.001) {
+                    actualOriginalCount++;
+                    break;
+                }
+            }
+        }
+        
+        // 如果原顶点数量明显不足（少于预期的80%），说明计算有误，回退到保留所有原顶点的方案
+        if (actualOriginalCount < expectedOriginalCount * 0.8) {
+            // 回退方案：保留所有原顶点，然后添加新顶点和边界点
+            List<Double[]> fallbackVertices = new ArrayList<>(originalVertices);
+            fallbackVertices.addAll(externalVertices);
+            if (boundaryPoints != null) {
+                fallbackVertices.addAll(boundaryPoints);
+            }
+            return sortVerticesCounterClockwise(fallbackVertices);
         }
         
         return finalVertices;
