@@ -1053,123 +1053,98 @@ public class ExpandAreaManager {
         int startBoundaryIndex = findBoundaryPointInsertIndex(startBoundaryPoint, originalVertices);
         int endBoundaryIndex = findBoundaryPointInsertIndex(endBoundaryPoint, originalVertices);
         
-        // 确保索引顺序正确
-        if (startBoundaryIndex > endBoundaryIndex) {
-            int temp = startBoundaryIndex;
-            startBoundaryIndex = endBoundaryIndex;
-            endBoundaryIndex = temp;
-            Double[] tempBP = startBoundaryPoint;
-            startBoundaryPoint = endBoundaryPoint;
-            endBoundaryPoint = tempBP;
-        }
-        
-        // 验证边界点索引的有效性：如果索引相同或非常接近，可能导致删除所有原顶点
-        // 在这种情况下，保留所有原顶点，只添加新顶点
-        if (startBoundaryIndex == endBoundaryIndex) {
-            // 如果两个边界点在同一位置，保留所有原顶点，然后添加边界点和新顶点
-            List<Double[]> allVertices = new ArrayList<>(originalVertices);
-            // 在边界点位置插入新顶点
-            allVertices.add(startBoundaryIndex + 1, startBoundaryPoint);
-            allVertices.addAll(startBoundaryIndex + 2, externalVertices);
-            allVertices.add(startBoundaryIndex + 2 + externalVertices.size(), endBoundaryPoint);
-            // 对所有顶点重新排序，防止交叉
-            return sortVerticesWithoutCrossing(allVertices);
-        }
-        
+        // 不进行简单的索引交换，使用模运算计算两段弧上的原顶点数量并删除较短的一段
+        int n = originalVertices.size();
+
         // 判断新顶点的插入方向（正向或反向）
         List<Double[]> orderedNewVertices = determineNewVerticesOrder(externalVertices, startBoundaryPoint, endBoundaryPoint);
-        
-        // 检测新顶点与原顶点之间的交叉
-        // 如果新添加入的区域的一级顶点与原有区域的顶点所连接成的线段有交叉
-        // 则证明新添加入的区域的顶点的顺序反了，重新排列
+
+        // 如果新/原交叉，反转新顶点顺序
         if (hasCrossingBetweenNewAndOriginal(originalVertices, orderedNewVertices, startBoundaryPoint, endBoundaryPoint)) {
-            // 反转新顶点顺序
             List<Double[]> reversed = new ArrayList<>();
             for (int i = orderedNewVertices.size() - 1; i >= 0; i--) {
                 reversed.add(orderedNewVertices.get(i));
             }
             orderedNewVertices = reversed;
         }
-        
-        // 构造最终顶点列表：原顶点 → 边界点1 → 新顶点 → 边界点2 → 原顶点
-        List<Double[]> finalVertices = new ArrayList<>();
-        
-        // 计算两个边界点之间的距离（两种路径）
-        int shortPath = endBoundaryIndex - startBoundaryIndex;
-        int longPath = originalVertices.size() - shortPath;
-        
-        // 删除两个边界点之间较短路径的点
-        // 关键：必须确保至少保留一些原顶点，不能删除所有原顶点
-        if (shortPath <= longPath) {
-            // 保留 [0, startBoundaryIndex] 的原顶点
-            for (int i = 0; i <= startBoundaryIndex; i++) {
-                finalVertices.add(originalVertices.get(i));
-            }
-            // 添加第一个边界点
-            finalVertices.add(startBoundaryPoint);
-            // 添加新顶点
-            finalVertices.addAll(orderedNewVertices);
-            // 添加第二个边界点
-            finalVertices.add(endBoundaryPoint);
-            // 保留 [endBoundaryIndex+1, end] 的原顶点
-            for (int i = endBoundaryIndex + 1; i < originalVertices.size(); i++) {
-                finalVertices.add(originalVertices.get(i));
+
+        // 计算沿正方向从 start 到 end 的要删除的原顶点数量（不包括 start 本身）
+        int forwardDeleteCount = (endBoundaryIndex - startBoundaryIndex + n) % n;
+        int backwardDeleteCount = n - forwardDeleteCount;
+
+        // 标记要保留的原顶点
+        boolean[] keep = new boolean[n];
+        for (int i = 0; i < n; i++) keep[i] = true;
+
+        if (n <= 2) {
+            // 太少顶点，直接合并
+            List<Double[]> fallback = new ArrayList<>(originalVertices);
+            fallback.add(startBoundaryPoint);
+            fallback.addAll(orderedNewVertices);
+            fallback.add(endBoundaryPoint);
+            return sortVerticesWithoutCrossing(fallback);
+        }
+
+        if (forwardDeleteCount <= backwardDeleteCount) {
+            // 删除从 startBoundaryIndex+1 到 endBoundaryIndex（包含 endBoundaryIndex）
+            int idx = (startBoundaryIndex + 1) % n;
+            for (int k = 0; k < forwardDeleteCount; k++) {
+                keep[idx] = false;
+                idx = (idx + 1) % n;
             }
         } else {
-            // 保留较长路径
-            // 保留 [endBoundaryIndex+1, end] 和 [0, startBoundaryIndex] 的原顶点
-            for (int i = endBoundaryIndex + 1; i < originalVertices.size(); i++) {
-                finalVertices.add(originalVertices.get(i));
-            }
-            for (int i = 0; i <= startBoundaryIndex; i++) {
-                finalVertices.add(originalVertices.get(i));
-            }
-            // 添加第一个边界点
-            finalVertices.add(startBoundaryPoint);
-            // 添加新顶点
-            finalVertices.addAll(orderedNewVertices);
-            // 添加第二个边界点
-            finalVertices.add(endBoundaryPoint);
-        }
-        
-        // 验证：确保最终顶点列表包含足够的原顶点
-        // 应该保留的原顶点数量 = 原顶点总数 - 被删除的两个边界点之间的点数量
-        // 被删除的点数量 = endBoundaryIndex - startBoundaryIndex - 1（如果 shortPath <= longPath）
-        // 或者 = originalVertices.size() - (endBoundaryIndex - startBoundaryIndex) - 1（如果 shortPath > longPath）
-        int deletedOriginalCount;
-        if (shortPath <= longPath) {
-            deletedOriginalCount = endBoundaryIndex - startBoundaryIndex - 1;
-        } else {
-            deletedOriginalCount = originalVertices.size() - (endBoundaryIndex - startBoundaryIndex) - 1;
-        }
-        int expectedOriginalCount = originalVertices.size() - deletedOriginalCount;
-        
-        // 统计最终顶点列表中的原顶点数量
-        int actualOriginalCount = 0;
-        for (Double[] vertex : finalVertices) {
-            // 检查这个点是否在原顶点列表中（允许小的浮点误差）
-            for (Double[] original : originalVertices) {
-                if (Math.abs(vertex[0] - original[0]) < 0.001 && Math.abs(vertex[1] - original[1]) < 0.001) {
-                    actualOriginalCount++;
-                    break;
-                }
+            // 删除从 endBoundaryIndex+1 到 startBoundaryIndex（包含 startBoundaryIndex）
+            int idx = (endBoundaryIndex + 1) % n;
+            for (int k = 0; k < backwardDeleteCount; k++) {
+                keep[idx] = false;
+                idx = (idx + 1) % n;
             }
         }
-        
-        // 如果原顶点数量明显不足（少于预期的80%），说明计算有误，回退到保留所有原顶点的方案
-        if (actualOriginalCount < expectedOriginalCount * 0.8) {
-            // 回退方案：保留所有原顶点，然后添加新顶点和边界点
+
+        // 确保至少保留一个原顶点（防止误删全部）
+        boolean anyKept = false;
+        for (boolean b : keep) { if (b) { anyKept = true; break; } }
+        if (!anyKept) {
+            // 回退到保留所有原顶点的方案
             List<Double[]> fallbackVertices = new ArrayList<>(originalVertices);
             fallbackVertices.addAll(externalVertices);
-            if (boundaryPoints != null) {
-                fallbackVertices.addAll(boundaryPoints);
-            }
-            // 对所有顶点重新排序，防止交叉
+            if (boundaryPoints != null) fallbackVertices.addAll(boundaryPoints);
             return sortVerticesWithoutCrossing(fallbackVertices);
         }
-        
-        // 按照提示词：将新添加顶点插入原域名后，需要对全部顶点重新进行一次排序
-        // 确保所有顶点（原顶点 + 新顶点 + 边界点）按照多边形边界的正确顺序排列，防止交叉
+
+        // 找到插入点：通常在 startBoundaryIndex 之后插入，但如果 start 被删除，向前找到最近保留的顶点作为插入点
+        int insertAfter = startBoundaryIndex;
+        int safeCounter = 0;
+        while (safeCounter < n && !keep[insertAfter]) {
+            insertAfter = (insertAfter - 1 + n) % n;
+            safeCounter++;
+        }
+
+        List<Double[]> finalVertices = new ArrayList<>();
+        boolean inserted = false;
+
+        // 以原始顺序遍历，保留未被删除的点，并在 insertAfter 后插入边界点与新顶点
+        for (int i = 0; i < n; i++) {
+            if (keep[i]) {
+                finalVertices.add(originalVertices.get(i));
+            }
+            if (!inserted && i == insertAfter) {
+                // 插入边界点与新顶点（保持顺序：startBoundary -> newVertices -> endBoundary）
+                finalVertices.add(startBoundaryPoint);
+                finalVertices.addAll(orderedNewVertices);
+                finalVertices.add(endBoundaryPoint);
+                inserted = true;
+            }
+        }
+
+        // 如果尚未插入（极端情况），追加到末尾
+        if (!inserted) {
+            finalVertices.add(startBoundaryPoint);
+            finalVertices.addAll(orderedNewVertices);
+            finalVertices.add(endBoundaryPoint);
+        }
+
+        // 最后进行去重与防交叉排序
         return sortVerticesWithoutCrossing(finalVertices);
     }
     
