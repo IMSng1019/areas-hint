@@ -7,19 +7,42 @@ import java.util.List;
 
 /**
  * 收缩几何计算器
- * 完全按照提示词实现复杂的域名收缩算法：
+ *
+ * 完全按照提示词实现复杂的域名收缩算法，是 ExpandAreaManager 的反义版本：
+ *
+ * === 核心差异对比 ===
+ *
+ * ExpandArea（扩展）:
+ * 1. 删除在原域名**内部**的新顶点，保留外部顶点
+ * 2. 新顶点在外部，用于扩大域名范围
+ * 3. 最终域名 = 原域名 + 外部新顶点
+ *
+ * ShrinkArea（收缩）:
+ * 1. 删除在原域名**外部**的收缩顶点，保留内部顶点
+ * 2. 收缩顶点在内部，用于缩小域名范围
+ * 3. 最终域名 = 原域名 - 收缩区域
+ *
+ * === 算法步骤（按照提示词）===
+ *
  * 1. 检测收缩区域顶点是否在原域名外（包括边界上）
  * 2. 计算线段与原域名边界的交叉点作为边界点
- * 3. 删除在原域名内的收缩顶点
+ * 3. 删除在原域名外的收缩顶点（保留内部顶点）
  * 4. 计算初始点和末尾点的临近点
  * 5. 计算临近点最近的边界点
  * 6. 处理一个点对应多个边界点的情况（取中位值）
  * 7. 判断边界点在原域名哪两个顶点之间
  * 8. 删除两个边界点之间的原域名顶点（较短路径）
  * 9. 判断新顶点插入方式（正向或反向）
- * 10. 插入：原顶点 → 边界点 → 新顶点 → 边界点 → 原顶点
+ * 10. 插入：原顶点 → 边界点 → 收缩顶点 → 边界点 → 原顶点
  * 11. 检查并修复线段交叉
  * 12. 重新计算二级顶点
+ *
+ * === 关键实现细节 ===
+ *
+ * - 变量命名：虽然变量名为 externalShrinkVertices，但实际存储的是**内部顶点**
+ *   （保持命名一致性以减少代码改动，但逻辑已反转）
+ * - 权限检查：signature（创建者）或 basename 引用的玩家可以收缩域名
+ * - 高度处理：收缩后的域名继承原域名的高度设置
  */
 public class ShrinkGeometryCalculator {
     private final AreaData originalArea;
@@ -130,66 +153,70 @@ public class ShrinkGeometryCalculator {
     
     /**
      * 步骤2: 分离内外部顶点
-     * 检测收缩顶点是否在原域名外，删除在原域名内的顶点
+     * 按照提示词：检测收缩顶点是否在原域名外（包括边界上），删除在原域名外的顶点
+     * 这是与expandarea相反的逻辑：expandarea删除内部顶点，shrinkarea删除外部顶点
      */
     private boolean separateInternalExternalVertices() {
         List<AreaData.Vertex> originalVertices = originalArea.getVertices();
         externalShrinkVertices.clear();
-        
+
         System.out.println("开始检测收缩顶点位置...");
-        
+
         for (int i = 0; i < shrinkVertices.size(); i++) {
             AreaData.Vertex vertex = shrinkVertices.get(i);
             boolean isInside = isPointInPolygon(vertex, originalVertices);
             boolean isOnBoundary = isPointOnPolygonBoundary(vertex, originalVertices);
-            
-            System.out.println("顶点 " + i + " (" + vertex.getX() + ", " + vertex.getZ() + "): " + 
+
+            System.out.println("顶点 " + i + " (" + vertex.getX() + ", " + vertex.getZ() + "): " +
                              (isInside ? "内部" : isOnBoundary ? "边界" : "外部"));
-            
-            // 在原域名外的点（包括边界上的点）保留
-            if (!isInside || isOnBoundary) {
+
+            // 按照提示词：删除在原域名外的顶点，保留内部顶点（包括边界上的点）
+            // 这里externalShrinkVertices实际上存储的是"内部顶点"（命名保持一致以减少改动）
+            if (isInside || isOnBoundary) {
                 externalShrinkVertices.add(vertex);
             }
         }
-        
-        System.out.println("外部/边界收缩顶点数量: " + externalShrinkVertices.size());
-        
-        // 如果所有顶点都在内部，无法收缩
+
+        System.out.println("内部/边界收缩顶点数量: " + externalShrinkVertices.size());
+
+        // 如果所有顶点都在外部，无法收缩
         if (externalShrinkVertices.isEmpty()) {
-            System.err.println("所有收缩顶点都在原域名内部，无法进行收缩");
+            System.err.println("所有收缩顶点都在原域名外部，无法进行收缩");
             return false;
         }
-        
+
         return true;
     }
     
     /**
      * 步骤3: 计算线段与原域名边界的交叉点
-     * 检查收缩区域的线段是否跨越原域名边界
+     * 按照提示词：检查收缩区域的线段是否跨越原域名边界
+     * 与expandarea相同的逻辑：计算线段与边界的交点
      */
     private boolean calculateBoundaryIntersections() {
         List<AreaData.Vertex> originalVertices = originalArea.getVertices();
         boundaryPoints.clear();
-        
+
         System.out.println("开始计算边界交叉点...");
-        
+
         // 遍历收缩顶点的每条边
         for (int i = 0; i < shrinkVertices.size(); i++) {
             AreaData.Vertex current = shrinkVertices.get(i);
             AreaData.Vertex next = shrinkVertices.get((i + 1) % shrinkVertices.size());
-            
+
             // 排除最开始点和最终点的线段（首尾相连的线段）
             if (i == shrinkVertices.size() - 1) {
                 continue;
             }
-            
+
             boolean currentInside = isPointInPolygon(current, originalVertices);
             boolean nextInside = isPointInPolygon(next, originalVertices);
-            
-            // 如果一个在内一个在外，说明线段跨越边界
+
+            // 按照提示词：如果一个在外一个在内，说明线段跨越边界
+            // 注意：这里的逻辑与expandarea相同，都是检测跨越边界的情况
             if (currentInside != nextInside) {
                 System.out.println("检测到跨越边界的线段: " + i + " -> " + (i + 1));
-                
+
                 // 计算交点
                 AreaData.Vertex intersection = findSegmentPolygonIntersection(current, next, originalVertices);
                 if (intersection != null) {
@@ -198,7 +225,7 @@ public class ShrinkGeometryCalculator {
                 }
             }
         }
-        
+
         System.out.println("边界交叉点数量: " + boundaryPoints.size());
         return true;
     }

@@ -18,21 +18,22 @@ public class ShrinkAreaClientNetworking {
     /**
      * 发送收缩后的域名数据到服务端
      */
-    public static void sendShrunkAreaToServer(AreaData shrunkArea) {
+    public static void sendShrunkAreaToServer(AreaData shrunkArea, String dimension) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
-            
+
             // 将AreaData转换为JsonObject
             JsonObject areaJson = AreaDataConverter.toJsonObject(shrunkArea);
-            
+
             // 写入数据
             buf.writeString(areaJson.toString());
-            
+            buf.writeString(dimension);  // 添加维度信息
+
             // 发送到服务端
             ClientPlayNetworking.send(Packets.SHRINK_AREA_CHANNEL, buf);
-            
-            System.out.println("已发送收缩域名数据到服务端: " + shrunkArea.getName());
-            
+
+            System.out.println("已发送收缩域名数据到服务端: " + shrunkArea.getName() + " (维度: " + dimension + ")");
+
         } catch (Exception e) {
             System.err.println("发送收缩域名数据失败: " + e.getMessage());
             e.printStackTrace();
@@ -67,12 +68,23 @@ public class ShrinkAreaClientNetworking {
      * 处理收缩域名响应
      */
     private static void handleShrinkAreaResponse(boolean success, String message) {
-        if (success) {
-            System.out.println("收缩域名成功: " + message);
-            // 可以在这里添加成功的UI提示
-        } else {
-            System.err.println("收缩域名失败: " + message);
-            // 可以在这里添加失败的UI提示
-        }
+        net.minecraft.client.MinecraftClient client = net.minecraft.client.MinecraftClient.getInstance();
+        client.execute(() -> {
+            if (client.player != null) {
+                if (success) {
+                    client.player.sendMessage(
+                        net.minecraft.text.Text.literal("§a域名收缩成功！" + message)
+                            .formatted(net.minecraft.util.Formatting.GREEN),
+                        false
+                    );
+                } else {
+                    client.player.sendMessage(
+                        net.minecraft.text.Text.literal("§c域名收缩失败：" + message)
+                            .formatted(net.minecraft.util.Formatting.RED),
+                        false
+                    );
+                }
+            }
+        });
     }
 } 
