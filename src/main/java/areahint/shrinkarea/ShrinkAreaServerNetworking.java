@@ -80,7 +80,7 @@ public class ShrinkAreaServerNetworking {
             }
 
             // 重新分发给所有玩家
-            redistributeAreasToAllPlayers(player.getServer(), dimension);
+            redistributeAreasToAllPlayers(player.getServer());
 
             // 发送成功响应
             sendSuccessResponse(player, "域名 '" + shrunkArea.getName() + "' 收缩成功");
@@ -215,14 +215,13 @@ public class ShrinkAreaServerNetworking {
     }
 
     /**
-     * 重新分发域名给所有玩家
+     * 重新分发域名给所有玩家（相当于执行一次reload指令）
+     * 向所有玩家发送所有维度的区域数据
      */
-    private static void redistributeAreasToAllPlayers(net.minecraft.server.MinecraftServer server, String dimension) {
+    private static void redistributeAreasToAllPlayers(net.minecraft.server.MinecraftServer server) {
         try {
-            // 向所有玩家发送重新加载的区域数据
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                ServerNetworking.sendAreaDataToClient(player, dimension);
-            }
+            // 使用ServerNetworking的方法发送所有维度的数据（相当于reload）
+            ServerNetworking.sendAllAreaDataToAll();
 
         } catch (Exception e) {
             System.err.println("重新分发域名失败: " + e.getMessage());
