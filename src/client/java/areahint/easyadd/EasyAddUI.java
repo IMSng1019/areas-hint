@@ -327,40 +327,42 @@ public class EasyAddUI {
         MutableText row1 = Text.empty()
             .append(createColorButton("白色", "#FFFFFF", "§f"))
             .append(Text.of("  "))
-            .append(createColorButton("红色", "#FF0000", "§c"))
+            .append(createColorButton("灰色", "#808080", "§7"))
             .append(Text.of("  "))
-            .append(createColorButton("粉红色", "#FF69B4", "§d"))
+            .append(createColorButton("深灰色", "#555555", "§8"))
             .append(Text.of("  "))
-            .append(createColorButton("橙色", "#FFA500", "§6"));
+            .append(createColorButton("黑色", "#000000", "§0"));
         
         // 第二行颜色按钮
         MutableText row2 = Text.empty()
-            .append(createColorButton("黄色", "#FFFF00", "§e"))
+            .append(createColorButton("深红色", "#AA0000", "§4")) 
             .append(Text.of("  "))
-            .append(createColorButton("棕色", "#8B4513", "§3"))
+            .append(createColorButton("红色", "#FF0000", "§c"))  
             .append(Text.of("  "))
-            .append(createColorButton("浅绿色", "#90EE90", "§a"))
-            .append(Text.of("  "))
-            .append(createColorButton("深绿色", "#006400", "§2"));
+            .append(createColorButton("粉红色", "#FF55FF", "§d"))   
+            .append(Text.of("  "))   
+            .append(createColorButton("橙色", "#FFAA00", "§6"));
         
         // 第三行颜色按钮
         MutableText row3 = Text.empty()
-            .append(createColorButton("浅蓝色", "#87CEEB", "§b"))
+            .append(createColorButton("黄色", "#FFFF55", "§e"))
             .append(Text.of("  "))
-            .append(createColorButton("深蓝色", "#000080", "§1"))
+            .append(createColorButton("绿色", "#55FF55", "§a"))
             .append(Text.of("  "))
-            .append(createColorButton("浅紫色", "#DDA0DD", "§5"))
+            .append(createColorButton("深绿色", "#00AA00", "§2"))
             .append(Text.of("  "))
-            .append(createColorButton("紫色", "#800080", "§5"));
+            .append(createColorButton("天蓝色", "#55FFFF", "§b"));
         
         // 第四行颜色按钮
         MutableText row4 = Text.empty()
-            .append(createColorButton("灰色", "#808080", "§7"))
+            .append(createColorButton("湖蓝色", "#00AAAA", "§3"))
             .append(Text.of("  "))
-            .append(createColorButton("黑色", "#000000", "§0"))
+            .append(createColorButton("蓝色", "#5555FF", "§9"))
             .append(Text.of("  "))
-            .append(createColorButton("自定义颜色", "custom", "§6"));
-        
+            .append(createColorButton("深蓝色", "#0000AA", "§1"))
+            .append(Text.of("  "))
+            .append(createColorButton("紫色", "#800080", "§5"));
+        //自定义颜色按钮因为无法显示被删除了
         // 取消按钮
         MutableText cancelButton = Text.literal("§c[取消本次操作]")
             .setStyle(Style.EMPTY
