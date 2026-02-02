@@ -226,6 +226,10 @@ public class ClientNetworking {
                     else if (action.startsWith("shrinkarea")) {
                         handleEasyAddCommand(action);
                     }
+                    // 处理Recolor命令
+                    else if (action.startsWith("recolor")) {
+                        handleRecolorCommand(action);
+                    }
                     // 处理模组开关命令
                     else if (action.equals("on") || action.equals("off")) {
                         areahint.command.ModToggleCommand.handleToggleCommand(action);
@@ -349,7 +353,38 @@ public class ClientNetworking {
             AreashintClient.LOGGER.error("处理EasyAdd命令时出错: " + e.getMessage(), e);
         }
     }
-    
+
+    /**
+     * 处理Recolor命令
+     * @param action 命令动作
+     */
+    private static void handleRecolorCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理Recolor命令: " + action);
+            areahint.recolor.RecolorManager manager = areahint.recolor.RecolorManager.getInstance();
+
+            if (action.startsWith("recolor_select:")) {
+                String areaName = action.substring("recolor_select:".length());
+                AreashintClient.LOGGER.info("执行recolor_select: " + areaName);
+                manager.handleAreaSelection(areaName);
+            } else if (action.startsWith("recolor_color:")) {
+                String colorValue = action.substring("recolor_color:".length());
+                AreashintClient.LOGGER.info("执行recolor_color: " + colorValue);
+                manager.handleColorSelection(colorValue);
+            } else if (action.equals("recolor_confirm")) {
+                AreashintClient.LOGGER.info("执行recolor_confirm");
+                manager.confirmChange();
+            } else if (action.equals("recolor_cancel")) {
+                AreashintClient.LOGGER.info("执行recolor_cancel");
+                manager.cancelRecolor();
+            } else {
+                AreashintClient.LOGGER.warn("未知的Recolor命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理Recolor命令时出错: " + e.getMessage(), e);
+        }
+    }
+
     /**
      * 显示当前频率信息
      * @param client Minecraft客户端实例
@@ -460,10 +495,33 @@ public class ClientNetworking {
                 // 处理交互式recolor界面
                 String dimension = buf.readString();
                 int count = buf.readInt();
-                
+
+                // 读取域名列表
+                java.util.List<areahint.data.AreaData> areas = new java.util.ArrayList<>();
+                for (int i = 0; i < count; i++) {
+                    try {
+                        String areaName = buf.readString();
+                        String currentColor = buf.readString();
+                        int level = buf.readInt();
+                        String baseName = buf.readString();
+
+                        // 创建简化的AreaData对象（只包含必要信息）
+                        areahint.data.AreaData area = new areahint.data.AreaData();
+                        area.setName(areaName);
+                        area.setColor(currentColor);
+                        area.setLevel(level);
+                        area.setBaseName(baseName.isEmpty() ? null : baseName);
+
+                        areas.add(area);
+                    } catch (Exception e) {
+                        AreashintClient.LOGGER.error("读取域名信息时出错", e);
+                    }
+                }
+
                 client.execute(() -> {
                     if (client.player != null) {
-                        showInteractiveRecolorScreen(count, buf);
+                        // 启动交互式Recolor流程
+                        areahint.recolor.RecolorManager.getInstance().startRecolor(areas, dimension);
                     }
                 });
             } else if ("recolor_response".equals(action)) {

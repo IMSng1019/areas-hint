@@ -185,11 +185,22 @@ public class ServerCommands {
             // recolor 命令
             .then(literal("recolor")
                 .executes(RecolorCommand::executeRecolor)
-                .then(argument("areaName", StringArgumentType.word())
-                    .then(argument("color", StringArgumentType.greedyString())
-                        .executes(context -> RecolorCommand.executeRecolorChange(context, 
-                            StringArgumentType.getString(context, "areaName"),
-                            StringArgumentType.getString(context, "color"))))))
+                // /areahint recolor select <域名>
+                .then(literal("select")
+                    .then(argument("selectAreaName", StringArgumentType.greedyString())
+                        .executes(context -> executeRecolorSelect(context,
+                            StringArgumentType.getString(context, "selectAreaName")))))
+                // /areahint recolor color <颜色>
+                .then(literal("color")
+                    .then(argument("colorValue", StringArgumentType.greedyString())
+                        .executes(context -> executeRecolorColor(context,
+                            StringArgumentType.getString(context, "colorValue")))))
+                // /areahint recolor confirm
+                .then(literal("confirm")
+                    .executes(ServerCommands::executeRecolorConfirm))
+                // /areahint recolor cancel
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeRecolorCancel)))
             
             // renamearea 命令
             .then(literal("renamearea")
@@ -1351,7 +1362,72 @@ public class ServerCommands {
                     builder.suggest(areaName);
                 }
             }
-            
+
             return builder.buildFuture();
         };
-} 
+
+    /**
+     * 执行recolor select命令（客户端通过网络调用）
+     */
+    private static int executeRecolorSelect(CommandContext<ServerCommandSource> context, String areaName) {
+        ServerCommandSource source = context.getSource();
+
+        // 移除引号（如果存在）
+        if (areaName.startsWith("\"") && areaName.endsWith("\"") && areaName.length() > 1) {
+            areaName = areaName.substring(1, areaName.length() - 1);
+        }
+
+        // 发送命令到客户端
+        if (source.getPlayer() != null) {
+            ServerNetworking.sendCommandToClient(source.getPlayer(),
+                "areahint:recolor_select:" + areaName);
+        }
+
+        return 1;
+    }
+
+    /**
+     * 执行recolor color命令（客户端通过网络调用）
+     */
+    private static int executeRecolorColor(CommandContext<ServerCommandSource> context, String colorValue) {
+        ServerCommandSource source = context.getSource();
+
+        // 发送命令到客户端
+        if (source.getPlayer() != null) {
+            ServerNetworking.sendCommandToClient(source.getPlayer(),
+                "areahint:recolor_color:" + colorValue);
+        }
+
+        return 1;
+    }
+
+    /**
+     * 执行recolor confirm命令（客户端通过网络调用）
+     */
+    private static int executeRecolorConfirm(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        // 发送命令到客户端
+        if (source.getPlayer() != null) {
+            ServerNetworking.sendCommandToClient(source.getPlayer(),
+                "areahint:recolor_confirm");
+        }
+
+        return 1;
+    }
+
+    /**
+     * 执行recolor cancel命令（客户端通过网络调用）
+     */
+    private static int executeRecolorCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        // 发送命令到客户端
+        if (source.getPlayer() != null) {
+            ServerNetworking.sendCommandToClient(source.getPlayer(),
+                "areahint:recolor_cancel");
+        }
+
+        return 1;
+    }
+}
