@@ -124,8 +124,17 @@ public class EasyAddManager {
             case INPUT_NAME:
                 if (!input.trim().isEmpty()) {
                     areaName = input.trim();
+
+                    // 检查域名名称是否已存在（不检查联合域名）
+                    if (checkAreaNameExists(areaName)) {
+                        client.player.sendMessage(Text.of("§c域名名称 \"" + areaName + "\" 已存在于当前维度"), false);
+                        client.player.sendMessage(Text.of("§7请输入一个不同的域名名称："), false);
+                        // 保持在 INPUT_NAME 状态，等待用户重新输入
+                        return;
+                    }
+
                     client.player.sendMessage(Text.of("§a已设置域名名称：§6" + areaName), false);
-                    
+
                     // 进入联合域名输入
                     currentState = EasyAddState.INPUT_SURFACE_NAME;
                     EasyAddUI.showSurfaceNameInputScreen();
@@ -527,11 +536,52 @@ public class EasyAddManager {
     }
     
     /**
+     * 检查域名名称是否已存在于当前维度
+     * 注意：只检查域名名称（name字段），不检查联合域名（surfacename字段）
+     * @param areaName 要检查的域名名称
+     * @return 如果域名名称已存在返回true，否则返回false
+     */
+    private boolean checkAreaNameExists(String areaName) {
+        try {
+            String fileName = getFileNameForCurrentDimension();
+            if (fileName == null) {
+                ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD,
+                    "无法确定当前维度文件名，跳过查重");
+                return false;
+            }
+
+            // 读取当前维度的所有域名数据
+            List<AreaData> existingAreas = FileManager.readAreaData(
+                areahint.world.ClientWorldFolderManager.getWorldDimensionFile(fileName));
+
+            // 检查是否存在相同的域名名称（name字段）
+            for (AreaData area : existingAreas) {
+                if (area.getName().equals(areaName)) {
+                    ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD,
+                        "发现重复域名名称: " + areaName);
+                    return true;
+                }
+            }
+
+            ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD,
+                "域名名称 \"" + areaName + "\" 未重复，可以使用");
+            return false;
+
+        } catch (Exception e) {
+            ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD,
+                "检查域名名称时发生错误: " + e.getMessage());
+            // 发生错误时，为了安全起见，允许继续（返回false）
+            // 服务端还会再次检查
+            return false;
+        }
+    }
+
+    /**
      * 获取当前维度的文件名
      */
     private String getFileNameForCurrentDimension() {
         if (currentDimension == null) return null;
-        
+
         if (currentDimension.contains("overworld")) {
             return areahint.Areashint.OVERWORLD_FILE;
         } else if (currentDimension.contains("nether")) {
