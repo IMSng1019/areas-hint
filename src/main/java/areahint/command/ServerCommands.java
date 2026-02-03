@@ -202,18 +202,17 @@ public class ServerCommands {
                 .then(literal("cancel")
                     .executes(ServerCommands::executeRecolorCancel)))
             
-            // renamearea 命令
-            .then(literal("renamearea")
-                .executes(RenameAreaCommand::executeRenameArea)
+            // rename 命令（交互式流程）
+            .then(literal("rename")
+                .executes(RenameAreaCommand::executeRename)
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> RenameAreaCommand.executeRenameSelect(context,
+                            StringArgumentType.getString(context, "areaName")))))
                 .then(literal("confirm")
                     .executes(RenameAreaCommand::executeRenameConfirm))
                 .then(literal("cancel")
-                    .executes(RenameAreaCommand::executeRenameCancel))
-                .then(argument("areaName", StringArgumentType.word())
-                    .then(argument("newName", StringArgumentType.greedyString())
-                        .executes(context -> RenameAreaCommand.executeRenameAreaChange(context,
-                            StringArgumentType.getString(context, "areaName"),
-                            StringArgumentType.getString(context, "newName"))))))
+                    .executes(RenameAreaCommand::executeRenameCancel)))
                             
             // sethigh 命令
             .then(literal("sethigh")
@@ -252,8 +251,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 (普通玩家可用)"));
         source.sendMessage(Text.of("§a/areahint recolor §7- 列出当前维度可编辑的域名"));
         source.sendMessage(Text.of("§a/areahint recolor <域名> <颜色> §7- 修改指定域名的颜色"));
-        source.sendMessage(Text.of("§a/areahint renamearea §7- 列出当前维度可重命名的域名"));
-        source.sendMessage(Text.of("§a/areahint renamearea <域名> <新名称> §7- 重命名指定域名"));
+        source.sendMessage(Text.of("§a/areahint rename §7- 启动交互式域名重命名流程"));
         source.sendMessage(Text.of("§a/areahint sethigh §7- 列出当前维度可修改高度的域名"));
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));

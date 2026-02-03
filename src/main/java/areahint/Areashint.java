@@ -64,7 +64,10 @@ public class Areashint implements ModInitializer {
 		
 		// 初始化EasyAdd服务端网络处理
 		areahint.easyadd.EasyAddServerNetworking.registerServerReceivers();
-		
+
+		// 初始化Rename服务端网络处理
+		areahint.command.RenameAreaCommand.registerServerReceivers();
+
 		// 初始化ExpandArea服务端网络处理
 		areahint.expandarea.ExpandAreaServerNetworking.registerServerNetworking();
 		

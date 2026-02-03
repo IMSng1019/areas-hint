@@ -219,23 +219,7 @@ public class ServerNetworking {
                     Areashint.LOGGER.error("处理recolor请求时发生错误", e);
                 }
             });
-        
-        // 注册rename请求处理器
-        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_RENAME_REQUEST,
-            (server, player, handler, buf, responseSender) -> {
-                try {
-                    String oldName = buf.readString();
-                    String newName = buf.readString();
-                    String dimension = buf.readString();
-                    
-                    server.execute(() -> {
-                        areahint.command.RenameAreaCommand.handleRenameRequest(player, oldName, newName, dimension);
-                    });
-                } catch (Exception e) {
-                    Areashint.LOGGER.error("处理rename请求时发生错误", e);
-                }
-            });
-        
+
         // 注册SetHigh请求处理器
         ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_SETHIGH_REQUEST,
             (server, player, handler, buf, responseSender) -> {
