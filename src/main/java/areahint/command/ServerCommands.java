@@ -86,12 +86,17 @@ public class ServerCommands {
                     .executes(context -> executeAdd(context, StringArgumentType.getString(context, "json"))))
             )
             
-            // delete 命令 (任何玩家都可以使用，但有权限检查)
+            // delete 命令 (交互式删除)
             .then(literal("delete")
-                .then(argument("areaName", StringArgumentType.greedyString())
-                    .suggests(DELETABLE_AREA_SUGGESTIONS)
-                    .executes(context -> executeDelete(context, StringArgumentType.getString(context, "areaName"))))
-                .executes(ServerCommands::executeDeleteList)
+                .executes(ServerCommands::executeDeleteStart)
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .suggests(DELETABLE_AREA_SUGGESTIONS)
+                        .executes(context -> executeDeleteSelect(context, StringArgumentType.getString(context, "areaName")))))
+                .then(literal("confirm")
+                    .executes(ServerCommands::executeDeleteConfirm))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeDeleteCancel))
             )
             
             // frequency 命令
@@ -513,148 +518,93 @@ public class ServerCommands {
     }
     
     /**
-     * 执行delete命令列表（显示所有可删除的域名）
+     * 执行delete命令（启动交互式删除流程）
      * @param context 命令上下文
      * @return 执行结果
      */
-    private static int executeDeleteList(CommandContext<ServerCommandSource> context) {
+    private static int executeDeleteStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
-        
-        // 获取当前维度
-        String dimensionId = getDimensionFromSource(source);
-        if (dimensionId == null) {
-            source.sendMessage(Text.of("§c无法确定当前维度"));
+
+        // 检查是否为客户端命令
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
             return 0;
         }
-        
-        String fileName = Packets.getFileNameForDimension(dimensionId);
-        if (fileName == null) {
-            source.sendMessage(Text.of("§c无法确定文件名，维度ID: " + dimensionId));
-            return 0;
-        }
-        
-        Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-        
-        // 读取区域数据
-        java.util.List<AreaData> areas = FileManager.readAreaData(areaFile);
-        
-        if (areas.isEmpty()) {
-            source.sendMessage(Text.of("§7当前维度没有任何域名"));
-            return Command.SINGLE_SUCCESS;
-        }
-        
-        source.sendMessage(Text.of("§6===== 可删除的域名列表 ====="));
-        
-        for (AreaData area : areas) {
-            String signature = area.getSignature();
-            String playerName = source.getName();
-            boolean hasOp = source.hasPermissionLevel(2);
-            boolean canDelete = false;
-            
-            if (signature == null) {
-                // 没有签名的旧域名：只有管理员可以删除
-                if (hasOp) {
-                    source.sendMessage(Text.of("§a" + area.getName() + " §7- 可删除 (旧版本域名，管理员权限)"));
-                    canDelete = true;
-                } else {
-                    source.sendMessage(Text.of("§c" + area.getName() + " §7- 不可删除 (旧版本域名，需要管理员权限)"));
-                }
-            } else if (signature.equals(playerName) || hasOp) {
-                // 可以删除
-                source.sendMessage(Text.of("§a" + area.getName() + " §7- 可删除 (创建者: " + signature + ")"));
-                canDelete = true;
-            } else {
-                // 不可删除
-                source.sendMessage(Text.of("§c" + area.getName() + " §7- 不可删除 (创建者: " + signature + ")"));
-            }
-        }
-        
-        source.sendMessage(Text.of("§7使用 §a/areahint delete <域名> §7来删除指定域名"));
-        return Command.SINGLE_SUCCESS;
-    }
-    
-    /**
-     * 执行delete命令（删除指定域名）
-     * @param context 命令上下文
-     * @param areaName 要删除的域名
-     * @return 执行结果
-     */
-    private static int executeDelete(CommandContext<ServerCommandSource> context, String areaName) {
-        ServerCommandSource source = context.getSource();
-        String playerName = source.getName();
-        boolean hasOp = source.hasPermissionLevel(2);
-        
-        // 获取当前维度
-        String dimensionId = getDimensionFromSource(source);
-        if (dimensionId == null) {
-            source.sendMessage(Text.of("§c无法确定当前维度"));
-            return 0;
-        }
-        
-        String fileName = Packets.getFileNameForDimension(dimensionId);
-        if (fileName == null) {
-            source.sendMessage(Text.of("§c无法确定文件名，维度ID: " + dimensionId));
-            return 0;
-        }
-        
-        Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-        
-        // 读取区域数据
-        java.util.List<AreaData> areas = FileManager.readAreaData(areaFile);
-        
-        // 查找要删除的域名
-        AreaData targetArea = null;
-        for (AreaData area : areas) {
-            if (area.getName().equals(areaName)) {
-                targetArea = area;
-                break;
-            }
-        }
-        
-        if (targetArea == null) {
-            source.sendMessage(Text.of("§c未找到域名: §6" + areaName));
-            return 0;
-        }
-        
-        // 检查签名权限
-        String signature = targetArea.getSignature();
-        if (signature == null) {
-            // 没有签名的旧域名：只有管理员可以删除
-            if (!hasOp) {
-                source.sendMessage(Text.of("§c该域名没有签名（旧版本域名），只有管理员可以删除"));
-                return 0;
-            }
-        } else {
-            // 有签名的新域名：创建者或管理员可以删除
-            if (!signature.equals(playerName) && !hasOp) {
-                source.sendMessage(Text.of("§c你不是该域名的创建者，无法删除"));
-                return 0;
-            }
-        }
-        
-        // 检查是否有次级域名引用此域名
-        for (AreaData area : areas) {
-            if (areaName.equals(area.getBaseName())) {
-                source.sendMessage(Text.of("§c不能删除该域名，因为存在次级域名 §6" + area.getName() + " §c引用了它"));
-                return 0;
-            }
-        }
-        
-        // 执行删除
-        areas.remove(targetArea);
-        
-        // 保存文件
+
+        // 发送客户端命令
         try {
-            FileManager.writeAreaData(areaFile, areas);
-            source.sendMessage(Text.of("§a成功删除域名: §6" + areaName));
-            
-            // 向所有客户端发送更新后的区域数据
-            ServerNetworking.sendAllAreaDataToAll();
-            
+            // 通过网络发送到客户端处理
+            sendClientCommand(source, "areahint:delete_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c删除域名时发生错误: " + e.getMessage()));
-            Areashint.LOGGER.error("删除域名时发生错误", e);
+            source.sendMessage(Text.of("§c启动Delete时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    /**
+     * 执行delete select命令（选择要删除的域名）
+     * @param context 命令上下文
+     * @param areaName 域名名称
+     * @return 执行结果
+     */
+    private static int executeDeleteSelect(CommandContext<ServerCommandSource> context, String areaName) {
+        ServerCommandSource source = context.getSource();
+
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        try {
+            sendClientCommand(source, "areahint:delete_select:" + areaName);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择域名时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    /**
+     * 执行delete confirm命令（确认删除）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeDeleteConfirm(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        try {
+            sendClientCommand(source, "areahint:delete_confirm");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c确认删除时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    /**
+     * 执行delete cancel命令（取消删除）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeDeleteCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        try {
+            sendClientCommand(source, "areahint:delete_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c取消删除时发生错误: " + e.getMessage()));
             return 0;
         }
     }

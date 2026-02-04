@@ -116,6 +116,17 @@ public class AreaDetector {
     }
     
     /**
+     * 查找玩家所在的区域（返回原始AreaData，不格式化）
+     * @param x 玩家的X坐标
+     * @param y 玩家的Y坐标（高度）
+     * @param z 玩家的Z坐标
+     * @return 玩家所在的区域数据，如果不在任何区域内则返回null
+     */
+    public AreaData findAreaRaw(double x, double y, double z) {
+        return findArea(x, y, z);
+    }
+
+    /**
      * 查找玩家所在的区域
      * @param x 玩家的X坐标
      * @param y 玩家的Y坐标（高度）

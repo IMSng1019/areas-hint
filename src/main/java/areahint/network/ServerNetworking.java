@@ -211,7 +211,7 @@ public class ServerNetworking {
                     String areaName = buf.readString();
                     String color = buf.readString();
                     String dimension = buf.readString();
-                    
+
                     server.execute(() -> {
                         areahint.command.RecolorCommand.handleRecolorRequest(player, areaName, color, dimension);
                     });
@@ -228,7 +228,7 @@ public class ServerNetworking {
                     final boolean hasCustomHeight = buf.readBoolean();
                     final Double maxHeight;
                     final Double minHeight;
-                    
+
                     if (hasCustomHeight) {
                         boolean hasMax = buf.readBoolean();
                         maxHeight = hasMax ? buf.readDouble() : null;
@@ -238,7 +238,7 @@ public class ServerNetworking {
                         maxHeight = null;
                         minHeight = null;
                     }
-                    
+
                     server.execute(() -> {
                         areahint.command.SetHighCommand.handleHeightRequest(player, areaName, hasCustomHeight, maxHeight, minHeight);
                     });
@@ -246,8 +246,243 @@ public class ServerNetworking {
                     Areashint.LOGGER.error("处理SetHigh请求时发生错误", e);
                 }
             });
-        
+
+        // 注册请求可删除域名列表处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_REQUEST_DELETABLE_AREAS,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    final String dimension = buf.readString();
+
+                    server.execute(() -> {
+                        sendDeletableAreasList(player, dimension);
+                    });
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理请求可删除域名列表时发生错误", e);
+                }
+            });
+
+        // 注册Delete请求处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_DELETE_AREA,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    final String areaName = buf.readString();
+                    final String dimension = buf.readString();
+
+                    server.execute(() -> {
+                        handleDeleteRequest(player, areaName, dimension);
+                    });
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理Delete请求时发生错误", e);
+                }
+            });
+
         // 注意：高度设置功能已简化，不再需要网络处理器
         // 玩家直接使用 /areahint sethigh 命令即可
+    }
+
+    /**
+     * 发送可删除域名列表到客户端
+     * @param player 请求的玩家
+     * @param dimension 维度标识
+     */
+    private static void sendDeletableAreasList(ServerPlayerEntity player, String dimension) {
+        try {
+            String playerName = player.getName().getString();
+            boolean hasOp = player.hasPermissionLevel(2);
+
+            Areashint.LOGGER.info("处理可删除域名列表请求 - 玩家: " + playerName + ", 维度: " + dimension + ", 是否OP: " + hasOp);
+
+            // 获取文件名
+            String fileName = Packets.getFileNameForDimension(dimension);
+            if (fileName == null) {
+                Areashint.LOGGER.warn("无法确定维度文件 - 维度: " + dimension);
+                // 发送空列表
+                sendEmptyDeletableAreasList(player);
+                return;
+            }
+
+            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+
+            // 读取区域数据
+            java.util.List<areahint.data.AreaData> allAreas = FileManager.readAreaData(areaFile);
+            java.util.List<areahint.data.AreaData> deletableAreas = new java.util.ArrayList<>();
+
+            // 筛选可删除的域名
+            for (areahint.data.AreaData area : allAreas) {
+                String signature = area.getSignature();
+
+                // 没有签名的旧域名不能删除
+                if (signature == null) {
+                    continue;
+                }
+
+                // 检查权限：创建者或管理员可以删除
+                boolean canDelete = signature.equals(playerName) || hasOp;
+
+                if (canDelete) {
+                    // 检查是否有次级域名引用此域名
+                    boolean hasChildren = false;
+                    for (areahint.data.AreaData childArea : allAreas) {
+                        if (area.getName().equals(childArea.getBaseName())) {
+                            hasChildren = true;
+                            break;
+                        }
+                    }
+
+                    // 只有没有子域名的才能删除
+                    if (!hasChildren) {
+                        deletableAreas.add(area);
+                    }
+                }
+            }
+
+            Areashint.LOGGER.info("找到 " + deletableAreas.size() + " 个可删除的域名");
+
+            // 创建数据包
+            PacketByteBuf buffer = PacketByteBufs.create();
+            buffer.writeInt(deletableAreas.size());
+
+            for (areahint.data.AreaData area : deletableAreas) {
+                String json = areahint.file.JsonHelper.toJsonSingle(area);
+                buffer.writeString(json);
+            }
+
+            // 发送数据包
+            ServerPlayNetworking.send(player, Packets.S2C_DELETABLE_AREAS_LIST, buffer);
+
+            Areashint.LOGGER.info("已向玩家 " + playerName + " 发送可删除域名列表");
+
+        } catch (Exception e) {
+            Areashint.LOGGER.error("发送可删除域名列表时发生错误", e);
+            sendEmptyDeletableAreasList(player);
+        }
+    }
+
+    /**
+     * 发送空的可删除域名列表
+     * @param player 目标玩家
+     */
+    private static void sendEmptyDeletableAreasList(ServerPlayerEntity player) {
+        try {
+            PacketByteBuf buffer = PacketByteBufs.create();
+            buffer.writeInt(0);
+            ServerPlayNetworking.send(player, Packets.S2C_DELETABLE_AREAS_LIST, buffer);
+        } catch (Exception e) {
+            Areashint.LOGGER.error("发送空可删除域名列表时发生错误", e);
+        }
+    }
+
+    /**
+     * 处理删除域名请求
+     * @param player 请求的玩家
+     * @param areaName 要删除的域名名称
+     * @param dimension 维度标识
+     */
+    private static void handleDeleteRequest(ServerPlayerEntity player, String areaName, String dimension) {
+        try {
+            String playerName = player.getName().getString();
+            boolean hasOp = player.hasPermissionLevel(2);
+
+            Areashint.LOGGER.info("处理删除请求 - 玩家: " + playerName + ", 域名: " + areaName + ", 维度: " + dimension);
+
+            // 获取文件名
+            String fileName = Packets.getFileNameForDimension(dimension);
+            if (fileName == null) {
+                Areashint.LOGGER.warn("无法确定维度文件 - 维度: " + dimension);
+                sendDeleteResponse(player, false, "无法确定维度文件（维度: " + dimension + "）");
+                return;
+            }
+
+            Areashint.LOGGER.info("维度文件名: " + fileName);
+
+            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+            Areashint.LOGGER.info("域名文件路径: " + areaFile.toAbsolutePath());
+
+            // 读取区域数据
+            java.util.List<areahint.data.AreaData> areas = FileManager.readAreaData(areaFile);
+            Areashint.LOGGER.info("读取到 " + areas.size() + " 个域名");
+
+            // 查找要删除的域名
+            areahint.data.AreaData targetArea = null;
+            for (areahint.data.AreaData area : areas) {
+                if (area.getName().equals(areaName)) {
+                    targetArea = area;
+                    break;
+                }
+            }
+
+            if (targetArea == null) {
+                Areashint.LOGGER.warn("未找到域名: " + areaName);
+                sendDeleteResponse(player, false, "未找到域名: " + areaName);
+                return;
+            }
+
+            Areashint.LOGGER.info("找到目标域名: " + areaName + ", 签名: " + targetArea.getSignature());
+
+            // 检查签名权限
+            String signature = targetArea.getSignature();
+            if (signature == null) {
+                // 没有签名的旧域名：不能删除
+                Areashint.LOGGER.warn("域名没有签名，无法删除");
+                sendDeleteResponse(player, false, "该域名没有签名（旧版本域名），无法删除");
+                return;
+            } else {
+                // 有签名的新域名：创建者或管理员可以删除
+                if (!signature.equals(playerName) && !hasOp) {
+                    Areashint.LOGGER.warn("玩家 " + playerName + " 不是域名创建者 " + signature);
+                    sendDeleteResponse(player, false, "你不是该域名的创建者，无法删除");
+                    return;
+                }
+            }
+
+            // 检查是否有次级域名引用此域名
+            for (areahint.data.AreaData area : areas) {
+                if (areaName.equals(area.getBaseName())) {
+                    Areashint.LOGGER.warn("域名 " + areaName + " 被子域名 " + area.getName() + " 引用");
+                    sendDeleteResponse(player, false, "不能删除该域名，因为存在次级域名 \"" + area.getName() + "\" 引用了它");
+                    return;
+                }
+            }
+
+            // 执行删除
+            areas.remove(targetArea);
+            Areashint.LOGGER.info("从列表中移除域名: " + areaName);
+
+            // 保存文件
+            FileManager.writeAreaData(areaFile, areas);
+
+            // 向所有客户端发送更新后的区域数据
+            sendAllAreaDataToAll();
+
+            // 发送成功响应
+            sendDeleteResponse(player, true, "成功删除域名: " + areaName);
+
+            Areashint.LOGGER.info("玩家 " + playerName + " 删除了域名: " + areaName);
+
+        } catch (Exception e) {
+            Areashint.LOGGER.error("处理删除请求时发生错误", e);
+            sendDeleteResponse(player, false, "删除域名时发生错误: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 发送删除响应到客户端
+     * @param player 目标玩家
+     * @param success 是否成功
+     * @param message 响应消息
+     */
+    private static void sendDeleteResponse(ServerPlayerEntity player, boolean success, String message) {
+        try {
+            PacketByteBuf buffer = PacketByteBufs.create();
+            buffer.writeBoolean(success);
+            buffer.writeString(message);
+
+            ServerPlayNetworking.send(player, Packets.S2C_DELETE_RESPONSE, buffer);
+
+            Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送删除响应: " +
+                (success ? "成功" : "失败") + " - " + message);
+        } catch (Exception e) {
+            Areashint.LOGGER.error("发送删除响应时出错: " + e.getMessage());
+        }
     }
 } 
