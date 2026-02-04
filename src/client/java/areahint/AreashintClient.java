@@ -46,10 +46,13 @@ public class AreashintClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		LOGGER.info("区域提示模组客户端初始化中...");
-		
+
 		// 检查并创建配置目录
 		initConfigDir();
-		
+
+		// 初始化客户端日志管理器
+		areahint.log.ClientLogManager.init();
+
 		// 初始化配置
 		ClientConfig.init();
 		
@@ -82,7 +85,10 @@ public class AreashintClient implements ClientModInitializer {
 		
 		// 初始化ShrinkArea功能
 		initShrinkArea();
-		
+
+		// 初始化Delete功能
+		initDelete();
+
 		// 注册统一的X键处理器
 		areahint.keyhandler.UnifiedKeyHandler.register();
 		
@@ -133,13 +139,27 @@ public class AreashintClient implements ClientModInitializer {
 		try {
 			// 注册按键处理器
 			areahint.shrinkarea.ShrinkAreaKeyHandler.register();
-			
+
 			// 注册网络接收器
 			areahint.shrinkarea.ShrinkAreaClientNetworking.registerClientNetworking();
-			
+
 			LOGGER.info("ShrinkArea功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化ShrinkArea功能时发生错误", e);
+		}
+	}
+
+	/**
+	 * 初始化Delete功能
+	 */
+	private void initDelete() {
+		try {
+			// 注册网络接收器
+			areahint.delete.DeleteNetworking.registerClientReceivers();
+
+			LOGGER.info("Delete功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化Delete功能时发生错误", e);
 		}
 	}
 	
@@ -215,11 +235,19 @@ public class AreashintClient implements ClientModInitializer {
 			
 			// 如果刚进入世界、维度变化或服务器变化，则执行检测和显示逻辑
 			if (justEnteredWorld || dimensionChanged || serverChanged) {
-				LOGGER.info("触发域名显示 - 刚进入世界: {}, 维度变化: {}, 服务器变化: {}", 
+				LOGGER.info("触发域名显示 - 刚进入世界: {}, 维度变化: {}, 服务器变化: {}",
 					justEnteredWorld, dimensionChanged, serverChanged);
-				
+
+				// 如果刚进入世界，通知日志管理器
+				if (justEnteredWorld) {
+					areahint.log.AreaChangeTracker.onWorldEnter();
+				}
+
 				// 只有在维度或服务器变化时才重新加载数据和初始化
 				if (dimensionChanged || serverChanged) {
+					// 重置区域追踪器
+					areahint.log.AreaChangeTracker.reset();
+
 					// 如果服务器变化了，重置状态并重新初始化客户端世界文件夹
 					if (serverChanged) {
 						LOGGER.info("检测到服务器变化: '{}' -> '{}', 重新初始化世界文件夹", currentServerAddress, serverAddress);
@@ -243,13 +271,15 @@ public class AreashintClient implements ClientModInitializer {
 				// 每次触发时都重置状态并立即检测（包括刚进入世界的情况）
 				currentAreaName = null;
 				hasShownDimensionalName = false; // 重置维度域名显示标记
-				
+
 				// 立即检测一次当前位置
 				double playerX = player.getX();
 				double playerY = player.getY();
 				double playerZ = player.getZ();
-				String areaName = areaDetector.detectPlayerArea(playerX, playerY, playerZ);
-				
+
+				// 使用AreaChangeTracker检测区域变化并发送日志
+				String areaName = areahint.log.AreaChangeTracker.detectAndLogAreaChange(areaDetector, playerX, playerY, playerZ, currentDimension);
+
 				// 立即显示结果（仅在模组启用时）
 				if (ClientConfig.isEnabled()) {
 					if (areaName != null) {
@@ -286,14 +316,16 @@ public class AreashintClient implements ClientModInitializer {
 				double playerX = player.getX();
 				double playerY = player.getY();
 				double playerZ = player.getZ();
-				String areaName = areaDetector.detectPlayerArea(playerX, playerY, playerZ);
-				
+
+				// 使用AreaChangeTracker检测区域变化并发送日志
+				String areaName = areahint.log.AreaChangeTracker.detectAndLogAreaChange(areaDetector, playerX, playerY, playerZ, currentDimension);
+
 				// 添加调试日志，无论是否有变化都记录当前检测结果
-				LOGGER.debug("玩家位置检测 - 坐标：({}, {}, {})，检测到区域：{}，之前区域：{}", 
+				LOGGER.debug("玩家位置检测 - 坐标：({}, {}, {})，检测到区域：{}，之前区域：{}",
 						playerX, playerY, playerZ, areaName, currentAreaName);
-				
+
 				// 如果区域发生变化，显示新的区域名称
-				if ((areaName == null && currentAreaName != null) || 
+				if ((areaName == null && currentAreaName != null) ||
 					(areaName != null && !areaName.equals(currentAreaName))) {
 					if (areaName == null) {
 						LOGGER.info("玩家（{}, {}, {}）离开区域：{}", playerX, playerY, playerZ, currentAreaName);
@@ -302,7 +334,7 @@ public class AreashintClient implements ClientModInitializer {
 					} else {
 						LOGGER.info("玩家（{}, {}, {}）从区域 {} 进入区域：{}", playerX, playerY, playerZ, currentAreaName, areaName);
 					}
-					
+
 					currentAreaName = areaName;
 					if (areaName != null) {
 						LOGGER.info("尝试显示区域名称：{}", areaName);

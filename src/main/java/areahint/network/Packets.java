@@ -52,7 +52,16 @@ public class Packets {
     // ShrinkArea功能相关的包ID
     public static final Identifier SHRINK_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "shrink_area");
     public static final Identifier SHRINK_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "shrink_area_response");
-    
+
+    // 日志功能相关的包ID
+    public static final Identifier C2S_AREA_LOG = new Identifier(Areashint.MOD_ID, "c2s_area_log");
+
+    // Delete功能相关的包ID
+    public static final Identifier C2S_REQUEST_DELETABLE_AREAS = new Identifier(Areashint.MOD_ID, "c2s_request_deletable_areas");
+    public static final Identifier S2C_DELETABLE_AREAS_LIST = new Identifier(Areashint.MOD_ID, "s2c_deletable_areas_list");
+    public static final Identifier C2S_DELETE_AREA = new Identifier(Areashint.MOD_ID, "c2s_delete_area");
+    public static final Identifier S2C_DELETE_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_delete_response");
+
     /**
      * 将维度路径转换为维度类型字符串
      * @param dimensionPath 维度路径

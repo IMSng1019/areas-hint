@@ -231,6 +231,10 @@ public class ClientNetworking {
                     else if (action.startsWith("rename")) {
                         handleRenameCommand(action);
                     }
+                    // 处理Delete命令
+                    else if (action.startsWith("delete")) {
+                        handleDeleteCommand(action);
+                    }
                     // 处理模组开关命令
                     else if (action.equals("on") || action.equals("off")) {
                         areahint.command.ModToggleCommand.handleToggleCommand(action);
@@ -410,6 +414,36 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理Rename命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理Delete命令
+     * @param action 命令动作
+     */
+    private static void handleDeleteCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理Delete命令: " + action);
+            areahint.delete.DeleteManager manager = areahint.delete.DeleteManager.getInstance();
+
+            if (action.equals("delete_start")) {
+                AreashintClient.LOGGER.info("执行delete_start");
+                manager.startDelete();
+            } else if (action.startsWith("delete_select:")) {
+                String areaName = action.substring("delete_select:".length());
+                AreashintClient.LOGGER.info("执行delete_select: " + areaName);
+                manager.handleAreaSelection(areaName);
+            } else if (action.equals("delete_confirm")) {
+                AreashintClient.LOGGER.info("执行delete_confirm");
+                manager.confirmDelete();
+            } else if (action.equals("delete_cancel")) {
+                AreashintClient.LOGGER.info("执行delete_cancel");
+                manager.cancelDelete();
+            } else {
+                AreashintClient.LOGGER.warn("未知的Delete命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理Delete命令时出错: " + e.getMessage(), e);
         }
     }
 

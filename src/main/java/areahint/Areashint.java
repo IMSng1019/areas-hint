@@ -41,9 +41,15 @@ public class Areashint implements ModInitializer {
 		// Proceed with mild caution.
 
 		LOGGER.info("区域提示模组服务端初始化中...");
-		
+
 		// 初始化文件管理
 		initConfigDir();
+
+		// 初始化服务端日志管理器
+		areahint.log.ServerLogManager.init();
+
+		// 初始化服务端日志网络处理
+		areahint.log.ServerLogNetworking.init();
 		
 		// 初始化维度域名管理器
 		areahint.dimensional.DimensionalNameManager.init();
@@ -115,6 +121,9 @@ public class Areashint implements ModInitializer {
 	private void onServerStopped(MinecraftServer minecraftServer) {
 		server = null;
 		LOGGER.info("区域提示模组: 服务器已停止");
+
+		// 关闭服务端日志管理器
+		areahint.log.ServerLogManager.shutdown();
 	}
 	
 	/**
