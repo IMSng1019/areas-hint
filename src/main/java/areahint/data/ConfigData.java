@@ -16,7 +16,10 @@ public class ConfigData {
     
     // 模组启用状态：true为开启，false为关闭
     private boolean enabled;
-    
+
+    // 记录顶点的按键代码（GLFW键码）
+    private int recordKey;
+
     /**
      * 默认构造方法，使用默认配置
      */
@@ -26,6 +29,7 @@ public class ConfigData {
         this.subtitleRender = "OpenGL";
         this.subtitleStyle = "mixed";
         this.enabled = true; // 默认开启模组
+        this.recordKey = 88; // 默认为X键 (GLFW_KEY_X = 88)
     }
     
     /**
@@ -39,8 +43,9 @@ public class ConfigData {
         this.subtitleRender = subtitleRender;
         this.subtitleStyle = subtitleStyle;
         this.enabled = true; // 默认开启模组
+        this.recordKey = 88; // 默认为X键
     }
-    
+
     /**
      * 完整构造方法
      * @param frequency 检测频率
@@ -53,6 +58,7 @@ public class ConfigData {
         this.subtitleRender = subtitleRender;
         this.subtitleStyle = subtitleStyle;
         this.enabled = enabled;
+        this.recordKey = 88; // 默认为X键
     }
     
     /**
@@ -125,7 +131,23 @@ public class ConfigData {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
-    
+
+    /**
+     * 获取记录按键代码
+     * @return 记录按键代码（GLFW键码）
+     */
+    public int getRecordKey() {
+        return recordKey;
+    }
+
+    /**
+     * 设置记录按键代码
+     * @param recordKey 记录按键代码（GLFW键码）
+     */
+    public void setRecordKey(int recordKey) {
+        this.recordKey = recordKey;
+    }
+
     /**
      * 验证渲染方式是否有效
      * @param mode 渲染方式

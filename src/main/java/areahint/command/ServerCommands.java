@@ -233,6 +233,14 @@ public class ServerCommands {
                     .suggests(SETHIGH_AREA_SUGGESTIONS)
                     .executes(context -> SetHighCommand.executeSetHighWithArea(context, StringArgumentType.getString(context, "areaName"))))
                 .executes(SetHighCommand::executeSetHigh))
+
+            // replacebutton 命令
+            .then(literal("replacebutton")
+                .executes(ServerCommands::executeReplaceButtonStart)
+                .then(literal("confirm")
+                    .executes(ServerCommands::executeReplaceButtonConfirm))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeReplaceButtonCancel)))
         );
     }
     
@@ -258,6 +266,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint recolor <域名> <颜色> §7- 修改指定域名的颜色"));
         source.sendMessage(Text.of("§a/areahint rename §7- 启动交互式域名重命名流程"));
         source.sendMessage(Text.of("§a/areahint sethigh §7- 列出当前维度可修改高度的域名"));
+        source.sendMessage(Text.of("§a/areahint replacebutton §7- 更改记录域名顶点的按键"));
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));
@@ -1374,6 +1383,51 @@ public class ServerCommands {
         if (source.getPlayer() != null) {
             ServerNetworking.sendCommandToClient(source.getPlayer(),
                 "areahint:recolor_cancel");
+        }
+
+        return 1;
+    }
+
+    /**
+     * 执行replacebutton命令（开始按键更换流程）
+     */
+    private static int executeReplaceButtonStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        // 发送命令到客户端
+        if (source.getPlayer() != null) {
+            ServerNetworking.sendCommandToClient(source.getPlayer(),
+                "areahint:replacebutton_start");
+        }
+
+        return 1;
+    }
+
+    /**
+     * 执行replacebutton confirm命令（确认新按键）
+     */
+    private static int executeReplaceButtonConfirm(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        // 发送命令到客户端
+        if (source.getPlayer() != null) {
+            ServerNetworking.sendCommandToClient(source.getPlayer(),
+                "areahint:replacebutton_confirm");
+        }
+
+        return 1;
+    }
+
+    /**
+     * 执行replacebutton cancel命令（取消按键更换）
+     */
+    private static int executeReplaceButtonCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        // 发送命令到客户端
+        if (source.getPlayer() != null) {
+            ServerNetworking.sendCommandToClient(source.getPlayer(),
+                "areahint:replacebutton_cancel");
         }
 
         return 1;

@@ -26,7 +26,7 @@ public class DeleteUI {
 
         client.player.sendMessage(Text.of("§6=== 删除域名 ==="), false);
         client.player.sendMessage(Text.of("§a请选择要删除的域名："), false);
-        client.player.sendMessage(Text.of("§7只显示您创建的且没有子域名的域名"), false);
+        client.player.sendMessage(Text.of("§7只显示您的权限内可以删除的域名"), false);
         client.player.sendMessage(Text.of(""), false);
 
         // 为每个可删除的域名创建按钮

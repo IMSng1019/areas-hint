@@ -20,6 +20,6 @@ public class EasyAddKeyHandler {
      */
     public static String getRecordKeyDisplayName() {
         // 使用统一处理器的按键显示名称
-        return areahint.keyhandler.UnifiedKeyHandler.getXKeyDisplayName();
+        return areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName();
     }
 } 
