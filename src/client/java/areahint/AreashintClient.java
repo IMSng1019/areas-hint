@@ -89,6 +89,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化Delete功能
 		initDelete();
 
+		// 初始化ReplaceButton功能
+		initReplaceButton();
+
 		// 注册统一的X键处理器
 		areahint.keyhandler.UnifiedKeyHandler.register();
 		
@@ -162,7 +165,24 @@ public class AreashintClient implements ClientModInitializer {
 			LOGGER.error("初始化Delete功能时发生错误", e);
 		}
 	}
-	
+
+	/**
+	 * 初始化ReplaceButton功能
+	 */
+	private void initReplaceButton() {
+		try {
+			// 注册按键监听器
+			areahint.replacebutton.ReplaceButtonKeyListener.register();
+
+			// 注册网络接收器
+			areahint.replacebutton.ReplaceButtonNetworking.registerClientReceivers();
+
+			LOGGER.info("ReplaceButton功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化ReplaceButton功能时发生错误", e);
+		}
+	}
+
 	/**
 	 * 检查并创建外部配置目录
 	 */

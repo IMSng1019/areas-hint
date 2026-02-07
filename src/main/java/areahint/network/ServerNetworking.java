@@ -311,13 +311,15 @@ public class ServerNetworking {
             for (areahint.data.AreaData area : allAreas) {
                 String signature = area.getSignature();
 
-                // 没有签名的旧域名不能删除
+                // 检查权限
+                boolean canDelete = false;
                 if (signature == null) {
-                    continue;
+                    // 没有签名的旧域名只有管理员可以删除
+                    canDelete = hasOp;
+                } else {
+                    // 有签名的新域名：创建者或管理员可以删除
+                    canDelete = signature.equals(playerName) || hasOp;
                 }
-
-                // 检查权限：创建者或管理员可以删除
-                boolean canDelete = signature.equals(playerName) || hasOp;
 
                 if (canDelete) {
                     // 检查是否有次级域名引用此域名
@@ -422,10 +424,14 @@ public class ServerNetworking {
             // 检查签名权限
             String signature = targetArea.getSignature();
             if (signature == null) {
-                // 没有签名的旧域名：不能删除
-                Areashint.LOGGER.warn("域名没有签名，无法删除");
-                sendDeleteResponse(player, false, "该域名没有签名（旧版本域名），无法删除");
-                return;
+                // 没有签名的旧域名：只有管理员可以删除
+                if (!hasOp) {
+                    Areashint.LOGGER.warn("玩家 " + playerName + " 不是管理员，无法删除旧版本域名");
+                    sendDeleteResponse(player, false, "该域名没有签名（旧版本域名），只有管理员可以删除");
+                    return;
+                }
+                // 管理员可以继续删除
+                Areashint.LOGGER.info("管理员 " + playerName + " 正在删除旧版本域名");
             } else {
                 // 有签名的新域名：创建者或管理员可以删除
                 if (!signature.equals(playerName) && !hasOp) {
