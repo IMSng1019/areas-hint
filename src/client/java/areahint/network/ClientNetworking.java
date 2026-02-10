@@ -235,6 +235,10 @@ public class ClientNetworking {
                     else if (action.startsWith("delete")) {
                         handleDeleteCommand(action);
                     }
+                    // 处理ReplaceButton命令
+                    else if (action.startsWith("replacebutton")) {
+                        handleReplaceButtonCommand(action);
+                    }
                     // 处理模组开关命令
                     else if (action.equals("on") || action.equals("off")) {
                         areahint.command.ModToggleCommand.handleToggleCommand(action);
@@ -444,6 +448,32 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理Delete命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理ReplaceButton命令
+     * @param action 命令动作
+     */
+    private static void handleReplaceButtonCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理ReplaceButton命令: " + action);
+            areahint.replacebutton.ReplaceButtonManager manager = areahint.replacebutton.ReplaceButtonManager.getInstance();
+
+            if (action.equals("replacebutton_start")) {
+                AreashintClient.LOGGER.info("执行replacebutton_start");
+                manager.startReplaceButton();
+            } else if (action.equals("replacebutton_confirm")) {
+                AreashintClient.LOGGER.info("执行replacebutton_confirm");
+                manager.confirmNewKey();
+            } else if (action.equals("replacebutton_cancel")) {
+                AreashintClient.LOGGER.info("执行replacebutton_cancel");
+                manager.cancel();
+            } else {
+                AreashintClient.LOGGER.warn("未知的ReplaceButton命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理ReplaceButton命令时出错: " + e.getMessage(), e);
         }
     }
 

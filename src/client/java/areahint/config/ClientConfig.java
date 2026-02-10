@@ -130,4 +130,21 @@ public class ClientConfig {
         config.setEnabled(enabled);
         save(); // 立即保存配置
     }
+
+    /**
+     * 获取记录按键代码
+     * @return 记录按键代码（GLFW键码）
+     */
+    public static int getRecordKey() {
+        return config.getRecordKey();
+    }
+
+    /**
+     * 设置记录按键代码
+     * @param recordKey 记录按键代码（GLFW键码）
+     */
+    public static void setRecordKey(int recordKey) {
+        config.setRecordKey(recordKey);
+        save(); // 立即保存配置
+    }
 } 
