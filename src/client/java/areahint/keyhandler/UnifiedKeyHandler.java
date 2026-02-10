@@ -56,19 +56,24 @@ public class UnifiedKeyHandler {
      * 重新注册按键（当按键配置改变时调用）
      */
     public static void reregisterKey() {
+        if (recordKeyBinding == null) {
+            System.out.println("DEBUG: recordKeyBinding 为 null，无法重新注册");
+            return;
+        }
+
         // 获取新的按键代码
         int keyCode = ClientConfig.getRecordKey();
 
-        // 由于Fabric API没有unregisterKeyBinding方法，我们直接创建新的按键绑定
-        // 旧的按键绑定会被自动覆盖
-        recordKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "key.areahint.unified.record", // 翻译键
-            InputUtil.Type.KEYSYM,
-            keyCode, // 使用新的按键
-            "category.areahint.general" // 通用类别
-        ));
+        // 使用 setBoundKey 方法更新按键绑定
+        recordKeyBinding.setBoundKey(InputUtil.Type.KEYSYM.createFromCode(keyCode));
 
-        System.out.println("DEBUG: 记录键已重新注册为键码 " + keyCode);
+        // 保存按键绑定设置到 Minecraft 的配置文件
+        net.minecraft.client.MinecraftClient client = net.minecraft.client.MinecraftClient.getInstance();
+        if (client != null && client.options != null) {
+            client.options.write();
+        }
+
+        System.out.println("DEBUG: 记录键已更新为键码 " + keyCode);
     }
 
     /**
