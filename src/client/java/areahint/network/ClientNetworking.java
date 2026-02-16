@@ -201,15 +201,7 @@ public class ClientNetworking {
                     }
                     // 处理subtitlestyle命令
                     else if (action.startsWith("subtitlestyle")) {
-                        if (action.equals("subtitlestyle_info")) {
-                            displaySubtitleStyleInfo(client);
-                        } else {
-                            String[] styleParts = action.split(" ");
-                            if (styleParts.length >= 2) {
-                                ClientConfig.setSubtitleStyle(styleParts[1]);
-                                AreashintClient.reload();
-                            }
-                        }
+                        handleSubtitleStyleCommand(action);
                     }
                     // 处理EasyAdd命令
                     else if (action.startsWith("easyadd")) {
@@ -418,6 +410,33 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理Rename命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理SubtitleStyle命令
+     * @param action 命令动作
+     */
+    private static void handleSubtitleStyleCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理SubtitleStyle命令: " + action);
+            areahint.subtitlestyle.SubtitleStyleManager manager = areahint.subtitlestyle.SubtitleStyleManager.getInstance();
+
+            if (action.equals("subtitlestyle_start")) {
+                AreashintClient.LOGGER.info("执行subtitlestyle_start");
+                manager.startSubtitleStyleSelection();
+            } else if (action.startsWith("subtitlestyle_select:")) {
+                String style = action.substring("subtitlestyle_select:".length());
+                AreashintClient.LOGGER.info("执行subtitlestyle_select: " + style);
+                manager.handleStyleSelection(style);
+            } else if (action.equals("subtitlestyle_cancel")) {
+                AreashintClient.LOGGER.info("执行subtitlestyle_cancel");
+                manager.cancelSubtitleStyle();
+            } else {
+                AreashintClient.LOGGER.warn("未知的SubtitleStyle命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理SubtitleStyle命令时出错: " + e.getMessage(), e);
         }
     }
 

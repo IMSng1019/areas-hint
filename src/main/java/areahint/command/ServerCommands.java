@@ -111,11 +111,14 @@ public class ServerCommands {
                     .executes(context -> executeSubtitleRender(context, StringArgumentType.getString(context, "mode"))))
                 .executes(ServerCommands::executeSubtitleRenderInfo))
             
-            // subtitlestyle 命令
+            // subtitlestyle 命令（交互式）
             .then(literal("subtitlestyle")
-                .then(argument("style", StringArgumentType.word())
-                    .executes(context -> executeSubtitleStyle(context, StringArgumentType.getString(context, "style"))))
-                .executes(ServerCommands::executeSubtitleStyleInfo))
+                .executes(ServerCommands::executeSubtitleStyleStart)
+                .then(literal("select")
+                    .then(argument("style", StringArgumentType.word())
+                        .executes(context -> executeSubtitleStyleSelect(context, StringArgumentType.getString(context, "style")))))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeSubtitleStyleCancel)))
                 
             // easyadd 命令（带多个子命令）
             .then(literal("easyadd")
@@ -259,7 +262,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint delete <域名> §7- 删除指定域名"));
         source.sendMessage(Text.of("§a/areahint frequency [值] §7- 设置或显示检测频率"));
         source.sendMessage(Text.of("§a/areahint subtitlerender [cpu|opengl|vulkan] §7- 设置或显示字幕渲染方式"));
-        source.sendMessage(Text.of("§a/areahint subtitlestyle [full|simple|mixed] §7- 设置或显示字幕样式"));
+        source.sendMessage(Text.of("§a/areahint subtitlestyle §7- 交互式设置字幕样式 (full|simple|mixed)"));
         source.sendMessage(Text.of("§a/areahint add <JSON> §7- 添加新的域名 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 (普通玩家可用)"));
         source.sendMessage(Text.of("§a/areahint recolor §7- 列出当前维度可编辑的域名"));
@@ -487,41 +490,71 @@ public class ServerCommands {
     }
     
     /**
-     * 执行subtitlestyle命令（显示当前样式）
+     * 执行subtitlestyle命令（启动交互式样式选择流程）
      * @param context 命令上下文
      * @return 执行结果
      */
-    private static int executeSubtitleStyleInfo(CommandContext<ServerCommandSource> context) {
+    private static int executeSubtitleStyleStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
-        
-        // 向客户端发送命令
-        sendClientCommand(source, "areahint:subtitlestyle_info");
-        
-        source.sendMessage(Text.of("§a字幕样式信息已发送到客户端"));
-        
-        return Command.SINGLE_SUCCESS;
+
+        // 检查是否为客户端命令
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        // 发送客户端命令
+        try {
+            // 通过网络发送到客户端处理
+            sendClientCommand(source, "areahint:subtitlestyle_start");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c启动SubtitleStyle时发生错误: " + e.getMessage()));
+            return 0;
+        }
     }
-    
+
     /**
-     * 执行subtitlestyle命令（设置样式）
+     * 执行subtitlestyle select命令（选择样式）
      * @param context 命令上下文
      * @param style 样式
      * @return 执行结果
      */
-    private static int executeSubtitleStyle(CommandContext<ServerCommandSource> context, String style) {
+    private static int executeSubtitleStyleSelect(CommandContext<ServerCommandSource> context, String style) {
         ServerCommandSource source = context.getSource();
-        
-        String normalizedStyle = ConfigData.normalizeStyleMode(style);
-        
-        if (ConfigData.isValidStyleMode(normalizedStyle)) {
-            // 向客户端发送命令
-            sendClientCommand(source, "areahint:subtitlestyle " + normalizedStyle);
-            
-            source.sendMessage(Text.of("§a字幕样式已设置为: §6" + normalizedStyle));
-            
+
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        try {
+            sendClientCommand(source, "areahint:subtitlestyle_select:" + style);
             return Command.SINGLE_SUCCESS;
-        } else {
-            source.sendMessage(Text.of("§c无效的样式: §6" + style + "§c。有效选项: full, simple, mixed"));
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择样式时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    /**
+     * 执行subtitlestyle cancel命令（取消样式选择）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeSubtitleStyleCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        try {
+            sendClientCommand(source, "areahint:subtitlestyle_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c取消样式选择时发生错误: " + e.getMessage()));
             return 0;
         }
     }
