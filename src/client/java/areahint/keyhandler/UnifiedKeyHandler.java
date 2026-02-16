@@ -67,13 +67,17 @@ public class UnifiedKeyHandler {
         // 使用 setBoundKey 方法更新按键绑定
         recordKeyBinding.setBoundKey(InputUtil.Type.KEYSYM.createFromCode(keyCode));
 
-        // 保存按键绑定设置到 Minecraft 的配置文件
+        // 刷新按键映射表（重要：让 Minecraft 重新索引按键）
         net.minecraft.client.MinecraftClient client = net.minecraft.client.MinecraftClient.getInstance();
         if (client != null && client.options != null) {
+            // 调用 KeyBinding 的静态方法来更新所有按键映射
+            KeyBinding.updateKeysByCode();
+
+            // 保存按键绑定设置到 Minecraft 的配置文件
             client.options.write();
         }
 
-        System.out.println("DEBUG: 记录键已更新为键码 " + keyCode);
+        System.out.println("DEBUG: 记录键已更新为键码 " + keyCode + "，按键名称：" + recordKeyBinding.getBoundKeyLocalizedText().getString());
     }
 
     /**

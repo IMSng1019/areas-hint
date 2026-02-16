@@ -122,7 +122,13 @@ public class FileManager {
                     "  \"subtitleRender\": \"" + defaultConfig.getSubtitleRender() + "\",\n\n" +
                     "  // SubtitleStyle: 字幕样式\n" +
                     "  // 选项: \"full\" (显示完整路径), \"simple\" (仅显示当前级别), \"mixed\" (混合模式)\n" +
-                    "  \"subtitleStyle\": \"" + defaultConfig.getSubtitleStyle() + "\"\n" +
+                    "  \"subtitleStyle\": \"" + defaultConfig.getSubtitleStyle() + "\",\n\n" +
+                    "  // Enabled: 模组启用状态\n" +
+                    "  // true: 启用模组, false: 禁用模组\n" +
+                    "  \"enabled\": " + defaultConfig.isEnabled() + ",\n\n" +
+                    "  // RecordKey: 记录顶点的按键代码（GLFW键码）\n" +
+                    "  // 默认: 88 (X键), 可通过 /areahint replacebutton 命令修改\n" +
+                    "  \"recordKey\": " + defaultConfig.getRecordKey() + "\n" +
                     "}";
             
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));
@@ -219,7 +225,13 @@ public class FileManager {
                     "  \"subtitleRender\": \"" + config.getSubtitleRender() + "\",\n\n" +
                     "  // SubtitleStyle: 字幕样式\n" +
                     "  // 选项: \"full\" (显示完整路径), \"simple\" (仅显示当前级别), \"mixed\" (混合模式)\n" +
-                    "  \"subtitleStyle\": \"" + config.getSubtitleStyle() + "\"\n" +
+                    "  \"subtitleStyle\": \"" + config.getSubtitleStyle() + "\",\n\n" +
+                    "  // Enabled: 模组启用状态\n" +
+                    "  // true: 启用模组, false: 禁用模组\n" +
+                    "  \"enabled\": " + config.isEnabled() + ",\n\n" +
+                    "  // RecordKey: 记录顶点的按键代码（GLFW键码）\n" +
+                    "  // 默认: 88 (X键), 可通过 /areahint replacebutton 命令修改\n" +
+                    "  \"recordKey\": " + config.getRecordKey() + "\n" +
                     "}";
             
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));
