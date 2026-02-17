@@ -40,8 +40,8 @@ public class ClientConfig {
         Path configFile = AreashintClient.getConfigFile();
         config = FileManager.readConfigData(configFile);
         loaded = true;
-        AreashintClient.LOGGER.info("已加载配置: 频率={}, 渲染方式={}, 字幕样式={}",
-                config.getFrequency(), config.getSubtitleRender(), config.getSubtitleStyle());
+        AreashintClient.LOGGER.info("已加载配置: 频率={}, 渲染方式={}, 字幕样式={}, 字幕大小={}",
+                config.getFrequency(), config.getSubtitleRender(), config.getSubtitleStyle(), config.getSubtitleSize());
     }
     
     /**

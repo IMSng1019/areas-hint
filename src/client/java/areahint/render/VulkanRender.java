@@ -1,6 +1,7 @@
 package areahint.render;
 
 import areahint.AreashintClient;
+import areahint.config.ClientConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -17,23 +18,20 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 public class VulkanRender implements RenderManager.IRender {
     // Minecraft客户端实例
     private final MinecraftClient client;
-    
+
     // 当前动画状态
     private AnimationState animationState = AnimationState.NONE;
-    
+
     // 当前显示的文本
     private String currentText = null;
-    
+
     // 动画开始时间
     private long animationStartTime = 0;
-    
+
     // 动画持续时间（毫秒）
     private static final long ANIMATION_IN_DURATION = 500; // 进入动画持续时间
     private static final long ANIMATION_STAY_DURATION = 3000; // 显示持续时间
     private static final long ANIMATION_OUT_DURATION = 300; // 退出动画持续时间
-    
-    // 文本大小缩放比例
-    private static final float TEXT_SCALE = 1.5f; // 增大文本大小
     
     // 上一帧的Y偏移和透明度，用于平滑插值
     private float lastYOffset = 0;
@@ -131,7 +129,9 @@ public class VulkanRender implements RenderManager.IRender {
         matrixStack.push();
         // 使用浮点数直接传递给矩阵变换，避免整数转换
         matrixStack.translate(x, y + yOffset, 0);
-        matrixStack.scale(TEXT_SCALE, TEXT_SCALE, 1.0f);
+        // 根据配置获取字幕大小
+        float textScale = getTextScale();
+        matrixStack.scale(textScale, textScale, 1.0f);
         
         // 获取未缩放的文本宽度
             int textWidth = textRenderer.getWidth(text);
@@ -192,6 +192,32 @@ public class VulkanRender implements RenderManager.IRender {
         }
     }
     
+    /**
+     * 根据配置获取文本缩放比例
+     * @return 文本缩放比例
+     */
+    private float getTextScale() {
+        String size = ClientConfig.getSubtitleSize();
+        switch (size) {
+            case "extra_large":
+                return 3.0f;
+            case "large":
+                return 2.5f;
+            case "medium_large":
+                return 2.0f;
+            case "medium":
+                return 1.5f;
+            case "medium_small":
+                return 1.2f;
+            case "small":
+                return 1.0f;
+            case "extra_small":
+                return 0.8f;
+            default:
+                return 1.5f; // 默认中等大小
+        }
+    }
+
     /**
      * 将RGB颜色和透明度转换为ARGB颜色值
      * @param rgb RGB颜色值

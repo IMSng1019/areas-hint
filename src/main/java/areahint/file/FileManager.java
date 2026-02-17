@@ -112,7 +112,7 @@ public class FileManager {
         if (Files.notExists(path)) {
             ConfigData defaultConfig = new ConfigData();
             String json = GSON.toJson(defaultConfig);
-            
+
             // 添加注释
             String jsonWithComments = "{\n" +
                     "  // Frequency: 检测频率，每秒检测的最大次数（必须为正整数）\n" +
@@ -128,9 +128,12 @@ public class FileManager {
                     "  \"enabled\": " + defaultConfig.isEnabled() + ",\n\n" +
                     "  // RecordKey: 记录顶点的按键代码（GLFW键码）\n" +
                     "  // 默认: 88 (X键), 可通过 /areahint replacebutton 命令修改\n" +
-                    "  \"recordKey\": " + defaultConfig.getRecordKey() + "\n" +
+                    "  \"recordKey\": " + defaultConfig.getRecordKey() + ",\n\n" +
+                    "  // SubtitleSize: 字幕大小\n" +
+                    "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
+                    "  \"subtitleSize\": \"" + defaultConfig.getSubtitleSize() + "\"\n" +
                     "}";
-            
+
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));
             Areashint.LOGGER.info("已创建默认配置文件: " + path);
         }
@@ -181,7 +184,7 @@ public class FileManager {
         if (Files.notExists(path)) {
             return new ConfigData();
         }
-        
+
         try {
             String json = Files.readString(path, StandardCharsets.UTF_8);
             // 移除注释（以 // 开头的行）
@@ -195,12 +198,58 @@ public class FileManager {
                 }
                 sb.append(line).append("\n");
             }
-            
+
             ConfigData config = GSON.fromJson(sb.toString(), ConfigData.class);
             // 如果解析失败，返回默认配置
             if (config == null) {
                 return new ConfigData();
             }
+
+            // 检测配置完整性并补全缺失项
+            boolean needsUpdate = false;
+            ConfigData defaultConfig = new ConfigData();
+
+            // 检查并补全 frequency
+            if (config.getFrequency() <= 0) {
+                config.setFrequency(defaultConfig.getFrequency());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'frequency' 无效或缺失，已补全为默认值: " + defaultConfig.getFrequency());
+            }
+
+            // 检查并补全 subtitleRender
+            if (config.getSubtitleRender() == null || !ConfigData.isValidRenderMode(config.getSubtitleRender())) {
+                config.setSubtitleRender(defaultConfig.getSubtitleRender());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'subtitleRender' 无效或缺失，已补全为默认值: " + defaultConfig.getSubtitleRender());
+            }
+
+            // 检查并补全 subtitleStyle
+            if (config.getSubtitleStyle() == null || !ConfigData.isValidStyleMode(config.getSubtitleStyle())) {
+                config.setSubtitleStyle(defaultConfig.getSubtitleStyle());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'subtitleStyle' 无效或缺失，已补全为默认值: " + defaultConfig.getSubtitleStyle());
+            }
+
+            // 检查并补全 subtitleSize
+            if (config.getSubtitleSize() == null || !ConfigData.isValidSize(config.getSubtitleSize())) {
+                config.setSubtitleSize(defaultConfig.getSubtitleSize());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'subtitleSize' 无效或缺失，已补全为默认值: " + defaultConfig.getSubtitleSize());
+            }
+
+            // 检查并补全 recordKey
+            if (config.getRecordKey() <= 0) {
+                config.setRecordKey(defaultConfig.getRecordKey());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'recordKey' 无效或缺失，已补全为默认值: " + defaultConfig.getRecordKey());
+            }
+
+            // 如果有缺失项，立即保存更新后的配置
+            if (needsUpdate) {
+                Areashint.LOGGER.info("检测到配置不完整，正在保存补全后的配置...");
+                writeConfigData(path, config);
+            }
+
             return config;
         } catch (IOException | JsonSyntaxException e) {
             Areashint.LOGGER.error("读取配置数据失败: " + e.getMessage());
@@ -231,9 +280,12 @@ public class FileManager {
                     "  \"enabled\": " + config.isEnabled() + ",\n\n" +
                     "  // RecordKey: 记录顶点的按键代码（GLFW键码）\n" +
                     "  // 默认: 88 (X键), 可通过 /areahint replacebutton 命令修改\n" +
-                    "  \"recordKey\": " + config.getRecordKey() + "\n" +
+                    "  \"recordKey\": " + config.getRecordKey() + ",\n\n" +
+                    "  // SubtitleSize: 字幕大小\n" +
+                    "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
+                    "  \"subtitleSize\": \"" + config.getSubtitleSize() + "\"\n" +
                     "}";
-            
+
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));
             return true;
         } catch (IOException e) {

@@ -462,15 +462,21 @@ public class AreashintClient implements ClientModInitializer {
 	public static void reload() {
 		LOGGER.info("重新加载区域提示模组配置和区域数据...");
 		ClientConfig.load();
-		
+
+		// 更新渲染管理器的渲染模式（这会重新读取字幕大小配置）
+		if (renderManager != null) {
+			renderManager.updateRenderMode();
+			LOGGER.info("渲染管理器已更新");
+		}
+
 		// 重新加载维度域名配置
 		areahint.dimensional.ClientDimensionalNameManager.resetToDefaults();
 		LOGGER.info("维度域名配置已重置");
-		
+
 		if (currentDimension != null) {
 			String dimensionFileName = getDimensionFileName(currentDimension);
 			LOGGER.info("重新加载维度{}的区域文件：{}", currentDimension.toString(), dimensionFileName);
-			
+
 			// 获取文件路径并检查是否存在
 			Path areaFile = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(dimensionFileName);
 			LOGGER.info("[调试] 重新加载区域文件路径: {}", areaFile.toAbsolutePath());
@@ -484,7 +490,7 @@ public class AreashintClient implements ClientModInitializer {
 			} else {
 				LOGGER.warn("[调试] 区域文件不存在: {}", areaFile.toAbsolutePath());
 			}
-			
+
 			areaDetector.loadAreaData(dimensionFileName);
 		}
 	}
