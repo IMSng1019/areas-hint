@@ -7,6 +7,7 @@ import areahint.render.RenderManager;
 import areahint.file.FileManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ServerInfo;
@@ -94,10 +95,13 @@ public class AreashintClient implements ClientModInitializer {
 
 		// 注册统一的X键处理器
 		areahint.keyhandler.UnifiedKeyHandler.register();
-		
+
+		// 注册断开连接事件监听器
+		registerDisconnectListener();
+
 		// 注册客户端tick事件
 		registerTickEvents();
-		
+
 		LOGGER.info("区域提示模组客户端初始化完成!");
 	}
 	
@@ -230,7 +234,32 @@ public class AreashintClient implements ClientModInitializer {
 			return "unknown";
 		}
 	}
-	
+
+	/**
+	 * 注册断开连接事件监听器
+	 * 在玩家退出世界/服务器时清理状态
+	 */
+	private void registerDisconnectListener() {
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			LOGGER.info("检测到断开连接,清理世界文件夹管理器状态");
+
+			// 重置ClientWorldFolderManager状态
+			areahint.world.ClientWorldFolderManager.resetState();
+
+			// 重置当前状态
+			currentDimension = null;
+			currentAreaName = null;
+			currentServerAddress = null;
+			wasPlayerNull = true;
+			hasShownDimensionalName = false;
+
+			// 重置区域追踪器
+			areahint.log.AreaChangeTracker.reset();
+
+			LOGGER.info("世界文件夹管理器状态已清理");
+		});
+	}
+
 	/**
 	 * 注册客户端tick事件，用于检测玩家位置
 	 */
