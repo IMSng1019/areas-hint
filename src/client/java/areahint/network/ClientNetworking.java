@@ -203,6 +203,10 @@ public class ClientNetworking {
                     else if (action.startsWith("subtitlestyle")) {
                         handleSubtitleStyleCommand(action);
                     }
+                    // 处理subtitlesize命令
+                    else if (action.startsWith("subtitlesize")) {
+                        handleSubtitleSizeCommand(action);
+                    }
                     // 处理EasyAdd命令
                     else if (action.startsWith("easyadd")) {
                         handleEasyAddCommand(action);
@@ -437,6 +441,33 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理SubtitleStyle命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理SubtitleSize命令
+     * @param action 命令动作
+     */
+    private static void handleSubtitleSizeCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理SubtitleSize命令: " + action);
+            areahint.subtitlesize.SubtitleSizeManager manager = areahint.subtitlesize.SubtitleSizeManager.getInstance();
+
+            if (action.equals("subtitlesize_start")) {
+                AreashintClient.LOGGER.info("执行subtitlesize_start");
+                manager.startSubtitleSizeSelection();
+            } else if (action.startsWith("subtitlesize_select:")) {
+                String size = action.substring("subtitlesize_select:".length());
+                AreashintClient.LOGGER.info("执行subtitlesize_select: " + size);
+                manager.handleSizeSelection(size);
+            } else if (action.equals("subtitlesize_cancel")) {
+                AreashintClient.LOGGER.info("执行subtitlesize_cancel");
+                manager.cancelSubtitleSize();
+            } else {
+                AreashintClient.LOGGER.warn("未知的SubtitleSize命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理SubtitleSize命令时出错: " + e.getMessage(), e);
         }
     }
 

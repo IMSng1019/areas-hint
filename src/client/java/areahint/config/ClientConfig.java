@@ -147,4 +147,22 @@ public class ClientConfig {
         config.setRecordKey(recordKey);
         save(); // 立即保存配置
     }
+
+    /**
+     * 获取字幕大小
+     * @return 字幕大小
+     */
+    public static String getSubtitleSize() {
+        return config.getSubtitleSize();
+    }
+
+    /**
+     * 设置字幕大小
+     * @param subtitleSize 字幕大小
+     */
+    public static void setSubtitleSize(String subtitleSize) {
+        String normalizedSize = ConfigData.normalizeSize(subtitleSize);
+        config.setSubtitleSize(normalizedSize);
+        save();
+    }
 } 

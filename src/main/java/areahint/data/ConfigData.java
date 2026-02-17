@@ -20,6 +20,9 @@ public class ConfigData {
     // 记录顶点的按键代码（GLFW键码）
     private int recordKey;
 
+    // 字幕大小：extra_large、large、medium_large、medium、medium_small、small、extra_small
+    private String subtitleSize;
+
     /**
      * 默认构造方法，使用默认配置
      */
@@ -30,6 +33,7 @@ public class ConfigData {
         this.subtitleStyle = "mixed";
         this.enabled = true; // 默认开启模组
         this.recordKey = 88; // 默认为X键 (GLFW_KEY_X = 88)
+        this.subtitleSize = "medium"; // 默认为中等大小
     }
     
     /**
@@ -44,6 +48,7 @@ public class ConfigData {
         this.subtitleStyle = subtitleStyle;
         this.enabled = true; // 默认开启模组
         this.recordKey = 88; // 默认为X键
+        this.subtitleSize = "medium"; // 默认为中等大小
     }
 
     /**
@@ -59,6 +64,7 @@ public class ConfigData {
         this.subtitleStyle = subtitleStyle;
         this.enabled = enabled;
         this.recordKey = 88; // 默认为X键
+        this.subtitleSize = "medium"; // 默认为中等大小
     }
     
     /**
@@ -149,6 +155,24 @@ public class ConfigData {
     }
 
     /**
+     * 获取字幕大小
+     * @return 字幕大小
+     */
+    public String getSubtitleSize() {
+        return subtitleSize;
+    }
+
+    /**
+     * 设置字幕大小
+     * @param subtitleSize 字幕大小
+     */
+    public void setSubtitleSize(String subtitleSize) {
+        if (isValidSize(subtitleSize)) {
+            this.subtitleSize = subtitleSize;
+        }
+    }
+
+    /**
      * 验证渲染方式是否有效
      * @param mode 渲染方式
      * @return 是否有效
@@ -165,7 +189,18 @@ public class ConfigData {
     public static boolean isValidStyleMode(String style) {
         return "full".equals(style) || "simple".equals(style) || "mixed".equals(style);
     }
-    
+
+    /**
+     * 验证字幕大小是否有效
+     * @param size 字幕大小
+     * @return 是否有效
+     */
+    public static boolean isValidSize(String size) {
+        return "extra_large".equals(size) || "large".equals(size) || "medium_large".equals(size) ||
+               "medium".equals(size) || "medium_small".equals(size) || "small".equals(size) ||
+               "extra_small".equals(size);
+    }
+
     /**
      * 根据命令行输入转换为合适的渲染模式
      * @param input 命令行输入
@@ -198,7 +233,7 @@ public class ConfigData {
         if (input == null) {
             return "mixed"; // 默认值
         }
-        
+
         String normalized = input.toLowerCase();
         switch (normalized) {
             case "full":
@@ -209,6 +244,37 @@ public class ConfigData {
                 return "mixed";
             default:
                 return "mixed"; // 默认值
+        }
+    }
+
+    /**
+     * 根据命令行输入转换为合适的字幕大小
+     * @param input 命令行输入
+     * @return 标准的字幕大小字符串
+     */
+    public static String normalizeSize(String input) {
+        if (input == null) {
+            return "medium"; // 默认值
+        }
+
+        String normalized = input.toLowerCase();
+        switch (normalized) {
+            case "extra_large":
+                return "extra_large";
+            case "large":
+                return "large";
+            case "medium_large":
+                return "medium_large";
+            case "medium":
+                return "medium";
+            case "medium_small":
+                return "medium_small";
+            case "small":
+                return "small";
+            case "extra_small":
+                return "extra_small";
+            default:
+                return "medium"; // 默认值
         }
     }
 } 

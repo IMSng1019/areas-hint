@@ -119,6 +119,15 @@ public class ServerCommands {
                         .executes(context -> executeSubtitleStyleSelect(context, StringArgumentType.getString(context, "style")))))
                 .then(literal("cancel")
                     .executes(ServerCommands::executeSubtitleStyleCancel)))
+
+            // subtitlesize 命令（交互式）
+            .then(literal("subtitlesize")
+                .executes(ServerCommands::executeSubtitleSizeStart)
+                .then(literal("select")
+                    .then(argument("size", StringArgumentType.word())
+                        .executes(context -> executeSubtitleSizeSelect(context, StringArgumentType.getString(context, "size")))))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeSubtitleSizeCancel)))
                 
             // easyadd 命令（带多个子命令）
             .then(literal("easyadd")
@@ -263,6 +272,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint frequency [值] §7- 设置或显示检测频率"));
         source.sendMessage(Text.of("§a/areahint subtitlerender [cpu|opengl|vulkan] §7- 设置或显示字幕渲染方式"));
         source.sendMessage(Text.of("§a/areahint subtitlestyle §7- 交互式设置字幕样式 (full|simple|mixed)"));
+        source.sendMessage(Text.of("§a/areahint subtitlesize §7- 交互式设置字幕大小 (极大|大|较大|中|较小|小|极小)"));
         source.sendMessage(Text.of("§a/areahint add <JSON> §7- 添加新的域名 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 (普通玩家可用)"));
         source.sendMessage(Text.of("§a/areahint recolor §7- 列出当前维度可编辑的域名"));
@@ -558,7 +568,77 @@ public class ServerCommands {
             return 0;
         }
     }
-    
+
+    /**
+     * 执行subtitlesize命令（启动交互式大小选择流程）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeSubtitleSizeStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        // 检查是否为客户端命令
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        // 发送客户端命令
+        try {
+            // 通过网络发送到客户端处理
+            sendClientCommand(source, "areahint:subtitlesize_start");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c启动SubtitleSize时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    /**
+     * 执行subtitlesize select命令（选择大小）
+     * @param context 命令上下文
+     * @param size 大小
+     * @return 执行结果
+     */
+    private static int executeSubtitleSizeSelect(CommandContext<ServerCommandSource> context, String size) {
+        ServerCommandSource source = context.getSource();
+
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        try {
+            sendClientCommand(source, "areahint:subtitlesize_select:" + size);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择大小时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    /**
+     * 执行subtitlesize cancel命令（取消大小选择）
+     * @param context 命令上下文
+     * @return 执行结果
+     */
+    private static int executeSubtitleSizeCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        try {
+            sendClientCommand(source, "areahint:subtitlesize_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c取消大小选择时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
     /**
      * 执行delete命令（启动交互式删除流程）
      * @param context 命令上下文
