@@ -105,21 +105,30 @@ public class ExpandAreaManager {
             sendMessage("§c无效的域名", Formatting.RED);
             return;
         }
-        
-        // 查找域名
-        AreaData area = findAreaByName(areaName.trim());
+
+        // 移除引号（如果存在）
+        String cleanedName = areaName.trim();
+        if (cleanedName.startsWith("\"") && cleanedName.endsWith("\"") && cleanedName.length() > 1) {
+            cleanedName = cleanedName.substring(1, cleanedName.length() - 1);
+        }
+
+        // 从已加载的可修改域名列表中查找域名（而不是重新从文件加载）
+        List<AreaData> modifiableAreas = getModifiableAreas();
+        AreaData area = null;
+        for (AreaData a : modifiableAreas) {
+            if (a.getName().equals(cleanedName)) {
+                area = a;
+                break;
+            }
+        }
+
         if (area == null) {
-            sendMessage("§c域名 '" + areaName + "' 不存在", Formatting.RED);
+            sendMessage("§c域名 '" + cleanedName + "' 不存在或您没有权限扩展", Formatting.RED);
+            sendMessage("§7请确保域名名称正确，且您有权限扩展该域名", Formatting.GRAY);
             return;
         }
-        
-        // 检查权限
-        if (!checkPermission(area)) {
-            sendMessage("§c您没有权限扩展此域名", Formatting.RED);
-            return;
-        }
-        
-        // 选择该域名
+
+        // 选择该域名（权限已在getModifiableAreas中检查）
         handleAreaSelection(area);
     }
     
