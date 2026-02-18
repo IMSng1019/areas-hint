@@ -195,7 +195,7 @@ public class ExpandAreaManager {
         this.selectedAreaName = selectedArea.getName();
         
         sendMessage("§a已选择域名: " + areahint.util.AreaDataConverter.getDisplayName(selectedArea), Formatting.GREEN);
-        sendMessage("§e请按 §6X §e键开始记录新区域的顶点位置", Formatting.YELLOW);
+        sendMessage("§e请按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §e键开始记录新区域的顶点位置", Formatting.YELLOW);
         sendMessage("§7记录完成后点击 §6[保存域名] §7按钮完成扩展", Formatting.GRAY);
         
         // 开始记录模式
@@ -653,7 +653,7 @@ public class ExpandAreaManager {
             return;
         }
         
-        sendMessage("§a继续记录更多顶点，按 §6X §a记录当前位置", Formatting.GREEN);
+        sendMessage("§a继续记录更多顶点，按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §a记录当前位置", Formatting.GREEN);
     }
     
     /**

@@ -79,9 +79,9 @@ public class ExpandAreaUI {
      */
     public void showRecordingInterface() {
         if (client.player == null) return;
-        
+
         client.player.sendMessage(Text.of("§a开始记录新区域顶点"), false);
-        client.player.sendMessage(Text.of("§e按 §6X §e键记录当前位置"), false);
+        client.player.sendMessage(Text.of("§e按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §e键记录当前位置"), false);
         client.player.sendMessage(Text.of("§7至少需要记录3个顶点"), false);
     }
     

@@ -41,7 +41,7 @@ import java.util.List;
  * 1. 启动收缩流程 (start)
  * 2. 加载可收缩的域名列表
  * 3. 玩家选择要收缩的域名
- * 4. 记录收缩区域的顶点（按 X 键）
+ * 4. 记录收缩区域的顶点（按记录键）
  * 5. 完成记录并计算收缩后的域名
  * 6. 发送到服务端保存并同步
  */
@@ -180,7 +180,7 @@ public class ShrinkAreaManager {
         this.selectedArea = selectedArea;
 
         sendMessage("§a已选择域名: " + AreaDataConverter.getDisplayName(selectedArea), Formatting.GREEN);
-        sendMessage("§e请按 §6X §e键开始记录收缩区域的顶点位置", Formatting.YELLOW);
+        sendMessage("§e请按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §e键开始记录收缩区域的顶点位置", Formatting.YELLOW);
         sendMessage("§7记录完成后点击 §6[保存域名] §7按钮完成收缩", Formatting.GRAY);
 
         // 开始记录模式
@@ -410,7 +410,7 @@ public class ShrinkAreaManager {
             return;
         }
 
-        sendMessage("§a继续记录更多顶点，按 §6X §a记录当前位置", Formatting.GREEN);
+        sendMessage("§a继续记录更多顶点，按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §a记录当前位置", Formatting.GREEN);
     }
     
     /**
