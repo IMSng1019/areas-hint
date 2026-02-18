@@ -297,6 +297,9 @@ public class ShrinkAreaManager {
         this.isRecording = false;
         this.isActive = false;  // 重置活动状态
         this.availableAreas.clear();
+
+        // 清除边界可视化的临时顶点
+        areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
     }
     
     /**
@@ -379,20 +382,27 @@ public class ShrinkAreaManager {
         if (!isRecording) {
             return;
         }
-        
+
         MinecraftClient client = MinecraftClient.getInstance();
         ClientPlayerEntity player = client.player;
-        
+
         if (player == null) {
             return;
         }
-        
+
         BlockPos pos = player.getBlockPos();
         AreaData.Vertex vertex = new AreaData.Vertex(pos.getX(), pos.getZ());
         shrinkVertices.add(vertex);
-        
+
         sendMessage("§a记录顶点 " + shrinkVertices.size() + ": §6(" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ")", Formatting.GREEN);
-        
+
+        // 更新边界可视化的临时顶点
+        List<BlockPos> blockPosList = new java.util.ArrayList<>();
+        for (AreaData.Vertex v : shrinkVertices) {
+            blockPosList.add(new BlockPos((int)v.getX(), pos.getY(), (int)v.getZ()));
+        }
+        areahint.boundviz.BoundVizManager.getInstance().setTemporaryVertices(blockPosList, true);
+
         // 显示选项按钮（参考EasyAdd的实现）
         ui.showPointRecordedOptions(shrinkVertices.size());
     }

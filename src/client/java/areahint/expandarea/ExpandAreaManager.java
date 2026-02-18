@@ -139,13 +139,16 @@ public class ExpandAreaManager {
         if (!isActive) {
             return;
         }
-        
+
         isActive = false;
         isRecording = false;
         selectedArea = null;
         selectedAreaName = null;
         newVertices.clear();
-        
+
+        // 清除边界可视化的临时顶点
+        areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
+
         ui.showCancelMessage();
     }
     
@@ -220,20 +223,27 @@ public class ExpandAreaManager {
         if (!isRecording || client.player == null) {
             return;
         }
-        
+
         double x = client.player.getX();
         double y = client.player.getY();
         double z = client.player.getZ();
-        
+
         // 取整为整数
         int roundedX = (int) Math.round(x);
         int roundedZ = (int) Math.round(z);
         newVertices.add(new Double[]{(double) roundedX, (double) roundedZ});
-        
-        sendMessage("§a已记录位置 #" + newVertices.size() + ": §6(" + 
-                   roundedX + ", " + String.format("%.1f", y) + ", " + roundedZ + ")", 
+
+        sendMessage("§a已记录位置 #" + newVertices.size() + ": §6(" +
+                   roundedX + ", " + String.format("%.1f", y) + ", " + roundedZ + ")",
                    Formatting.GREEN);
-        
+
+        // 更新边界可视化的临时顶点
+        List<net.minecraft.util.math.BlockPos> blockPosList = new java.util.ArrayList<>();
+        for (Double[] vertex : newVertices) {
+            blockPosList.add(new net.minecraft.util.math.BlockPos(vertex[0].intValue(), (int) y, vertex[1].intValue()));
+        }
+        areahint.boundviz.BoundVizManager.getInstance().setTemporaryVertices(blockPosList, true);
+
         // 显示选项按钮（参考EasyAdd的实现）
         ui.showPointRecordedOptions(newVertices.size());
     }

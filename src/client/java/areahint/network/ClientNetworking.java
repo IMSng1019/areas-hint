@@ -235,6 +235,10 @@ public class ClientNetworking {
                     else if (action.startsWith("replacebutton")) {
                         handleReplaceButtonCommand(action);
                     }
+                    // 处理BoundViz命令
+                    else if (action.startsWith("boundviz")) {
+                        handleBoundVizCommand(action);
+                    }
                     // 处理模组开关命令
                     else if (action.equals("on") || action.equals("off")) {
                         areahint.command.ModToggleCommand.handleToggleCommand(action);
@@ -524,6 +528,35 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理ReplaceButton命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理BoundViz命令
+     * @param action 命令动作
+     */
+    private static void handleBoundVizCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理BoundViz命令: " + action);
+            areahint.boundviz.BoundVizManager manager = areahint.boundviz.BoundVizManager.getInstance();
+
+            if (action.equals("boundviz_toggle")) {
+                AreashintClient.LOGGER.info("执行boundviz_toggle");
+                manager.toggle();
+
+                MinecraftClient client = MinecraftClient.getInstance();
+                if (client.player != null) {
+                    if (manager.isEnabled()) {
+                        client.player.sendMessage(net.minecraft.text.Text.of("§a边界可视化已开启"), false);
+                    } else {
+                        client.player.sendMessage(net.minecraft.text.Text.of("§7边界可视化已关闭"), false);
+                    }
+                }
+            } else {
+                AreashintClient.LOGGER.warn("未知的BoundViz命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理BoundViz命令时出错: " + e.getMessage(), e);
         }
     }
 

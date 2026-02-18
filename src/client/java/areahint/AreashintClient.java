@@ -93,6 +93,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化ReplaceButton功能
 		initReplaceButton();
 
+		// 初始化BoundViz功能
+		initBoundViz();
+
 		// 注册统一的X键处理器
 		areahint.keyhandler.UnifiedKeyHandler.register();
 
@@ -184,6 +187,20 @@ public class AreashintClient implements ClientModInitializer {
 			LOGGER.info("ReplaceButton功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化ReplaceButton功能时发生错误", e);
+		}
+	}
+
+	/**
+	 * 初始化BoundViz功能
+	 */
+	private void initBoundViz() {
+		try {
+			// 初始化BoundViz管理器
+			areahint.boundviz.BoundVizManager.getInstance();
+
+			LOGGER.info("BoundViz功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化BoundViz功能时发生错误", e);
 		}
 	}
 
@@ -501,6 +518,10 @@ public class AreashintClient implements ClientModInitializer {
 		// 重新加载维度域名配置
 		areahint.dimensional.ClientDimensionalNameManager.resetToDefaults();
 		LOGGER.info("维度域名配置已重置");
+
+		// 重新加载边界可视化数据
+		areahint.boundviz.BoundVizManager.getInstance().reload();
+		LOGGER.info("边界可视化数据已重新加载");
 
 		if (currentDimension != null) {
 			String dimensionFileName = getDimensionFileName(currentDimension);

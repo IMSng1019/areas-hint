@@ -165,4 +165,21 @@ public class ClientConfig {
         config.setSubtitleSize(normalizedSize);
         save();
     }
-} 
+
+    /**
+     * 获取边界可视化开关状态
+     * @return 边界可视化是否启用
+     */
+    public static boolean isBoundVizEnabled() {
+        return config.isBoundVizEnabled();
+    }
+
+    /**
+     * 设置边界可视化开关状态
+     * @param enabled 边界可视化开关状态
+     */
+    public static void setBoundVizEnabled(boolean enabled) {
+        config.setBoundVizEnabled(enabled);
+        save();
+    }
+}

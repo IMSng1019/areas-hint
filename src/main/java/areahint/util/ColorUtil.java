@@ -159,4 +159,25 @@ public class ColorUtil {
         }
         return hexToMinecraftColor(hexColor) + text + "§r";
     }
-} 
+
+    /**
+     * 解析十六进制颜色为RGB数组
+     * @param hexColor 十六进制颜色（如 #FF0000）
+     * @return RGB数组 [r, g, b]，范围0-255
+     */
+    public static int[] parseColor(String hexColor) {
+        if (!isValidColor(hexColor)) {
+            return new int[]{255, 255, 255}; // 默认白色
+        }
+
+        try {
+            int rgb = Integer.parseInt(hexColor.substring(1), 16);
+            int r = (rgb >> 16) & 0xFF;
+            int g = (rgb >> 8) & 0xFF;
+            int b = rgb & 0xFF;
+            return new int[]{r, g, b};
+        } catch (Exception e) {
+            return new int[]{255, 255, 255}; // 默认白色
+        }
+    }
+}

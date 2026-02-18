@@ -23,6 +23,9 @@ public class ConfigData {
     // 字幕大小：extra_large、large、medium_large、medium、medium_small、small、extra_small
     private String subtitleSize;
 
+    // 边界可视化开关：true为开启，false为关闭
+    private boolean boundVizEnabled;
+
     /**
      * 默认构造方法，使用默认配置
      */
@@ -34,6 +37,7 @@ public class ConfigData {
         this.enabled = true; // 默认开启模组
         this.recordKey = 88; // 默认为X键 (GLFW_KEY_X = 88)
         this.subtitleSize = "medium"; // 默认为中等大小
+        this.boundVizEnabled = false; // 默认关闭边界可视化
     }
     
     /**
@@ -170,6 +174,22 @@ public class ConfigData {
         if (isValidSize(subtitleSize)) {
             this.subtitleSize = subtitleSize;
         }
+    }
+
+    /**
+     * 获取边界可视化开关状态
+     * @return 边界可视化是否启用
+     */
+    public boolean isBoundVizEnabled() {
+        return boundVizEnabled;
+    }
+
+    /**
+     * 设置边界可视化开关状态
+     * @param boundVizEnabled 边界可视化开关状态
+     */
+    public void setBoundVizEnabled(boolean boundVizEnabled) {
+        this.boundVizEnabled = boundVizEnabled;
     }
 
     /**

@@ -253,6 +253,10 @@ public class ServerCommands {
                     .executes(ServerCommands::executeReplaceButtonConfirm))
                 .then(literal("cancel")
                     .executes(ServerCommands::executeReplaceButtonCancel)))
+
+            // boundviz 命令
+            .then(literal("boundviz")
+                .executes(ServerCommands::executeBoundViz))
         );
     }
     
@@ -280,6 +284,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint rename §7- 启动交互式域名重命名流程"));
         source.sendMessage(Text.of("§a/areahint sethigh §7- 列出当前维度可修改高度的域名"));
         source.sendMessage(Text.of("§a/areahint replacebutton §7- 更改记录域名顶点的按键"));
+        source.sendMessage(Text.of("§a/areahint boundviz §7- 切换域名边界可视化显示"));
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));
@@ -1544,5 +1549,27 @@ public class ServerCommands {
         }
 
         return 1;
+    }
+
+    /**
+     * 执行boundviz命令（切换边界可视化）
+     */
+    private static int executeBoundViz(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+
+        // 检查是否为客户端命令
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+
+        // 发送命令到客户端
+        try {
+            sendClientCommand(source, "areahint:boundviz_toggle");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c切换边界可视化时发生错误: " + e.getMessage()));
+            return 0;
+        }
     }
 }

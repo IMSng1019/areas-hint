@@ -277,22 +277,25 @@ public class EasyAddManager {
         if (currentState != EasyAddState.RECORDING_POINTS) {
             return;
         }
-        
+
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
             return;
         }
-        
+
         BlockPos pos = client.player.getBlockPos();
         recordedPoints.add(pos);
-        
-        client.player.sendMessage(Text.of("§a已记录坐标点 " + recordedPoints.size() + ": §6(" + 
+
+        client.player.sendMessage(Text.of("§a已记录坐标点 " + recordedPoints.size() + ": §6(" +
             pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ")"), false);
-        
+
         // 显示当前状态和选项
         EasyAddUI.showPointRecordedScreen(recordedPoints, pos);
-        
-        ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD, 
+
+        // 更新边界可视化的临时顶点
+        areahint.boundviz.BoundVizManager.getInstance().setTemporaryVertices(recordedPoints, true);
+
+        ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD,
             "记录坐标点: " + pos + ", 总计: " + recordedPoints.size());
     }
     
@@ -530,7 +533,10 @@ public class EasyAddManager {
         availableParentAreas.clear();
         customAltitudeData = null;
         selectedColor = "#FFFFFF"; // 重置颜色
-        
+
+        // 清除边界可视化的临时顶点
+        areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
+
         // 重置高度管理器
         EasyAddAltitudeManager.reset();
     }
