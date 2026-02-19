@@ -224,6 +224,10 @@ public class ClientNetworking {
                     else if (action.startsWith("addhint")) {
                         handleEasyAddCommand(action);
                     }
+                    // 处理DeleteHint命令
+                    else if (action.startsWith("deletehint")) {
+                        handleEasyAddCommand(action);
+                    }
                     // 处理Recolor命令
                     else if (action.startsWith("recolor")) {
                         handleRecolorCommand(action);
@@ -328,6 +332,18 @@ public class ClientNetworking {
                 areahint.addhint.AddHintManager.getInstance().submit();
             } else if (action.equals("addhint_cancel")) {
                 areahint.addhint.AddHintManager.getInstance().cancel();
+            } else if (action.equals("deletehint_start")) {
+                areahint.deletehint.DeleteHintManager.getInstance().start();
+            } else if (action.startsWith("deletehint_select:")) {
+                String areaName = action.substring("deletehint_select:".length());
+                areahint.deletehint.DeleteHintManager.getInstance().selectArea(areaName);
+            } else if (action.startsWith("deletehint_toggle:")) {
+                int index = Integer.parseInt(action.substring("deletehint_toggle:".length()));
+                areahint.deletehint.DeleteHintManager.getInstance().toggleVertex(index);
+            } else if (action.equals("deletehint_submit")) {
+                areahint.deletehint.DeleteHintManager.getInstance().submit();
+            } else if (action.equals("deletehint_cancel")) {
+                areahint.deletehint.DeleteHintManager.getInstance().cancel();
             } else if (action.equals("easyadd_cancel")) {
                 AreashintClient.LOGGER.info("执行easyadd_cancel");
                 manager.cancelEasyAdd();

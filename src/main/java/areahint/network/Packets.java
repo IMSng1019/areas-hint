@@ -66,6 +66,10 @@ public class Packets {
     public static final Identifier ADDHINT_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "addhint_area");
     public static final Identifier ADDHINT_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "addhint_area_response");
 
+    // DeleteHint功能相关的包ID
+    public static final Identifier DELETEHINT_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "deletehint_area");
+    public static final Identifier DELETEHINT_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "deletehint_area_response");
+
     // ReplaceButton功能相关的包ID
     public static final Identifier REPLACEBUTTON_START = new Identifier(Areashint.MOD_ID, "replacebutton_start");
     public static final Identifier REPLACEBUTTON_CANCEL = new Identifier(Areashint.MOD_ID, "replacebutton_cancel");

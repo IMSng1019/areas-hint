@@ -90,6 +90,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化AddHint功能
 		initAddHint();
 
+		// 初始化DeleteHint功能
+		initDeleteHint();
+
 		// 初始化Delete功能
 		initDelete();
 
@@ -171,6 +174,18 @@ public class AreashintClient implements ClientModInitializer {
 			LOGGER.info("AddHint功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化AddHint功能时发生错误", e);
+		}
+	}
+
+	/**
+	 * 初始化DeleteHint功能
+	 */
+	private void initDeleteHint() {
+		try {
+			areahint.deletehint.DeleteHintClientNetworking.registerClientReceivers();
+			LOGGER.info("DeleteHint功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化DeleteHint功能时发生错误", e);
 		}
 	}
 

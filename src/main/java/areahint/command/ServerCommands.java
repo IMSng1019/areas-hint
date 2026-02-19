@@ -260,6 +260,22 @@ public class ServerCommands {
                 .then(literal("cancel")
                     .executes(ServerCommands::executeAddHintCancel)))
 
+            // deletehint 命令 (从已有域名删除顶点)
+            .then(literal("deletehint")
+                .executes(ServerCommands::executeDeleteHintStart)
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeDeleteHintSelect(context,
+                            StringArgumentType.getString(context, "areaName")))))
+                .then(literal("toggle")
+                    .then(argument("index", IntegerArgumentType.integer(0))
+                        .executes(context -> executeDeleteHintToggle(context,
+                            IntegerArgumentType.getInteger(context, "index")))))
+                .then(literal("submit")
+                    .executes(ServerCommands::executeDeleteHintSubmit))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeDeleteHintCancel)))
+
             // replacebutton 命令
             .then(literal("replacebutton")
                 .executes(ServerCommands::executeReplaceButtonStart)
@@ -1290,6 +1306,83 @@ public class ServerCommands {
         }
         try {
             sendClientCommand(source, "areahint:addhint_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c取消失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    // ===== DeleteHint 命令方法 =====
+
+    private static int executeDeleteHintStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (source.getPlayer() == null) {
+                source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+                return 0;
+            }
+            sendClientCommand(source, "areahint:deletehint_start");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c启动删除顶点失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeDeleteHintSelect(CommandContext<ServerCommandSource> context, String areaName) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:deletehint_select:" + areaName);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择域名失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeDeleteHintToggle(CommandContext<ServerCommandSource> context, int index) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:deletehint_toggle:" + index);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c切换顶点失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeDeleteHintSubmit(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:deletehint_submit");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c提交失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeDeleteHintCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:deletehint_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.of("§c取消失败: " + e.getMessage()));

@@ -82,6 +82,9 @@ public class Areashint implements ModInitializer {
 
 		// 初始化AddHint服务端网络处理
 		areahint.addhint.AddHintServerNetworking.registerServerReceivers();
+
+		// 初始化DeleteHint服务端网络处理
+		areahint.deletehint.DeleteHintServerNetworking.registerServerReceivers();
 		
 		// 注册命令
 		ServerCommands.register();
