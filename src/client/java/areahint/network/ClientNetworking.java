@@ -128,6 +128,7 @@ public class ClientNetworking {
                         dimensionName.equals(Packets.convertDimensionPathToType(client.world.getDimensionKey().getValue().getPath()))) {
                     AreashintClient.LOGGER.info("[调试] 重新加载当前维度的区域数据: " + fileName);
                     AreashintClient.getAreaDetector().loadAreaData(fileName);
+                    areahint.boundviz.BoundVizManager.getInstance().reload();
                 }
                 
             } catch (IOException e) {
