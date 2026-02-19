@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,7 +34,7 @@ public class BoundVizRenderer {
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        // 保持深度测试启用，使方块正确遮挡面，并避免顶面/底面叠加
+        RenderSystem.enableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
@@ -82,21 +83,32 @@ public class BoundVizRenderer {
 
         Matrix4f matrix = matrices.peek().getPositionMatrix();
 
-        // 渲染底面（20%透明度）
-        buffer.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-        for (AreaData.Vertex vertex : vertices) {
-            buffer.vertex(matrix, (float) vertex.getX(), (float) minY, (float) vertex.getZ())
-                    .color(r, g, b, 0.2f).next();
-        }
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        // 耳切法三角剖分（解决凹多边形TRIANGLE_FAN多层叠加问题）
+        List<int[]> triangles = earClipTriangulate(vertices);
 
-        // 渲染顶面（20%透明度）
-        buffer.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-        for (AreaData.Vertex vertex : vertices) {
-            buffer.vertex(matrix, (float) vertex.getX(), (float) maxY, (float) vertex.getZ())
-                    .color(r, g, b, 0.2f).next();
+        // 渲染底面（20%透明度）
+        if (!triangles.isEmpty()) {
+            buffer.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+            for (int[] tri : triangles) {
+                for (int idx : tri) {
+                    AreaData.Vertex v = vertices.get(idx);
+                    buffer.vertex(matrix, (float) v.getX(), (float) minY, (float) v.getZ())
+                            .color(r, g, b, 0.2f).next();
+                }
+            }
+            BufferRenderer.drawWithGlobalProgram(buffer.end());
+
+            // 渲染顶面（20%透明度）
+            buffer.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+            for (int[] tri : triangles) {
+                for (int idx : tri) {
+                    AreaData.Vertex v = vertices.get(idx);
+                    buffer.vertex(matrix, (float) v.getX(), (float) maxY, (float) v.getZ())
+                            .color(r, g, b, 0.2f).next();
+                }
+            }
+            BufferRenderer.drawWithGlobalProgram(buffer.end());
         }
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
 
         // 渲染侧面（20%透明度）
         for (int i = 0; i < vertices.size(); i++) {
@@ -152,50 +164,124 @@ public class BoundVizRenderer {
 
     /**
      * 渲染临时顶点（白色虚线，100%不透明度）
+     * 记录过程中实时显示，不闭合多边形
      */
     private static void renderTemporaryVertices(MatrixStack matrices, BufferBuilder buffer, List<BlockPos> vertices, MinecraftClient client) {
-        if (vertices.size() < 2) {
-            return;
-        }
+        if (vertices.isEmpty()) return;
 
         Matrix4f matrix = matrices.peek().getPositionMatrix();
-
-        // 获取玩家当前Y坐标作为渲染高度
         double playerY = client.player.getY();
 
-        // 渲染白色虚线（通过间隔渲染实现虚线效果）
-        for (int i = 0; i < vertices.size(); i++) {
-            BlockPos v1 = vertices.get(i);
-            BlockPos v2 = vertices.get((i + 1) % vertices.size());
-
-            // 计算两点之间的距离
-            double dx = v2.getX() - v1.getX();
-            double dz = v2.getZ() - v1.getZ();
-            double distance = Math.sqrt(dx * dx + dz * dz);
-
-            // 虚线参数：每段长度0.5，间隔0.3
-            double segmentLength = 0.5;
-            double gapLength = 0.3;
-            double totalSegment = segmentLength + gapLength;
-
+        // 每个顶点渲染十字标记
+        for (BlockPos pos : vertices) {
+            float px = pos.getX() + 0.5f;
+            float pz = pos.getZ() + 0.5f;
+            float py = (float) playerY;
+            float size = 0.4f;
             buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
-
-            for (double d = 0; d < distance; d += totalSegment) {
-                double t1 = d / distance;
-                double t2 = Math.min((d + segmentLength) / distance, 1.0);
-
-                float x1 = (float) (v1.getX() + dx * t1);
-                float z1 = (float) (v1.getZ() + dz * t1);
-                float x2 = (float) (v1.getX() + dx * t2);
-                float z2 = (float) (v1.getZ() + dz * t2);
-
-                buffer.vertex(matrix, x1, (float) playerY, z1)
-                        .color(1.0f, 1.0f, 1.0f, 1.0f).next();
-                buffer.vertex(matrix, x2, (float) playerY, z2)
-                        .color(1.0f, 1.0f, 1.0f, 1.0f).next();
-            }
-
+            buffer.vertex(matrix, px - size, py, pz).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, px + size, py, pz).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, px, py, pz - size).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, px, py, pz + size).color(1f, 1f, 1f, 1f).next();
             BufferRenderer.drawWithGlobalProgram(buffer.end());
         }
+
+        // 顺序连线（不闭合），虚线效果
+        for (int i = 0; i < vertices.size() - 1; i++) {
+            BlockPos v1 = vertices.get(i);
+            BlockPos v2 = vertices.get(i + 1);
+            renderDashedLine(matrix, buffer, v1.getX() + 0.5f, v2.getX() + 0.5f,
+                    v1.getZ() + 0.5f, v2.getZ() + 0.5f, (float) playerY);
+        }
+    }
+
+    /**
+     * 渲染一条白色虚线段
+     */
+    private static void renderDashedLine(Matrix4f matrix, BufferBuilder buffer,
+                                          float x1, float x2, float z1, float z2, float y) {
+        double dx = x2 - x1;
+        double dz = z2 - z1;
+        double distance = Math.sqrt(dx * dx + dz * dz);
+        if (distance < 0.01) return;
+
+        double segLen = 0.5, gapLen = 0.3, total = segLen + gapLen;
+        buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+        for (double d = 0; d < distance; d += total) {
+            double t1 = d / distance;
+            double t2 = Math.min((d + segLen) / distance, 1.0);
+            buffer.vertex(matrix, (float)(x1 + dx * t1), y, (float)(z1 + dz * t1))
+                    .color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, (float)(x1 + dx * t2), y, (float)(z1 + dz * t2))
+                    .color(1f, 1f, 1f, 1f).next();
+        }
+        BufferRenderer.drawWithGlobalProgram(buffer.end());
+    }
+
+    /**
+     * 耳切法三角剖分（支持凹多边形）
+     */
+    private static List<int[]> earClipTriangulate(List<AreaData.Vertex> polygon) {
+        int n = polygon.size();
+        List<int[]> triangles = new ArrayList<>();
+        if (n < 3) return triangles;
+
+        // 计算有向面积判断绕向
+        double area = 0;
+        for (int i = 0; i < n; i++) {
+            AreaData.Vertex c = polygon.get(i);
+            AreaData.Vertex nx = polygon.get((i + 1) % n);
+            area += c.getX() * nx.getZ() - nx.getX() * c.getZ();
+        }
+        boolean ccw = area > 0;
+
+        List<Integer> rem = new ArrayList<>();
+        for (int i = 0; i < n; i++) rem.add(i);
+
+        int safe = n * n;
+        while (rem.size() > 2 && safe-- > 0) {
+            boolean found = false;
+            for (int i = 0; i < rem.size(); i++) {
+                int pi = rem.get((i - 1 + rem.size()) % rem.size());
+                int ci = rem.get(i);
+                int ni = rem.get((i + 1) % rem.size());
+
+                if (!isEar(polygon, rem, pi, ci, ni, ccw)) continue;
+
+                triangles.add(new int[]{pi, ci, ni});
+                rem.remove(i);
+                found = true;
+                break;
+            }
+            if (!found) break;
+        }
+        return triangles;
+    }
+
+    private static boolean isEar(List<AreaData.Vertex> poly, List<Integer> rem,
+                                  int pi, int ci, int ni, boolean ccw) {
+        AreaData.Vertex a = poly.get(pi), b = poly.get(ci), c = poly.get(ni);
+        double cross = (b.getX() - a.getX()) * (c.getZ() - a.getZ())
+                     - (b.getZ() - a.getZ()) * (c.getX() - a.getX());
+        if (ccw ? cross <= 0 : cross >= 0) return false;
+
+        for (int idx : rem) {
+            if (idx == pi || idx == ci || idx == ni) continue;
+            if (pointInTriangle(poly.get(idx), a, b, c)) return false;
+        }
+        return true;
+    }
+
+    private static boolean pointInTriangle(AreaData.Vertex p,
+                                            AreaData.Vertex a, AreaData.Vertex b, AreaData.Vertex c) {
+        double d1 = sign(p, a, b), d2 = sign(p, b, c), d3 = sign(p, c, a);
+        boolean hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+        boolean hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+        return !(hasNeg && hasPos);
+    }
+
+    private static double sign(AreaData.Vertex p1, AreaData.Vertex p2, AreaData.Vertex p3) {
+        return (p1.getX() - p3.getX()) * (p2.getZ() - p3.getZ())
+             - (p2.getX() - p3.getX()) * (p1.getZ() - p3.getZ());
     }
 }

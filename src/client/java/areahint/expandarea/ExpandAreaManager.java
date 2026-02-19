@@ -715,6 +715,7 @@ public class ExpandAreaManager {
         selectedArea = null;
         selectedAreaName = null;
         newVertices.clear();
+        areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
     }
     
     /**
