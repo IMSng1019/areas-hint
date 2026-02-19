@@ -110,12 +110,7 @@ public class ShrinkAreaServerNetworking {
             return true;
         }
 
-        // 检查是否为域名创建者
-        if (playerName.equals(area.getSignature())) {
-            return true;
-        }
-
-        // 检查是否为basename引用的玩家（只在玩家所在维度查找）
+        // 检查是否为basename引用的域名的创建者（只在玩家所在维度查找）
         if (area.getBaseName() != null) {
             try {
                 AreaData baseArea = findAreaByName(area.getBaseName(), dimensionType);

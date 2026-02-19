@@ -1405,14 +1405,14 @@ public class ServerCommands {
             
             return areas.stream()
                 .filter(area -> {
-                    String signature = area.getSignature();
-                    if (signature == null) {
-                        // 旧域名只有管理员可以收缩
-                        return hasOp;
-                    } else {
-                        // 新域名创建者或管理员可以收缩
-                        return signature.equals(playerName) || hasOp;
-                    }
+                    if (hasOp) return true;
+                    // 检查basename引用域名的signature
+                    String baseName = area.getBaseName();
+                    if (baseName == null) return false;
+                    AreaData baseArea = areas.stream()
+                        .filter(a -> a.getName().equals(baseName))
+                        .findFirst().orElse(null);
+                    return baseArea != null && playerName.equals(baseArea.getSignature());
                 })
                 .map(AreaData::getName)
                 .toList();
