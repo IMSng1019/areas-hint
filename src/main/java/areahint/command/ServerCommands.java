@@ -246,6 +246,20 @@ public class ServerCommands {
                     .executes(context -> SetHighCommand.executeSetHighWithArea(context, StringArgumentType.getString(context, "areaName"))))
                 .executes(SetHighCommand::executeSetHigh))
 
+            // addhint 命令 (向已有域名添加顶点)
+            .then(literal("addhint")
+                .executes(ServerCommands::executeAddHintStart)
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeAddHintSelect(context,
+                            StringArgumentType.getString(context, "areaName")))))
+                .then(literal("continue")
+                    .executes(ServerCommands::executeAddHintContinue))
+                .then(literal("submit")
+                    .executes(ServerCommands::executeAddHintSubmit))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeAddHintCancel)))
+
             // replacebutton 命令
             .then(literal("replacebutton")
                 .executes(ServerCommands::executeReplaceButtonStart)
@@ -1216,6 +1230,73 @@ public class ServerCommands {
         }
     }
     
+    // ===== AddHint 命令处理 =====
+
+    private static int executeAddHintStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (source.getPlayer() == null) {
+                source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+                return 0;
+            }
+            sendClientCommand(source, "areahint:addhint_start");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c启动添加顶点失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeAddHintSelect(CommandContext<ServerCommandSource> context, String areaName) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:addhint_select:" + areaName);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择域名失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeAddHintContinue(CommandContext<ServerCommandSource> context) {
+        // 继续记录由按键处理，此处无需操作
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int executeAddHintSubmit(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:addhint_submit");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c提交失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeAddHintCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:addhint_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c取消失败: " + e.getMessage()));
+            return 0;
+        }
+    }
+
     /**
      * 执行shrinkarea命令（选择域名）
      * @param context 命令上下文

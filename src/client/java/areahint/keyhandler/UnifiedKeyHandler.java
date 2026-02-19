@@ -112,6 +112,13 @@ public class UnifiedKeyHandler {
             return;
         }
 
+        // 检查AddHint是否活跃且在记录状态
+        areahint.addhint.AddHintManager addHintManager = areahint.addhint.AddHintManager.getInstance();
+        if (addHintManager.isActive() && addHintManager.isRecording()) {
+            addHintManager.recordCurrentPosition();
+            return;
+        }
+
         System.out.println("DEBUG: 没有模块处理记录键");
         // 如果没有模块处于记录状态，则忽略按键
         // （避免误操作）

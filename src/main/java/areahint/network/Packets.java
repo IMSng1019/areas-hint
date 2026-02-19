@@ -62,6 +62,10 @@ public class Packets {
     public static final Identifier C2S_DELETE_AREA = new Identifier(Areashint.MOD_ID, "c2s_delete_area");
     public static final Identifier S2C_DELETE_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_delete_response");
 
+    // AddHint功能相关的包ID
+    public static final Identifier ADDHINT_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "addhint_area");
+    public static final Identifier ADDHINT_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "addhint_area_response");
+
     // ReplaceButton功能相关的包ID
     public static final Identifier REPLACEBUTTON_START = new Identifier(Areashint.MOD_ID, "replacebutton_start");
     public static final Identifier REPLACEBUTTON_CANCEL = new Identifier(Areashint.MOD_ID, "replacebutton_cancel");

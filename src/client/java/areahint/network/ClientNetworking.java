@@ -220,6 +220,10 @@ public class ClientNetworking {
                     else if (action.startsWith("shrinkarea")) {
                         handleEasyAddCommand(action);
                     }
+                    // 处理AddHint命令
+                    else if (action.startsWith("addhint")) {
+                        handleEasyAddCommand(action);
+                    }
                     // 处理Recolor命令
                     else if (action.startsWith("recolor")) {
                         handleRecolorCommand(action);
@@ -315,6 +319,15 @@ public class ClientNetworking {
             } else if (action.equals("shrinkarea_cancel")) {
                 AreashintClient.LOGGER.info("执行shrinkarea_cancel");
                 areahint.shrinkarea.ShrinkAreaManager.getInstance().stop();
+            } else if (action.equals("addhint_start")) {
+                areahint.addhint.AddHintManager.getInstance().start();
+            } else if (action.startsWith("addhint_select:")) {
+                String areaName = action.substring("addhint_select:".length());
+                areahint.addhint.AddHintManager.getInstance().selectArea(areaName);
+            } else if (action.equals("addhint_submit")) {
+                areahint.addhint.AddHintManager.getInstance().submit();
+            } else if (action.equals("addhint_cancel")) {
+                areahint.addhint.AddHintManager.getInstance().cancel();
             } else if (action.equals("easyadd_cancel")) {
                 AreashintClient.LOGGER.info("执行easyadd_cancel");
                 manager.cancelEasyAdd();
