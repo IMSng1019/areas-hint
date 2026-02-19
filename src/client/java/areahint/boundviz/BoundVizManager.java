@@ -106,7 +106,7 @@ public class BoundVizManager {
      * 获取当前维度的所有域名数据
      */
     public List<AreaData> getCurrentDimensionAreas() {
-        if (enabled && currentDimensionAreas.isEmpty()) {
+        if (enabled) {
             loadCurrentDimensionAreas();
         }
         return new ArrayList<>(currentDimensionAreas);
