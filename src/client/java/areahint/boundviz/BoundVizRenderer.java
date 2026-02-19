@@ -6,12 +6,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 边界可视化渲染器
@@ -159,6 +163,209 @@ public class BoundVizRenderer {
             buffer.vertex(matrix, (float) vertex.getX(), (float) maxY, (float) vertex.getZ())
                     .color(r, g, b, 0.8f).next();
             BufferRenderer.drawWithGlobalProgram(buffer.end());
+        }
+
+        // 渲染侧面与方块交接处的边界线（80%透明度）
+        renderSideWallBlockIntersections(matrix, buffer, vertices, minY, maxY, r, g, b, client);
+    }
+
+    /**
+     * 渲染侧面与方块交接处的边界线
+     * 当域名的侧面（垂直墙面）穿过实心方块时，在方块表面渲染边界线（80%透明度）
+     */
+    private static void renderSideWallBlockIntersections(Matrix4f matrix, BufferBuilder buffer,
+            List<AreaData.Vertex> vertices, double minY, double maxY,
+            float r, float g, float b, MinecraftClient client) {
+
+        World world = client.world;
+        if (world == null) return;
+
+        Vec3d playerPos = client.player.getPos();
+        int renderDist = 64;
+        int yMin = (int) Math.floor(minY);
+        int yMax = (int) Math.ceil(maxY) - 1;
+
+        // 限制Y范围到合理值
+        yMin = Math.max(yMin, (int) playerPos.y - renderDist);
+        yMax = Math.min(yMax, (int) playerPos.y + renderDist);
+
+        // 先收集所有线段端点，避免空buffer问题
+        List<float[]> lineSegments = new ArrayList<>();
+
+        for (int ei = 0; ei < vertices.size(); ei++) {
+            AreaData.Vertex v1 = vertices.get(ei);
+            AreaData.Vertex v2 = vertices.get((ei + 1) % vertices.size());
+
+            double ex1 = v1.getX(), ez1 = v1.getZ();
+            double ex2 = v2.getX(), ez2 = v2.getZ();
+            double edx = ex2 - ex1, edz = ez2 - ez1;
+            double edgeLen = Math.sqrt(edx * edx + edz * edz);
+            if (edgeLen < 0.001) continue;
+
+            Set<Long> visited = new HashSet<>();
+            double step = 0.25;
+
+            for (double d = 0; d <= edgeLen; d += step) {
+                double t = d / edgeLen;
+                double px = ex1 + edx * t;
+                double pz = ez1 + edz * t;
+                int bx = (int) Math.floor(px);
+                int bz = (int) Math.floor(pz);
+
+                long key = ((long) bx << 32) | (bz & 0xFFFFFFFFL);
+                if (!visited.add(key)) continue;
+
+                double ddx = bx + 0.5 - playerPos.x, ddz = bz + 0.5 - playerPos.z;
+                if (ddx * ddx + ddz * ddz > renderDist * renderDist) continue;
+
+                collectFaceIntersections(lineSegments, world,
+                        ex1, ez1, edx, edz,
+                        bx, bz, yMin, yMax, (float) minY, (float) maxY, r, g, b);
+
+                // 方块顶面和底面与边界墙的交接线（水平线段）
+                collectHorizontalLines(lineSegments, world,
+                        ex1, ez1, edx, edz,
+                        bx, bz, yMin, yMax, (float) minY, (float) maxY);
+            }
+        }
+
+        if (!lineSegments.isEmpty()) {
+            buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+            for (float[] seg : lineSegments) {
+                buffer.vertex(matrix, seg[0], seg[1], seg[2]).color(r, g, b, 0.8f).next();
+                buffer.vertex(matrix, seg[3], seg[4], seg[5]).color(r, g, b, 0.8f).next();
+            }
+            BufferRenderer.drawWithGlobalProgram(buffer.end());
+        }
+    }
+
+    private static final float FACE_OFFSET = 0.002f;
+
+    /**
+     * 收集边线与方块面的交点线段
+     * 对每个面检查两侧方块，并加偏移避免z-fighting
+     */
+    private static void collectFaceIntersections(List<float[]> segments, World world,
+            double ex1, double ez1, double edx, double edz,
+            int bx, int bz, int yMin, int yMax, float fMinY, float fMaxY,
+            float r, float g, float b) {
+
+        // 北面 z=bz：检查(bx,bz)和(bx,bz-1)
+        if (Math.abs(edz) > 0.001) {
+            double t = (bz - ez1) / edz;
+            if (t >= 0 && t <= 1) {
+                double ix = ex1 + edx * t;
+                if (ix >= bx && ix <= bx + 1) {
+                    // 偏移向z-方向（北侧外）
+                    collectVerticalLines(segments, world, (float) ix, (float) bz - FACE_OFFSET, bx, bz, yMin, yMax, fMinY, fMaxY);
+                    // 偏移向z+方向（南侧外），检查北侧方块
+                    collectVerticalLines(segments, world, (float) ix, (float) bz + FACE_OFFSET, bx, bz - 1, yMin, yMax, fMinY, fMaxY);
+                }
+            }
+            // 南面 z=bz+1：检查(bx,bz)和(bx,bz+1)
+            t = (bz + 1 - ez1) / edz;
+            if (t >= 0 && t <= 1) {
+                double ix = ex1 + edx * t;
+                if (ix >= bx && ix <= bx + 1) {
+                    collectVerticalLines(segments, world, (float) ix, (float) (bz + 1) + FACE_OFFSET, bx, bz, yMin, yMax, fMinY, fMaxY);
+                    collectVerticalLines(segments, world, (float) ix, (float) (bz + 1) - FACE_OFFSET, bx, bz + 1, yMin, yMax, fMinY, fMaxY);
+                }
+            }
+        }
+
+        // 西面 x=bx：检查(bx,bz)和(bx-1,bz)
+        if (Math.abs(edx) > 0.001) {
+            double t = (bx - ex1) / edx;
+            if (t >= 0 && t <= 1) {
+                double iz = ez1 + edz * t;
+                if (iz >= bz && iz <= bz + 1) {
+                    collectVerticalLines(segments, world, (float) bx - FACE_OFFSET, (float) iz, bx, bz, yMin, yMax, fMinY, fMaxY);
+                    collectVerticalLines(segments, world, (float) bx + FACE_OFFSET, (float) iz, bx - 1, bz, yMin, yMax, fMinY, fMaxY);
+                }
+            }
+            // 东面 x=bx+1：检查(bx,bz)和(bx+1,bz)
+            t = (bx + 1 - ex1) / edx;
+            if (t >= 0 && t <= 1) {
+                double iz = ez1 + edz * t;
+                if (iz >= bz && iz <= bz + 1) {
+                    collectVerticalLines(segments, world, (float) (bx + 1) + FACE_OFFSET, (float) iz, bx, bz, yMin, yMax, fMinY, fMaxY);
+                    collectVerticalLines(segments, world, (float) (bx + 1) - FACE_OFFSET, (float) iz, bx + 1, bz, yMin, yMax, fMinY, fMaxY);
+                }
+            }
+        }
+    }
+
+    /**
+     * 收集方块顶面/底面与边界墙交接处的水平线段
+     * 遍历所有Y层级，在实心方块的暴露面上画线
+     */
+    private static void collectHorizontalLines(List<float[]> segments, World world,
+            double ex1, double ez1, double edx, double edz,
+            int bx, int bz, int yMin, int yMax, float fMinY, float fMaxY) {
+
+        // 计算边线在该方块XZ范围内的t区间
+        double tMin = 0, tMax = 1;
+        if (Math.abs(edx) > 0.001) {
+            double t1 = (bx - ex1) / edx, t2 = (bx + 1 - ex1) / edx;
+            if (t1 > t2) { double tmp = t1; t1 = t2; t2 = tmp; }
+            tMin = Math.max(tMin, t1);
+            tMax = Math.min(tMax, t2);
+        } else if (ex1 < bx || ex1 > bx + 1) return;
+
+        if (Math.abs(edz) > 0.001) {
+            double t1 = (bz - ez1) / edz, t2 = (bz + 1 - ez1) / edz;
+            if (t1 > t2) { double tmp = t1; t1 = t2; t2 = tmp; }
+            tMin = Math.max(tMin, t1);
+            tMax = Math.min(tMax, t2);
+        } else if (ez1 < bz || ez1 > bz + 1) return;
+
+        if (tMin >= tMax) return;
+
+        float x1 = (float)(ex1 + edx * tMin), z1 = (float)(ez1 + edz * tMin);
+        float x2 = (float)(ex1 + edx * tMax), z2 = (float)(ez1 + edz * tMax);
+        BlockPos.Mutable pos = new BlockPos.Mutable();
+
+        for (int by = yMin; by <= yMax; by++) {
+            pos.set(bx, by, bz);
+            if (!world.getBlockState(pos).isOpaqueFullCube(world, pos)) continue;
+
+            float bottom = Math.max(by, fMinY);
+            float top = Math.min(by + 1, fMaxY);
+            if (top <= bottom) continue;
+
+            // 顶面：上方方块非实心时，线往上偏（到空气中）
+            pos.set(bx, by + 1, bz);
+            if (top == by + 1 && !world.getBlockState(pos).isOpaqueFullCube(world, pos)) {
+                segments.add(new float[]{x1, top + FACE_OFFSET, z1, x2, top + FACE_OFFSET, z2});
+            }
+
+            // 底面：下方方块非实心时，线往下偏（到空气中）
+            pos.set(bx, by - 1, bz);
+            if (bottom == by && !world.getBlockState(pos).isOpaqueFullCube(world, pos)) {
+                segments.add(new float[]{x1, bottom - FACE_OFFSET, z1, x2, bottom - FACE_OFFSET, z2});
+            }
+        }
+    }
+
+    /**
+     * 收集方块面上的垂直线段（仅对实心方块）
+     */
+    private static void collectVerticalLines(List<float[]> segments, World world,
+            float fx, float fz, int bx, int bz,
+            int yMin, int yMax, float fMinY, float fMaxY) {
+
+        BlockPos.Mutable pos = new BlockPos.Mutable();
+
+        for (int by = yMin; by <= yMax; by++) {
+            pos.set(bx, by, bz);
+            BlockState state = world.getBlockState(pos);
+            if (!state.isOpaqueFullCube(world, pos)) continue;
+
+            float lineBottom = Math.max(by, fMinY);
+            float lineTop = Math.min(by + 1, fMaxY);
+            if (lineTop <= lineBottom) continue;
+
+            segments.add(new float[]{fx, lineBottom, fz, fx, lineTop, fz});
         }
     }
 
