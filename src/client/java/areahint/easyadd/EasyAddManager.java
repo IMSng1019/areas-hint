@@ -313,9 +313,12 @@ public class EasyAddManager {
             return;
         }
         
+        // 清除临时顶点（记录完成后不再显示）
+        areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
+
         // 进入高度选择状态
         currentState = EasyAddState.HEIGHT_SELECTION;
-        
+
         // 开始高度选择流程
         EasyAddAltitudeManager.startAltitudeSelection(recordedPoints);
     }

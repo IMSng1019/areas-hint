@@ -652,7 +652,8 @@ public class ExpandAreaManager {
         this.selectedArea = null;
         this.newVertices.clear();
         this.isRecording = false;
-        this.isActive = false;  // 重置活动状态
+        this.isActive = false;
+        areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
     }
     
     /**

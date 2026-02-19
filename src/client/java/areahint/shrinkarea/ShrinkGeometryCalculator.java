@@ -109,16 +109,30 @@ public class ShrinkGeometryCalculator {
                 System.err.println("修复线段交叉失败");
                 return null;
             }
-            
-            // 7. 重新计算二级顶点（边界框）
+
+            // 7. 最终排序：强制按角度排序所有顶点，确保没有交叉
+            finalVertices = ensureNoIntersections(finalVertices);
+            if (finalVertices == null || finalVertices.size() < 3) {
+                System.err.println("最终排序失败");
+                return null;
+            }
+
+            // 8. 重新计算二级顶点（边界框）
             List<AreaData.Vertex> secondVertices = calculateBoundingBox(finalVertices);
-            
-            // 8. 创建新的域名数据
+
+            // 9. 创建新的域名数据
             AreaData shrunkArea = createShrunkAreaData(finalVertices, secondVertices);
-            
+
             System.out.println("=== 域名收缩计算完成 ===");
             System.out.println("最终顶点数量: " + finalVertices.size());
-            
+
+            // 最终验证：打印所有顶点坐标
+            System.out.println("最终顶点列表:");
+            for (int i = 0; i < finalVertices.size(); i++) {
+                AreaData.Vertex v = finalVertices.get(i);
+                System.out.println("  [" + i + "] (" + v.getX() + ", " + v.getZ() + ")");
+            }
+
             return shrunkArea;
             
         } catch (Exception e) {
@@ -301,19 +315,26 @@ public class ShrinkGeometryCalculator {
      * 步骤5: 构造最终的顶点列表
      * 删除原域名顶点，插入新顶点
      * 插入方式：原顶点 → 边界点1 → 新顶点 → 边界点2 → 原顶点
+     *
+     * 关键修复：
+     * 1. 删除两个边界点之间较短路径的原域名顶点（临近点之间更少的点）
+     * 2. 确保边界点不重复添加（如果边界点与原顶点重合）
+     * 3. 新顶点与原顶点重新排序，避免线段交叉
      */
     private List<AreaData.Vertex> constructFinalVertices() {
         List<AreaData.Vertex> finalVertices = new ArrayList<>();
         List<AreaData.Vertex> originalVertices = originalArea.getVertices();
-        
+
         System.out.println("开始构造最终顶点列表...");
-        
+        System.out.println("原域名顶点数: " + originalVertices.size());
+        System.out.println("收缩区域顶点数: " + externalShrinkVertices.size());
+
         // 确保 startBoundaryIndex < endBoundaryIndex
         int idx1 = startBoundaryIndex;
         int idx2 = endBoundaryIndex;
         AreaData.Vertex bp1 = startBoundaryPoint;
         AreaData.Vertex bp2 = endBoundaryPoint;
-        
+
         if (idx1 > idx2) {
             int temp = idx1;
             idx1 = idx2;
@@ -322,90 +343,344 @@ public class ShrinkGeometryCalculator {
             bp1 = bp2;
             bp2 = tempVertex;
         }
-        
+
+        System.out.println("边界点索引: idx1=" + idx1 + ", idx2=" + idx2);
+
         // 计算两个边界点之间的距离（两种路径）
+        // shortPath: 从 idx1 到 idx2 的直接路径
+        // longPath: 从 idx2 绕一圈到 idx1 的路径
         int shortPath = idx2 - idx1;
         int longPath = originalVertices.size() - shortPath;
-        
-        System.out.println("短路径距离: " + shortPath + ", 长路径距离: " + longPath);
-        
-        // 删除两个边界点之间较短路径的点
+
+        System.out.println("短路径距离: " + shortPath + " 个顶点");
+        System.out.println("长路径距离: " + longPath + " 个顶点");
+
+        // 判断新顶点的插入方式（正向或反向）
+        List<AreaData.Vertex> orderedNewVertices = determineVertexOrder(externalShrinkVertices, bp1, bp2);
+        System.out.println("新顶点排序完成，数量: " + orderedNewVertices.size());
+
+        // 删除两个边界点之间较短路径的点（临近点之间更少的点）
         if (shortPath <= longPath) {
+            System.out.println("删除短路径的顶点 [" + (idx1 + 1) + ", " + idx2 + "]");
+
             // 保留 [0, idx1] 的原顶点
             for (int i = 0; i <= idx1; i++) {
                 finalVertices.add(originalVertices.get(i));
             }
-            // 添加第一个边界点
-            finalVertices.add(bp1);
-            // 判断新顶点的插入方式（正向或反向）
-            List<AreaData.Vertex> orderedNewVertices = determineVertexOrder(externalShrinkVertices, bp1, bp2);
+
+            // 添加第一个边界点（如果不与最后一个原顶点重合）
+            if (!isVertexEqual(bp1, originalVertices.get(idx1))) {
+                finalVertices.add(bp1);
+            }
+
             // 添加新顶点
             finalVertices.addAll(orderedNewVertices);
-            // 添加第二个边界点
-            finalVertices.add(bp2);
+
+            // 添加第二个边界点（如果不与下一个原顶点重合）
+            if (idx2 + 1 < originalVertices.size() && !isVertexEqual(bp2, originalVertices.get(idx2 + 1))) {
+                finalVertices.add(bp2);
+            } else if (idx2 + 1 >= originalVertices.size() && !isVertexEqual(bp2, originalVertices.get(0))) {
+                finalVertices.add(bp2);
+            }
+
             // 保留 [idx2+1, end] 的原顶点
             for (int i = idx2 + 1; i < originalVertices.size(); i++) {
                 finalVertices.add(originalVertices.get(i));
             }
         } else {
-            // 保留较长路径
-            // 保留 [idx2+1, end] 和 [0, idx1] 的原顶点
-            for (int i = idx2 + 1; i < originalVertices.size(); i++) {
+            System.out.println("删除长路径的顶点 [" + (idx2 + 1) + ", " + (originalVertices.size() - 1) + "] 和 [0, " + idx1 + "]");
+
+            // 保留 [idx1+1, idx2] 的原顶点（较短的那段）
+            for (int i = idx1 + 1; i <= idx2; i++) {
                 finalVertices.add(originalVertices.get(i));
             }
-            for (int i = 0; i <= idx1; i++) {
-                finalVertices.add(originalVertices.get(i));
+
+            // 添加第二个边界点（如果不与最后一个原顶点重合）
+            if (!isVertexEqual(bp2, originalVertices.get(idx2))) {
+                finalVertices.add(bp2);
             }
-            // 添加第一个边界点
-            finalVertices.add(bp1);
-            // 判断新顶点的插入方式
-            List<AreaData.Vertex> orderedNewVertices = determineVertexOrder(externalShrinkVertices, bp1, bp2);
-            // 添加新顶点
-            finalVertices.addAll(orderedNewVertices);
-            // 添加第二个边界点
-            finalVertices.add(bp2);
+
+            // 添加新顶点（反向）
+            List<AreaData.Vertex> reversedNewVertices = new ArrayList<>();
+            for (int i = orderedNewVertices.size() - 1; i >= 0; i--) {
+                reversedNewVertices.add(orderedNewVertices.get(i));
+            }
+            finalVertices.addAll(reversedNewVertices);
+
+            // 添加第一个边界点（如果不与下一个原顶点重合）
+            if (!isVertexEqual(bp1, originalVertices.get(idx1))) {
+                finalVertices.add(bp1);
+            }
         }
-        
+
         System.out.println("最终顶点列表构造完成，顶点数: " + finalVertices.size());
+
+        // 打印最终顶点列表用于调试
+        for (int i = 0; i < finalVertices.size(); i++) {
+            AreaData.Vertex v = finalVertices.get(i);
+            System.out.println("  顶点 " + i + ": (" + v.getX() + ", " + v.getZ() + ")");
+        }
+
         return finalVertices;
+    }
+
+    /**
+     * 判断两个顶点是否相等（在误差范围内）
+     */
+    private boolean isVertexEqual(AreaData.Vertex v1, AreaData.Vertex v2) {
+        return Math.abs(v1.getX() - v2.getX()) < EPSILON &&
+               Math.abs(v1.getZ() - v2.getZ()) < EPSILON;
     }
     
     /**
      * 步骤6: 检查并修复线段交叉
-     * 如果有交叉，反转新顶点的顺序
+     * 如果有交叉，反转新顶点的顺序并重新排序
+     *
+     * 关键修复：
+     * 1. 检测线段交叉
+     * 2. 如果有交叉，尝试反转新顶点顺序
+     * 3. 如果仍有交叉，尝试重新排序所有顶点（使用凸包或角度排序）
      */
     private List<AreaData.Vertex> fixCrossingsIfNeeded(List<AreaData.Vertex> vertices) {
         if (vertices.size() < 4) {
             return vertices; // 少于4个顶点不会有交叉
         }
-        
+
         System.out.println("开始检查线段交叉...");
-        
+
         // 检查是否有线段交叉
         if (hasCrossing(vertices)) {
             System.out.println("检测到线段交叉，尝试反转新顶点顺序...");
-            
+
             // 反转新顶点的顺序
             List<AreaData.Vertex> reversedNewVertices = new ArrayList<>();
             for (int i = externalShrinkVertices.size() - 1; i >= 0; i--) {
                 reversedNewVertices.add(externalShrinkVertices.get(i));
             }
             externalShrinkVertices = reversedNewVertices;
-            
+
             // 重新构造顶点列表
             vertices = constructFinalVertices();
-            
+
             // 再次检查
             if (hasCrossing(vertices)) {
-                System.err.println("反转后仍然有交叉，可能存在几何问题");
+                System.out.println("反转后仍然有交叉，尝试重新排序所有顶点...");
+
+                // 尝试使用角度排序重新排列顶点
+                vertices = reorderVerticesByAngle(vertices);
+
+                // 最后一次检查
+                if (hasCrossing(vertices)) {
+                    System.err.println("重新排序后仍然有交叉，可能存在几何问题");
+                } else {
+                    System.out.println("重新排序后交叉问题已解决");
+                }
             } else {
                 System.out.println("反转后交叉问题已解决");
             }
         } else {
             System.out.println("没有检测到线段交叉");
         }
-        
+
         return vertices;
+    }
+
+    /**
+     * 使用角度排序重新排列顶点，确保顶点按逆时针顺序排列
+     * 这样可以避免线段交叉
+     */
+    private List<AreaData.Vertex> reorderVerticesByAngle(List<AreaData.Vertex> vertices) {
+        if (vertices.size() < 3) {
+            return vertices;
+        }
+
+        System.out.println("开始按角度重新排序顶点...");
+
+        // 计算中心点
+        double centerX = 0, centerZ = 0;
+        for (AreaData.Vertex v : vertices) {
+            centerX += v.getX();
+            centerZ += v.getZ();
+        }
+        centerX /= vertices.size();
+        centerZ /= vertices.size();
+
+        System.out.println("中心点: (" + centerX + ", " + centerZ + ")");
+
+        // 创建顶点和角度的映射
+        List<VertexWithAngle> verticesWithAngles = new ArrayList<>();
+        for (AreaData.Vertex v : vertices) {
+            double angle = Math.atan2(v.getZ() - centerZ, v.getX() - centerX);
+            verticesWithAngles.add(new VertexWithAngle(v, angle));
+        }
+
+        // 按角度排序（逆时针）
+        verticesWithAngles.sort((a, b) -> Double.compare(a.angle, b.angle));
+
+        // 提取排序后的顶点
+        List<AreaData.Vertex> sortedVertices = new ArrayList<>();
+        for (VertexWithAngle vwa : verticesWithAngles) {
+            sortedVertices.add(vwa.vertex);
+        }
+
+        System.out.println("角度排序完成");
+        return sortedVertices;
+    }
+
+    /**
+     * 辅助类：顶点和角度的组合
+     */
+    private static class VertexWithAngle {
+        AreaData.Vertex vertex;
+        double angle;
+
+        VertexWithAngle(AreaData.Vertex vertex, double angle) {
+            this.vertex = vertex;
+            this.angle = angle;
+        }
+    }
+
+    /**
+     * 最终排序：确保所有顶点按正确顺序排列，没有线段交叉
+     *
+     * 这是最后一道防线，使用多种策略确保顶点顺序正确：
+     * 1. 首先检查是否有交叉
+     * 2. 如果有交叉，使用角度排序（从中心点出发）
+     * 3. 如果角度排序后仍有交叉，尝试使用凸包算法
+     * 4. 最后验证是否还有交叉
+     */
+    private List<AreaData.Vertex> ensureNoIntersections(List<AreaData.Vertex> vertices) {
+        System.out.println("=== 开始最终排序，确保没有线段交叉 ===");
+
+        if (vertices.size() < 3) {
+            return vertices;
+        }
+
+        // 检查当前是否有交叉
+        if (!hasCrossing(vertices)) {
+            System.out.println("当前顶点顺序正确，没有交叉");
+            return vertices;
+        }
+
+        System.out.println("检测到线段交叉，开始强制重新排序...");
+
+        // 策略1：使用角度排序（从中心点出发，逆时针排列）
+        List<AreaData.Vertex> sortedVertices = reorderVerticesByAngle(vertices);
+
+        if (!hasCrossing(sortedVertices)) {
+            System.out.println("角度排序成功，没有交叉");
+            return sortedVertices;
+        }
+
+        System.out.println("角度排序后仍有交叉，尝试使用凸包算法...");
+
+        // 策略2：使用凸包算法（Graham扫描）
+        sortedVertices = computeConvexHull(vertices);
+
+        if (!hasCrossing(sortedVertices)) {
+            System.out.println("凸包算法成功，没有交叉");
+            return sortedVertices;
+        }
+
+        // 策略3：如果凸包后仍有交叉，尝试反向排序
+        System.out.println("凸包算法后仍有交叉，尝试反向排序...");
+        List<AreaData.Vertex> reversedVertices = new ArrayList<>();
+        for (int i = sortedVertices.size() - 1; i >= 0; i--) {
+            reversedVertices.add(sortedVertices.get(i));
+        }
+
+        if (!hasCrossing(reversedVertices)) {
+            System.out.println("反向排序成功，没有交叉");
+            return reversedVertices;
+        }
+
+        // 如果所有策略都失败，返回角度排序的结果（这是最可能正确的）
+        System.err.println("警告：无法完全消除线段交叉，返回角度排序结果");
+        return sortedVertices;
+    }
+
+    /**
+     * 使用Graham扫描算法计算凸包
+     * 凸包保证没有线段交叉
+     */
+    private List<AreaData.Vertex> computeConvexHull(List<AreaData.Vertex> vertices) {
+        if (vertices.size() < 3) {
+            return new ArrayList<>(vertices);
+        }
+
+        System.out.println("开始计算凸包...");
+
+        // 复制顶点列表
+        List<AreaData.Vertex> points = new ArrayList<>(vertices);
+
+        // 找到最下方的点（y最小，如果相同则x最小）
+        AreaData.Vertex pivot = points.get(0);
+        int pivotIndex = 0;
+        for (int i = 1; i < points.size(); i++) {
+            AreaData.Vertex p = points.get(i);
+            if (p.getZ() < pivot.getZ() || (p.getZ() == pivot.getZ() && p.getX() < pivot.getX())) {
+                pivot = p;
+                pivotIndex = i;
+            }
+        }
+
+        // 将pivot移到第一个位置
+        points.set(pivotIndex, points.get(0));
+        points.set(0, pivot);
+
+        // 按照相对于pivot的极角排序
+        final AreaData.Vertex finalPivot = pivot;
+        points.subList(1, points.size()).sort((a, b) -> {
+            double angleA = Math.atan2(a.getZ() - finalPivot.getZ(), a.getX() - finalPivot.getX());
+            double angleB = Math.atan2(b.getZ() - finalPivot.getZ(), b.getX() - finalPivot.getX());
+            int angleCompare = Double.compare(angleA, angleB);
+            if (angleCompare != 0) {
+                return angleCompare;
+            }
+            // 如果角度相同，按距离排序
+            double distA = distance(finalPivot, a);
+            double distB = distance(finalPivot, b);
+            return Double.compare(distA, distB);
+        });
+
+        // Graham扫描
+        List<AreaData.Vertex> hull = new ArrayList<>();
+        hull.add(points.get(0));
+        hull.add(points.get(1));
+
+        for (int i = 2; i < points.size(); i++) {
+            AreaData.Vertex top = hull.get(hull.size() - 1);
+            AreaData.Vertex nextToTop = hull.get(hull.size() - 2);
+            AreaData.Vertex current = points.get(i);
+
+            // 如果不是左转，移除栈顶
+            while (hull.size() > 1 && crossProduct(nextToTop, top, current) <= 0) {
+                hull.remove(hull.size() - 1);
+                if (hull.size() > 1) {
+                    top = hull.get(hull.size() - 1);
+                    nextToTop = hull.get(hull.size() - 2);
+                }
+            }
+
+            hull.add(current);
+        }
+
+        System.out.println("凸包计算完成，顶点数: " + hull.size());
+        return hull;
+    }
+
+    /**
+     * 计算叉积，用于判断三点的转向
+     * 返回值 > 0: 左转（逆时针）
+     * 返回值 < 0: 右转（顺时针）
+     * 返回值 = 0: 共线
+     */
+    private double crossProduct(AreaData.Vertex o, AreaData.Vertex a, AreaData.Vertex b) {
+        double oax = a.getX() - o.getX();
+        double oay = a.getZ() - o.getZ();
+        double obx = b.getX() - o.getX();
+        double oby = b.getZ() - o.getZ();
+        return oax * oby - oay * obx;
     }
     
     /**

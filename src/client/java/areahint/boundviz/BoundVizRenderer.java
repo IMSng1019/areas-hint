@@ -23,49 +23,40 @@ public class BoundVizRenderer {
      */
     public static void render(MatrixStack matrices, float tickDelta) {
         BoundVizManager manager = BoundVizManager.getInstance();
-        if (!manager.isEnabled()) {
-            return;
-        }
-
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null || client.world == null) {
-            return;
-        }
+        if (client.player == null || client.world == null) return;
 
-        // 获取相机位置
+        boolean hasTempVertices = manager.shouldShowTemporaryVertices();
+        if (!manager.isEnabled() && !hasTempVertices) return;
+
         Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
 
-        // 设置渲染状态
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.disableDepthTest();
+        // 保持深度测试启用，使方块正确遮挡面，并避免顶面/底面叠加
         RenderSystem.depthMask(false);
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
         matrices.push();
-
-        // 偏移到相机位置
         matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
 
-        // 渲染所有域名边界
-        List<AreaData> areas = manager.getCurrentDimensionAreas();
-        for (AreaData area : areas) {
-            renderAreaBoundary(matrices, buffer, area, client);
+        if (manager.isEnabled()) {
+            List<AreaData> areas = manager.getCurrentDimensionAreas();
+            for (AreaData area : areas) {
+                renderAreaBoundary(matrices, buffer, area, client);
+            }
         }
 
-        // 渲染临时顶点（easyadd、expandarea、shrinkarea）
-        if (manager.shouldShowTemporaryVertices()) {
+        if (hasTempVertices) {
             renderTemporaryVertices(matrices, buffer, manager.getTemporaryVertices(), client);
         }
 
         matrices.pop();
 
-        // 恢复渲染状态
         RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
     }
 
