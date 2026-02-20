@@ -220,6 +220,10 @@ public class ClientNetworking {
                     else if (action.startsWith("shrinkarea")) {
                         handleEasyAddCommand(action);
                     }
+                    // 处理DivideArea命令
+                    else if (action.startsWith("dividearea")) {
+                        handleDivideAreaCommand(action);
+                    }
                     // 处理AddHint命令
                     else if (action.startsWith("addhint")) {
                         handleEasyAddCommand(action);
@@ -509,6 +513,33 @@ public class ClientNetworking {
      * 处理Delete命令
      * @param action 命令动作
      */
+    private static void handleDivideAreaCommand(String action) {
+        try {
+            areahint.dividearea.DivideAreaManager mgr = areahint.dividearea.DivideAreaManager.getInstance();
+            if (action.equals("dividearea_start")) {
+                mgr.start();
+            } else if (action.startsWith("dividearea_select:")) {
+                mgr.selectAreaByName(action.substring("dividearea_select:".length()));
+            } else if (action.equals("dividearea_continue")) {
+                mgr.continueRecording();
+            } else if (action.equals("dividearea_save")) {
+                mgr.finishAndSave();
+            } else if (action.startsWith("dividearea_name:")) {
+                mgr.handleNameInput(action.substring("dividearea_name:".length()));
+            } else if (action.startsWith("dividearea_level:")) {
+                mgr.handleLevelInput(Integer.parseInt(action.substring("dividearea_level:".length())));
+            } else if (action.startsWith("dividearea_base:")) {
+                mgr.handleBaseInput(action.substring("dividearea_base:".length()));
+            } else if (action.startsWith("dividearea_color:")) {
+                mgr.handleColorInput(action.substring("dividearea_color:".length()));
+            } else if (action.equals("dividearea_cancel")) {
+                mgr.cancel();
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理DivideArea命令时出错: " + e.getMessage(), e);
+        }
+    }
+
     private static void handleDeleteCommand(String action) {
         try {
             AreashintClient.LOGGER.info("处理Delete命令: " + action);

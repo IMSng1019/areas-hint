@@ -198,7 +198,37 @@ public class ServerCommands {
                     .executes(ServerCommands::executeShrinkAreaSave))
                 .then(literal("cancel")
                     .executes(ServerCommands::executeShrinkAreaCancel)))
-            
+
+            // dividearea 命令 (域名分割)
+            .then(literal("dividearea")
+                .executes(ServerCommands::executeDivideAreaStart)
+                .then(literal("select")
+                    .then(argument("selectAreaName", StringArgumentType.greedyString())
+                        .executes(context -> executeDivideAreaSelect(context,
+                            StringArgumentType.getString(context, "selectAreaName")))))
+                .then(literal("continue")
+                    .executes(ServerCommands::executeDivideAreaContinue))
+                .then(literal("save")
+                    .executes(ServerCommands::executeDivideAreaSave))
+                .then(literal("name")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeDivideAreaName(context,
+                            StringArgumentType.getString(context, "areaName")))))
+                .then(literal("level")
+                    .then(argument("levelValue", IntegerArgumentType.integer(1, 3))
+                        .executes(context -> executeDivideAreaLevel(context,
+                            IntegerArgumentType.getInteger(context, "levelValue")))))
+                .then(literal("base")
+                    .then(argument("baseName", StringArgumentType.greedyString())
+                        .executes(context -> executeDivideAreaBase(context,
+                            StringArgumentType.getString(context, "baseName")))))
+                .then(literal("color")
+                    .then(argument("colorValue", StringArgumentType.greedyString())
+                        .executes(context -> executeDivideAreaColor(context,
+                            StringArgumentType.getString(context, "colorValue")))))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeDivideAreaCancel)))
+
             // recolor 命令
             .then(literal("recolor")
                 .executes(RecolorCommand::executeRecolor)
@@ -1246,6 +1276,89 @@ public class ServerCommands {
         }
     }
     
+    // ===== DivideArea 命令处理 =====
+
+    private static int executeDivideAreaStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (source.getPlayer() == null) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            sendClientCommand(source, "areahint:dividearea_start");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) { source.sendMessage(Text.of("§c启动域名分割失败: " + e.getMessage())); return 0; }
+    }
+
+    private static int executeDivideAreaSelect(CommandContext<ServerCommandSource> context, String areaName) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            sendClientCommand(source, "areahint:dividearea_select:" + areaName);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) { source.sendMessage(Text.of("§c选择域名失败: " + e.getMessage())); return 0; }
+    }
+
+    private static int executeDivideAreaContinue(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            sendClientCommand(source, "areahint:dividearea_continue");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) { return 0; }
+    }
+
+    private static int executeDivideAreaSave(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            sendClientCommand(source, "areahint:dividearea_save");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) { return 0; }
+    }
+
+    private static int executeDivideAreaName(CommandContext<ServerCommandSource> context, String name) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            sendClientCommand(source, "areahint:dividearea_name:" + name);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) { return 0; }
+    }
+
+    private static int executeDivideAreaLevel(CommandContext<ServerCommandSource> context, int level) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            sendClientCommand(source, "areahint:dividearea_level:" + level);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) { return 0; }
+    }
+
+    private static int executeDivideAreaBase(CommandContext<ServerCommandSource> context, String baseName) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            sendClientCommand(source, "areahint:dividearea_base:" + baseName);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) { return 0; }
+    }
+
+    private static int executeDivideAreaColor(CommandContext<ServerCommandSource> context, String color) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            sendClientCommand(source, "areahint:dividearea_color:" + color);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) { return 0; }
+    }
+
+    private static int executeDivideAreaCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        try {
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            sendClientCommand(source, "areahint:dividearea_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) { return 0; }
+    }
+
     // ===== AddHint 命令处理 =====
 
     private static int executeAddHintStart(CommandContext<ServerCommandSource> context) {

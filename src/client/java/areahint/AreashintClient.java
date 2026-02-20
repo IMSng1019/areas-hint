@@ -96,6 +96,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化DeleteHint功能
 		initDeleteHint();
 
+		// 初始化DivideArea功能
+		initDivideArea();
+
 		// 初始化Delete功能
 		initDelete();
 
@@ -189,6 +192,18 @@ public class AreashintClient implements ClientModInitializer {
 			LOGGER.info("DeleteHint功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化DeleteHint功能时发生错误", e);
+		}
+	}
+
+	/**
+	 * 初始化DivideArea功能
+	 */
+	private void initDivideArea() {
+		try {
+			areahint.dividearea.DivideAreaClientNetworking.registerClientNetworking();
+			LOGGER.info("DivideArea功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化DivideArea功能时发生错误", e);
 		}
 	}
 

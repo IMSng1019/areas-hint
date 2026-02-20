@@ -1,0 +1,588 @@
+package areahint.dividearea;
+
+import areahint.data.AreaData;
+import areahint.file.FileManager;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.nio.file.Path;
+
+public class DivideAreaManager {
+    public enum State {
+        IDLE, SELECTING_AREA, RECORDING_POINTS,
+        AREA1_NAME, AREA1_LEVEL, AREA1_BASE, AREA1_COLOR,
+        AREA2_NAME, AREA2_LEVEL, AREA2_BASE, AREA2_COLOR,
+        SAVING
+    }
+
+    private static DivideAreaManager instance;
+    private MinecraftClient client;
+    private DivideAreaUI ui;
+    private State state = State.IDLE;
+    private AreaData selectedArea;
+    private List<Double[]> newVertices = new ArrayList<>();
+    private boolean isActive = false;
+    private boolean isRecording = false;
+
+    // 分割后的两组顶点
+    private List<Double[]> area1Vertices;
+    private List<Double[]> area2Vertices;
+
+    // 两个新域名的配置
+    private AreaData area1Config;
+    private AreaData area2Config;
+
+    public static DivideAreaManager getInstance() {
+        if (instance == null) instance = new DivideAreaManager();
+        return instance;
+    }
+
+    private DivideAreaManager() {
+        this.client = MinecraftClient.getInstance();
+        this.ui = new DivideAreaUI(this);
+    }
+
+    public boolean isActive() { return isActive; }
+    public boolean isRecording() { return isRecording; }
+    public State getState() { return state; }
+
+    // ===== 第1阶段：启动和域名选择 =====
+
+    public void start() {
+        if (client.player == null) return;
+        isActive = true;
+        state = State.SELECTING_AREA;
+        List<AreaData> modifiableAreas = getModifiableAreas();
+        if (modifiableAreas.isEmpty()) {
+            sendMsg("§c没有可分割的域名", Formatting.RED);
+            reset();
+            return;
+        }
+        ui.showAreaSelection(modifiableAreas);
+    }
+
+    public void selectAreaByName(String areaName) {
+        if (areaName == null || areaName.trim().isEmpty()) {
+            sendMsg("§c无效的域名", Formatting.RED);
+            return;
+        }
+        String cleaned = areaName.trim();
+        if (cleaned.startsWith("\"") && cleaned.endsWith("\"") && cleaned.length() > 1)
+            cleaned = cleaned.substring(1, cleaned.length() - 1);
+
+        List<AreaData> modifiable = getModifiableAreas();
+        AreaData area = null;
+        for (AreaData a : modifiable) {
+            if (a.getName().equals(cleaned)) { area = a; break; }
+        }
+        if (area == null) {
+            sendMsg("§c域名 '" + cleaned + "' 不存在或您没有权限", Formatting.RED);
+            return;
+        }
+        this.selectedArea = area;
+        sendMsg("§a已选择域名: " + areahint.util.AreaDataConverter.getDisplayName(area), Formatting.GREEN);
+        sendMsg("§e请按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §e键记录分割线顶点", Formatting.YELLOW);
+        state = State.RECORDING_POINTS;
+        isRecording = true;
+        newVertices.clear();
+        ui.showRecordingInterface();
+    }
+
+    public void cancel() {
+        if (!isActive) return;
+        areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
+        ui.showCancelMessage();
+        reset();
+    }
+
+    public void continueRecording() {
+        if (!isRecording || client.player == null) return;
+        sendMsg("§a继续记录，按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §a记录位置", Formatting.GREEN);
+    }
+
+    // ===== 第2阶段：记录顶点 =====
+
+    public void recordCurrentPosition() {
+        if (!isRecording || client.player == null) return;
+        double x = client.player.getX();
+        double y = client.player.getY();
+        double z = client.player.getZ();
+        int rx = (int) Math.round(x);
+        int rz = (int) Math.round(z);
+        newVertices.add(new Double[]{(double) rx, (double) rz});
+        sendMsg("§a已记录位置 #" + newVertices.size() + ": §6(" + rx + ", " + String.format("%.1f", y) + ", " + rz + ")", Formatting.GREEN);
+
+        List<net.minecraft.util.math.BlockPos> bpList = new ArrayList<>();
+        for (Double[] v : newVertices)
+            bpList.add(new net.minecraft.util.math.BlockPos(v[0].intValue(), (int) y, v[1].intValue()));
+        areahint.boundviz.BoundVizManager.getInstance().setTemporaryVertices(bpList, true);
+        ui.showPointRecordedOptions(newVertices.size());
+    }
+
+    // ===== 第3阶段：处理分割 =====
+
+    public void finishAndSave() {
+        if (!isRecording || client.player == null) return;
+        if (newVertices.size() < 2) {
+            sendMsg("§c至少需要记录2个顶点来定义分割线", Formatting.RED);
+            return;
+        }
+        isRecording = false;
+        areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
+        try {
+            processDivision();
+        } catch (Exception e) {
+            sendMsg("§c分割域名时发生错误: " + e.getMessage(), Formatting.RED);
+            e.printStackTrace();
+            reset();
+        }
+    }
+
+    private void processDivision() {
+        // 1. 高度验证
+        if (!validateAltitude()) return;
+
+        // 2. 提取原域名顶点
+        List<Double[]> origVerts = extractOriginalVertices();
+        if (origVerts.size() < 3) {
+            sendMsg("§c原域名顶点不足", Formatting.RED);
+            reset(); return;
+        }
+
+        // 3. 过滤外部顶点，计算边界点
+        List<Double[]> processedVerts = new ArrayList<>();
+        List<Double[]> boundaryPoints = new ArrayList<>();
+        processVerticesAndBoundary(origVerts, processedVerts, boundaryPoints);
+
+        if (boundaryPoints.size() < 2) {
+            sendMsg("§c分割线未能正确穿过域名边界（需要恰好2个交叉点）", Formatting.RED);
+            reset(); return;
+        }
+
+        // 取前两个边界点
+        Double[] bp1 = boundaryPoints.get(0);
+        Double[] bp2 = boundaryPoints.get(1);
+
+        // 4. 找到边界点在原域名边上的位置
+        int bp1Edge = findEdgeIndex(bp1, origVerts);
+        int bp2Edge = findEdgeIndex(bp2, origVerts);
+
+        // 5. 将原域名顶点分成两组
+        splitOriginalVertices(origVerts, bp1, bp2, bp1Edge, bp2Edge, processedVerts);
+
+        if (area1Vertices == null || area1Vertices.size() < 3 || area2Vertices == null || area2Vertices.size() < 3) {
+            sendMsg("§c分割结果无效，每个区域至少需要3个顶点", Formatting.RED);
+            reset(); return;
+        }
+
+        // 6. 排序防止交叉，重新计算AABB
+        area1Vertices = sortVerticesCounterClockwise(area1Vertices);
+        area2Vertices = sortVerticesCounterClockwise(area2Vertices);
+
+        sendMsg("§a分割完成！区域1有 " + area1Vertices.size() + " 个顶点，区域2有 " + area2Vertices.size() + " 个顶点", Formatting.GREEN);
+
+        // 7. 初始化两个域名配置（继承原域名属性）
+        area1Config = createBaseConfig(area1Vertices);
+        area2Config = createBaseConfig(area2Vertices);
+
+        // 8. 开始配置区域1
+        startArea1Config();
+    }
+
+    // ===== 第4阶段：EasyAdd式配置流程 =====
+
+    private void startArea1Config() {
+        state = State.AREA1_NAME;
+        sendMsg("§6=== 配置分割区域 1 ===", Formatting.GOLD);
+        sendMsg("§e请在聊天中输入区域1的名称（使用 /areahint dividearea name <名称>）", Formatting.YELLOW);
+    }
+
+    private void startArea2Config() {
+        state = State.AREA2_NAME;
+        sendMsg("§6=== 配置分割区域 2 ===", Formatting.GOLD);
+        sendMsg("§e请在聊天中输入区域2的名称（使用 /areahint dividearea name <名称>）", Formatting.YELLOW);
+    }
+
+    public void handleNameInput(String name) {
+        if (state == State.AREA1_NAME) {
+            area1Config.setName(name);
+            sendMsg("§a区域1名称设置为: " + name, Formatting.GREEN);
+            state = State.AREA1_LEVEL;
+            showLevelSelection(1);
+        } else if (state == State.AREA2_NAME) {
+            area2Config.setName(name);
+            sendMsg("§a区域2名称设置为: " + name, Formatting.GREEN);
+            state = State.AREA2_LEVEL;
+            showLevelSelection(2);
+        }
+    }
+
+    public void handleLevelInput(int level) {
+        if (state == State.AREA1_LEVEL) {
+            area1Config.setLevel(level);
+            sendMsg("§a区域1等级设置为: " + level, Formatting.GREEN);
+            if (level > 1) {
+                state = State.AREA1_BASE;
+                showBaseSelection(1);
+            } else {
+                area1Config.setBaseName(null);
+                state = State.AREA1_COLOR;
+                showColorSelection(1);
+            }
+        } else if (state == State.AREA2_LEVEL) {
+            area2Config.setLevel(level);
+            sendMsg("§a区域2等级设置为: " + level, Formatting.GREEN);
+            if (level > 1) {
+                state = State.AREA2_BASE;
+                showBaseSelection(2);
+            } else {
+                area2Config.setBaseName(null);
+                state = State.AREA2_COLOR;
+                showColorSelection(2);
+            }
+        }
+    }
+
+    public void handleBaseInput(String baseName) {
+        if (state == State.AREA1_BASE) {
+            area1Config.setBaseName("none".equals(baseName) ? null : baseName);
+            sendMsg("§a区域1上级域名设置为: " + (area1Config.getBaseName() == null ? "无" : baseName), Formatting.GREEN);
+            state = State.AREA1_COLOR;
+            showColorSelection(1);
+        } else if (state == State.AREA2_BASE) {
+            area2Config.setBaseName("none".equals(baseName) ? null : baseName);
+            sendMsg("§a区域2上级域名设置为: " + (area2Config.getBaseName() == null ? "无" : baseName), Formatting.GREEN);
+            state = State.AREA2_COLOR;
+            showColorSelection(2);
+        }
+    }
+
+    public void handleColorInput(String color) {
+        if (state == State.AREA1_COLOR) {
+            area1Config.setColor(color);
+            sendMsg("§a区域1颜色设置为: " + color, Formatting.GREEN);
+            // 区域1配置完成，开始配置区域2
+            startArea2Config();
+        } else if (state == State.AREA2_COLOR) {
+            area2Config.setColor(color);
+            sendMsg("§a区域2颜色设置为: " + color, Formatting.GREEN);
+            // 两个区域都配置完成，发送到服务端
+            sendToServer();
+        }
+    }
+
+    private void sendToServer() {
+        state = State.SAVING;
+        String dimension = null;
+        if (client.world != null)
+            dimension = client.world.getRegistryKey().getValue().toString();
+        if (dimension == null) {
+            sendMsg("§c无法获取当前维度信息", Formatting.RED);
+            reset(); return;
+        }
+        DivideAreaClientNetworking.sendDividedAreasToServer(area1Config, area2Config, selectedArea.getName(), dimension);
+        sendMsg("§a已发送分割数据到服务端", Formatting.GREEN);
+        reset();
+    }
+
+    // ===== UI辅助方法 =====
+
+    private void showLevelSelection(int areaNum) {
+        if (client.player == null) return;
+        sendMsg("§e请选择区域" + areaNum + "的等级：", Formatting.YELLOW);
+        net.minecraft.text.MutableText row = Text.empty();
+        for (int i = 1; i <= 3; i++) {
+            row.append(Text.literal("§6[" + i + "级]").setStyle(net.minecraft.text.Style.EMPTY
+                .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND,
+                    "/areahint dividearea level " + i))
+                .withColor(Formatting.GOLD)));
+            if (i < 3) row.append(Text.of("  "));
+        }
+        client.player.sendMessage(row, false);
+    }
+
+    private void showBaseSelection(int areaNum) {
+        if (client.player == null) return;
+        sendMsg("§e请选择区域" + areaNum + "的上级域名：", Formatting.YELLOW);
+        List<AreaData> allAreas = loadAllAreas();
+        int targetLevel = (state == State.AREA1_BASE ? area1Config.getLevel() : area2Config.getLevel()) - 1;
+
+        net.minecraft.text.MutableText noneBtn = Text.literal("§7[无上级域名]").setStyle(net.minecraft.text.Style.EMPTY
+            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND,
+                "/areahint dividearea base none"))
+            .withColor(Formatting.GRAY));
+        client.player.sendMessage(noneBtn, false);
+
+        for (AreaData a : allAreas) {
+            if (a.getLevel() == targetLevel) {
+                String dn = areahint.util.AreaDataConverter.getDisplayName(a);
+                net.minecraft.text.MutableText btn = Text.literal("§6[" + dn + "]").setStyle(net.minecraft.text.Style.EMPTY
+                    .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND,
+                        "/areahint dividearea base " + a.getName()))
+                    .withColor(Formatting.GOLD));
+                client.player.sendMessage(btn, false);
+            }
+        }
+    }
+
+    private void showColorSelection(int areaNum) {
+        if (client.player == null) return;
+        sendMsg("§e请选择区域" + areaNum + "的颜色：", Formatting.YELLOW);
+        String[][] colors = {
+            {"#FFFFFF", "白色"}, {"#FF0000", "红色"}, {"#FF69B4", "粉红色"},
+            {"#FFA500", "橙色"}, {"#FFFF00", "黄色"}, {"#00FF00", "浅绿色"},
+            {"#006400", "深绿色"}, {"#00BFFF", "浅蓝色"}, {"#00008B", "深蓝色"},
+            {"#9370DB", "浅紫色"}, {"#800080", "紫色"}
+        };
+        for (String[] c : colors) {
+            net.minecraft.text.MutableText btn = Text.literal("§6[" + c[1] + "]").setStyle(net.minecraft.text.Style.EMPTY
+                .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND,
+                    "/areahint dividearea color " + c[0]))
+                .withColor(Formatting.GOLD));
+            client.player.sendMessage(btn, false);
+        }
+        sendMsg("§7或使用 /areahint dividearea color <十六进制颜色>", Formatting.GRAY);
+    }
+
+    // ===== 几何算法 =====
+
+    private boolean validateAltitude() {
+        if (client.player == null || selectedArea.getAltitude() == null) return true;
+        AreaData.AltitudeData alt = selectedArea.getAltitude();
+        if (alt.getMax() == null || alt.getMin() == null) return true;
+
+        double playerY = client.player.getY();
+        double newMax = playerY + 10;
+        double newMin = playerY - 10;
+
+        if (newMax < alt.getMax() && newMin > alt.getMin()) {
+            return true;
+        } else {
+            sendMsg("§c新区域高度超出原域名范围", Formatting.RED);
+            sendMsg("§c原域名高度: " + alt.getMin() + " ~ " + alt.getMax(), Formatting.RED);
+            reset();
+            return false;
+        }
+    }
+
+    private List<Double[]> extractOriginalVertices() {
+        List<Double[]> verts = new ArrayList<>();
+        if (selectedArea.getVertices() == null) return verts;
+        for (AreaData.Vertex v : selectedArea.getVertices())
+            verts.add(new Double[]{v.getX(), v.getZ()});
+        return verts;
+    }
+
+    private void processVerticesAndBoundary(List<Double[]> origVerts, List<Double[]> processedVerts, List<Double[]> boundaryPoints) {
+        // 计算分割线与原域名边界的所有交点
+        for (int i = 0; i < newVertices.size() - 1; i++) {
+            Double[] p1 = newVertices.get(i);
+            Double[] p2 = newVertices.get(i + 1);
+            for (int j = 0; j < origVerts.size(); j++) {
+                int k = (j + 1) % origVerts.size();
+                Double[] inter = lineIntersection(p1, p2, origVerts.get(j), origVerts.get(k));
+                if (inter != null) boundaryPoints.add(inter);
+            }
+        }
+
+        // 保留在原域名内部的顶点
+        for (Double[] v : newVertices) {
+            if (isPointInPolygon(v, origVerts)) processedVerts.add(v);
+        }
+    }
+
+    private void splitOriginalVertices(List<Double[]> origVerts, Double[] bp1, Double[] bp2,
+                                        int bp1Edge, int bp2Edge, List<Double[]> innerVerts) {
+        int n = origVerts.size();
+        // 沿正方向从bp1Edge+1到bp2Edge收集一组顶点
+        List<Double[]> group1 = new ArrayList<>();
+        group1.add(bp1);
+        int idx = (bp1Edge + 1) % n;
+        while (idx != (bp2Edge + 1) % n) {
+            group1.add(origVerts.get(idx));
+            idx = (idx + 1) % n;
+        }
+        group1.add(bp2);
+
+        // 沿反方向收集另一组
+        List<Double[]> group2 = new ArrayList<>();
+        group2.add(bp2);
+        idx = (bp2Edge + 1) % n;
+        while (idx != (bp1Edge + 1) % n) {
+            group2.add(origVerts.get(idx));
+            idx = (idx + 1) % n;
+        }
+        group2.add(bp1);
+
+        // 每组加上内部分割线顶点
+        area1Vertices = new ArrayList<>(group1);
+        area1Vertices.addAll(innerVerts);
+
+        area2Vertices = new ArrayList<>(group2);
+        // 反转内部顶点顺序给第二组
+        List<Double[]> reversedInner = new ArrayList<>(innerVerts);
+        java.util.Collections.reverse(reversedInner);
+        area2Vertices.addAll(reversedInner);
+    }
+
+    private int findEdgeIndex(Double[] point, List<Double[]> polygon) {
+        double minDist = Double.MAX_VALUE;
+        int bestEdge = 0;
+        for (int i = 0; i < polygon.size(); i++) {
+            int j = (i + 1) % polygon.size();
+            Double[] closest = closestPointOnSegment(point, polygon.get(i), polygon.get(j));
+            double dist = distance(point, closest);
+            if (dist < minDist) { minDist = dist; bestEdge = i; }
+        }
+        return bestEdge;
+    }
+
+    private AreaData createBaseConfig(List<Double[]> vertices) {
+        List<AreaData.Vertex> vList = new ArrayList<>();
+        for (Double[] v : vertices) vList.add(new AreaData.Vertex(Math.round(v[0]), Math.round(v[1])));
+
+        List<AreaData.Vertex> sv = calculateAABB(vertices);
+
+        AreaData config = new AreaData(
+            "", vList, sv,
+            selectedArea.getAltitude(),
+            selectedArea.getLevel(),
+            selectedArea.getBaseName(),
+            client.player != null ? client.player.getGameProfile().getName() : selectedArea.getSignature(),
+            selectedArea.getColor(),
+            selectedArea.getSurfacename()
+        );
+        return config;
+    }
+
+    private List<AreaData.Vertex> calculateAABB(List<Double[]> vertices) {
+        double minX = Double.MAX_VALUE, maxX = -Double.MAX_VALUE;
+        double minZ = Double.MAX_VALUE, maxZ = -Double.MAX_VALUE;
+        for (Double[] v : vertices) {
+            minX = Math.min(minX, v[0]); maxX = Math.max(maxX, v[0]);
+            minZ = Math.min(minZ, v[1]); maxZ = Math.max(maxZ, v[1]);
+        }
+        List<AreaData.Vertex> sv = new ArrayList<>();
+        sv.add(new AreaData.Vertex(Math.round(minX), Math.round(minZ)));
+        sv.add(new AreaData.Vertex(Math.round(maxX), Math.round(minZ)));
+        sv.add(new AreaData.Vertex(Math.round(maxX), Math.round(maxZ)));
+        sv.add(new AreaData.Vertex(Math.round(minX), Math.round(maxZ)));
+        return sv;
+    }
+
+    // ===== 几何工具方法 =====
+
+    private boolean isPointInPolygon(Double[] point, List<Double[]> polygon) {
+        if (polygon.size() < 3) return false;
+        double x = point[0], y = point[1];
+        boolean inside = false;
+        for (int i = 0, j = polygon.size() - 1; i < polygon.size(); j = i++) {
+            double xi = polygon.get(i)[0], yi = polygon.get(i)[1];
+            double xj = polygon.get(j)[0], yj = polygon.get(j)[1];
+            if (((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi))
+                inside = !inside;
+        }
+        return inside;
+    }
+
+    private Double[] lineIntersection(Double[] a, Double[] b, Double[] c, Double[] d) {
+        double x1=a[0],y1=a[1], x2=b[0],y2=b[1], x3=c[0],y3=c[1], x4=d[0],y4=d[1];
+        double denom = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4);
+        if (Math.abs(denom) < 1e-10) return null;
+        double t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / denom;
+        double u = -((x1-x2)*(y1-y3) - (y1-y2)*(x1-x3)) / denom;
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+            return new Double[]{(double)Math.round(x1+t*(x2-x1)), (double)Math.round(y1+t*(y2-y1))};
+        return null;
+    }
+
+    private Double[] closestPointOnSegment(Double[] p, Double[] a, Double[] b) {
+        double dx=b[0]-a[0], dy=b[1]-a[1];
+        if (dx==0 && dy==0) return new Double[]{a[0], a[1]};
+        double t = Math.max(0, Math.min(1, ((p[0]-a[0])*dx + (p[1]-a[1])*dy) / (dx*dx+dy*dy)));
+        return new Double[]{a[0]+t*dx, a[1]+t*dy};
+    }
+
+    private double distance(Double[] a, Double[] b) {
+        double dx=a[0]-b[0], dy=a[1]-b[1];
+        return Math.sqrt(dx*dx+dy*dy);
+    }
+
+    private List<Double[]> sortVerticesCounterClockwise(List<Double[]> vertices) {
+        if (vertices.size() < 3) return vertices;
+        double cx=0, cz=0;
+        for (Double[] v : vertices) { cx+=v[0]; cz+=v[1]; }
+        cx /= vertices.size(); cz /= vertices.size();
+        final double fcx=cx, fcz=cz;
+        List<Double[]> sorted = new ArrayList<>(vertices);
+        sorted.sort((a, b) -> Double.compare(
+            Math.atan2(a[1]-fcz, a[0]-fcx),
+            Math.atan2(b[1]-fcz, b[0]-fcx)));
+        return sorted;
+    }
+
+    // ===== 权限和数据加载 =====
+
+    private List<AreaData> getModifiableAreas() {
+        List<AreaData> result = new ArrayList<>();
+        if (client.player == null) return result;
+        String playerName = client.player.getGameProfile().getName();
+        boolean isAdmin = client.player.hasPermissionLevel(2);
+        List<AreaData> all = loadAllAreas();
+        for (AreaData area : all) {
+            if (isAdmin) { result.add(area); continue; }
+            if (playerName.equals(area.getSignature())) { result.add(area); continue; }
+            if (area.getBaseName() != null) {
+                for (AreaData base : all) {
+                    if (base.getName().equals(area.getBaseName()) && playerName.equals(base.getSignature())) {
+                        result.add(area); break;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private List<AreaData> loadAllAreas() {
+        List<AreaData> areas = new ArrayList<>();
+        try {
+            if (client.world != null) {
+                String dim = client.world.getRegistryKey().getValue().toString();
+                String fn = getFileNameForDimension(dim);
+                if (fn != null) {
+                    Path p = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(fn);
+                    if (p.toFile().exists()) areas = FileManager.readAreaData(p);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return areas;
+    }
+
+    private String getFileNameForDimension(String dimId) {
+        if (dimId == null) return null;
+        if (dimId.contains("overworld")) return areahint.Areashint.OVERWORLD_FILE;
+        if (dimId.contains("nether")) return areahint.Areashint.NETHER_FILE;
+        if (dimId.contains("end")) return areahint.Areashint.END_FILE;
+        return null;
+    }
+
+    private void sendMsg(String msg, Formatting fmt) {
+        if (client.player != null)
+            client.player.sendMessage(Text.literal(msg).formatted(fmt), false);
+    }
+
+    public void reset() {
+        state = State.IDLE;
+        isActive = false;
+        isRecording = false;
+        selectedArea = null;
+        newVertices.clear();
+        area1Vertices = null;
+        area2Vertices = null;
+        area1Config = null;
+        area2Config = null;
+    }
+}

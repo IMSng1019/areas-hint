@@ -112,6 +112,14 @@ public class UnifiedKeyHandler {
             return;
         }
 
+        // 检查DivideArea是否活跃且在记录状态
+        areahint.dividearea.DivideAreaManager divideAreaManager = areahint.dividearea.DivideAreaManager.getInstance();
+        if (divideAreaManager.isActive() && divideAreaManager.isRecording()) {
+            System.out.println("DEBUG: DivideArea 处理记录键");
+            divideAreaManager.recordCurrentPosition();
+            return;
+        }
+
         // 检查AddHint是否活跃且在记录状态
         areahint.addhint.AddHintManager addHintManager = areahint.addhint.AddHintManager.getInstance();
         if (addHintManager.isActive() && addHintManager.isRecording()) {
