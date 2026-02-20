@@ -341,25 +341,29 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint help §7- 显示此帮助"));
         source.sendMessage(Text.of("§a/areahint reload §7- 重新加载配置和域名文件"));
         source.sendMessage(Text.of("§a/areahint delete §7- 列出所有可删除的域名"));
-        source.sendMessage(Text.of("§a/areahint delete <域名> §7- 删除指定域名"));
+        source.sendMessage(Text.of("§a/areahint delete §7- 删除指定域名"));
         source.sendMessage(Text.of("§a/areahint frequency [值] §7- 设置或显示检测频率"));
         source.sendMessage(Text.of("§a/areahint subtitlerender [cpu|opengl|vulkan] §7- 设置或显示字幕渲染方式"));
-        source.sendMessage(Text.of("§a/areahint subtitlestyle §7- 交互式设置字幕样式 (full|simple|mixed)"));
-        source.sendMessage(Text.of("§a/areahint subtitlesize §7- 交互式设置字幕大小 (极大|大|较大|中|较小|小|极小)"));
-        source.sendMessage(Text.of("§a/areahint add <JSON> §7- 添加新的域名 (管理员专用)"));
-        source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 (普通玩家可用)"));
+        source.sendMessage(Text.of("§a/areahint subtitlestyle §7- 交互式设置字幕样式"));
+        source.sendMessage(Text.of("§a/areahint subtitlesize §7- 交互式设置字幕大小 "));
+        source.sendMessage(Text.of("§a/areahint add <JSON> §7- 添加新的域名 (已弃用)"));
+        source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 "));
         source.sendMessage(Text.of("§a/areahint recolor §7- 列出当前维度可编辑的域名"));
-        source.sendMessage(Text.of("§a/areahint recolor <域名> <颜色> §7- 修改指定域名的颜色"));
+        source.sendMessage(Text.of("§a/areahint recolor §7- 修改指定域名的颜色"));
         source.sendMessage(Text.of("§a/areahint rename §7- 启动交互式域名重命名流程"));
         source.sendMessage(Text.of("§a/areahint sethigh §7- 列出当前维度可修改高度的域名"));
         source.sendMessage(Text.of("§a/areahint replacebutton §7- 更改记录域名顶点的按键"));
+        source.sendMessage(Text.of("§a/areahint check §7- 查看联合域名信息"));
+        source.sendMessage(Text.of("§a/areahint dimensionalityname §7- 管理维度域名 (管理员专用)"));
+        source.sendMessage(Text.of("§a/areahint expandarea §7- 交互式扩展域名区域"));
+        source.sendMessage(Text.of("§a/areahint shrinkarea §7- 交互式收缩域名区域"));
+        source.sendMessage(Text.of("§a/areahint dividearea §7- 交互式分割域名区域"));
+        source.sendMessage(Text.of("§a/areahint addhint §7- 向域名添加顶点"));
+        source.sendMessage(Text.of("§a/areahint deletehint §7- 从域名删除顶点"));
         source.sendMessage(Text.of("§a/areahint boundviz §7- 切换域名边界可视化显示"));
         source.sendMessage(Text.of("§a/areahint language §7- 交互式选择模组语言"));
-        source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
-        source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
-        source.sendMessage(Text.of("§6===== JSON格式示例 ====="));
-        source.sendMessage(Text.of("§7{\"name\": \"区域名称\", \"vertices\": [{\"x\":0,\"z\":10},{\"x\":10,\"z\":0},...], \"second-vertices\": [{\"x\":-10,\"z\":10},...], \"altitude\": {\"max\":100,\"min\":0}, \"level\": 1, \"base-name\": null, \"signature\": null}"));
-        source.sendMessage(Text.of("§7altitude字段可选: max/min可为null表示无限制，如{\"max\":null,\"min\":64}"));
+        source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员)"));
+        
         
         return Command.SINGLE_SUCCESS;
     }
