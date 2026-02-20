@@ -66,6 +66,7 @@ public class BoundVizRenderer {
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(false);
+        RenderSystem.disableCull();
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
         matrices.push();
@@ -85,6 +86,7 @@ public class BoundVizRenderer {
 
         matrices.pop();
         RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
         RenderSystem.disableBlend();
     }
 
