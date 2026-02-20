@@ -37,9 +37,9 @@ public class ShrinkAreaUI {
         client.player.sendMessage(Text.of("§a请选择要收缩的域名："), false);
         
         if (manager.isAdmin()) {
-            client.player.sendMessage(Text.of("§7管理员权限：可以收缩所有域名"), false);
+            client.player.sendMessage(Text.of("§7管理员可以收缩所有域名"), false);
         } else {
-            client.player.sendMessage(Text.of("§7您只能收缩自己创建的域名"), false);
+            client.player.sendMessage(Text.of("§7您可以收缩自己创建的域名"), false);
         }
         
         client.player.sendMessage(Text.of(""), false);

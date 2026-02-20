@@ -361,7 +361,7 @@ public class EasyAddUI {
             .append(Text.of("  "))
             .append(createColorButton("深蓝色", "#0000AA", "§1"))
             .append(Text.of("  "))
-            .append(createColorButton("紫色", "#800080", "§5"));
+            .append(createColorButton("紫色", "#AA00AA", "§5"));
         // 闪烁效果按钮行
         MutableText row5 = Text.empty()
             .append(createColorButton("整体黑白闪烁", "FLASH_BW_ALL", "§7"))

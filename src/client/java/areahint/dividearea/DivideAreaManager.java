@@ -77,8 +77,11 @@ public class DivideAreaManager {
                 area1Config.setName(input.trim());
                 sendMsg("§a区域1名称设置为: " + input.trim(), Formatting.GREEN);
                 state = State.AREA1_SURFACE_NAME;
-                sendMsg("§e请在聊天中输入区域1的联合域名（直接发送任意消息，留空则跳过）：", Formatting.YELLOW);
-                sendMsg("§7输入 §6skip §7跳过联合域名", Formatting.GRAY);
+                sendMsg("§6=== 联合域名设置 ===", Formatting.GOLD);
+                sendMsg("§a请输入区域1的联合域名：", Formatting.GREEN);
+                sendMsg("§7联合域名是显示给玩家看的名称，可以与实际域名不同", Formatting.GRAY);
+                sendMsg("§e提示：输入 §6skip §e跳过联合域名设置", Formatting.YELLOW);
+                showCancelButton();
                 break;
             case AREA1_SURFACE_NAME:
                 if (!"skip".equalsIgnoreCase(input.trim())) {
@@ -87,8 +90,8 @@ public class DivideAreaManager {
                 } else {
                     sendMsg("§7跳过联合域名设置", Formatting.GRAY);
                 }
-                state = State.AREA1_LEVEL;
-                showLevelSelection(1);
+                state = State.AREA1_COLOR;
+                showColorSelection(1);
                 break;
             case AREA2_NAME:
                 if (checkAreaNameExists(input.trim())) {
@@ -98,8 +101,11 @@ public class DivideAreaManager {
                 area2Config.setName(input.trim());
                 sendMsg("§a区域2名称设置为: " + input.trim(), Formatting.GREEN);
                 state = State.AREA2_SURFACE_NAME;
-                sendMsg("§e请在聊天中输入区域2的联合域名（直接发送任意消息，留空则跳过）：", Formatting.YELLOW);
-                sendMsg("§7输入 §6skip §7跳过联合域名", Formatting.GRAY);
+                sendMsg("§6=== 联合域名设置 ===", Formatting.GOLD);
+                sendMsg("§a请输入区域2的联合域名：", Formatting.GREEN);
+                sendMsg("§7联合域名是显示给玩家看的名称，可以与实际域名不同", Formatting.GRAY);
+                sendMsg("§e提示：输入 §6skip §e跳过联合域名设置", Formatting.YELLOW);
+                showCancelButton();
                 break;
             case AREA2_SURFACE_NAME:
                 if (!"skip".equalsIgnoreCase(input.trim())) {
@@ -108,8 +114,8 @@ public class DivideAreaManager {
                 } else {
                     sendMsg("§7跳过联合域名设置", Formatting.GRAY);
                 }
-                state = State.AREA2_LEVEL;
-                showLevelSelection(2);
+                state = State.AREA2_COLOR;
+                showColorSelection(2);
                 break;
             default:
                 break;
@@ -254,10 +260,6 @@ public class DivideAreaManager {
             reset(); return;
         }
 
-        // 6. 排序防止交叉，重新计算AABB
-        area1Vertices = sortVerticesCounterClockwise(area1Vertices);
-        area2Vertices = sortVerticesCounterClockwise(area2Vertices);
-
         sendMsg("§a分割完成！区域1有 " + area1Vertices.size() + " 个顶点，区域2有 " + area2Vertices.size() + " 个顶点", Formatting.GREEN);
 
         // 7. 初始化两个域名配置（继承原域名属性）
@@ -273,13 +275,26 @@ public class DivideAreaManager {
     private void startArea1Config() {
         state = State.AREA1_NAME;
         sendMsg("§6=== 配置分割区域 1 ===", Formatting.GOLD);
-        sendMsg("§e请在聊天中直接输入区域1的名称：", Formatting.YELLOW);
+        sendMsg("§a请在聊天框中输入区域1的名称：", Formatting.GREEN);
+        sendMsg("§7直接在聊天中发送消息即可", Formatting.GRAY);
+        showCancelButton();
     }
 
     private void startArea2Config() {
         state = State.AREA2_NAME;
         sendMsg("§6=== 配置分割区域 2 ===", Formatting.GOLD);
-        sendMsg("§e请在聊天中直接输入区域2的名称：", Formatting.YELLOW);
+        sendMsg("§a请在聊天框中输入区域2的名称：", Formatting.GREEN);
+        sendMsg("§7直接在聊天中发送消息即可", Formatting.GRAY);
+        showCancelButton();
+    }
+
+    private void showCancelButton() {
+        if (client.player == null) return;
+        net.minecraft.text.MutableText cancel = Text.literal("§c[取消]").setStyle(net.minecraft.text.Style.EMPTY
+            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("取消分割流程")))
+            .withColor(Formatting.RED));
+        client.player.sendMessage(cancel, false);
     }
 
     public void handleNameInput(String name) {
@@ -368,59 +383,106 @@ public class DivideAreaManager {
 
     private void showLevelSelection(int areaNum) {
         if (client.player == null) return;
-        sendMsg("§e请选择区域" + areaNum + "的等级：", Formatting.YELLOW);
-        net.minecraft.text.MutableText row = Text.empty();
-        for (int i = 1; i <= 3; i++) {
-            row.append(Text.literal("§6[" + i + "级]").setStyle(net.minecraft.text.Style.EMPTY
-                .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND,
-                    "/areahint dividearea level " + i))
-                .withColor(Formatting.GOLD)));
-            if (i < 3) row.append(Text.of("  "));
-        }
-        client.player.sendMessage(row, false);
+        sendMsg("§a请选择区域" + areaNum + "的等级：", Formatting.GREEN);
+
+        net.minecraft.text.MutableText l1 = Text.literal("§b[1-顶级域名]").setStyle(net.minecraft.text.Style.EMPTY
+            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea level 1"))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("选择1级（顶级域名）")))
+            .withColor(Formatting.AQUA));
+        net.minecraft.text.MutableText l2 = Text.literal("§e[2-二级域名]").setStyle(net.minecraft.text.Style.EMPTY
+            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea level 2"))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("选择2级（二级域名）")))
+            .withColor(Formatting.YELLOW));
+        net.minecraft.text.MutableText l3 = Text.literal("§d[3-三级域名]").setStyle(net.minecraft.text.Style.EMPTY
+            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea level 3"))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("选择3级（三级域名）")))
+            .withColor(Formatting.LIGHT_PURPLE));
+        net.minecraft.text.MutableText cancel = Text.literal("§c[取消]").setStyle(net.minecraft.text.Style.EMPTY
+            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("取消分割流程")))
+            .withColor(Formatting.RED));
+
+        client.player.sendMessage(Text.empty().append(l1).append(Text.of("  ")).append(l2).append(Text.of("  ")).append(l3).append(Text.of("  ")).append(cancel), false);
+        sendMsg("§7等级说明：1=顶级域名，2/3=次级域名", Formatting.GRAY);
     }
 
     private void showBaseSelection(int areaNum) {
         if (client.player == null) return;
-        sendMsg("§e请选择区域" + areaNum + "的上级域名：", Formatting.YELLOW);
+        sendMsg("§a请选择区域" + areaNum + "的上级域名：", Formatting.GREEN);
         List<AreaData> allAreas = loadAllAreas();
         int targetLevel = (state == State.AREA1_BASE ? area1Config.getLevel() : area2Config.getLevel()) - 1;
-
-        net.minecraft.text.MutableText noneBtn = Text.literal("§7[无上级域名]").setStyle(net.minecraft.text.Style.EMPTY
-            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND,
-                "/areahint dividearea base none"))
-            .withColor(Formatting.GRAY));
-        client.player.sendMessage(noneBtn, false);
 
         for (AreaData a : allAreas) {
             if (a.getLevel() == targetLevel) {
                 String dn = areahint.util.AreaDataConverter.getDisplayName(a);
                 net.minecraft.text.MutableText btn = Text.literal("§6[" + dn + "]").setStyle(net.minecraft.text.Style.EMPTY
                     .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND,
-                        "/areahint dividearea base " + a.getName()))
+                        "/areahint dividearea base \"" + a.getName() + "\""))
+                    .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT,
+                        Text.of("选择 " + dn + " 作为上级域名")))
                     .withColor(Formatting.GOLD));
                 client.player.sendMessage(btn, false);
             }
         }
+
+        net.minecraft.text.MutableText cancel = Text.literal("§c[取消]").setStyle(net.minecraft.text.Style.EMPTY
+            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("取消分割流程")))
+            .withColor(Formatting.RED));
+        client.player.sendMessage(cancel, false);
     }
 
     private void showColorSelection(int areaNum) {
         if (client.player == null) return;
-        sendMsg("§e请选择区域" + areaNum + "的颜色：", Formatting.YELLOW);
-        String[][] colors = {
-            {"#FFFFFF", "白色"}, {"#FF0000", "红色"}, {"#FF69B4", "粉红色"},
-            {"#FFA500", "橙色"}, {"#FFFF00", "黄色"}, {"#00FF00", "浅绿色"},
-            {"#006400", "深绿色"}, {"#00BFFF", "浅蓝色"}, {"#00008B", "深蓝色"},
-            {"#9370DB", "浅紫色"}, {"#800080", "紫色"}
-        };
-        for (String[] c : colors) {
-            net.minecraft.text.MutableText btn = Text.literal("§6[" + c[1] + "]").setStyle(net.minecraft.text.Style.EMPTY
-                .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND,
-                    "/areahint dividearea color " + c[0]))
-                .withColor(Formatting.GOLD));
-            client.player.sendMessage(btn, false);
-        }
-        sendMsg("§7或使用 /areahint dividearea color <十六进制颜色>", Formatting.GRAY);
+        sendMsg("§6=== 区域" + areaNum + " 颜色设置 ===", Formatting.GOLD);
+        sendMsg("§a请选择域名颜色：", Formatting.GREEN);
+
+        net.minecraft.text.MutableText row1 = Text.empty()
+            .append(colorBtn("白色", "#FFFFFF", "§f")).append(Text.of("  "))
+            .append(colorBtn("灰色", "#808080", "§7")).append(Text.of("  "))
+            .append(colorBtn("深灰色", "#555555", "§8")).append(Text.of("  "))
+            .append(colorBtn("黑色", "#000000", "§0"));
+        net.minecraft.text.MutableText row2 = Text.empty()
+            .append(colorBtn("深红色", "#AA0000", "§4")).append(Text.of("  "))
+            .append(colorBtn("红色", "#FF0000", "§c")).append(Text.of("  "))
+            .append(colorBtn("粉红色", "#FF55FF", "§d")).append(Text.of("  "))
+            .append(colorBtn("橙色", "#FFAA00", "§6"));
+        net.minecraft.text.MutableText row3 = Text.empty()
+            .append(colorBtn("黄色", "#FFFF55", "§e")).append(Text.of("  "))
+            .append(colorBtn("绿色", "#55FF55", "§a")).append(Text.of("  "))
+            .append(colorBtn("深绿色", "#00AA00", "§2")).append(Text.of("  "))
+            .append(colorBtn("天蓝色", "#55FFFF", "§b"));
+        net.minecraft.text.MutableText row4 = Text.empty()
+            .append(colorBtn("湖蓝色", "#00AAAA", "§3")).append(Text.of("  "))
+            .append(colorBtn("蓝色", "#5555FF", "§9")).append(Text.of("  "))
+            .append(colorBtn("深蓝色", "#0000AA", "§1")).append(Text.of("  "))
+            .append(colorBtn("紫色", "#800080", "§5"));
+        net.minecraft.text.MutableText row5 = Text.empty()
+            .append(colorBtn("整体黑白闪烁", "FLASH_BW_ALL", "§7")).append(Text.of("  "))
+            .append(colorBtn("整体彩虹闪烁", "FLASH_RAINBOW_ALL", "§b")).append(Text.of("  "))
+            .append(colorBtn("单字黑白闪烁", "FLASH_BW_CHAR", "§8")).append(Text.of("  "))
+            .append(colorBtn("单字彩虹闪烁", "FLASH_RAINBOW_CHAR", "§d"));
+
+        client.player.sendMessage(row1, false);
+        client.player.sendMessage(row2, false);
+        client.player.sendMessage(row3, false);
+        client.player.sendMessage(row4, false);
+        client.player.sendMessage(Text.of(""), false);
+        sendMsg("§6--- 闪烁效果 ---", Formatting.GOLD);
+        client.player.sendMessage(row5, false);
+        client.player.sendMessage(Text.of(""), false);
+
+        net.minecraft.text.MutableText cancel = Text.literal("§c[取消]").setStyle(net.minecraft.text.Style.EMPTY
+            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("取消分割流程")))
+            .withColor(Formatting.RED));
+        client.player.sendMessage(cancel, false);
+    }
+
+    private net.minecraft.text.MutableText colorBtn(String name, String value, String mc) {
+        return Text.literal(mc + "[" + name + "]").setStyle(net.minecraft.text.Style.EMPTY
+            .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea color " + value))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("选择 " + name + " 作为域名颜色"))));
     }
 
     // ===== 几何算法 =====
@@ -497,35 +559,30 @@ public class DivideAreaManager {
     private void splitOriginalVertices(List<Double[]> origVerts, Double[] bp1, Double[] bp2,
                                         int bp1Edge, int bp2Edge, List<Double[]> innerVerts) {
         int n = origVerts.size();
-        // 沿正方向从bp1Edge+1到bp2Edge收集一组顶点
-        List<Double[]> group1 = new ArrayList<>();
-        group1.add(bp1);
-        int idx = (bp1Edge + 1) % n;
-        while (idx != (bp2Edge + 1) % n) {
-            group1.add(origVerts.get(idx));
-            idx = (idx + 1) % n;
-        }
-        group1.add(bp2);
 
-        // 沿反方向收集另一组
-        List<Double[]> group2 = new ArrayList<>();
-        group2.add(bp2);
-        idx = (bp2Edge + 1) % n;
-        while (idx != (bp1Edge + 1) % n) {
-            group2.add(origVerts.get(idx));
-            idx = (idx + 1) % n;
-        }
-        group2.add(bp1);
-
-        // 每组加上内部分割线顶点
-        area1Vertices = new ArrayList<>(group1);
+        // 区域1: bp1 → 内部分割点 → bp2 → 原域名顶点(bp2Edge+1..bp1Edge) → 回到bp1
+        area1Vertices = new ArrayList<>();
+        area1Vertices.add(bp1);
         area1Vertices.addAll(innerVerts);
+        area1Vertices.add(bp2);
+        int idx = (bp2Edge + 1) % n;
+        while (idx != (bp1Edge + 1) % n) {
+            area1Vertices.add(origVerts.get(idx));
+            idx = (idx + 1) % n;
+        }
 
-        area2Vertices = new ArrayList<>(group2);
-        // 反转内部顶点顺序给第二组
+        // 区域2: bp2 → 内部分割点(反转) → bp1 → 原域名顶点(bp1Edge+1..bp2Edge) → 回到bp2
+        area2Vertices = new ArrayList<>();
+        area2Vertices.add(bp2);
         List<Double[]> reversedInner = new ArrayList<>(innerVerts);
         java.util.Collections.reverse(reversedInner);
         area2Vertices.addAll(reversedInner);
+        area2Vertices.add(bp1);
+        idx = (bp1Edge + 1) % n;
+        while (idx != (bp2Edge + 1) % n) {
+            area2Vertices.add(origVerts.get(idx));
+            idx = (idx + 1) % n;
+        }
     }
 
     private int findEdgeIndex(Double[] point, List<Double[]> polygon) {
@@ -609,19 +666,6 @@ public class DivideAreaManager {
     private double distance(Double[] a, Double[] b) {
         double dx=a[0]-b[0], dy=a[1]-b[1];
         return Math.sqrt(dx*dx+dy*dy);
-    }
-
-    private List<Double[]> sortVerticesCounterClockwise(List<Double[]> vertices) {
-        if (vertices.size() < 3) return vertices;
-        double cx=0, cz=0;
-        for (Double[] v : vertices) { cx+=v[0]; cz+=v[1]; }
-        cx /= vertices.size(); cz /= vertices.size();
-        final double fcx=cx, fcz=cz;
-        List<Double[]> sorted = new ArrayList<>(vertices);
-        sorted.sort((a, b) -> Double.compare(
-            Math.atan2(a[1]-fcz, a[0]-fcx),
-            Math.atan2(b[1]-fcz, b[0]-fcx)));
-        return sorted;
     }
 
     // ===== 权限和数据加载 =====
