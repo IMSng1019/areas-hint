@@ -20,6 +20,7 @@ public class BoundVizManager {
     private boolean enabled = false;
     private List<AreaData> currentDimensionAreas = new ArrayList<>();
     private String currentDimension = null;
+    private int version = 0;
 
     // 临时顶点记录（用于easyadd、expandarea、shrinkarea）
     private List<BlockPos> temporaryVertices = new ArrayList<>();
@@ -93,6 +94,7 @@ public class BoundVizManager {
 
             Path areaFile = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(fileName);
             currentDimensionAreas = FileManager.readAreaData(areaFile);
+            version++;
 
             AreashintClient.LOGGER.info("已加载 {} 个域名边界用于可视化", currentDimensionAreas.size());
 
@@ -113,11 +115,29 @@ public class BoundVizManager {
     }
 
     /**
+     * 直接获取域名列表（无拷贝，仅供渲染器使用）
+     */
+    public List<AreaData> getCurrentDimensionAreasDirect() {
+        if (enabled) {
+            loadCurrentDimensionAreas();
+        }
+        return currentDimensionAreas;
+    }
+
+    /**
+     * 获取缓存版本号
+     */
+    public int getVersion() {
+        return version;
+    }
+
+    /**
      * 设置临时顶点（用于easyadd、expandarea、shrinkarea）
      */
     public void setTemporaryVertices(List<BlockPos> vertices, boolean show) {
         this.temporaryVertices = new ArrayList<>(vertices);
         this.showTemporaryVertices = show;
+        version++;
     }
 
     /**
@@ -126,6 +146,7 @@ public class BoundVizManager {
     public void clearTemporaryVertices() {
         this.temporaryVertices.clear();
         this.showTemporaryVertices = false;
+        version++;
     }
 
     /**
@@ -133,6 +154,13 @@ public class BoundVizManager {
      */
     public List<BlockPos> getTemporaryVertices() {
         return new ArrayList<>(temporaryVertices);
+    }
+
+    /**
+     * 直接获取临时顶点列表（无拷贝，仅供渲染器使用）
+     */
+    public List<BlockPos> getTemporaryVerticesDirect() {
+        return temporaryVertices;
     }
 
     /**
@@ -148,6 +176,7 @@ public class BoundVizManager {
     public void reload() {
         currentDimensionAreas.clear();
         currentDimension = null;
+        version++;
         if (enabled) {
             loadCurrentDimensionAreas();
         }
