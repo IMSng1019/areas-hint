@@ -1,6 +1,7 @@
 package areahint.boundviz;
 
 import areahint.data.AreaData;
+import areahint.render.FlashColorHelper;
 import areahint.util.ColorUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
@@ -23,6 +24,8 @@ public class BoundVizRenderer {
         float[] vx, vz;                // 预计算的float顶点坐标
         float minY, maxY;
         float r, g, b;
+        String colorMode; // 闪烁颜色模式（null表示静态颜色）
+        float[] vr, vg, vb; // 单字模式逐顶点颜色
         // AABB（用于视锥剔除）
         double aabbMinX, aabbMaxX, aabbMinZ, aabbMaxZ;
         // 方块交接线缓存
@@ -208,10 +211,22 @@ public class BoundVizRenderer {
         ca.minY = (float) (alt != null && alt.getMin() != null ? alt.getMin() : -64);
         ca.maxY = (float) (alt != null && alt.getMax() != null ? alt.getMax() : 320);
 
-        int[] rgb = ColorUtil.parseColor(area.getColor());
-        ca.r = rgb[0] / 255.0f;
-        ca.g = rgb[1] / 255.0f;
-        ca.b = rgb[2] / 255.0f;
+        String color = area.getColor();
+        if (ColorUtil.isFlashColor(color)) {
+            ca.colorMode = color;
+            ca.r = 1f; ca.g = 1f; ca.b = 1f;
+            if (FlashColorHelper.isPerCharMode(color)) {
+                ca.vr = new float[n];
+                ca.vg = new float[n];
+                ca.vb = new float[n];
+            }
+        } else {
+            ca.colorMode = null;
+            int[] rgb = ColorUtil.parseColor(color);
+            ca.r = rgb[0] / 255.0f;
+            ca.g = rgb[1] / 255.0f;
+            ca.b = rgb[2] / 255.0f;
+        }
 
         // 方块交接线初始化为空，延迟计算
         ca.blockIntersections = null;
@@ -234,10 +249,31 @@ public class BoundVizRenderer {
 
         // 一次性计算可见性，两个pass复用
         if (visibleFlags.length < size) visibleFlags = new boolean[size];
+        long now = System.currentTimeMillis();
         for (int i = 0; i < size; i++) {
             CachedArea ca = cachedAreas.get(i);
             visibleFlags[i] = isAABBInFrustum(ca.aabbMinX, ca.minY, ca.aabbMinZ,
                                                ca.aabbMaxX, ca.maxY, ca.aabbMaxZ, cam);
+            // 动态更新闪烁颜色
+            if (ca.colorMode != null && visibleFlags[i]) {
+                if (ca.vr != null) {
+                    // 单字模式：逐顶点不同相位
+                    for (int vi = 0; vi < ca.vr.length; vi++) {
+                        int rgb = FlashColorHelper.getCharColor(ca.colorMode, now, vi);
+                        ca.vr[vi] = ((rgb >> 16) & 0xFF) / 255.0f;
+                        ca.vg[vi] = ((rgb >> 8) & 0xFF) / 255.0f;
+                        ca.vb[vi] = (rgb & 0xFF) / 255.0f;
+                    }
+                    // r,g,b用于方块交接线（取顶点0的颜色）
+                    ca.r = ca.vr[0]; ca.g = ca.vg[0]; ca.b = ca.vb[0];
+                } else {
+                    // 整体模式
+                    int rgb = FlashColorHelper.getWholeColor(ca.colorMode, now);
+                    ca.r = ((rgb >> 16) & 0xFF) / 255.0f;
+                    ca.g = ((rgb >> 8) & 0xFF) / 255.0f;
+                    ca.b = (rgb & 0xFF) / 255.0f;
+                }
+            }
         }
 
         // === Pass 1: 批量三角形 ===
@@ -280,26 +316,34 @@ public class BoundVizRenderer {
     private static void emitAreaTriangles(Matrix4f matrix, BufferBuilder buffer, CachedArea ca) {
         float[] vx = ca.vx, vz = ca.vz;
         float r = ca.r, g = ca.g, b = ca.b;
+        float[] vr = ca.vr, vg = ca.vg, vb = ca.vb;
+        boolean perVertex = vr != null;
         float minY = ca.minY, maxY = ca.maxY;
 
         // 底面 + 顶面
         for (int[] tri : ca.triangles) {
-            for (int idx : tri)
-                buffer.vertex(matrix, vx[idx], minY, vz[idx]).color(r, g, b, 0.2f).next();
-            for (int idx : tri)
-                buffer.vertex(matrix, vx[idx], maxY, vz[idx]).color(r, g, b, 0.2f).next();
+            for (int idx : tri) {
+                float cr = perVertex ? vr[idx] : r, cg = perVertex ? vg[idx] : g, cb = perVertex ? vb[idx] : b;
+                buffer.vertex(matrix, vx[idx], minY, vz[idx]).color(cr, cg, cb, 0.2f).next();
+            }
+            for (int idx : tri) {
+                float cr = perVertex ? vr[idx] : r, cg = perVertex ? vg[idx] : g, cb = perVertex ? vb[idx] : b;
+                buffer.vertex(matrix, vx[idx], maxY, vz[idx]).color(cr, cg, cb, 0.2f).next();
+            }
         }
 
         // 侧面：每个边的quad拆为2个三角形
         int n = vx.length;
         for (int i = 0; i < n; i++) {
             int j = (i + 1) % n;
-            buffer.vertex(matrix, vx[i], minY, vz[i]).color(r, g, b, 0.2f).next();
-            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(r, g, b, 0.2f).next();
-            buffer.vertex(matrix, vx[j], minY, vz[j]).color(r, g, b, 0.2f).next();
-            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(r, g, b, 0.2f).next();
-            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(r, g, b, 0.2f).next();
-            buffer.vertex(matrix, vx[j], minY, vz[j]).color(r, g, b, 0.2f).next();
+            float ri = perVertex ? vr[i] : r, gi = perVertex ? vg[i] : g, bi = perVertex ? vb[i] : b;
+            float rj = perVertex ? vr[j] : r, gj = perVertex ? vg[j] : g, bj = perVertex ? vb[j] : b;
+            buffer.vertex(matrix, vx[i], minY, vz[i]).color(ri, gi, bi, 0.2f).next();
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.2f).next();
+            buffer.vertex(matrix, vx[j], minY, vz[j]).color(rj, gj, bj, 0.2f).next();
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.2f).next();
+            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(rj, gj, bj, 0.2f).next();
+            buffer.vertex(matrix, vx[j], minY, vz[j]).color(rj, gj, bj, 0.2f).next();
         }
     }
 
@@ -310,20 +354,25 @@ public class BoundVizRenderer {
     private static void emitAreaLines(Matrix4f matrix, BufferBuilder buffer, CachedArea ca) {
         float[] vx = ca.vx, vz = ca.vz;
         float r = ca.r, g = ca.g, b = ca.b;
+        float[] vr = ca.vr, vg = ca.vg, vb = ca.vb;
+        boolean perVertex = vr != null;
         float minY = ca.minY, maxY = ca.maxY;
         int n = vx.length;
 
         for (int i = 0; i < n; i++) {
             int j = (i + 1) % n;
-            buffer.vertex(matrix, vx[i], minY, vz[i]).color(r, g, b, 0.8f).next();
-            buffer.vertex(matrix, vx[j], minY, vz[j]).color(r, g, b, 0.8f).next();
-            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(r, g, b, 0.8f).next();
-            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(r, g, b, 0.8f).next();
+            float ri = perVertex ? vr[i] : r, gi = perVertex ? vg[i] : g, bi = perVertex ? vb[i] : b;
+            float rj = perVertex ? vr[j] : r, gj = perVertex ? vg[j] : g, bj = perVertex ? vb[j] : b;
+            buffer.vertex(matrix, vx[i], minY, vz[i]).color(ri, gi, bi, 0.8f).next();
+            buffer.vertex(matrix, vx[j], minY, vz[j]).color(rj, gj, bj, 0.8f).next();
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.8f).next();
+            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(rj, gj, bj, 0.8f).next();
         }
 
         for (int i = 0; i < n; i++) {
-            buffer.vertex(matrix, vx[i], minY, vz[i]).color(r, g, b, 0.8f).next();
-            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(r, g, b, 0.8f).next();
+            float ri = perVertex ? vr[i] : r, gi = perVertex ? vg[i] : g, bi = perVertex ? vb[i] : b;
+            buffer.vertex(matrix, vx[i], minY, vz[i]).color(ri, gi, bi, 0.8f).next();
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.8f).next();
         }
     }
 
