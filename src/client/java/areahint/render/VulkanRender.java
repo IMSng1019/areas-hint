@@ -25,6 +25,9 @@ public class VulkanRender implements RenderManager.IRender {
     // 当前显示的文本
     private String currentText = null;
 
+    // 当前颜色
+    private String currentColor = "#FFFFFF";
+
     // 动画开始时间
     private long animationStartTime = 0;
 
@@ -147,10 +150,26 @@ public class VulkanRender implements RenderManager.IRender {
         int bgColor = getAlphaColor(0x2266FF, alpha * 0.3f);
             drawContext.fill(finalX - 10, finalY - 5, finalX + textWidth + 10, finalY + 15, bgColor);
             
-            // 绘制文本阴影
-        int color = getAlphaColor(0xFFFFFF, alpha);
-            drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
-            
+            // 绘制文本（支持闪烁颜色）
+        long now = System.currentTimeMillis();
+        if (FlashColorHelper.isFlashMode(currentColor)) {
+            if (FlashColorHelper.isPerCharMode(currentColor)) {
+                int xOff = finalX;
+                for (int i = 0; i < currentText.length(); i++) {
+                    String ch = String.valueOf(currentText.charAt(i));
+                    int charRgb = FlashColorHelper.getCharColor(currentColor, now, i);
+                    drawContext.drawTextWithShadow(textRenderer, Text.of(ch), xOff, finalY, getAlphaColor(charRgb, alpha));
+                    xOff += textRenderer.getWidth(ch);
+                }
+            } else {
+                int rgb = FlashColorHelper.getWholeColor(currentColor, now);
+                drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, getAlphaColor(rgb, alpha));
+            }
+        } else {
+            int rgb = parseHexColor(currentColor);
+            drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, getAlphaColor(rgb, alpha));
+        }
+
         // 恢复矩阵状态
             matrixStack.pop();
         
@@ -230,29 +249,32 @@ public class VulkanRender implements RenderManager.IRender {
     }
     
     @Override
-    public void renderTitle(String title) {
+    public void renderTitle(String title, String color) {
         if (title == null || title.isEmpty()) {
             return;
         }
-        
-        // 如果已经有动画在播放，检查是否是相同的文本
-        if (animationState != AnimationState.NONE) {
-            if (title.equals(currentText)) {
-                return; // 已经在显示相同的文本
-            }
+
+        if (animationState != AnimationState.NONE && title.equals(currentText)) {
+            return;
         }
-        
-        // 设置新的动画状态
+
         currentText = title;
+        currentColor = color != null ? color : "#FFFFFF";
         animationState = AnimationState.IN;
         animationStartTime = System.currentTimeMillis();
-        
-        // 初始化插值变量为0，确保渐入动画从完全透明开始
         lastYOffset = 0.0f;
         lastAlpha = 0.0f;
-        
-        // 添加日志记录
+
         AreashintClient.LOGGER.info("VulkanRender: 开始显示区域标题: {}, 动画状态: {}", title, animationState);
+    }
+
+    private static int parseHexColor(String hex) {
+        try {
+            if (hex != null && hex.startsWith("#") && hex.length() == 7) {
+                return Integer.parseInt(hex.substring(1), 16);
+            }
+        } catch (Exception ignored) {}
+        return 0xFFFFFF;
     }
     
     /**

@@ -362,7 +362,16 @@ public class EasyAddUI {
             .append(createColorButton("深蓝色", "#0000AA", "§1"))
             .append(Text.of("  "))
             .append(createColorButton("紫色", "#800080", "§5"));
-        //自定义颜色按钮因为无法显示被删除了
+        // 闪烁效果按钮行
+        MutableText row5 = Text.empty()
+            .append(createColorButton("整体黑白闪烁", "FLASH_BW_ALL", "§7"))
+            .append(Text.of("  "))
+            .append(createColorButton("整体彩虹闪烁", "FLASH_RAINBOW_ALL", "§b"))
+            .append(Text.of("  "))
+            .append(createColorButton("单字黑白闪烁", "FLASH_BW_CHAR", "§8"))
+            .append(Text.of("  "))
+            .append(createColorButton("单字彩虹闪烁", "FLASH_RAINBOW_CHAR", "§d"));
+
         // 取消按钮
         MutableText cancelButton = Text.literal("§c[取消本次操作]")
             .setStyle(Style.EMPTY
@@ -375,8 +384,10 @@ public class EasyAddUI {
         client.player.sendMessage(row3, false);
         client.player.sendMessage(row4, false);
         client.player.sendMessage(Text.of(""), false);
+        client.player.sendMessage(Text.of("§6--- 闪烁效果 ---"), false);
+        client.player.sendMessage(row5, false);
+        client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(cancelButton, false);
-        client.player.sendMessage(Text.of("§7选择自定义颜色需要输入十六进制代码（如 #FF0000）"), false);
     }
     
     /**

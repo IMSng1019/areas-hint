@@ -385,11 +385,13 @@ public class AreashintClient implements ClientModInitializer {
 				if (ClientConfig.isEnabled()) {
 					if (areaName != null) {
 						currentAreaName = areaName;
-						renderManager.showAreaTitle(areaName);
+						areahint.data.AreaData detectedArea = areahint.log.AreaChangeTracker.getCurrentAreaData();
+						String areaColor = detectedArea != null ? detectedArea.getColor() : "#FFFFFF";
+						renderManager.showAreaTitle(areaName, areaColor);
 						if (justEnteredWorld) {
 							LOGGER.info("进入世界时位于区域：{}", areaName);
 						} else {
-							LOGGER.info("切换维度时位于区域：{}", areaName);
+							LOGGER.info("切换维度时位于区域：", areaName);
 						}
 					} else {
 						// 如果不在区域内，显示维度域名
@@ -433,7 +435,8 @@ public class AreashintClient implements ClientModInitializer {
 						(areaName != null && !areaName.equals(currentAreaName))) {
 						currentAreaName = areaName;
 						if (areaName != null) {
-							renderManager.showAreaTitle(areaName);
+							String areaColor = result.areaData != null ? result.areaData.getColor() : "#FFFFFF";
+							renderManager.showAreaTitle(areaName, areaColor);
 							hasShownDimensionalName = false;
 						} else if (!hasShownDimensionalName) {
 							String dimensionId = currentDimension != null
@@ -512,7 +515,9 @@ public class AreashintClient implements ClientModInitializer {
 				// 立即显示结果
 				if (areaName != null) {
 					currentAreaName = areaName;
-					renderManager.showAreaTitle(areaName);
+					areahint.data.AreaData detectedArea = areahint.log.AreaChangeTracker.getCurrentAreaData();
+					String areaColor = detectedArea != null ? detectedArea.getColor() : "#FFFFFF";
+					renderManager.showAreaTitle(areaName, areaColor);
 					LOGGER.info("网络同步后检测到位于区域：{}", areaName);
 				} else {
 					// 如果不在区域内，显示维度域名

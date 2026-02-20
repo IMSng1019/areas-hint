@@ -109,6 +109,16 @@ public class RecolorUI {
             .append(Text.of("  "))
             .append(createColorButton("紫色", "#AA00AA", "§5"));
 
+        // 闪烁效果按钮行
+        MutableText row5 = Text.empty()
+            .append(createColorButton("整体黑白闪烁", "FLASH_BW_ALL", "§7"))
+            .append(Text.of("  "))
+            .append(createColorButton("整体彩虹闪烁", "FLASH_RAINBOW_ALL", "§b"))
+            .append(Text.of("  "))
+            .append(createColorButton("单字黑白闪烁", "FLASH_BW_CHAR", "§8"))
+            .append(Text.of("  "))
+            .append(createColorButton("单字彩虹闪烁", "FLASH_RAINBOW_CHAR", "§d"));
+
         // 取消按钮
         MutableText cancelButton = Text.literal("§c[取消本次操作]")
             .setStyle(Style.EMPTY
@@ -121,8 +131,10 @@ public class RecolorUI {
         client.player.sendMessage(row3, false);
         client.player.sendMessage(row4, false);
         client.player.sendMessage(Text.of(""), false);
+        client.player.sendMessage(Text.of("§6--- 闪烁效果 ---"), false);
+        client.player.sendMessage(row5, false);
+        client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(cancelButton, false);
-        client.player.sendMessage(Text.of("§7您也可以使用 §e/areahint recolor color <十六进制颜色> §7来自定义颜色"), false);
     }
 
     /**

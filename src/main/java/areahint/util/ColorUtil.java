@@ -3,6 +3,8 @@ package areahint.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * 颜色工具类
@@ -10,6 +12,23 @@ import java.util.Set;
  */
 public class ColorUtil {
     
+    // 特殊闪烁颜色模式常量
+    public static final String FLASH_BW_ALL = "FLASH_BW_ALL";           // 整体黑白闪烁
+    public static final String FLASH_RAINBOW_ALL = "FLASH_RAINBOW_ALL"; // 整体彩虹闪烁
+    public static final String FLASH_BW_CHAR = "FLASH_BW_CHAR";         // 单字黑白闪烁
+    public static final String FLASH_RAINBOW_CHAR = "FLASH_RAINBOW_CHAR"; // 单字彩虹闪烁
+
+    private static final Set<String> FLASH_MODES = new HashSet<>(Arrays.asList(
+        FLASH_BW_ALL, FLASH_RAINBOW_ALL, FLASH_BW_CHAR, FLASH_RAINBOW_CHAR
+    ));
+
+    /**
+     * 判断是否为特殊闪烁颜色模式
+     */
+    public static boolean isFlashColor(String color) {
+        return color != null && FLASH_MODES.contains(color);
+    }
+
     // 预定义颜色映射
     private static final Map<String, String> COLOR_MAP = new HashMap<>();
     
@@ -39,7 +58,7 @@ public class ColorUtil {
         if (color == null) {
             return false;
         }
-        return color.matches("^#[0-9A-Fa-f]{6}$");
+        return isFlashColor(color) || color.matches("^#[0-9A-Fa-f]{6}$");
     }
     
     /**
@@ -68,23 +87,28 @@ public class ColorUtil {
         if (color == null || color.trim().isEmpty()) {
             return "#FFFFFF";
         }
-        
+
+        // 如果是闪烁颜色模式，直接返回
+        if (isFlashColor(color)) {
+            return color;
+        }
+
         // 如果是颜色名称，转换为十六进制
         String hexColor = getColorHex(color);
         if (hexColor != null) {
             return hexColor;
         }
-        
+
         // 如果是十六进制代码，验证格式
         String trimmedColor = color.trim().toUpperCase();
         if (!trimmedColor.startsWith("#")) {
             trimmedColor = "#" + trimmedColor;
         }
-        
+
         if (isValidColor(trimmedColor)) {
             return trimmedColor;
         }
-        
+
         // 默认返回白色
         return "#FFFFFF";
     }

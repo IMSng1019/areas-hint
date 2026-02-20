@@ -210,7 +210,8 @@ public class AreaData {
         }
         
         // 验证颜色格式（如果存在）
-        if (color != null && !color.matches("^#[0-9A-Fa-f]{6}$")) {
+        if (color != null && !color.matches("^#[0-9A-Fa-f]{6}$")
+                && !areahint.util.ColorUtil.isFlashColor(color)) {
             return false;
         }
         

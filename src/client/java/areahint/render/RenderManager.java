@@ -63,22 +63,30 @@ public class RenderManager {
      * @param areaName 区域名称
      */
     public void showAreaTitle(String areaName) {
+        showAreaTitle(areaName, "#FFFFFF");
+    }
+
+    /**
+     * 显示区域名称（带颜色）
+     * @param areaName 区域名称
+     * @param color 颜色值（十六进制或闪烁模式）
+     */
+    public void showAreaTitle(String areaName, String color) {
         if (areaName == null || areaName.isEmpty()) {
             return;
         }
-        
-        // 使用当前渲染器显示区域名称
-        currentRender.renderTitle(areaName);
+        currentRender.renderTitle(areaName, color != null ? color : "#FFFFFF");
     }
-    
+
     /**
      * 渲染接口，定义渲染方法
      */
     public interface IRender {
         /**
-         * 渲染标题
+         * 渲染标题（带颜色）
          * @param title 标题文本
+         * @param color 颜色值
          */
-        void renderTitle(String title);
+        void renderTitle(String title, String color);
     }
 } 
