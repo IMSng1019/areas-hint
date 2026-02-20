@@ -2,6 +2,7 @@ package areahint;
 
 import areahint.config.ClientConfig;
 import areahint.detection.AreaDetector;
+import areahint.detection.AsyncAreaDetector;
 import areahint.network.ClientNetworking;
 import areahint.render.RenderManager;
 import areahint.file.FileManager;
@@ -31,6 +32,7 @@ public class AreashintClient implements ClientModInitializer {
 	
 	// 区域检测器和渲染管理器实例
 	private static AreaDetector areaDetector;
+	private static AsyncAreaDetector asyncAreaDetector;
 	private static RenderManager renderManager;
 	
 	// 当前维度标识符
@@ -59,7 +61,8 @@ public class AreashintClient implements ClientModInitializer {
 		
 		// 初始化区域检测器
 		areaDetector = new AreaDetector();
-		
+		asyncAreaDetector = new AsyncAreaDetector(areaDetector);
+
 		// 初始化渲染管理器
 		renderManager = new RenderManager();
 		
@@ -300,8 +303,9 @@ public class AreashintClient implements ClientModInitializer {
 			wasPlayerNull = true;
 			hasShownDimensionalName = false;
 
-			// 重置区域追踪器
+			// 重置区域追踪器和异步检测器
 			areahint.log.AreaChangeTracker.reset();
+			asyncAreaDetector.reset();
 
 			LOGGER.info("世界文件夹管理器状态已清理");
 		});
@@ -341,8 +345,9 @@ public class AreashintClient implements ClientModInitializer {
 
 				// 只有在维度或服务器变化时才重新加载数据和初始化
 				if (dimensionChanged || serverChanged) {
-					// 重置区域追踪器
+					// 重置区域追踪器和异步检测器
 					areahint.log.AreaChangeTracker.reset();
+					asyncAreaDetector.reset();
 
 					// 如果服务器变化了，重置状态并重新初始化客户端世界文件夹
 					if (serverChanged) {
@@ -407,48 +412,40 @@ public class AreashintClient implements ClientModInitializer {
 				}
 			}
 			
-			// 按照配置的频率检测玩家位置（仅在模组启用时）
+			// 异步检测：提交检测任务（移动阈值在AsyncAreaDetector内部判断）
 			if (ClientConfig.isEnabled() && areaDetector.shouldDetect()) {
-				double playerX = player.getX();
-				double playerY = player.getY();
-				double playerZ = player.getZ();
+				asyncAreaDetector.submitDetection(player.getX(), player.getY(), player.getZ());
+			}
 
-				// 使用AreaChangeTracker检测区域变化并发送日志
-				String areaName = areahint.log.AreaChangeTracker.detectAndLogAreaChange(areaDetector, playerX, playerY, playerZ, currentDimension);
+			// 主线程消费异步检测结果
+			if (ClientConfig.isEnabled()) {
+				AsyncAreaDetector.DetectionResult result = asyncAreaDetector.pollResult();
+				if (result != null) {
+					String areaName = result.formattedName;
 
-				// 添加调试日志，无论是否有变化都记录当前检测结果
-				LOGGER.debug("玩家位置检测 - 坐标：({}, {}, {})，检测到区域：{}，之前区域：{}",
-						playerX, playerY, playerZ, areaName, currentAreaName);
+					// 在主线程处理区域变化追踪（网络消息必须在主线程发送）
+					areahint.log.AreaChangeTracker.handlePrecomputedChange(
+						result.areaData, currentDimension);
 
-				// 如果区域发生变化，显示新的区域名称
-				if ((areaName == null && currentAreaName != null) ||
-					(areaName != null && !areaName.equals(currentAreaName))) {
-					if (areaName == null) {
-						LOGGER.info("玩家（{}, {}, {}）离开区域：{}", playerX, playerY, playerZ, currentAreaName);
-					} else if (currentAreaName == null) {
-						LOGGER.info("玩家（{}, {}, {}）进入区域：{}", playerX, playerY, playerZ, areaName);
-					} else {
-						LOGGER.info("玩家（{}, {}, {}）从区域 {} 进入区域：{}", playerX, playerY, playerZ, currentAreaName, areaName);
-					}
+					LOGGER.debug("异步检测结果 - 区域：{}，之前区域：{}", areaName, currentAreaName);
 
-					currentAreaName = areaName;
-					if (areaName != null) {
-						LOGGER.info("尝试显示区域名称：{}", areaName);
-						renderManager.showAreaTitle(areaName);
-						hasShownDimensionalName = false; // 重置维度域名显示标记
-					} else {
-						// 离开所有区域时，只显示一次维度域名，避免闪烁
-						if (!hasShownDimensionalName) {
-							String dimensionId = currentDimension != null ? currentDimension.toString() : "minecraft:overworld";
-							String dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
-							LOGGER.info("离开所有区域，显示维度域名：{}", dimensionalName);
+					if ((areaName == null && currentAreaName != null) ||
+						(areaName != null && !areaName.equals(currentAreaName))) {
+						currentAreaName = areaName;
+						if (areaName != null) {
+							renderManager.showAreaTitle(areaName);
+							hasShownDimensionalName = false;
+						} else if (!hasShownDimensionalName) {
+							String dimensionId = currentDimension != null
+								? currentDimension.toString() : "minecraft:overworld";
+							String dimensionalName = areahint.dimensional
+								.ClientDimensionalNameManager.getDimensionalName(dimensionId);
 							renderManager.showAreaTitle(dimensionalName);
 							hasShownDimensionalName = true;
 						}
 					}
 				}
-			} else if (!ClientConfig.isEnabled()) {
-				// 模组禁用时，仍然需要记录当前状态但不显示
+			} else {
 				currentAreaName = null;
 				hasShownDimensionalName = false;
 			}

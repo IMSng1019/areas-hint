@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
  * 用于检测玩家所在的区域
  */
 public class AreaDetector {
-    // 当前维度的区域数据
-    private List<AreaData> areas = new ArrayList<>();
-    
+    // 当前维度的区域数据（volatile保证异步线程可见性）
+    private volatile List<AreaData> areas = new ArrayList<>();
+
     // 按区域等级分组的区域数据
-    private Map<Integer, List<AreaData>> areasByLevel = new HashMap<>();
+    private volatile Map<Integer, List<AreaData>> areasByLevel = new HashMap<>();
     
     // 最后一次检测的时间（毫秒）
     private long lastDetectionTime = 0;
@@ -35,8 +35,15 @@ public class AreaDetector {
     public void loadAreaData(String fileName) {
         // 使用客户端世界文件夹管理器获取文件路径
         Path areaFile = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(fileName);
-        areas = FileManager.readAreaData(areaFile);
-        AreashintClient.LOGGER.info("已加载区域数据: {} 个区域", areas.size());
+        List<AreaData> loadedAreas = FileManager.readAreaData(areaFile);
+        AreashintClient.LOGGER.info("已加载区域数据: {} 个区域", loadedAreas.size());
+
+        // 预计算AABB边界和中心点缓存
+        for (AreaData area : loadedAreas) {
+            area.computeCache();
+        }
+
+        areas = loadedAreas;
         
         // 输出所有加载的区域名称
         if (!areas.isEmpty()) {
@@ -47,11 +54,12 @@ public class AreaDetector {
             AreashintClient.LOGGER.info(names.toString());
         }
         
-        // 按等级分组
-        areasByLevel.clear();
-        for (AreaData area : areas) {
-            areasByLevel.computeIfAbsent(area.getLevel(), k -> new ArrayList<>()).add(area);
+        // 按等级分组（构建新map再赋值，保证线程安全）
+        Map<Integer, List<AreaData>> newAreasByLevel = new HashMap<>();
+        for (AreaData area : loadedAreas) {
+            newAreasByLevel.computeIfAbsent(area.getLevel(), k -> new ArrayList<>()).add(area);
         }
+        areasByLevel = newAreasByLevel;
         
         // 输出按等级分组的信息
         for (Map.Entry<Integer, List<AreaData>> entry : areasByLevel.entrySet()) {
@@ -116,6 +124,14 @@ public class AreaDetector {
     }
     
     /**
+     * 根据已有的AreaData格式化区域名称（避免重复检测）
+     */
+    public String formatAreaNameFromData(AreaData area) {
+        if (area == null) return null;
+        return formatAreaName(area, ClientConfig.getSubtitleStyle());
+    }
+
+    /**
      * 查找玩家所在的区域（返回原始AreaData，不格式化）
      * @param x 玩家的X坐标
      * @param y 玩家的Y坐标（高度）
@@ -167,22 +183,22 @@ public class AreaDetector {
         List<AreaData> sortedLevelOneAreas = sortAreasByDistance(levelOneAreas, x, z);
         
         for (AreaData area : sortedLevelOneAreas) {
-            // 先用AABB快速排除
-            boolean inAABB = RayCasting.isPointInAABB(x, z, area.getSecondVertices());
-            AreashintClient.LOGGER.debug("检查区域 {} 的AABB: {}", area.getName(), inAABB ? "在内部" : "在外部");
-            
+            // 先用缓存AABB快速排除
+            boolean inAABB = area.isCacheComputed() ? area.isPointInCachedAABB(x, z)
+                : RayCasting.isPointInAABB(x, z, area.getSecondVertices());
+            AreashintClient.LOGGER.debug("检查区域 {} 的AABB: ", area.getName(), inAABB ? "在内部" : "在外部");
+
             if (inAABB) {
-                // 再用精确的射线法检测
                 boolean inPolygon = RayCasting.isPointInPolygon(x, z, area.getVertices());
                 AreashintClient.LOGGER.debug("检查区域 {} 的多边形: {}", area.getName(), inPolygon ? "在内部" : "在外部");
-                
+
                 if (inPolygon) {
                     inLevelOne = area;
                     break;
                 }
             }
         }
-        
+
         // 如果玩家不在任何一级域名内
         if (inLevelOne == null) {
             AreashintClient.LOGGER.debug("玩家不在任何一级域名内");
@@ -200,10 +216,12 @@ public class AreaDetector {
             List<AreaData> currentLevelAreas = filteredAreasByLevel.getOrDefault(currentLevel, Collections.emptyList());
             
             // 只检查基于当前域名的下一级域名
-            final String finalBaseName = baseName; // 创建final副本供lambda表达式使用
-            List<AreaData> childAreas = currentLevelAreas.stream()
-                    .filter(area -> finalBaseName.equals(area.getBaseName()))
-                    .collect(Collectors.toList());
+            List<AreaData> childAreas = new ArrayList<>();
+            for (AreaData area : currentLevelAreas) {
+                if (baseName.equals(area.getBaseName())) {
+                    childAreas.add(area);
+                }
+            }
             
             AreashintClient.LOGGER.debug("检查 {} 级域名，基于上级域名 {}，符合条件的下级域名数量: {}", 
                     currentLevel, baseName, childAreas.size());
@@ -214,12 +232,12 @@ public class AreaDetector {
             boolean foundInCurrentLevel = false;
             
             for (AreaData area : sortedChildAreas) {
-                // 先用AABB快速排除
-                boolean inAABB = RayCasting.isPointInAABB(x, z, area.getSecondVertices());
+                // 先用缓存AABB快速排除
+                boolean inAABB = area.isCacheComputed() ? area.isPointInCachedAABB(x, z)
+                    : RayCasting.isPointInAABB(x, z, area.getSecondVertices());
                 AreashintClient.LOGGER.debug("检查区域 {} 的AABB: {}", area.getName(), inAABB ? "在内部" : "在外部");
-                
+
                 if (inAABB) {
-                    // 再用精确的射线法检测
                     boolean inPolygon = RayCasting.isPointInPolygon(x, z, area.getVertices());
                     AreashintClient.LOGGER.debug("检查区域 {} 的多边形: {}", area.getName(), inPolygon ? "在内部" : "在外部");
                     
@@ -278,24 +296,19 @@ public class AreaDetector {
      * @return 距离
      */
     private double distanceToArea(AreaData area, double x, double z) {
-        // 计算多边形的中心点
-        double centerX = 0;
-        double centerZ = 0;
+        if (area.isCacheComputed()) {
+            return area.distanceSqToCenter(x, z); // 用平方距离排序即可，无需sqrt
+        }
+        double centerX = 0, centerZ = 0;
         List<AreaData.Vertex> vertices = area.getVertices();
-        
         for (AreaData.Vertex vertex : vertices) {
             centerX += vertex.getX();
             centerZ += vertex.getZ();
         }
-        
         centerX /= vertices.size();
         centerZ /= vertices.size();
-        
-        // 计算到中心点的距离
-        double dx = x - centerX;
-        double dz = z - centerZ;
-        
-        return Math.sqrt(dx * dx + dz * dz);
+        double dx = x - centerX, dz = z - centerZ;
+        return dx * dx + dz * dz;
     }
     
     /**

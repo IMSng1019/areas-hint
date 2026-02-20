@@ -87,12 +87,41 @@ public class AreaChangeTracker {
             currentAreaData = newAreaData;
         }
 
-        // 返回格式化后的区域名称（用于显示）
+        // 直接用已有的AreaData格式化，避免二次findArea()
         if (newAreaData != null) {
-            return areaDetector.detectPlayerArea(x, y, z);
+            return areaDetector.formatAreaNameFromData(newAreaData);
         }
 
         return null;
+    }
+
+    /**
+     * 处理异步检测的预计算结果（在主线程调用）
+     * @param newAreaData 异步检测到的区域数据
+     * @param currentDimension 当前维度标识符
+     * @return 是否发生了区域变化
+     */
+    public static boolean handlePrecomputedChange(AreaData newAreaData, Identifier currentDimension) {
+        String dimensionalName = null;
+        if (currentDimension != null) {
+            dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(currentDimension.toString());
+        }
+
+        if (currentAreaData == null && newAreaData != null) {
+            currentAreaData = newAreaData;
+            ClientLogNetworking.sendEnterAreaMessage(newAreaData.getName(), newAreaData.getLevel(), newAreaData.getSurfacename(), dimensionalName);
+            return true;
+        } else if (currentAreaData != null && newAreaData == null) {
+            ClientLogNetworking.sendLeaveAreaMessage(currentAreaData.getName(), currentAreaData.getLevel(), currentAreaData.getSurfacename(), dimensionalName);
+            currentAreaData = null;
+            return true;
+        } else if (currentAreaData != null && newAreaData != null && !currentAreaData.getName().equals(newAreaData.getName())) {
+            ClientLogNetworking.sendLeaveAreaMessage(currentAreaData.getName(), currentAreaData.getLevel(), currentAreaData.getSurfacename(), dimensionalName);
+            ClientLogNetworking.sendEnterAreaMessage(newAreaData.getName(), newAreaData.getLevel(), newAreaData.getSurfacename(), dimensionalName);
+            currentAreaData = newAreaData;
+            return true;
+        }
+        return false;
     }
 
     /**

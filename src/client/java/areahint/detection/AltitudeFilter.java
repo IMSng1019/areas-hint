@@ -5,8 +5,8 @@ import areahint.data.AreaData;
 import areahint.data.AreaData.AltitudeData;
 import areahint.debug.ClientDebugManager;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 高度预筛选器
@@ -29,10 +29,13 @@ public class AltitudeFilter {
         // 记录筛选前的区域数量
         int originalCount = allAreas.size();
         
-        // 进行高度筛选
-        List<AreaData> filteredAreas = allAreas.stream()
-            .filter(area -> isPlayerInAltitudeRange(playerY, area))
-            .collect(Collectors.toList());
+        // 进行高度筛选（使用for循环避免Stream对象分配）
+        List<AreaData> filteredAreas = new ArrayList<>(allAreas.size());
+        for (AreaData area : allAreas) {
+            if (isPlayerInAltitudeRange(playerY, area)) {
+                filteredAreas.add(area);
+            }
+        }
         
         // 记录筛选后的区域数量
         int filteredCount = filteredAreas.size();

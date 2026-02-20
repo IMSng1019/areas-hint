@@ -21,6 +21,11 @@ public class AreaData {
     private String color;                  // 域名颜色（十六进制格式）
     private String surfacename;            // 联合域名（表面域名）
 
+    // 预计算缓存（transient确保Gson序列化时忽略）
+    private transient double cachedMinX, cachedMaxX, cachedMinZ, cachedMaxZ;
+    private transient double cachedCenterX, cachedCenterZ;
+    private transient boolean cacheComputed = false;
+
     // 构造函数
     public AreaData() {
         this.vertices = new ArrayList<>();
@@ -136,6 +141,46 @@ public class AreaData {
 
     public void setSurfacename(String surfacename) {
         this.surfacename = surfacename;
+    }
+
+    /**
+     * 预计算AABB边界和中心点缓存
+     */
+    public void computeCache() {
+        if (secondVertices != null && secondVertices.size() == 4) {
+            cachedMinX = Double.MAX_VALUE; cachedMaxX = -Double.MAX_VALUE;
+            cachedMinZ = Double.MAX_VALUE; cachedMaxZ = -Double.MAX_VALUE;
+            for (Vertex v : secondVertices) {
+                cachedMinX = Math.min(cachedMinX, v.getX());
+                cachedMaxX = Math.max(cachedMaxX, v.getX());
+                cachedMinZ = Math.min(cachedMinZ, v.getZ());
+                cachedMaxZ = Math.max(cachedMaxZ, v.getZ());
+            }
+        }
+        if (vertices != null && !vertices.isEmpty()) {
+            cachedCenterX = 0; cachedCenterZ = 0;
+            for (Vertex v : vertices) {
+                cachedCenterX += v.getX();
+                cachedCenterZ += v.getZ();
+            }
+            cachedCenterX /= vertices.size();
+            cachedCenterZ /= vertices.size();
+        }
+        cacheComputed = true;
+    }
+
+    public boolean isPointInCachedAABB(double x, double z) {
+        return cacheComputed && x >= cachedMinX && x <= cachedMaxX && z >= cachedMinZ && z <= cachedMaxZ;
+    }
+
+    public double distanceSqToCenter(double x, double z) {
+        double dx = x - cachedCenterX;
+        double dz = z - cachedCenterZ;
+        return dx * dx + dz * dz;
+    }
+
+    public boolean isCacheComputed() {
+        return cacheComputed;
     }
 
     /**
