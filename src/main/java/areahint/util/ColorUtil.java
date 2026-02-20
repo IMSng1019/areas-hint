@@ -181,6 +181,10 @@ public class ColorUtil {
         if (hexColor == null || hexColor.trim().isEmpty()) {
             return "§f" + text + "§r";
         }
+        // 闪烁颜色由渲染器动态处理，不嵌入§颜色代码
+        if (isFlashColor(hexColor)) {
+            return text;
+        }
         return hexToMinecraftColor(hexColor) + text + "§r";
     }
 
