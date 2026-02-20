@@ -314,6 +314,15 @@ public class ServerCommands {
                 .then(literal("cancel")
                     .executes(ServerCommands::executeReplaceButtonCancel)))
 
+            // language 命令（交互式语言选择）
+            .then(literal("language")
+                .executes(ServerCommands::executeLanguageStart)
+                .then(literal("select")
+                    .then(argument("langCode", StringArgumentType.word())
+                        .executes(context -> executeLanguageSelect(context, StringArgumentType.getString(context, "langCode")))))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeLanguageCancel)))
+
             // boundviz 命令
             .then(literal("boundviz")
                 .executes(ServerCommands::executeBoundViz))
@@ -345,6 +354,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint sethigh §7- 列出当前维度可修改高度的域名"));
         source.sendMessage(Text.of("§a/areahint replacebutton §7- 更改记录域名顶点的按键"));
         source.sendMessage(Text.of("§a/areahint boundviz §7- 切换域名边界可视化显示"));
+        source.sendMessage(Text.of("§a/areahint language §7- 交互式选择模组语言"));
         source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint debug [on|off|status] §7- 启用/禁用/查看调试模式状态 (管理员专用)"));
         source.sendMessage(Text.of("§6===== JSON格式示例 ====="));
@@ -1841,6 +1851,51 @@ public class ServerCommands {
     /**
      * 执行boundviz命令（切换边界可视化）
      */
+    private static int executeLanguageStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:language_start");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c启动语言选择时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeLanguageSelect(CommandContext<ServerCommandSource> context, String langCode) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:language_select:" + langCode);
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c选择语言时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
+    private static int executeLanguageCancel(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            return 0;
+        }
+        try {
+            sendClientCommand(source, "areahint:language_cancel");
+            return Command.SINGLE_SUCCESS;
+        } catch (Exception e) {
+            source.sendMessage(Text.of("§c取消语言选择时发生错误: " + e.getMessage()));
+            return 0;
+        }
+    }
+
     private static int executeBoundViz(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
 

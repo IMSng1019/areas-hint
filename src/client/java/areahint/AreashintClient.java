@@ -108,6 +108,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化BoundViz功能
 		initBoundViz();
 
+		// 初始化i18n系统
+		areahint.i18n.I18nManager.init();
+
 		// 注册统一的X键处理器
 		areahint.keyhandler.UnifiedKeyHandler.register();
 

@@ -248,6 +248,10 @@ public class ClientNetworking {
                     else if (action.startsWith("replacebutton")) {
                         handleReplaceButtonCommand(action);
                     }
+                    // 处理Language命令
+                    else if (action.startsWith("language")) {
+                        handleLanguageCommand(action);
+                    }
                     // 处理BoundViz命令
                     else if (action.startsWith("boundviz")) {
                         handleBoundVizCommand(action);
@@ -589,6 +593,30 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理ReplaceButton命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理Language命令
+     * @param action 命令动作
+     */
+    private static void handleLanguageCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理Language命令: " + action);
+            areahint.language.LanguageManager manager = areahint.language.LanguageManager.getInstance();
+
+            if (action.equals("language_start")) {
+                manager.startLanguageSelection();
+            } else if (action.startsWith("language_select:")) {
+                String langCode = action.substring("language_select:".length());
+                manager.handleLanguageSelection(langCode);
+            } else if (action.equals("language_cancel")) {
+                manager.cancelLanguageSelection();
+            } else {
+                AreashintClient.LOGGER.warn("未知的Language命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理Language命令时出错: " + e.getMessage(), e);
         }
     }
 

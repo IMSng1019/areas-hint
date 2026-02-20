@@ -26,6 +26,9 @@ public class ConfigData {
     // 边界可视化开关：true为开启，false为关闭
     private boolean boundVizEnabled;
 
+    // 语言设置
+    private String language;
+
     /**
      * 默认构造方法，使用默认配置
      */
@@ -38,6 +41,7 @@ public class ConfigData {
         this.recordKey = 88; // 默认为X键 (GLFW_KEY_X = 88)
         this.subtitleSize = "medium"; // 默认为中等大小
         this.boundVizEnabled = false; // 默认关闭边界可视化
+        this.language = "zh_cn"; // 默认中文
     }
     
     /**
@@ -190,6 +194,24 @@ public class ConfigData {
      */
     public void setBoundVizEnabled(boolean boundVizEnabled) {
         this.boundVizEnabled = boundVizEnabled;
+    }
+
+    /**
+     * 获取语言设置
+     * @return 语言代码
+     */
+    public String getLanguage() {
+        return language;
+    }
+
+    /**
+     * 设置语言
+     * @param language 语言代码
+     */
+    public void setLanguage(String language) {
+        if (language != null && !language.isEmpty()) {
+            this.language = language;
+        }
     }
 
     /**

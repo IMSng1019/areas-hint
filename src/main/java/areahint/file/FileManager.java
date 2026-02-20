@@ -131,7 +131,10 @@ public class FileManager {
                     "  \"recordKey\": " + defaultConfig.getRecordKey() + ",\n\n" +
                     "  // SubtitleSize: 字幕大小\n" +
                     "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
-                    "  \"subtitleSize\": \"" + defaultConfig.getSubtitleSize() + "\"\n" +
+                    "  \"subtitleSize\": \"" + defaultConfig.getSubtitleSize() + "\",\n\n" +
+                    "  // Language: 语言设置\n" +
+                    "  // 对应 areas-hint/lang/ 文件夹中的语言文件名（不含.json后缀）\n" +
+                    "  \"language\": \"" + defaultConfig.getLanguage() + "\"\n" +
                     "}";
 
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));
@@ -244,6 +247,13 @@ public class FileManager {
                 Areashint.LOGGER.warn("配置项 'recordKey' 无效或缺失，已补全为默认值: " + defaultConfig.getRecordKey());
             }
 
+            // 检查并补全 language
+            if (config.getLanguage() == null || config.getLanguage().isEmpty()) {
+                config.setLanguage(defaultConfig.getLanguage());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'language' 无效或缺失，已补全为默认值: " + defaultConfig.getLanguage());
+            }
+
             // 如果有缺失项，立即保存更新后的配置
             if (needsUpdate) {
                 Areashint.LOGGER.info("检测到配置不完整，正在保存补全后的配置...");
@@ -283,7 +293,10 @@ public class FileManager {
                     "  \"recordKey\": " + config.getRecordKey() + ",\n\n" +
                     "  // SubtitleSize: 字幕大小\n" +
                     "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
-                    "  \"subtitleSize\": \"" + config.getSubtitleSize() + "\"\n" +
+                    "  \"subtitleSize\": \"" + config.getSubtitleSize() + "\",\n\n" +
+                    "  // Language: 语言设置\n" +
+                    "  // 对应 areas-hint/lang/ 文件夹中的语言文件名（不含.json后缀）\n" +
+                    "  \"language\": \"" + (config.getLanguage() != null ? config.getLanguage() : "zh_cn") + "\"\n" +
                     "}";
 
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));

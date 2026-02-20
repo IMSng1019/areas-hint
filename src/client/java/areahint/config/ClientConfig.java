@@ -167,6 +167,24 @@ public class ClientConfig {
     }
 
     /**
+     * 获取语言设置
+     * @return 语言代码
+     */
+    public static String getLanguage() {
+        String lang = config.getLanguage();
+        return lang != null ? lang : "zh_cn";
+    }
+
+    /**
+     * 设置语言
+     * @param language 语言代码
+     */
+    public static void setLanguage(String language) {
+        config.setLanguage(language);
+        save();
+    }
+
+    /**
      * 获取边界可视化开关状态
      * @return 边界可视化是否启用
      */
