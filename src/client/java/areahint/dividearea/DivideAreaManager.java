@@ -5,6 +5,7 @@ import areahint.file.FileManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +14,8 @@ import java.nio.file.Path;
 public class DivideAreaManager {
     public enum State {
         IDLE, SELECTING_AREA, RECORDING_POINTS,
-        AREA1_NAME, AREA1_LEVEL, AREA1_BASE, AREA1_COLOR,
-        AREA2_NAME, AREA2_LEVEL, AREA2_BASE, AREA2_COLOR,
+        AREA1_NAME, AREA1_SURFACE_NAME, AREA1_LEVEL, AREA1_BASE, AREA1_COLOR,
+        AREA2_NAME, AREA2_SURFACE_NAME, AREA2_LEVEL, AREA2_BASE, AREA2_COLOR,
         SAVING
     }
 
@@ -26,6 +27,7 @@ public class DivideAreaManager {
     private List<Double[]> newVertices = new ArrayList<>();
     private boolean isActive = false;
     private boolean isRecording = false;
+    private boolean chatListenerRegistered = false;
 
     // 分割后的两组顶点
     private List<Double[]> area1Vertices;
@@ -45,6 +47,81 @@ public class DivideAreaManager {
         this.ui = new DivideAreaUI(this);
     }
 
+    private void registerChatListener() {
+        if (!chatListenerRegistered) {
+            ClientReceiveMessageEvents.CHAT.register((message, signedMessage, sender, params, receptionTimestamp) -> {
+                if (state == State.AREA1_NAME || state == State.AREA1_SURFACE_NAME
+                    || state == State.AREA2_NAME || state == State.AREA2_SURFACE_NAME) {
+                    handleChatInput(message.getString());
+                }
+            });
+            chatListenerRegistered = true;
+        }
+    }
+
+    private void handleChatInput(String input) {
+        if (client.player == null) return;
+        // 去掉 <玩家名> 前缀
+        if (input.startsWith("<") && input.contains(">")) {
+            int end = input.indexOf(">") + 1;
+            if (end < input.length()) input = input.substring(end).trim();
+        }
+        if (input.trim().isEmpty()) return;
+
+        switch (state) {
+            case AREA1_NAME:
+                if (checkAreaNameExists(input.trim())) {
+                    sendMsg("§c域名名称 \"" + input.trim() + "\" 已存在，请重新输入", Formatting.RED);
+                    return;
+                }
+                area1Config.setName(input.trim());
+                sendMsg("§a区域1名称设置为: " + input.trim(), Formatting.GREEN);
+                state = State.AREA1_SURFACE_NAME;
+                sendMsg("§e请在聊天中输入区域1的联合域名（直接发送任意消息，留空则跳过）：", Formatting.YELLOW);
+                sendMsg("§7输入 §6skip §7跳过联合域名", Formatting.GRAY);
+                break;
+            case AREA1_SURFACE_NAME:
+                if (!"skip".equalsIgnoreCase(input.trim())) {
+                    area1Config.setSurfacename(input.trim());
+                    sendMsg("§a区域1联合域名设置为: " + input.trim(), Formatting.GREEN);
+                } else {
+                    sendMsg("§7跳过联合域名设置", Formatting.GRAY);
+                }
+                state = State.AREA1_LEVEL;
+                showLevelSelection(1);
+                break;
+            case AREA2_NAME:
+                if (checkAreaNameExists(input.trim())) {
+                    sendMsg("§c域名名称 \"" + input.trim() + "\" 已存在，请重新输入", Formatting.RED);
+                    return;
+                }
+                area2Config.setName(input.trim());
+                sendMsg("§a区域2名称设置为: " + input.trim(), Formatting.GREEN);
+                state = State.AREA2_SURFACE_NAME;
+                sendMsg("§e请在聊天中输入区域2的联合域名（直接发送任意消息，留空则跳过）：", Formatting.YELLOW);
+                sendMsg("§7输入 §6skip §7跳过联合域名", Formatting.GRAY);
+                break;
+            case AREA2_SURFACE_NAME:
+                if (!"skip".equalsIgnoreCase(input.trim())) {
+                    area2Config.setSurfacename(input.trim());
+                    sendMsg("§a区域2联合域名设置为: " + input.trim(), Formatting.GREEN);
+                } else {
+                    sendMsg("§7跳过联合域名设置", Formatting.GRAY);
+                }
+                state = State.AREA2_LEVEL;
+                showLevelSelection(2);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private boolean checkAreaNameExists(String name) {
+        for (AreaData a : loadAllAreas())
+            if (a.getName().equals(name)) return true;
+        return false;
+    }
+
     public boolean isActive() { return isActive; }
     public boolean isRecording() { return isRecording; }
     public State getState() { return state; }
@@ -53,6 +130,7 @@ public class DivideAreaManager {
 
     public void start() {
         if (client.player == null) return;
+        registerChatListener();
         isActive = true;
         state = State.SELECTING_AREA;
         List<AreaData> modifiableAreas = getModifiableAreas();
@@ -110,10 +188,8 @@ public class DivideAreaManager {
         double x = client.player.getX();
         double y = client.player.getY();
         double z = client.player.getZ();
-        int rx = (int) Math.round(x);
-        int rz = (int) Math.round(z);
-        newVertices.add(new Double[]{(double) rx, (double) rz});
-        sendMsg("§a已记录位置 #" + newVertices.size() + ": §6(" + rx + ", " + String.format("%.1f", y) + ", " + rz + ")", Formatting.GREEN);
+        newVertices.add(new Double[]{x, z});
+        sendMsg("§a已记录位置 #" + newVertices.size() + ": §6(" + (int)Math.round(x) + ", " + String.format("%.1f", y) + ", " + (int)Math.round(z) + ")", Formatting.GREEN);
 
         List<net.minecraft.util.math.BlockPos> bpList = new ArrayList<>();
         for (Double[] v : newVertices)
@@ -197,13 +273,13 @@ public class DivideAreaManager {
     private void startArea1Config() {
         state = State.AREA1_NAME;
         sendMsg("§6=== 配置分割区域 1 ===", Formatting.GOLD);
-        sendMsg("§e请在聊天中输入区域1的名称（使用 /areahint dividearea name <名称>）", Formatting.YELLOW);
+        sendMsg("§e请在聊天中直接输入区域1的名称：", Formatting.YELLOW);
     }
 
     private void startArea2Config() {
         state = State.AREA2_NAME;
         sendMsg("§6=== 配置分割区域 2 ===", Formatting.GOLD);
-        sendMsg("§e请在聊天中输入区域2的名称（使用 /areahint dividearea name <名称>）", Formatting.YELLOW);
+        sendMsg("§e请在聊天中直接输入区域2的名称：", Formatting.YELLOW);
     }
 
     public void handleNameInput(String name) {
@@ -392,6 +468,30 @@ public class DivideAreaManager {
         for (Double[] v : newVertices) {
             if (isPointInPolygon(v, origVerts)) processedVerts.add(v);
         }
+
+        // 如果边界点不足2个，从首尾点找最近边上的最近点作为边界点
+        if (boundaryPoints.size() < 2) {
+            Double[] first = newVertices.get(0);
+            Double[] last = newVertices.get(newVertices.size() - 1);
+            if (boundaryPoints.size() < 1) {
+                boundaryPoints.add(findClosestPointOnPolygon(first, origVerts));
+            }
+            if (boundaryPoints.size() < 2) {
+                boundaryPoints.add(findClosestPointOnPolygon(last, origVerts));
+            }
+        }
+    }
+
+    private Double[] findClosestPointOnPolygon(Double[] point, List<Double[]> polygon) {
+        double minDist = Double.MAX_VALUE;
+        Double[] best = null;
+        for (int i = 0; i < polygon.size(); i++) {
+            int j = (i + 1) % polygon.size();
+            Double[] cp = closestPointOnSegment(point, polygon.get(i), polygon.get(j));
+            double d = distance(point, cp);
+            if (d < minDist) { minDist = d; best = cp; }
+        }
+        return best;
     }
 
     private void splitOriginalVertices(List<Double[]> origVerts, Double[] bp1, Double[] bp2,
