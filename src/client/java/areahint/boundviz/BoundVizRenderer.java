@@ -6,30 +6,28 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class BoundVizRenderer {
 
     // ========== 缓存数据结构 ==========
     private static class CachedArea {
         List<int[]> triangles;          // 预计算的三角剖分
-        List<AreaData.Vertex> vertices; // 顶点引用
-        double minY, maxY;
+        List<AreaData.Vertex> vertices; // 顶点引用（方块交接线计算用）
+        float[] vx, vz;                // 预计算的float顶点坐标
+        float minY, maxY;
         float r, g, b;
         // AABB（用于视锥剔除）
         double aabbMinX, aabbMaxX, aabbMinZ, aabbMaxZ;
         // 方块交接线缓存
         List<float[]> blockIntersections;
-        int lastPlayerBX, lastPlayerBY, lastPlayerBZ; // 上次计算时的玩家方块坐标
+        int lastPlayerBX, lastPlayerBY, lastPlayerBZ;
     }
 
     // ========== 静态缓存 ==========
@@ -37,6 +35,10 @@ public class BoundVizRenderer {
     private static int cachedVersion = -1;
     // 视锥平面 [6个平面][a,b,c,d]
     private static final float[][] frustumPlanes = new float[6][4];
+    // 复用矩阵，避免每帧分配
+    private static final Matrix4f vpMatrix = new Matrix4f();
+    // 可见性缓存，避免两个pass重复视锥检测
+    private static boolean[] visibleFlags = new boolean[0];
 
     // ========== 主渲染方法 ==========
     public static void render(MatrixStack matrices, float tickDelta) {
@@ -90,7 +92,7 @@ public class BoundVizRenderer {
      * 使用Gribb/Hartmann方法，JOML的m[col][row]命名
      */
     private static void extractFrustumPlanes(Matrix4f view, Matrix4f proj) {
-        Matrix4f vp = new Matrix4f(proj).mul(view);
+        Matrix4f vp = vpMatrix.set(proj).mul(view);
         // Left: row3 + row0
         frustumPlanes[0][0] = vp.m03() + vp.m00();
         frustumPlanes[0][1] = vp.m13() + vp.m10();
@@ -186,25 +188,30 @@ public class BoundVizRenderer {
         ca.vertices = verts;
         ca.triangles = earClipTriangulate(verts);
 
-        AreaData.AltitudeData alt = area.getAltitude();
-        ca.minY = alt != null && alt.getMin() != null ? alt.getMin() : -64;
-        ca.maxY = alt != null && alt.getMax() != null ? alt.getMax() : 320;
-
-        int[] rgb = ColorUtil.parseColor(area.getColor());
-        ca.r = rgb[0] / 255.0f;
-        ca.g = rgb[1] / 255.0f;
-        ca.b = rgb[2] / 255.0f;
-
-        // 计算XZ平面AABB
+        // 预计算float顶点坐标，避免每帧double→float转换
+        int n = verts.size();
+        ca.vx = new float[n];
+        ca.vz = new float[n];
         ca.aabbMinX = ca.aabbMaxX = verts.get(0).getX();
         ca.aabbMinZ = ca.aabbMaxZ = verts.get(0).getZ();
-        for (int i = 1; i < verts.size(); i++) {
+        for (int i = 0; i < n; i++) {
             double x = verts.get(i).getX(), z = verts.get(i).getZ();
+            ca.vx[i] = (float) x;
+            ca.vz[i] = (float) z;
             if (x < ca.aabbMinX) ca.aabbMinX = x;
             if (x > ca.aabbMaxX) ca.aabbMaxX = x;
             if (z < ca.aabbMinZ) ca.aabbMinZ = z;
             if (z > ca.aabbMaxZ) ca.aabbMaxZ = z;
         }
+
+        AreaData.AltitudeData alt = area.getAltitude();
+        ca.minY = (float) (alt != null && alt.getMin() != null ? alt.getMin() : -64);
+        ca.maxY = (float) (alt != null && alt.getMax() != null ? alt.getMax() : 320);
+
+        int[] rgb = ColorUtil.parseColor(area.getColor());
+        ca.r = rgb[0] / 255.0f;
+        ca.g = rgb[1] / 255.0f;
+        ca.b = rgb[2] / 255.0f;
 
         // 方块交接线初始化为空，延迟计算
         ca.blockIntersections = null;
@@ -223,33 +230,38 @@ public class BoundVizRenderer {
         int playerBX = (int) Math.floor(cam.x);
         int playerBY = (int) Math.floor(cam.y);
         int playerBZ = (int) Math.floor(cam.z);
+        int size = cachedAreas.size();
 
-        // === Pass 1: 批量三角形（顶面+底面+侧面，20%透明度） ===
+        // 一次性计算可见性，两个pass复用
+        if (visibleFlags.length < size) visibleFlags = new boolean[size];
+        for (int i = 0; i < size; i++) {
+            CachedArea ca = cachedAreas.get(i);
+            visibleFlags[i] = isAABBInFrustum(ca.aabbMinX, ca.minY, ca.aabbMinZ,
+                                               ca.aabbMaxX, ca.maxY, ca.aabbMaxZ, cam);
+        }
+
+        // === Pass 1: 批量三角形 ===
         boolean hasTriangles = false;
-        for (CachedArea ca : cachedAreas) {
-            if (!isAABBInFrustum(ca.aabbMinX, ca.minY, ca.aabbMinZ,
-                                  ca.aabbMaxX, ca.maxY, ca.aabbMaxZ, cam)) continue;
+        for (int i = 0; i < size; i++) {
+            if (!visibleFlags[i]) continue;
             if (!hasTriangles) {
                 buffer.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
                 hasTriangles = true;
             }
-            emitAreaTriangles(matrix, buffer, ca);
+            emitAreaTriangles(matrix, buffer, cachedAreas.get(i));
         }
-        if (hasTriangles) {
-            BufferRenderer.drawWithGlobalProgram(buffer.end());
-        }
+        if (hasTriangles) BufferRenderer.drawWithGlobalProgram(buffer.end());
 
-        // === Pass 2: 批量线段（边界线+方块交接线，80%透明度） ===
+        // === Pass 2: 批量线段 ===
         boolean hasLines = false;
-        for (CachedArea ca : cachedAreas) {
-            if (!isAABBInFrustum(ca.aabbMinX, ca.minY, ca.aabbMinZ,
-                                  ca.aabbMaxX, ca.maxY, ca.aabbMaxZ, cam)) continue;
+        for (int i = 0; i < size; i++) {
+            if (!visibleFlags[i]) continue;
+            CachedArea ca = cachedAreas.get(i);
             if (!hasLines) {
                 buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
                 hasLines = true;
             }
             emitAreaLines(matrix, buffer, ca);
-            // 方块交接线（带缓存）
             updateBlockIntersectionsIfNeeded(ca, playerBX, playerBY, playerBZ, client);
             if (ca.blockIntersections != null) {
                 for (float[] seg : ca.blockIntersections) {
@@ -258,9 +270,7 @@ public class BoundVizRenderer {
                 }
             }
         }
-        if (hasLines) {
-            BufferRenderer.drawWithGlobalProgram(buffer.end());
-        }
+        if (hasLines) BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
 
     /**
@@ -268,36 +278,28 @@ public class BoundVizRenderer {
      * 包含底面、顶面、侧面（TRIANGLE_STRIP转为TRIANGLES以支持批量）
      */
     private static void emitAreaTriangles(Matrix4f matrix, BufferBuilder buffer, CachedArea ca) {
-        List<AreaData.Vertex> verts = ca.vertices;
+        float[] vx = ca.vx, vz = ca.vz;
         float r = ca.r, g = ca.g, b = ca.b;
-        float minY = (float) ca.minY, maxY = (float) ca.maxY;
+        float minY = ca.minY, maxY = ca.maxY;
 
         // 底面 + 顶面
         for (int[] tri : ca.triangles) {
-            for (int idx : tri) {
-                AreaData.Vertex v = verts.get(idx);
-                buffer.vertex(matrix, (float) v.getX(), minY, (float) v.getZ()).color(r, g, b, 0.2f).next();
-            }
-            for (int idx : tri) {
-                AreaData.Vertex v = verts.get(idx);
-                buffer.vertex(matrix, (float) v.getX(), maxY, (float) v.getZ()).color(r, g, b, 0.2f).next();
-            }
+            for (int idx : tri)
+                buffer.vertex(matrix, vx[idx], minY, vz[idx]).color(r, g, b, 0.2f).next();
+            for (int idx : tri)
+                buffer.vertex(matrix, vx[idx], maxY, vz[idx]).color(r, g, b, 0.2f).next();
         }
 
         // 侧面：每个边的quad拆为2个三角形
-        for (int i = 0; i < verts.size(); i++) {
-            AreaData.Vertex v1 = verts.get(i);
-            AreaData.Vertex v2 = verts.get((i + 1) % verts.size());
-            float x1 = (float) v1.getX(), z1 = (float) v1.getZ();
-            float x2 = (float) v2.getX(), z2 = (float) v2.getZ();
-            // 三角形1: v1-bottom, v1-top, v2-bottom
-            buffer.vertex(matrix, x1, minY, z1).color(r, g, b, 0.2f).next();
-            buffer.vertex(matrix, x1, maxY, z1).color(r, g, b, 0.2f).next();
-            buffer.vertex(matrix, x2, minY, z2).color(r, g, b, 0.2f).next();
-            // 三角形2: v1-top, v2-top, v2-bottom
-            buffer.vertex(matrix, x1, maxY, z1).color(r, g, b, 0.2f).next();
-            buffer.vertex(matrix, x2, maxY, z2).color(r, g, b, 0.2f).next();
-            buffer.vertex(matrix, x2, minY, z2).color(r, g, b, 0.2f).next();
+        int n = vx.length;
+        for (int i = 0; i < n; i++) {
+            int j = (i + 1) % n;
+            buffer.vertex(matrix, vx[i], minY, vz[i]).color(r, g, b, 0.2f).next();
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(r, g, b, 0.2f).next();
+            buffer.vertex(matrix, vx[j], minY, vz[j]).color(r, g, b, 0.2f).next();
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(r, g, b, 0.2f).next();
+            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(r, g, b, 0.2f).next();
+            buffer.vertex(matrix, vx[j], minY, vz[j]).color(r, g, b, 0.2f).next();
         }
     }
 
@@ -306,29 +308,22 @@ public class BoundVizRenderer {
      * 底部线、顶部线、垂直线全部转为独立线段对
      */
     private static void emitAreaLines(Matrix4f matrix, BufferBuilder buffer, CachedArea ca) {
-        List<AreaData.Vertex> verts = ca.vertices;
+        float[] vx = ca.vx, vz = ca.vz;
         float r = ca.r, g = ca.g, b = ca.b;
-        float minY = (float) ca.minY, maxY = (float) ca.maxY;
+        float minY = ca.minY, maxY = ca.maxY;
+        int n = vx.length;
 
-        // 底部 + 顶部边界线（LINE_STRIP转为独立线段对）
-        for (int i = 0; i < verts.size(); i++) {
-            AreaData.Vertex v1 = verts.get(i);
-            AreaData.Vertex v2 = verts.get((i + 1) % verts.size());
-            float x1 = (float) v1.getX(), z1 = (float) v1.getZ();
-            float x2 = (float) v2.getX(), z2 = (float) v2.getZ();
-            // 底部线段
-            buffer.vertex(matrix, x1, minY, z1).color(r, g, b, 0.8f).next();
-            buffer.vertex(matrix, x2, minY, z2).color(r, g, b, 0.8f).next();
-            // 顶部线段
-            buffer.vertex(matrix, x1, maxY, z1).color(r, g, b, 0.8f).next();
-            buffer.vertex(matrix, x2, maxY, z2).color(r, g, b, 0.8f).next();
+        for (int i = 0; i < n; i++) {
+            int j = (i + 1) % n;
+            buffer.vertex(matrix, vx[i], minY, vz[i]).color(r, g, b, 0.8f).next();
+            buffer.vertex(matrix, vx[j], minY, vz[j]).color(r, g, b, 0.8f).next();
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(r, g, b, 0.8f).next();
+            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(r, g, b, 0.8f).next();
         }
 
-        // 垂直边界线
-        for (AreaData.Vertex v : verts) {
-            float x = (float) v.getX(), z = (float) v.getZ();
-            buffer.vertex(matrix, x, minY, z).color(r, g, b, 0.8f).next();
-            buffer.vertex(matrix, x, maxY, z).color(r, g, b, 0.8f).next();
+        for (int i = 0; i < n; i++) {
+            buffer.vertex(matrix, vx[i], minY, vz[i]).color(r, g, b, 0.8f).next();
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(r, g, b, 0.8f).next();
         }
     }
 
@@ -360,6 +355,7 @@ public class BoundVizRenderer {
 
         Vec3d playerPos = client.player.getPos();
         int renderDist = 64;
+        int renderDistSq = renderDist * renderDist;
         int yMin = Math.max((int) Math.floor(ca.minY), (int) playerPos.y - renderDist);
         int yMax = Math.min((int) Math.ceil(ca.maxY) - 1, (int) playerPos.y + renderDist);
 
@@ -371,25 +367,32 @@ public class BoundVizRenderer {
             AreaData.Vertex v2 = verts.get((ei + 1) % verts.size());
             double ex1 = v1.getX(), ez1 = v1.getZ();
             double edx = v2.getX() - ex1, edz = v2.getZ() - ez1;
-            double edgeLen = Math.sqrt(edx * edx + edz * edz);
-            if (edgeLen < 0.001) continue;
+            if (Math.abs(edx) < 0.001 && Math.abs(edz) < 0.001) continue;
 
-            Set<Long> visited = new HashSet<>();
-            double step = 0.25;
-            for (double d = 0; d <= edgeLen; d += step) {
-                double t = d / edgeLen;
-                double px = ex1 + edx * t, pz = ez1 + edz * t;
-                int bx = (int) Math.floor(px), bz = (int) Math.floor(pz);
-                long key = ((long) bx << 32) | (bz & 0xFFFFFFFFL);
-                if (!visited.add(key)) continue;
+            // DDA光栅化：精确遍历边线经过的每个方块格子
+            int bx = (int) Math.floor(ex1), bz = (int) Math.floor(ez1);
+            int endBx = (int) Math.floor(v2.getX()), endBz = (int) Math.floor(v2.getZ());
+            int stepX = edx > 0 ? 1 : edx < 0 ? -1 : 0;
+            int stepZ = edz > 0 ? 1 : edz < 0 ? -1 : 0;
 
+            // tMaxX/Z: 到达下一个X/Z格线的t值; tDeltaX/Z: 跨越一个格子的t增量
+            double tMaxX = Math.abs(edx) > 0.001 ? ((stepX > 0 ? bx + 1 : bx) - ex1) / edx : Double.MAX_VALUE;
+            double tMaxZ = Math.abs(edz) > 0.001 ? ((stepZ > 0 ? bz + 1 : bz) - ez1) / edz : Double.MAX_VALUE;
+            double tDeltaX = Math.abs(edx) > 0.001 ? Math.abs(1.0 / edx) : Double.MAX_VALUE;
+            double tDeltaZ = Math.abs(edz) > 0.001 ? Math.abs(1.0 / edz) : Double.MAX_VALUE;
+
+            int maxSteps = Math.abs(endBx - bx) + Math.abs(endBz - bz) + 2;
+            for (int s = 0; s < maxSteps; s++) {
                 double ddx = bx + 0.5 - playerPos.x, ddz = bz + 0.5 - playerPos.z;
-                if (ddx * ddx + ddz * ddz > renderDist * renderDist) continue;
-
-                collectFaceIntersections(segments, world, ex1, ez1, edx, edz,
-                        bx, bz, yMin, yMax, (float) ca.minY, (float) ca.maxY);
-                collectHorizontalLines(segments, world, ex1, ez1, edx, edz,
-                        bx, bz, yMin, yMax, (float) ca.minY, (float) ca.maxY);
+                if (ddx * ddx + ddz * ddz <= renderDistSq) {
+                    collectFaceIntersections(segments, world, ex1, ez1, edx, edz,
+                            bx, bz, yMin, yMax, ca.minY, ca.maxY);
+                    collectHorizontalLines(segments, world, ex1, ez1, edx, edz,
+                            bx, bz, yMin, yMax, ca.minY, ca.maxY);
+                }
+                if (bx == endBx && bz == endBz) break;
+                if (tMaxX < tMaxZ) { bx += stepX; tMaxX += tDeltaX; }
+                else { bz += stepZ; tMaxZ += tDeltaZ; }
             }
         }
         return segments;
