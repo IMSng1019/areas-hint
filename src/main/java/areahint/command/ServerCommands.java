@@ -372,8 +372,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§6===== 区域提示模组命令帮助 ====="));
         source.sendMessage(Text.of("§a/areahint help §7- 显示此帮助"));
         source.sendMessage(Text.of("§a/areahint reload §7- 重新加载配置和域名文件"));
-        source.sendMessage(Text.of("§a/areahint delete §7- 列出所有可删除的域名"));
-        source.sendMessage(Text.of("§a/areahint delete §7- 删除指定域名"));
+        source.sendMessage(Text.of("§a/areahint delete §7- 交互式删除域名"));
         source.sendMessage(Text.of("§a/areahint frequency [值] §7- 设置或显示检测频率"));
         source.sendMessage(Text.of("§a/areahint subtitlerender [cpu|opengl|vulkan] §7- 设置或显示字幕渲染方式"));
         source.sendMessage(Text.of("§a/areahint subtitlestyle §7- 交互式设置字幕样式"));
@@ -386,6 +385,7 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint replacebutton §7- 更改记录域名顶点的按键"));
         source.sendMessage(Text.of("§a/areahint check §7- 查看联合域名信息"));
         source.sendMessage(Text.of("§a/areahint dimensionalityname §7- 管理维度域名 (管理员专用)"));
+        source.sendMessage(Text.of("§a/areahint dimensionalitycolor §7- 修改维度域名颜色 (管理员专用)"));
         source.sendMessage(Text.of("§a/areahint expandarea §7- 交互式扩展域名区域"));
         source.sendMessage(Text.of("§a/areahint shrinkarea §7- 交互式收缩域名区域"));
         source.sendMessage(Text.of("§a/areahint dividearea §7- 交互式分割域名区域"));
