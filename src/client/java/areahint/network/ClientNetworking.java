@@ -270,22 +270,8 @@ public class ClientNetworking {
                         areahint.command.ModToggleCommand.handleToggleCommand(action);
                     }
                     // 处理SetHigh命令
-                    else if (action.equals("sethigh_start")) {
-                        AreashintClient.LOGGER.info("执行sethigh_start");
-                        // SetHigh命令由服务端直接处理，客户端只需要等待服务端发送域名列表
-                        if (client.player != null) {
-                            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.area.altitude.modify")), false);
-                        }
-                    }
-                    // 处理SetHigh自定义高度命令
-                    else if (action.equals("sethigh_custom")) {
-                        AreashintClient.LOGGER.info("执行sethigh_custom");
-                        // 读取域名名称参数
-                        int argCount = buf.readInt();
-                        if (argCount > 0) {
-                            String areaName = buf.readString();
-                            areahint.command.SetHighClientCommand.startCustomHeightInput(areaName);
-                        }
+                    else if (action.startsWith("sethigh")) {
+                        handleSetHighCommand(action);
                     }
                 }
             } catch (Exception e) {
@@ -594,6 +580,25 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理DivideArea命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理SetHigh命令
+     */
+    private static void handleSetHighCommand(String action) {
+        try {
+            if (action.equals("sethigh_start")) {
+                MinecraftClient client = MinecraftClient.getInstance();
+                if (client.player != null) {
+                    client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.area.altitude.modify")), false);
+                }
+            } else if (action.startsWith("sethigh_custom:")) {
+                String areaName = action.substring("sethigh_custom:".length());
+                areahint.command.SetHighClientCommand.startCustomHeightInput(areaName);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理SetHigh命令时出错: " + e.getMessage(), e);
         }
     }
 

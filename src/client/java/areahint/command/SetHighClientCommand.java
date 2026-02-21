@@ -11,6 +11,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -68,14 +69,27 @@ public class SetHighClientCommand {
             return;
         }
         
-        // 显示域名列表
+        // 显示域名列表（带可点击按钮）
         client.player.sendMessage(Text.of(I18nManager.translate("command.title.area.altitude.modify")), false);
         for (int i = 0; i < areaNames.size(); i++) {
             String areaName = areaNames.get(i);
-            client.player.sendMessage(Text.of(String.format("§a%d. §f%s", i + 1, areaName)), false);
+            MutableText areaButton = Text.literal(String.format("§a%d. §f%s", i + 1, areaName))
+                .setStyle(Style.EMPTY
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint sethigh " + areaName))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        Text.of(I18nManager.translate("sethigh.prompt.select.hover") + areaName)))
+                    .withColor(Formatting.AQUA));
+            client.player.sendMessage(areaButton, false);
         }
-        client.player.sendMessage(Text.of(I18nManager.translate("command.prompt.area.modify.name")), false);
-        
+
+        // 取消按钮
+        MutableText cancelButton = Text.literal(I18nManager.translate("command.error.cancel"))
+            .setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint sethigh cancel"))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.of(I18nManager.translate("command.message.altitude.cancel"))))
+                .withColor(Formatting.RED));
+        client.player.sendMessage(cancelButton, false);
     }
     
     /**

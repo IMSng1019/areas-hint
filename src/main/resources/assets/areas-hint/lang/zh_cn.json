@@ -1442,5 +1442,6 @@
   "language.title.settings": "§6=== 语言设置 / Language Settings ===",
   "language.prompt.select": "§a请选择语言 / Select language:",
   "language.error.no_files": "§7请在 areas-hint/lang/ 文件夹中添加语言文件",
-  "language.button.cancel": "§c[取消 / Cancel]"
+  "language.button.cancel": "§c[取消 / Cancel]",
+  "sethigh.prompt.select.hover": "点击选择域名: "
 }

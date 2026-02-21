@@ -434,8 +434,8 @@ public class SetHighCommand {
             return 0;
         }
 
-        // 发送命令到客户端，启动自定义高度输入流程
-        sendClientCommand(source, "areahint:sethigh_custom", areaName);
+        // 通过标准命令通道发送到客户端
+        areahint.network.ServerNetworking.sendCommandToClient(source.getPlayer(), "areahint:sethigh_custom:" + areaName);
         return Command.SINGLE_SUCCESS;
     }
     
