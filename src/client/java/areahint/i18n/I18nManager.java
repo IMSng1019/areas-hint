@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +33,7 @@ public class I18nManager {
      */
     public static void init() {
         ensureLangFolder();
-        createDefaultLangFile();
+        extractLanguageFilesFromResources();
         loadLanguage(ClientConfig.getLanguage());
     }
 
@@ -52,20 +53,38 @@ public class I18nManager {
     }
 
     /**
-     * 创建默认语言文件（空模板）
+     * 从资源文件中提取语言文件到配置文件夹
+     * 这样可以让玩家自定义翻译，同时保证有默认的翻译文件
      */
-    private static void createDefaultLangFile() {
-        Path zhFile = getLangFolder().resolve("zh_cn.json");
-        if (Files.notExists(zhFile)) {
-            try {
-                // 创建空的翻译模板
-                Map<String, String> defaultTranslations = new LinkedHashMap<>();
-                defaultTranslations.put("language.name", "简体中文");
-                String json = new Gson().newBuilder().setPrettyPrinting().create().toJson(defaultTranslations);
-                Files.write(zhFile, json.getBytes(StandardCharsets.UTF_8));
-                AreashintClient.LOGGER.info("已创建默认语言文件: zh_cn.json");
+    private static void extractLanguageFilesFromResources() {
+        // 支持的语言列表
+        String[] languages = {"zh_cn", "en_us"};
+
+        for (String lang : languages) {
+            Path targetFile = getLangFolder().resolve(lang + ".json");
+
+            // 如果文件已存在，不覆盖（保留玩家的自定义翻译）
+            if (Files.exists(targetFile)) {
+                continue;
+            }
+
+            // 从 JAR 资源中读取语言文件
+            String resourcePath = "/assets/areas-hint/lang/" + lang + ".json";
+            try (InputStream inputStream = I18nManager.class.getResourceAsStream(resourcePath)) {
+                if (inputStream == null) {
+                    AreashintClient.LOGGER.warn("资源文件不存在: " + resourcePath);
+                    continue;
+                }
+
+                // 读取资源内容
+                byte[] bytes = inputStream.readAllBytes();
+
+                // 写入到配置文件夹
+                Files.write(targetFile, bytes);
+                AreashintClient.LOGGER.info("已提取语言文件: " + lang + ".json");
+
             } catch (IOException e) {
-                AreashintClient.LOGGER.error("创建默认语言文件失败: " + e.getMessage());
+                AreashintClient.LOGGER.error("提取语言文件失败 (" + lang + "): " + e.getMessage());
             }
         }
     }
