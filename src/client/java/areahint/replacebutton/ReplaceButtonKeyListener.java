@@ -1,5 +1,6 @@
 package areahint.replacebutton;
 
+import areahint.i18n.I18nManager;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
@@ -70,17 +71,17 @@ public class ReplaceButtonKeyListener {
 
         // 对于特殊键，返回自定义名称
         switch (keyCode) {
-            case GLFW.GLFW_KEY_SPACE: return "空格";
+            case GLFW.GLFW_KEY_SPACE: return I18nManager.translate("replacebutton.message.general_12");
             case GLFW.GLFW_KEY_ESCAPE: return "ESC";
-            case GLFW.GLFW_KEY_ENTER: return "回车";
+            case GLFW.GLFW_KEY_ENTER: return I18nManager.translate("replacebutton.message.general_7");
             case GLFW.GLFW_KEY_TAB: return "Tab";
-            case GLFW.GLFW_KEY_BACKSPACE: return "退格";
+            case GLFW.GLFW_KEY_BACKSPACE: return I18nManager.translate("replacebutton.message.general_13");
             case GLFW.GLFW_KEY_INSERT: return "Insert";
             case GLFW.GLFW_KEY_DELETE: return "Delete";
-            case GLFW.GLFW_KEY_RIGHT: return "右箭头";
-            case GLFW.GLFW_KEY_LEFT: return "左箭头";
-            case GLFW.GLFW_KEY_DOWN: return "下箭头";
-            case GLFW.GLFW_KEY_UP: return "上箭头";
+            case GLFW.GLFW_KEY_RIGHT: return I18nManager.translate("replacebutton.message.general_6");
+            case GLFW.GLFW_KEY_LEFT: return I18nManager.translate("replacebutton.message.general_11");
+            case GLFW.GLFW_KEY_DOWN: return I18nManager.translate("replacebutton.message.general_2");
+            case GLFW.GLFW_KEY_UP: return I18nManager.translate("replacebutton.message.general");
             case GLFW.GLFW_KEY_PAGE_UP: return "Page Up";
             case GLFW.GLFW_KEY_PAGE_DOWN: return "Page Down";
             case GLFW.GLFW_KEY_HOME: return "Home";
@@ -90,13 +91,13 @@ public class ReplaceButtonKeyListener {
             case GLFW.GLFW_KEY_NUM_LOCK: return "Num Lock";
             case GLFW.GLFW_KEY_PRINT_SCREEN: return "Print Screen";
             case GLFW.GLFW_KEY_PAUSE: return "Pause";
-            case GLFW.GLFW_KEY_LEFT_SHIFT: return "左Shift";
-            case GLFW.GLFW_KEY_LEFT_CONTROL: return "左Ctrl";
-            case GLFW.GLFW_KEY_LEFT_ALT: return "左Alt";
-            case GLFW.GLFW_KEY_RIGHT_SHIFT: return "右Shift";
-            case GLFW.GLFW_KEY_RIGHT_CONTROL: return "右Ctrl";
-            case GLFW.GLFW_KEY_RIGHT_ALT: return "右Alt";
-            default: return "按键" + keyCode;
+            case GLFW.GLFW_KEY_LEFT_SHIFT: return I18nManager.translate("replacebutton.message.general_10");
+            case GLFW.GLFW_KEY_LEFT_CONTROL: return I18nManager.translate("replacebutton.message.general_9");
+            case GLFW.GLFW_KEY_LEFT_ALT: return I18nManager.translate("replacebutton.message.general_8");
+            case GLFW.GLFW_KEY_RIGHT_SHIFT: return I18nManager.translate("replacebutton.message.general_5");
+            case GLFW.GLFW_KEY_RIGHT_CONTROL: return I18nManager.translate("replacebutton.message.general_4");
+            case GLFW.GLFW_KEY_RIGHT_ALT: return I18nManager.translate("replacebutton.message.general_3");
+            default: return I18nManager.translate("replacebutton.message.key") + keyCode;
         }
     }
 }

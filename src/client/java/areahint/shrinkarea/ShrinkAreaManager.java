@@ -2,6 +2,7 @@ package areahint.shrinkarea;
 
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.i18n.I18nManager;
 import areahint.util.AreaDataConverter;
 import areahint.shrinkarea.ShrinkAreaClientNetworking;
 import net.minecraft.client.MinecraftClient;
@@ -92,7 +93,7 @@ public class ShrinkAreaManager {
      */
     public void start() {
         if (isActive) {
-            sendMessage("§c域名收缩功能已经在运行中", Formatting.RED);
+            sendMessage(I18nManager.translate("shrinkarea.error.area.shrink"), Formatting.RED);
             return;
         }
         
@@ -100,7 +101,7 @@ public class ShrinkAreaManager {
         ClientPlayerEntity player = client.player;
         
         if (player == null) {
-            sendMessage("§c无法获取玩家信息", Formatting.RED);
+            sendMessage(I18nManager.translate("shrinkarea.error.general"), Formatting.RED);
             return;
         }
         
@@ -112,8 +113,8 @@ public class ShrinkAreaManager {
         isActive = true;
         currentState = ShrinkState.SELECTING_AREA;
         
-        sendMessage("§a域名收缩功能已启动", Formatting.GREEN);
-        sendMessage("§e正在加载可用域名...", Formatting.YELLOW);
+        sendMessage(I18nManager.translate("shrinkarea.message.area.shrink.start"), Formatting.GREEN);
+        sendMessage(I18nManager.translate("shrinkarea.message.area"), Formatting.YELLOW);
         
         // 加载可用域名
         loadAvailableAreas();
@@ -144,7 +145,7 @@ public class ShrinkAreaManager {
      */
     public void selectAreaByName(String areaName) {
         if (areaName == null || areaName.trim().isEmpty()) {
-            sendMessage("§c无效的域名", Formatting.RED);
+            sendMessage(I18nManager.translate("dividearea.error.area"), Formatting.RED);
             return;
         }
 
@@ -164,8 +165,8 @@ public class ShrinkAreaManager {
         }
 
         if (area == null) {
-            sendMessage("§c域名 '" + cleanedName + "' 不存在或您没有权限收缩", Formatting.RED);
-            sendMessage("§7请确保域名名称正确，且您有权限收缩该域名", Formatting.GRAY);
+            sendMessage("§c" + I18nManager.translate("addhint.message.area_2") + cleanedName + I18nManager.translate("shrinkarea.message.shrink.permission"), Formatting.RED);
+            sendMessage(I18nManager.translate("shrinkarea.prompt.area.shrink.permission"), Formatting.GRAY);
             return;
         }
 
@@ -179,9 +180,9 @@ public class ShrinkAreaManager {
     public void handleAreaSelection(AreaData selectedArea) {
         this.selectedArea = selectedArea;
 
-        sendMessage("§a已选择域名: " + AreaDataConverter.getDisplayName(selectedArea), Formatting.GREEN);
-        sendMessage("§e请按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §e键开始记录收缩区域的顶点位置", Formatting.YELLOW);
-        sendMessage("§7记录完成后点击 §6[保存域名] §7按钮完成收缩", Formatting.GRAY);
+        sendMessage(I18nManager.translate("dividearea.prompt.area") + AreaDataConverter.getDisplayName(selectedArea), Formatting.GREEN);
+        sendMessage(I18nManager.translate("addhint.message.general_2") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("shrinkarea.message.vertex.record.shrink"), Formatting.YELLOW);
+        sendMessage(I18nManager.translate("shrinkarea.button.area.record.save"), Formatting.GRAY);
 
         // 开始记录模式
         startRecording();
@@ -335,16 +336,16 @@ public class ShrinkAreaManager {
             }
 
             if (availableAreas.isEmpty()) {
-                sendMessage("§c没有找到可以收缩的域名", Formatting.RED);
-                sendMessage("§e只能收缩您创建的域名或basename引用您的域名", Formatting.YELLOW);
+                sendMessage(I18nManager.translate("shrinkarea.error.area.shrink_7"), Formatting.RED);
+                sendMessage(I18nManager.translate("shrinkarea.message.area.shrink_4"), Formatting.YELLOW);
                 stop();
                 return;
             }
 
-            sendMessage("§a找到 " + availableAreas.size() + " 个可收缩的域名", Formatting.GREEN);
+            sendMessage(I18nManager.translate("shrinkarea.message.general_2") + availableAreas.size() + I18nManager.translate("shrinkarea.message.area.shrink"), Formatting.GREEN);
 
         } catch (Exception e) {
-            sendMessage("§c加载域名失败: " + e.getMessage(), Formatting.RED);
+            sendMessage(I18nManager.translate("shrinkarea.error.area") + e.getMessage(), Formatting.RED);
             e.printStackTrace();
             stop();
         }
@@ -394,7 +395,7 @@ public class ShrinkAreaManager {
         AreaData.Vertex vertex = new AreaData.Vertex(pos.getX(), pos.getZ());
         shrinkVertices.add(vertex);
 
-        sendMessage("§a记录顶点 " + shrinkVertices.size() + ": §6(" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ")", Formatting.GREEN);
+        sendMessage(I18nManager.translate("shrinkarea.message.vertex.record") + shrinkVertices.size() + ": §6(" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ")", Formatting.GREEN);
 
         // 更新边界可视化的临时顶点
         List<BlockPos> blockPosList = new java.util.ArrayList<>();
@@ -420,7 +421,7 @@ public class ShrinkAreaManager {
             return;
         }
 
-        sendMessage("§a继续记录更多顶点，按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §a记录当前位置", Formatting.GREEN);
+        sendMessage(I18nManager.translate("expandarea.message.vertex.record.continue") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("expandarea.message.record"), Formatting.GREEN);
     }
     
     /**
@@ -432,7 +433,7 @@ public class ShrinkAreaManager {
         }
 
         if (shrinkVertices.size() < 3) {
-            sendMessage("§c至少需要记录3个点才能形成有效区域", Formatting.RED);
+            sendMessage(I18nManager.translate("expandarea.error.vertex.record"), Formatting.RED);
             return;
         }
 
@@ -443,7 +444,7 @@ public class ShrinkAreaManager {
         try {
             processAreaShrinking();
         } catch (Exception e) {
-            sendMessage("§c收缩域名时发生错误: " + e.getMessage(), Formatting.RED);
+            sendMessage(I18nManager.translate("shrinkarea.error.area.shrink_4") + e.getMessage(), Formatting.RED);
             e.printStackTrace();
         }
     }
@@ -452,7 +453,7 @@ public class ShrinkAreaManager {
      * 处理域名收缩的核心逻辑
      */
     private void processAreaShrinking() {
-        sendMessage("§e正在处理域名收缩...", Formatting.YELLOW);
+        sendMessage(I18nManager.translate("shrinkarea.message.area.shrink_5"), Formatting.YELLOW);
 
         try {
             // 1. 高度验证
@@ -465,7 +466,7 @@ public class ShrinkAreaManager {
             AreaData shrunkArea = calculator.shrinkArea();
 
             if (shrunkArea == null) {
-                sendMessage("§c无法计算收缩后的域名", Formatting.RED);
+                sendMessage(I18nManager.translate("shrinkarea.error.area.shrink_5"), Formatting.RED);
                 return;
             }
 
@@ -477,17 +478,17 @@ public class ShrinkAreaManager {
             }
 
             if (currentDimension == null) {
-                sendMessage("§c无法获取当前维度信息", Formatting.RED);
+                sendMessage(I18nManager.translate("dividearea.error.dimension"), Formatting.RED);
                 return;
             }
 
             // 4. 发送给服务端
             ShrinkAreaClientNetworking.sendShrunkAreaToServer(shrunkArea, currentDimension);
 
-            sendMessage("§a域名收缩完成！", Formatting.GREEN);
+            sendMessage(I18nManager.translate("shrinkarea.message.area.finish.shrink"), Formatting.GREEN);
 
         } catch (Exception e) {
-            sendMessage("§c域名收缩过程中发生错误: " + e.getMessage(), Formatting.RED);
+            sendMessage(I18nManager.translate("shrinkarea.error.area.shrink_3") + e.getMessage(), Formatting.RED);
             e.printStackTrace();
         } finally {
             // 重置状态
@@ -500,7 +501,7 @@ public class ShrinkAreaManager {
      */
     private boolean validateHeights() {
         if (selectedArea == null || selectedArea.getAltitude() == null) {
-            sendMessage("§c原域名没有高度信息", Formatting.RED);
+            sendMessage(I18nManager.translate("shrinkarea.error.area.altitude"), Formatting.RED);
             return false;
         }
         

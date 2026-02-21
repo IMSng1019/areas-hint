@@ -20,10 +20,10 @@ public class DimensionalNameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        String title = commandPrefix.equals("dimname") ? "维度域名修改" : "维度域名颜色修改";
+        String titleKey = commandPrefix.equals("dimname") ? "gui.title.area.dimension.modify" : "gui.title.area.color.dimension.modify";
         String cmdBase = commandPrefix.equals("dimname") ? "dimensionalityname" : "dimensionalitycolor";
 
-        client.player.sendMessage(Text.of("§6=== " + title + " ==="), false);
+        client.player.sendMessage(Text.of(I18nManager.translate(titleKey)), false);
         client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.dimension")), false);
         client.player.sendMessage(Text.of(""), false);
 

@@ -1,6 +1,7 @@
 package areahint.replacebutton;
 
 import areahint.config.ClientConfig;
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
@@ -65,7 +66,7 @@ public class ReplaceButtonManager {
 
         // 忽略某些特殊键
         if (isInvalidKey(keyCode)) {
-            ReplaceButtonUI.showError("该按键不能用作记录键！");
+            ReplaceButtonUI.showError(I18nManager.translate("replacebutton.message.record.key_2"));
             return;
         }
 
@@ -93,7 +94,7 @@ public class ReplaceButtonManager {
         areahint.keyhandler.UnifiedKeyHandler.reregisterKey();
 
         // 显示成功消息
-        ReplaceButtonUI.showSuccess("记录按键已更改为：" + pendingKeyName);
+        ReplaceButtonUI.showSuccess(I18nManager.translate("replacebutton.message.record.key") + pendingKeyName);
 
         // 重置状态
         reset();
@@ -103,7 +104,7 @@ public class ReplaceButtonManager {
      * 取消按键更换
      */
     public void cancel() {
-        ReplaceButtonUI.showInfo("已取消按键更换");
+        ReplaceButtonUI.showInfo(I18nManager.translate("replacebutton.message.cancel.key"));
         reset();
     }
 

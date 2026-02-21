@@ -1142,10 +1142,6 @@ public class ServerCommands {
                 return 0;
             }
             
-            // 发送客户端命令，启动域名扩展流程
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.message.area.expand.start")));
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.prompt.area.expand")));
-            
             // 通过客户端命令通道发送启动命令
             sendClientCommand(source, "areahint:expandarea_start");
             
@@ -1216,10 +1212,6 @@ public class ServerCommands {
                 source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
                 return 0;
             }
-            
-            // 发送客户端命令，启动域名收缩流程
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.message.area.shrink.start")));
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.prompt.area.shrink")));
             
             // 通过客户端命令通道发送启动命令
             sendClientCommand(source, "areahint:shrinkarea_start");

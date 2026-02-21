@@ -2,6 +2,7 @@ package areahint.expandarea;
 
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.i18n.I18nManager;
 import areahint.expandarea.ExpandAreaClientNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -58,8 +59,8 @@ public class ExpandAreaManager {
         
         if (modifiableAreas.isEmpty()) {
             System.out.println("DEBUG: 没有可扩展的域名");
-            sendMessage("§c没有可扩展的域名", Formatting.RED);
-            sendMessage("§7您只能扩展自己创建的域名", Formatting.GRAY);
+            sendMessage(I18nManager.translate("expandarea.error.area.expand_4"), Formatting.RED);
+            sendMessage(I18nManager.translate("expandarea.message.area.expand_2"), Formatting.GRAY);
             isActive = false;
             return;
         }
@@ -102,7 +103,7 @@ public class ExpandAreaManager {
      */
     public void selectAreaByName(String areaName) {
         if (areaName == null || areaName.trim().isEmpty()) {
-            sendMessage("§c无效的域名", Formatting.RED);
+            sendMessage(I18nManager.translate("dividearea.error.area"), Formatting.RED);
             return;
         }
 
@@ -123,8 +124,8 @@ public class ExpandAreaManager {
         }
 
         if (area == null) {
-            sendMessage("§c域名 '" + cleanedName + "' 不存在或您没有权限扩展", Formatting.RED);
-            sendMessage("§7请确保域名名称正确，且您有权限扩展该域名", Formatting.GRAY);
+            sendMessage("§c" + I18nManager.translate("addhint.message.area_2") + cleanedName + I18nManager.translate("expandarea.message.expand.permission"), Formatting.RED);
+            sendMessage(I18nManager.translate("expandarea.prompt.area.expand.permission"), Formatting.GRAY);
             return;
         }
 
@@ -197,9 +198,9 @@ public class ExpandAreaManager {
         this.selectedArea = selectedArea;
         this.selectedAreaName = selectedArea.getName();
         
-        sendMessage("§a已选择域名: " + areahint.util.AreaDataConverter.getDisplayName(selectedArea), Formatting.GREEN);
-        sendMessage("§e请按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §e键开始记录新区域的顶点位置", Formatting.YELLOW);
-        sendMessage("§7记录完成后点击 §6[保存域名] §7按钮完成扩展", Formatting.GRAY);
+        sendMessage(I18nManager.translate("dividearea.prompt.area") + areahint.util.AreaDataConverter.getDisplayName(selectedArea), Formatting.GREEN);
+        sendMessage(I18nManager.translate("addhint.message.general_2") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("expandarea.message.vertex.record"), Formatting.YELLOW);
+        sendMessage(I18nManager.translate("expandarea.button.area.record.save"), Formatting.GRAY);
         
         // 开始记录模式
         startRecording();
@@ -233,7 +234,7 @@ public class ExpandAreaManager {
         int roundedZ = (int) Math.round(z);
         newVertices.add(new Double[]{(double) roundedX, (double) roundedZ});
 
-        sendMessage("§a已记录位置 #" + newVertices.size() + ": §6(" +
+        sendMessage(I18nManager.translate("dividearea.message.record_3") + newVertices.size() + ": §6(" +
                    roundedX + ", " + String.format("%.1f", y) + ", " + roundedZ + ")",
                    Formatting.GREEN);
 
@@ -253,7 +254,7 @@ public class ExpandAreaManager {
      */
     public void finishRecording() {
         if (!isRecording || newVertices.size() < 3) {
-            sendMessage("§c至少需要记录3个顶点才能形成有效区域", Formatting.RED);
+            sendMessage(I18nManager.translate("expandarea.error.vertex.record"), Formatting.RED);
             return;
         }
         
@@ -263,7 +264,7 @@ public class ExpandAreaManager {
             // 进行几何计算和域名扩展
             processAreaExpansion();
         } catch (Exception e) {
-            sendMessage("§c扩展域名时发生错误: " + e.getMessage(), Formatting.RED);
+            sendMessage(I18nManager.translate("expandarea.error.area.expand_3") + e.getMessage(), Formatting.RED);
             e.printStackTrace();
         }
     }
@@ -273,7 +274,7 @@ public class ExpandAreaManager {
      * 按照提示词实现复杂的几何算法
      */
     private void processAreaExpansion() {
-        sendMessage("§e正在处理域名扩展...", Formatting.YELLOW);
+        sendMessage(I18nManager.translate("expandarea.message.area.expand_3"), Formatting.YELLOW);
         
         try {
             // 1. 高度验证 - 按照提示词逻辑
@@ -291,7 +292,7 @@ public class ExpandAreaManager {
             List<Double[]> externalVertices = filterExternalVertices(originalVertices);
             
             if (externalVertices.isEmpty()) {
-                sendMessage("§c所有新添加的顶点都在原域名内部，无法扩展", Formatting.RED);
+                sendMessage(I18nManager.translate("expandarea.error.area.vertex.add"), Formatting.RED);
                 return;
             }
             
@@ -324,17 +325,17 @@ public class ExpandAreaManager {
             }
 
             if (currentDimension == null) {
-                sendMessage("§c无法获取当前维度信息", Formatting.RED);
+                sendMessage(I18nManager.translate("dividearea.error.dimension"), Formatting.RED);
                 return;
             }
 
             // 13. 发送给服务端
             ExpandAreaClientNetworking.sendExpandedAreaToServer(expandedArea, currentDimension);
 
-            sendMessage("§a域名扩展完成！", Formatting.GREEN);
+            sendMessage(I18nManager.translate("expandarea.message.area.finish.expand"), Formatting.GREEN);
             
         } catch (Exception e) {
-            sendMessage("§c域名扩展过程中发生错误: " + e.getMessage(), Formatting.RED);
+            sendMessage(I18nManager.translate("expandarea.error.area.expand_2") + e.getMessage(), Formatting.RED);
             e.printStackTrace();
         } finally {
             // 重置状态
@@ -365,13 +366,13 @@ public class ExpandAreaManager {
             // 按照提示词逻辑：新区域最高高度 < 原域名最高高度 且 新区域最低高度 > 原域名最低高度
             if (newMaxHeight < originalMaxHeight && newMinHeight > originalMinHeight) {
                 // 不改变域名的高度
-                sendMessage("§a新区域高度在原域名范围内，保持原高度设置", Formatting.GREEN);
+                sendMessage(I18nManager.translate("expandarea.message.area.altitude"), Formatting.GREEN);
                 return true;
             } else {
                 // 反之则将报错
-                sendMessage("§c新区域高度超出原域名范围，无法扩展", Formatting.RED);
-                sendMessage("§c原域名高度范围: " + originalMinHeight + " ~ " + originalMaxHeight, Formatting.RED);
-                sendMessage("§c新区域高度范围: " + newMinHeight + " ~ " + newMaxHeight, Formatting.RED);
+                sendMessage(I18nManager.translate("expandarea.error.area.altitude.expand"), Formatting.RED);
+                sendMessage(I18nManager.translate("expandarea.error.area.altitude") + originalMinHeight + " ~ " + originalMaxHeight, Formatting.RED);
+                sendMessage(I18nManager.translate("expandarea.error.altitude") + newMinHeight + " ~ " + newMaxHeight, Formatting.RED);
                 return false;
             }
         }
@@ -664,7 +665,7 @@ public class ExpandAreaManager {
             return;
         }
         
-        sendMessage("§a继续记录更多顶点，按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §a记录当前位置", Formatting.GREEN);
+        sendMessage(I18nManager.translate("expandarea.message.vertex.record.continue") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("easyadd.message.record"), Formatting.GREEN);
     }
     
     /**
@@ -676,7 +677,7 @@ public class ExpandAreaManager {
         }
         
         if (newVertices.size() < 3) {
-            sendMessage("§c至少需要记录3个点才能形成有效区域", Formatting.RED);
+            sendMessage(I18nManager.translate("expandarea.error.vertex.record"), Formatting.RED);
             return;
         }
         
@@ -687,7 +688,7 @@ public class ExpandAreaManager {
         try {
             processAreaExpansion();
         } catch (Exception e) {
-            sendMessage("§c扩展域名时发生错误: " + e.getMessage(), Formatting.RED);
+            sendMessage(I18nManager.translate("expandarea.error.area.expand_3") + e.getMessage(), Formatting.RED);
             e.printStackTrace();
         }
     }
