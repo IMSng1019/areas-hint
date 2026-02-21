@@ -57,33 +57,45 @@ public class I18nManager {
      * 这样可以让玩家自定义翻译，同时保证有默认的翻译文件
      */
     private static void extractLanguageFilesFromResources() {
-        // 支持的语言列表
         String[] languages = {"zh_cn", "en_us"};
 
         for (String lang : languages) {
             Path targetFile = getLangFolder().resolve(lang + ".json");
-
-            // 如果文件已存在，不覆盖（保留玩家的自定义翻译）
-            if (Files.exists(targetFile)) {
-                continue;
-            }
-
-            // 从 JAR 资源中读取语言文件
             String resourcePath = "/assets/areas-hint/lang/" + lang + ".json";
+
             try (InputStream inputStream = I18nManager.class.getResourceAsStream(resourcePath)) {
                 if (inputStream == null) {
                     AreashintClient.LOGGER.warn("资源文件不存在: " + resourcePath);
                     continue;
                 }
 
-                // 读取资源内容
-                byte[] bytes = inputStream.readAllBytes();
+                String jarContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                Map<String, String> jarMap = GSON.fromJson(jarContent, new TypeToken<Map<String, String>>(){}.getType());
+                if (jarMap == null) continue;
 
-                // 写入到配置文件夹
-                Files.write(targetFile, bytes);
-                AreashintClient.LOGGER.info("已提取语言文件: " + lang + ".json");
+                if (Files.notExists(targetFile)) {
+                    // 文件不存在，直接写入
+                    Files.writeString(targetFile, jarContent, StandardCharsets.UTF_8);
+                    AreashintClient.LOGGER.info("已提取语言文件: " + lang + ".json");
+                } else {
+                    // 文件已存在，合并缺失的翻译键
+                    String localContent = Files.readString(targetFile, StandardCharsets.UTF_8);
+                    Map<String, String> localMap = GSON.fromJson(localContent, new TypeToken<Map<String, String>>(){}.getType());
+                    if (localMap == null) localMap = new LinkedHashMap<>();
 
-            } catch (IOException e) {
+                    int added = 0;
+                    for (Map.Entry<String, String> entry : jarMap.entrySet()) {
+                        if (!localMap.containsKey(entry.getKey())) {
+                            localMap.put(entry.getKey(), entry.getValue());
+                            added++;
+                        }
+                    }
+                    if (added > 0) {
+                        Files.writeString(targetFile, GSON.toJson(localMap), StandardCharsets.UTF_8);
+                        AreashintClient.LOGGER.info("已合并 " + added + " 条新翻译到: " + lang + ".json");
+                    }
+                }
+            } catch (Exception e) {
                 AreashintClient.LOGGER.error("提取语言文件失败 (" + lang + "): " + e.getMessage());
             }
         }
