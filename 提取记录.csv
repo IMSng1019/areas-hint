@@ -1,0 +1,1409 @@
+﻿序号,翻译键名,原始文本(中文),文件路径,行号,用途说明,是否含占位符,是否含颜色代码,模块分类
+1,addhint.button.general,§b[提交],,,AddHint添加顶点,No,Yes,addhint
+2,addhint.button.record.continue,§a[继续记录],,,AddHint添加顶点,No,Yes,addhint
+3,addhint.button.record.finish,§7记录完成后点击 §6[提交] §7按钮,,,AddHint添加顶点,No,Yes,addhint
+4,addhint.error.area,§c域名 ',,,AddHint添加顶点,No,Yes,addhint
+5,addhint.error.area.modify,§c没有可修改的域名,,,AddHint添加顶点,No,Yes,addhint
+6,addhint.error.area_2,域名数据无效,,,AddHint添加顶点,No,No,addhint
+7,addhint.error.cancel,§c[取消],,,AddHint添加顶点,No,Yes,addhint
+8,addhint.error.dimension,无效的维度: ,,,AddHint添加顶点,No,No,addhint
+9,addhint.error.general,处理失败: ,,,AddHint添加顶点,No,No,addhint
+10,addhint.error.general_2,服务端处理错误: ,,,AddHint添加顶点,No,No,addhint
+11,addhint.error.save,保存文件失败,,,AddHint添加顶点,No,No,addhint
+12,addhint.error.vertex,§c处理顶点时发生错误: ,,,AddHint添加顶点,No,Yes,addhint
+13,addhint.error.vertex.cancel.add,§c已取消添加顶点,,,AddHint添加顶点,No,Yes,addhint
+14,addhint.error.vertex.record,§c至少需要记录1个顶点,,,AddHint添加顶点,No,Yes,addhint
+15,addhint.message.area,§a已提交域名 §6,,,AddHint添加顶点,No,Yes,addhint
+16,addhint.message.area.modify.permission,您没有权限修改此域名,,,AddHint添加顶点,No,No,addhint
+17,addhint.message.area_2,域名 ',,,AddHint添加顶点,No,No,addhint
+18,addhint.message.area_3,未找到域名: ,,,AddHint添加顶点,No,No,addhint
+19,addhint.message.cancel,取消,,,AddHint添加顶点,No,No,addhint
+20,addhint.message.general,\n创建者: ,,,AddHint添加顶点,No,No,addhint
+21,addhint.message.general_2,§e按 §6,,,AddHint添加顶点,No,Yes,addhint
+22,addhint.message.permission,' 不存在或您没有权限,,,AddHint添加顶点,No,No,addhint
+23,addhint.message.record,§7当前已记录 §6,,,AddHint添加顶点,No,Yes,addhint
+24,addhint.message.record.continue,继续记录,,,AddHint添加顶点,No,No,addhint
+25,addhint.message.vertex, §7个新顶点,,,AddHint添加顶点,No,Yes,addhint
+26,addhint.message.vertex.record, §e键记录新顶点,,,AddHint添加顶点,No,Yes,addhint
+27,addhint.message.vertex.record_2,§a已记录顶点 #,,,AddHint添加顶点,No,Yes,addhint
+28,addhint.message.vertex_2, §a的顶点更新,,,AddHint添加顶点,No,Yes,addhint
+29,addhint.message.vertex_3,提交顶点更新,,,AddHint添加顶点,No,No,addhint
+30,addhint.message.vertex_4,顶点数量不足,,,AddHint添加顶点,No,No,addhint
+31,addhint.prompt.area,§a已选择域名: §6,,,AddHint添加顶点,No,Yes,addhint
+32,addhint.prompt.area.vertex.add,§a请选择要添加顶点的域名：,,,AddHint添加顶点,No,Yes,addhint
+33,addhint.prompt.general,选择 ,,,AddHint添加顶点,No,No,addhint
+34,addhint.success.vertex,' 顶点更新成功,,,AddHint添加顶点,No,No,addhint
+35,addhint.title.area.vertex.add,§6=== 添加顶点 - 选择域名 ===,,,AddHint添加顶点,No,Yes,addhint
+36,boundviz.error.area.boundary,加载域名边界数据失败,,,边界可视化,No,No,boundviz
+37,boundviz.message.area.boundary.visualization,已加载 {} 个域名边界用于可视化,,,边界可视化,No,No,boundviz
+38,boundviz.message.boundary.visualization,边界可视化已关闭,,,边界可视化,No,No,boundviz
+39,boundviz.message.boundary.visualization_2,边界可视化已开启,,,边界可视化,No,No,boundviz
+40,boundviz.message.dimension,无法确定维度文件名: {},,,边界可视化,No,No,boundviz
+41,command.button.altitude,§d[自定义高度],,,命令系统,No,Yes,command
+42,command.button.altitude_2,§e[不限制高度],,,命令系统,No,Yes,command
+43,command.button.altitude_3,"最低高度超出合理范围 [-64, 320]",,,命令系统,No,No,command
+44,command.button.altitude_4,"最高高度超出合理范围 [-64, 320]",,,命令系统,No,No,command
+45,command.button.area,§a[AreaHint] 模组已启用！域名显示和检测功能已开启。,,,命令系统,No,Yes,command
+46,command.button.general,§e[AreaHint] 模组当前状态：%s,,,命令系统,Yes,Yes,command
+47,command.button.general_2,§e[AreaHint] 用法：,,,命令系统,No,Yes,command
+48,command.error.altitude,"§c最大高度 %.1f 超出合理范围 [-64, 320]",,,命令系统,No,Yes,command
+49,command.error.altitude.cancel,§c已取消高度设置流程,,,命令系统,No,Yes,command
+50,command.error.altitude.cancel_2,§c已取消高度输入,,,命令系统,No,Yes,command
+51,command.error.altitude.start,§c启动高度设置流程时发生错误,,,命令系统,No,Yes,command
+52,command.error.altitude.start_2,启动交互式高度设置流程时发生错误,,,命令系统,No,No,command
+53,command.error.altitude_2,"§c最小高度 %.1f 超出合理范围 [-64, 320]",,,命令系统,No,Yes,command
+54,command.error.altitude_3,§c选择不限制高度时发生错误: ,,,命令系统,No,Yes,command
+55,command.error.altitude_4,§c选择自动高度时发生错误: ,,,命令系统,No,Yes,command
+56,command.error.altitude_5,§c选择自定义高度时发生错误: ,,,命令系统,No,Yes,command
+57,command.error.altitude_6,§c错误：最低高度必须小于最高高度 ,,,命令系统,No,Yes,command
+58,command.error.altitude_7,"§c高度值超出合理范围 [-64, 320]",,,命令系统,No,Yes,command
+59,command.error.altitude_8,§c高度数据无效: 最大高度不能小于最小高度,,,命令系统,No,Yes,command
+60,command.error.altitude_9,处理高度设置请求时发生错误,,,命令系统,No,No,command
+61,command.error.area,§c[AreaHint] 模组已禁用！域名将不再显示，但仍会接收服务器数据。,,,命令系统,No,Yes,command
+62,command.error.area.add,§c添加域名失败，请检查日志,,,命令系统,No,Yes,command
+63,command.error.area.altitude.dimension,§c当前维度没有您可以修改高度的域名,,,命令系统,No,Yes,command
+64,command.error.area.altitude.list,获取可设置高度的域名列表时发生错误,,,命令系统,No,No,command
+65,command.error.area.altitude.start,启动指定域名高度设置流程时发生错误,,,命令系统,No,No,command
+66,command.error.area.continue.expand,§c继续域名扩展时发生错误: ,,,命令系统,No,Yes,command
+67,command.error.area.continue.shrink,§c继续域名收缩时发生错误: ,,,命令系统,No,Yes,command
+68,command.error.area.delete.list,获取可删除域名列表时发生错误,,,命令系统,No,No,command
+69,command.error.area.dimension,§c当前维度暂无域名,,,命令系统,No,Yes,command
+70,command.error.area.dimension.save,保存维度域名配置失败,,,命令系统,No,No,command
+71,command.error.area.dimension_2,§c当前维度暂无域名数据,,,命令系统,No,Yes,command
+72,command.error.area.dimension_3,§c当前维度没有您可以编辑的域名,,,命令系统,No,Yes,command
+73,command.error.area.dimension_4,重新发送维度域名配置失败,,,命令系统,No,No,command
+74,command.error.area.divide.start,§c启动域名分割失败: ,,,命令系统,No,Yes,command
+75,command.error.area.expand.list,获取可扩展域名列表时发生错误,,,命令系统,No,No,command
+76,command.error.area.expand.start,§c启动域名扩展失败: ,,,命令系统,No,Yes,command
+77,command.error.area.level,§c域名数据无效，请确保至少有3个点和正确的域名等级,,,命令系统,No,Yes,command
+78,command.error.area.level_2,§c设置域名等级时发生错误: ,,,命令系统,No,Yes,command
+79,command.error.area.list,发送域名列表到客户端时发生错误,,,命令系统,No,No,command
+80,command.error.area.list_2,获取可编辑域名列表时发生错误,,,命令系统,No,No,command
+81,command.error.area.parent,§c选择上级域名时发生错误: ,,,命令系统,No,Yes,command
+82,command.error.area.save,保存域名数据时失败,,,命令系统,No,No,command
+83,command.error.area.save.expand,§c保存域名扩展时发生错误: ,,,命令系统,No,Yes,command
+84,command.error.area.save.shrink,§c保存域名收缩时发生错误: ,,,命令系统,No,Yes,command
+85,command.error.area.shrink.list,获取可收缩域名列表时发生错误,,,命令系统,No,No,command
+86,command.error.area.shrink.start,§c启动域名收缩失败: ,,,命令系统,No,Yes,command
+87,command.error.area.surface,§c未找到联合域名: ,,,命令系统,No,Yes,command
+88,command.error.area_2,§c选择域名失败: ,,,命令系统,No,Yes,command
+89,command.error.area_3,§c选择域名时发生错误: ,,,命令系统,No,Yes,command
+90,command.error.area_4,读取域名数据时发生错误,,,命令系统,No,No,command
+91,command.error.boundary.visualization,§c切换边界可视化时发生错误: ,,,命令系统,No,Yes,command
+92,command.error.cancel,§c[取消本次操作],,,命令系统,No,Yes,command
+93,command.error.cancel.delete,§c取消删除时发生错误: ,,,命令系统,No,Yes,command
+94,command.error.cancel.expand,§c取消扩展时发生错误: ,,,命令系统,No,Yes,command
+95,command.error.cancel.language,§c取消语言选择时发生错误: ,,,命令系统,No,Yes,command
+96,command.error.cancel.rename,§c取消重命名时发生错误: ,,,命令系统,No,Yes,command
+97,command.error.cancel.shrink,§c取消收缩时发生错误: ,,,命令系统,No,Yes,command
+98,command.error.cancel_2,§c取消EasyAdd时发生错误: ,,,命令系统,No,Yes,command
+99,command.error.cancel_3,§c取消大小选择时发生错误: ,,,命令系统,No,Yes,command
+100,command.error.cancel_4,§c取消失败: ,,,命令系统,No,Yes,command
+101,command.error.cancel_5,§c取消样式选择时发生错误: ,,,命令系统,No,Yes,command
+102,command.error.color,§c无效的颜色: ,,,命令系统,No,Yes,command
+103,command.error.color.dimension,设置维度颜色失败,,,命令系统,No,No,command
+104,command.error.color.dimension_2,设置维度颜色时发生错误: ,,,命令系统,No,No,command
+105,command.error.color_2,§c选择颜色时发生错误: ,,,命令系统,No,Yes,command
+106,command.error.color_3,无效的颜色格式: ,,,命令系统,No,No,command
+107,command.error.confirm.delete,§c确认删除时发生错误: ,,,命令系统,No,Yes,command
+108,command.error.confirm.rename,§c确认重命名时发生错误: ,,,命令系统,No,Yes,command
+109,command.error.dimension,§c无法确定当前维度，请指定维度,,,命令系统,No,Yes,command
+110,command.error.dimension.name,设置维度名称失败,,,命令系统,No,No,command
+111,command.error.dimension.name_2,设置维度名称时发生错误: ,,,命令系统,No,No,command
+112,command.error.dimension_2,§c无法确定文件名，维度ID: ,,,命令系统,No,Yes,command
+113,command.error.dimension_3,§c无法识别当前维度,,,命令系统,No,Yes,command
+114,command.error.dimension_4,§c该维度已被命名为: ,,,命令系统,No,Yes,command
+115,command.error.general,"§c。有效选项: cpu, opengl, vulkan",,,命令系统,No,Yes,command
+116,command.error.general_10,§c此指令只能由玩家执行,,,命令系统,No,Yes,command
+117,command.error.general_11,§c禁用,,,命令系统,No,Yes,command
+118,command.error.general_12,§c输入格式错误，请输入有效的数字,,,命令系统,No,Yes,command
+119,command.error.general_13,§c选择大小时发生错误: ,,,命令系统,No,Yes,command
+120,command.error.general_14,§c选择样式时发生错误: ,,,命令系统,No,Yes,command
+121,command.error.general_15,发送交互式recolor界面到客户端时发生错误,,,命令系统,No,No,command
+122,command.error.general_16,发送响应时发生错误,,,命令系统,No,No,command
+123,command.error.general_17,发送客户端命令时发生错误,,,命令系统,No,No,command
+124,command.error.general_18,发送重新着色响应时发生错误,,,命令系统,No,No,command
+125,command.error.general_19,处理请求时发生错误: ,,,命令系统,No,No,command
+126,command.error.general_2,§c命令执行失败: ,,,命令系统,No,Yes,command
+127,command.error.general_20,处理重新着色请求时发生错误,,,命令系统,No,No,command
+128,command.error.general_21,执行check命令时发生错误,,,命令系统,No,No,command
+129,command.error.general_22,执行rename命令时发生错误: ,,,命令系统,No,No,command
+130,command.error.general_23,服务端处理请求时发生错误: ,,,命令系统,No,No,command
+131,command.error.general_3,§c执行命令时出错: ,,,命令系统,No,Yes,command
+132,command.error.general_4,§c执行命令时发生错误，请稍后重试,,,命令系统,No,Yes,command
+133,command.error.general_5,§c提交失败: ,,,命令系统,No,Yes,command
+134,command.error.general_6,§c无效的JSON数据，请检查格式,,,命令系统,No,Yes,command
+135,command.error.general_7,§c无效的渲染方式: §6,,,命令系统,No,Yes,command
+136,command.error.general_8,§c最大: ,,,命令系统,No,Yes,command
+137,command.error.general_9,§c此命令只能由玩家执行,,,命令系统,No,Yes,command
+138,command.error.language,§c选择语言时发生错误: ,,,命令系统,No,Yes,command
+139,command.error.name,名称无效（1-50个字符）,,,命令系统,No,No,command
+140,command.error.record.continue,§c继续记录时发生错误: ,,,命令系统,No,Yes,command
+141,command.error.record.finish,§c完成记录时发生错误: ,,,命令系统,No,Yes,command
+142,command.error.rename,处理重命名请求时发生错误,,,命令系统,No,No,command
+143,command.error.rename_2,处理重命名请求时发生错误: ,,,命令系统,No,No,command
+144,command.error.start,§c启动Delete时发生错误: ,,,命令系统,No,Yes,command
+145,command.error.start.language,§c启动语言选择时发生错误: ,,,命令系统,No,Yes,command
+146,command.error.start_2,§c启动EasyAdd时发生错误: ,,,命令系统,No,Yes,command
+147,command.error.start_3,§c启动SubtitleSize时发生错误: ,,,命令系统,No,Yes,command
+148,command.error.start_4,§c启动SubtitleStyle时发生错误: ,,,命令系统,No,Yes,command
+149,command.error.vertex,§c切换顶点失败: ,,,命令系统,No,Yes,command
+150,command.error.vertex.add.start,§c启动添加顶点失败: ,,,命令系统,No,Yes,command
+151,command.error.vertex.delete.start,§c启动删除顶点失败: ,,,命令系统,No,Yes,command
+152,command.hint.general,区域提示调试模式: ,,,命令系统,No,No,command
+153,command.message.altitude,  §7高度范围: §f,,,命令系统,No,Yes,command
+154,command.message.altitude.cancel,取消高度设置流程,,,命令系统,No,No,command
+155,command.message.altitude.modify.permission,' 不存在或您没有权限修改其高度,,,命令系统,No,No,command
+156,command.message.altitude.start, 的高度设置流程已启动,,,命令系统,No,No,command
+157,command.message.altitude_10,§a已设置最低高度：§6,,,命令系统,No,Yes,command
+158,command.message.altitude_11,§a已设置最高高度：§6,,,命令系统,No,Yes,command
+159,command.message.altitude_12,§a高度范围：§6,,,命令系统,No,Yes,command
+160,command.message.altitude_13,最高高度不能小于最低高度,,,命令系统,No,No,command
+161,command.message.altitude_2,  §7高度范围: §f无限制,,,命令系统,No,Yes,command
+162,command.message.altitude_3, §a的高度设置流程,,,命令系统,No,Yes,command
+163,command.message.altitude_4,' 的高度已设置为 ,,,命令系统,No,No,command
+164,command.message.altitude_5,' 的高度限制已移除,,,命令系统,No,No,command
+165,command.message.altitude_6,§7不限制高度适用于跨越多个高度层的大型区域,,,命令系统,No,Yes,command
+166,command.message.altitude_7,§7当前高度: 无限制,,,命令系统,No,Yes,command
+167,command.message.altitude_8,§7当前高度: 最高:,,,命令系统,No,Yes,command
+168,command.message.altitude_9,§7高度范围: -64 到 320,,,命令系统,No,Yes,command
+169,command.message.area,  §7实际域名: §f,,,命令系统,No,Yes,command
+170,command.message.area.altitude.boundary,§7自定义可以精确控制域名的高度边界,,,命令系统,No,Yes,command
+171,command.message.area.altitude.coordinate,不限制高度范围\n域名在所有Y坐标生效,,,命令系统,No,No,command
+172,command.message.area.altitude.modify,§a您可以修改以下域名的高度：\n,,,命令系统,No,Yes,command
+173,command.message.area.color.dimension,§a维度域名颜色已更新！,,,命令系统,No,Yes,command
+174,command.message.area.dimension,§a区域数据和维度域名配置已重新加载并发送给所有客户端,,,命令系统,No,Yes,command
+175,command.message.area.dimension_2,§a维度域名已更新！,,,命令系统,No,Yes,command
+176,command.message.area.dimension_3,已重新发送维度域名配置给所有客户端,,,命令系统,No,No,command
+177,command.message.area.expand.start,§a启动域名扩展模式...,,,命令系统,No,Yes,command
+178,command.message.area.level,  §7域名等级: §e,,,命令系统,No,Yes,command
+179,command.message.area.list,发送域名列表时出错: ,,,命令系统,No,No,command
+180,command.message.area.modify.permission,您没有权限修改域名 \,,,命令系统,No,No,command
+181,command.message.area.parent,  §7上级域名: §f,,,命令系统,No,Yes,command
+182,command.message.area.rename.permission,您没有权限重命名域名 \,,,命令系统,No,No,command
+183,command.message.area.shrink.start,§a启动域名收缩模式...,,,命令系统,No,Yes,command
+184,command.message.area.start,§a已启动域名 §f,,,命令系统,No,Yes,command
+185,command.message.area.surface,  §7联合域名: §f,,,命令系统,No,Yes,command
+186,command.message.area.surface_2, §7个联合域名，§e,,,命令系统,No,Yes,command
+187,command.message.area.surface_3,\n§7新联合域名: §f,,,命令系统,No,Yes,command
+188,command.message.area.surface_4,§6联合域名: §f,,,命令系统,No,Yes,command
+189,command.message.area.surface_5,§7点击联合域名查看详细信息,,,命令系统,No,Yes,command
+190,command.message.area_10,域名 \,,,命令系统,No,No,command
+191,command.message.area_11,新域名不能为空,,,命令系统,No,No,command
+192,command.message.area_2, §7个域名,,,命令系统,No,Yes,command
+193,command.message.area_3, §7个域名:\n,,,命令系统,No,Yes,command
+194,command.message.area_4, 将域名 \,,,命令系统,No,No,command
+195,command.message.area_5,\n§7新域名: §f,,,命令系统,No,Yes,command
+196,command.message.area_6,§7包含域名数量: §e,,,命令系统,No,Yes,command
+197,command.message.area_7,§7域名：,,,命令系统,No,Yes,command
+198,command.message.area_8,§a域名 ,,,命令系统,No,Yes,command
+199,command.message.area_9,§a域名 #,,,命令系统,No,Yes,command
+200,command.message.color,  §7颜色: §f,,,命令系统,No,Yes,command
+201,command.message.color.dimension,管理员 {} 将维度 {} 的颜色从 '{}' 更改为 '{}',,,命令系统,No,No,command
+202,command.message.color_2, 的颜色,,,命令系统,No,No,command
+203,command.message.color_3, 的颜色从 ,,,命令系统,No,No,command
+204,command.message.color_4, 颜色已从 %s 更改为 %s,,,命令系统,Yes,No,command
+205,command.message.color_5,§e原颜色: §7,,,命令系统,No,Yes,command
+206,command.message.color_6,§e新颜色: §a,,,命令系统,No,Yes,command
+207,command.message.dimension,§e维度: §b,,,命令系统,No,Yes,command
+208,command.message.dimension.name,管理员 {} 将维度 {} 的名称从 '{}' 更改为 '{}',,,命令系统,No,No,command
+209,command.message.dimension.name_2,维度名称不能为空,,,命令系统,No,No,command
+210,command.message.dimension.name_3,维度名称过长（最多50个字符）,,,命令系统,No,No,command
+211,command.message.dimension_2,无法确定当前维度文件,,,命令系统,No,No,command
+212,command.message.dimension_3,无法确定维度文件,,,命令系统,No,No,command
+213,command.message.dimension_4,无法识别当前维度,,,命令系统,No,No,command
+214,command.message.dimension_5,维度文件不存在,,,命令系统,No,No,command
+215,command.message.general,  §7创建者: §f,,,命令系统,No,Yes,command
+216,command.message.general_10,§7无限制,,,命令系统,No,Yes,command
+217,command.message.general_11,§9最小: ,,,命令系统,No,Yes,command
+218,command.message.general_12,§a启用,,,命令系统,No,Yes,command
+219,command.message.general_13,§a字幕渲染方式信息已发送到客户端,,,命令系统,No,Yes,command
+220,command.message.general_14,§a字幕渲染方式已设置为: §6,,,命令系统,No,Yes,command
+221,command.message.general_15,§a检测频率信息已发送到客户端,,,命令系统,No,Yes,command
+222,command.message.general_16,§a检测频率已设置为: §6,,,命令系统,No,Yes,command
+223,command.message.general_17,发送客户端命令时出错,,,命令系统,No,No,command
+224,command.message.general_18,已启用,,,命令系统,No,No,command
+225,command.message.general_19,已禁用,,,命令系统,No,No,command
+226,command.message.general_2, 以上,,,命令系统,No,No,command
+227,command.message.general_20,当前配置已加载,,,命令系统,No,No,command
+228,command.message.general_21,执行recolor cancel时出错,,,命令系统,No,No,command
+229,command.message.general_22,执行recolor color时出错,,,命令系统,No,No,command
+230,command.message.general_23,执行recolor confirm时出错,,,命令系统,No,No,command
+231,command.message.general_24,执行recolor select时出错,,,命令系统,No,No,command
+232,command.message.general_25,无限制,,,命令系统,No,No,command
+233,command.message.general_26,模组已通过命令启用,,,命令系统,No,No,command
+234,command.message.general_27,模组已通过命令禁用,,,命令系统,No,No,command
+235,command.message.general_28,玩家 ,,,命令系统,No,No,command
+236,command.message.general_29,级,,,命令系统,No,No,command
+237,command.message.general_3, 以下,,,命令系统,No,No,command
+238,command.message.general_30,该命令只能由玩家执行,,,命令系统,No,No,command
+239,command.message.general_4, 到 ,,,命令系统,No,No,command
+240,command.message.general_5, 更改为 ,,,命令系统,No,No,command
+241,command.message.general_6,#FFFFFF (默认白色),,,命令系统,No,No,command
+242,command.message.general_7,", 最低:",,,命令系统,No,No,command
+243,command.message.general_8,§7包含 §e,,,命令系统,No,Yes,command
+244,command.message.general_9,§7总计: §e,,,命令系统,No,Yes,command
+245,command.message.name,§7已使用默认名称: ,,,命令系统,No,Yes,command
+246,command.message.name_2,§e新名称: §a,,,命令系统,No,Yes,command
+247,command.message.name_3,§e旧名称: §7,,,命令系统,No,Yes,command
+248,command.message.rename, 重命名为 \,,,命令系统,No,No,command
+249,command.message.vertex,  §7一级顶点数量: §e,,,命令系统,No,Yes,command
+250,command.message.vertex.coordinate,  §7顶点坐标: §f,,,命令系统,No,Yes,command
+251,command.prompt.altitude,§a正在发送高度设置请求到服务器...,,,命令系统,No,Yes,command
+252,command.prompt.altitude_2,§a请输入最低高度值：,,,命令系统,No,Yes,command
+253,command.prompt.altitude_3,§a请选择高度设置方式：,,,命令系统,No,Yes,command
+254,command.prompt.altitude_4,§e请输入最高高度值：,,,命令系统,No,Yes,command
+255,command.prompt.altitude_5,自定义高度范围\n依次输入最高和最低高度,,,命令系统,No,No,command
+256,command.prompt.area.altitude.modify,§a已向您发送可修改高度的域名列表，请在客户端选择要设置高度的域名,,,命令系统,No,Yes,command
+257,command.prompt.area.expand,§e请在客户端界面中选择要扩展的域名,,,命令系统,No,Yes,command
+258,command.prompt.area.list,§a已向您发送可编辑的域名列表，请在客户端选择要重新着色的域名,,,命令系统,No,Yes,command
+259,command.prompt.area.modify.name,§e请在指令中输入域名名称来选择要修改的域名,,,命令系统,No,Yes,command
+260,command.prompt.area.shrink,§e请在客户端界面中选择要收缩的域名,,,命令系统,No,Yes,command
+261,command.prompt.name, 已存在，请选择其他名称,,,命令系统,No,No,command
+262,command.success.area.add,§a成功添加域名: ,,,命令系统,No,Yes,command
+263,command.success.area.rename,§a域名重命名成功！\n§7原域名: §f,,,命令系统,No,Yes,command
+264,command.title.altitude,§6=== 高度设置 ===,,,命令系统,No,Yes,command
+265,command.title.altitude_2,§6===== 设置自定义高度 =====,,,命令系统,No,Yes,command
+266,command.title.area.altitude,§6===== 域名高度设置: ,,,命令系统,No,Yes,command
+267,command.title.area.altitude.modify,§6===== 可修改高度的域名列表 =====,,,命令系统,No,Yes,command
+268,command.title.area.surface,§6=== 联合域名详细信息 ===,,,命令系统,No,Yes,command
+269,command.title.area.surface.list,§6=== 联合域名列表 ===,,,命令系统,No,Yes,command
+270,command.title.general,§6===== 区域提示模组命令帮助 =====,,,命令系统,No,Yes,command
+271,debug.button.general,[区域提示调试] ,,,调试信息,No,No,debug
+272,debug.hint.general,已启用区域提示调试模式，您将收到实时调试信息,,,调试信息,No,No,debug
+273,debug.hint.general_2,已禁用区域提示调试模式,,,调试信息,No,No,debug
+274,debug.message.general,为玩家 {} 启用调试模式,,,调试信息,No,No,debug
+275,debug.message.general_2,为玩家 {} 禁用调试模式,,,调试信息,No,No,debug
+276,debug.message.general_3,客户端调试模式已启用,,,调试信息,No,No,debug
+277,debug.message.general_4,客户端调试模式已禁用,,,调试信息,No,No,debug
+278,debug.message.general_5,调试模式已经启用,,,调试信息,No,No,debug
+279,debug.message.general_6,调试模式未启用,,,调试信息,No,No,debug
+280,deletehint.button.delete,§b[提交删除],,,DeleteHint删除顶点,No,Yes,deletehint
+281,deletehint.error.vertex,§c无效的顶点索引,,,DeleteHint删除顶点,No,Yes,deletehint
+282,deletehint.error.vertex.cancel.delete,§c已取消删除顶点,,,DeleteHint删除顶点,No,Yes,deletehint
+283,deletehint.error.vertex.delete,§c不能再删除更多顶点，至少需要保留3个顶点,,,DeleteHint删除顶点,No,Yes,deletehint
+284,deletehint.error.vertex.delete_2,§c删除后顶点不足3个，无法提交,,,DeleteHint删除顶点,No,Yes,deletehint
+285,deletehint.error.vertex.delete_3,§c请至少选择一个要删除的顶点,,,DeleteHint删除顶点,No,Yes,deletehint
+286,deletehint.message.cancel,点击取消标记,,,DeleteHint删除顶点,No,No,deletehint
+287,deletehint.message.delete,点击标记删除,,,DeleteHint删除顶点,No,No,deletehint
+288,deletehint.message.general, §7个,,,DeleteHint删除顶点,No,Yes,deletehint
+289,deletehint.message.general_2,§7已标记 §c,,,DeleteHint删除顶点,No,Yes,deletehint
+290,deletehint.message.vertex, §7个顶点，剩余 §a,,,DeleteHint删除顶点,No,Yes,deletehint
+291,deletehint.message.vertex.delete, §a的顶点删除,,,DeleteHint删除顶点,No,Yes,deletehint
+292,deletehint.message.vertex.delete_2,提交顶点删除,,,DeleteHint删除顶点,No,No,deletehint
+293,deletehint.message.vertex_2,[顶点,,,DeleteHint删除顶点,No,No,deletehint
+294,deletehint.message.vertex_3,\n顶点数: ,,,DeleteHint删除顶点,No,No,deletehint
+295,deletehint.message.vertex_4,顶点数量不足（至少需要3个）,,,DeleteHint删除顶点,No,No,deletehint
+296,deletehint.prompt.area.vertex.delete,§a请选择要删除顶点的域名：,,,DeleteHint删除顶点,No,Yes,deletehint
+297,deletehint.success.vertex.delete,' 顶点删除成功,,,DeleteHint删除顶点,No,No,deletehint
+298,deletehint.title.area.vertex.delete,§6=== 删除顶点 - 选择域名 ===,,,DeleteHint删除顶点,No,Yes,deletehint
+299,deletehint.title.vertex.delete,§6=== 选择要删除的顶点 ===,,,DeleteHint删除顶点,No,Yes,deletehint
+300,dividearea.button.area,§b[1-顶级域名],,,DivideArea域名分割,No,Yes,dividearea
+301,dividearea.button.area_2,§d[3-三级域名],,,DivideArea域名分割,No,Yes,dividearea
+302,dividearea.button.area_3,§e[2-二级域名],,,DivideArea域名分割,No,Yes,dividearea
+303,dividearea.button.record.finish,§b[完成记录],,,DivideArea域名分割,No,Yes,dividearea
+304,dividearea.error.area,§c无效的域名,,,DivideArea域名分割,No,Yes,dividearea
+305,dividearea.error.area.altitude,§c原域名高度: ,,,DivideArea域名分割,No,Yes,dividearea
+306,dividearea.error.area.altitude_2,§c新区域高度超出原域名范围,,,DivideArea域名分割,No,Yes,dividearea
+307,dividearea.error.area.cancel.divide,§c已取消域名分割,,,DivideArea域名分割,No,Yes,dividearea
+308,dividearea.error.area.divide,§c分割域名时发生错误: ,,,DivideArea域名分割,No,Yes,dividearea
+309,dividearea.error.area.divide.boundary,§c分割线未能正确穿过域名边界（需要恰好2个交叉点）,,,DivideArea域名分割,No,Yes,dividearea
+310,dividearea.error.area.divide_2,§c域名分割失败：,,,DivideArea域名分割,No,Yes,dividearea
+311,dividearea.error.area.divide_3,§c没有可分割的域名,,,DivideArea域名分割,No,Yes,dividearea
+312,dividearea.error.area.divide_4,发送分割域名数据失败: ,,,DivideArea域名分割,No,No,dividearea
+313,dividearea.error.area.divide_5,处理分割域名请求失败: ,,,DivideArea域名分割,No,No,dividearea
+314,dividearea.error.area.divide_6,处理分割域名请求时发生错误: ,,,DivideArea域名分割,No,No,dividearea
+315,dividearea.error.area.name,§c域名名称 \,,,DivideArea域名分割,No,Yes,dividearea
+316,dividearea.error.area.save.divide,保存分割域名失败,,,DivideArea域名分割,No,No,dividearea
+317,dividearea.error.area.save.divide_2,保存分割域名失败: ,,,DivideArea域名分割,No,No,dividearea
+318,dividearea.error.area.vertex,§c原域名顶点不足,,,DivideArea域名分割,No,Yes,dividearea
+319,dividearea.error.dimension,§c无法获取当前维度信息,,,DivideArea域名分割,No,Yes,dividearea
+320,dividearea.error.general,处理请求失败: ,,,DivideArea域名分割,No,No,dividearea
+321,dividearea.error.general_2,处理请求时发生内部错误,,,DivideArea域名分割,No,No,dividearea
+322,dividearea.error.vertex.divide,§c分割结果无效，每个区域至少需要3个顶点,,,DivideArea域名分割,No,Yes,dividearea
+323,dividearea.error.vertex.record.divide,§c至少需要记录2个顶点来定义分割线,,,DivideArea域名分割,No,Yes,dividearea
+324,dividearea.message.area.color, 作为域名颜色,,,DivideArea域名分割,No,No,dividearea
+325,dividearea.message.area.divide.permission,您没有权限分割此域名,,,DivideArea域名分割,No,No,dividearea
+326,dividearea.message.area.parent, 作为上级域名,,,DivideArea域名分割,No,No,dividearea
+327,dividearea.message.area.parent_2,§a区域1上级域名设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+328,dividearea.message.area.parent_3,§a区域2上级域名设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+329,dividearea.message.area.parent_4,的上级域名：,,,DivideArea域名分割,No,No,dividearea
+330,dividearea.message.area.surface,§7跳过联合域名设置,,,DivideArea域名分割,No,Yes,dividearea
+331,dividearea.message.area.surface.name,§7联合域名是显示给玩家看的名称，可以与实际域名不同,,,DivideArea域名分割,No,Yes,dividearea
+332,dividearea.message.area.surface_2,§a区域1联合域名设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+333,dividearea.message.area.surface_3,§a区域2联合域名设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+334,dividearea.message.cancel.divide,取消分割流程,,,DivideArea域名分割,No,No,dividearea
+335,dividearea.message.color,§a区域1颜色设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+336,dividearea.message.color_2,§a区域2颜色设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+337,dividearea.message.coordinate, §7个坐标点,,,DivideArea域名分割,No,Yes,dividearea
+338,dividearea.message.coordinate.record.continue,继续记录更多坐标点,,,DivideArea域名分割,No,No,dividearea
+339,dividearea.message.coordinate.record.finish,完成坐标记录，开始分割,,,DivideArea域名分割,No,No,dividearea
+340,dividearea.message.divide,' 已分割为 ',,,DivideArea域名分割,No,No,dividearea
+341,dividearea.message.divide_2,§7至少需要2个点才能分割,,,DivideArea域名分割,No,Yes,dividearea
+342,dividearea.message.divide_3,§a已发送分割数据到服务端,,,DivideArea域名分割,No,Yes,dividearea
+343,dividearea.message.divide_4,分割 ,,,DivideArea域名分割,No,No,dividearea
+344,dividearea.message.finish.divide,§a分割完成！区域1有 ,,,DivideArea域名分割,No,Yes,dividearea
+345,dividearea.message.general,' 和 ',,,DivideArea域名分割,No,No,dividearea
+346,dividearea.message.general_2,§7直接在聊天中发送消息即可,,,DivideArea域名分割,No,Yes,dividearea
+347,dividearea.message.general_3,无,,,DivideArea域名分割,No,No,dividearea
+348,dividearea.message.level,§a区域1等级设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+349,dividearea.message.level_2,§a区域2等级设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+350,dividearea.message.level_3,的等级：,,,DivideArea域名分割,No,No,dividearea
+351,dividearea.message.name,§a区域1名称设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+352,dividearea.message.name_2,§a区域2名称设置为: ,,,DivideArea域名分割,No,Yes,dividearea
+353,dividearea.message.record, §a记录位置,,,DivideArea域名分割,No,Yes,dividearea
+354,dividearea.message.record.continue,§a继续记录，按 §6,,,DivideArea域名分割,No,Yes,dividearea
+355,dividearea.message.record_2, §e键记录当前位置,,,DivideArea域名分割,No,Yes,dividearea
+356,dividearea.message.record_3,§a已记录位置 #,,,DivideArea域名分割,No,Yes,dividearea
+357,dividearea.message.vertex, 个顶点,,,DivideArea域名分割,No,No,dividearea
+358,dividearea.message.vertex.record.divide, §e键记录分割线顶点,,,DivideArea域名分割,No,Yes,dividearea
+359,dividearea.message.vertex.record.divide_2,§7至少需要记录2个顶点来定义分割线,,,DivideArea域名分割,No,Yes,dividearea
+360,dividearea.message.vertex.record.divide_3,§a开始记录分割线顶点,,,DivideArea域名分割,No,Yes,dividearea
+361,dividearea.message.vertex_2, 个顶点，区域2有 ,,,DivideArea域名分割,No,No,dividearea
+362,dividearea.prompt.area,§a已选择域名: ,,,DivideArea域名分割,No,Yes,dividearea
+363,dividearea.prompt.area.color,§a请选择域名颜色：,,,DivideArea域名分割,No,Yes,dividearea
+364,dividearea.prompt.area.divide,§a请选择要分割的域名：,,,DivideArea域名分割,No,Yes,dividearea
+365,dividearea.prompt.area.surface,§a请输入区域1的联合域名：,,,DivideArea域名分割,No,Yes,dividearea
+366,dividearea.prompt.area.surface_2,§a请输入区域2的联合域名：,,,DivideArea域名分割,No,Yes,dividearea
+367,dividearea.prompt.area.surface_3,§e提示：输入 §6skip §e跳过联合域名设置,,,DivideArea域名分割,No,Yes,dividearea
+368,dividearea.prompt.area_2,选择1级（顶级域名）,,,DivideArea域名分割,No,No,dividearea
+369,dividearea.prompt.area_3,选择2级（二级域名）,,,DivideArea域名分割,No,No,dividearea
+370,dividearea.prompt.area_4,选择3级（三级域名）,,,DivideArea域名分割,No,No,dividearea
+371,dividearea.prompt.general, 已存在，请重新输入,,,DivideArea域名分割,No,No,dividearea
+372,dividearea.prompt.general_2,§a请选择区域,,,DivideArea域名分割,No,Yes,dividearea
+373,dividearea.prompt.general_3,§e请按 §6,,,DivideArea域名分割,No,Yes,dividearea
+374,dividearea.prompt.name,§a请在聊天框中输入区域1的名称：,,,DivideArea域名分割,No,Yes,dividearea
+375,dividearea.prompt.name_2,§a请在聊天框中输入区域2的名称：,,,DivideArea域名分割,No,Yes,dividearea
+376,dividearea.success.area.divide,§a域名分割成功！,,,DivideArea域名分割,No,Yes,dividearea
+377,dividearea.title.area.divide,§6=== 分割域名 - 选择域名 ===,,,DivideArea域名分割,No,Yes,dividearea
+378,dividearea.title.area.surface,§6=== 联合域名设置 ===,,,DivideArea域名分割,No,Yes,dividearea
+379,dividearea.title.color, 颜色设置 ===,,,DivideArea域名分割,No,No,dividearea
+380,dividearea.title.divide,§6=== 配置分割区域 1 ===,,,DivideArea域名分割,No,Yes,dividearea
+381,dividearea.title.divide_2,§6=== 配置分割区域 2 ===,,,DivideArea域名分割,No,Yes,dividearea
+382,dividearea.title.general,§6=== 区域,,,DivideArea域名分割,No,Yes,dividearea
+383,easyadd.button.altitude,§b[智能高度],,,EasyAdd交互式添加,No,Yes,easyadd
+384,easyadd.button.area.save,§a[保存域名],,,EasyAdd交互式添加,No,Yes,easyadd
+385,easyadd.error.altitude,§c错误：最高高度必须大于最低高度 ,,,EasyAdd交互式添加,No,Yes,easyadd
+386,easyadd.error.area,§c发送域名数据到服务端时发生错误: ,,,EasyAdd交互式添加,No,Yes,easyadd
+387,easyadd.error.area.altitude,高度验证失败: 子域名高度超出父域名范围,,,EasyAdd交互式添加,No,No,easyadd
+388,easyadd.error.area.coordinate,§c域名验证失败，请检查坐标和引用关系,,,EasyAdd交互式添加,No,Yes,easyadd
+389,easyadd.error.area.name,检查域名名称时发生错误: ,,,EasyAdd交互式添加,No,No,easyadd
+390,easyadd.error.area.parent,§c未找到上级域名: ,,,EasyAdd交互式添加,No,Yes,easyadd
+391,easyadd.error.area.parent_2,加载上级域名失败: ,,,EasyAdd交互式添加,No,No,easyadd
+392,easyadd.error.area.save,§c保存域名时发生错误: ,,,EasyAdd交互式添加,No,Yes,easyadd
+393,easyadd.error.area.save_2,保存域名数据到文件时失败,,,EasyAdd交互式添加,No,No,easyadd
+394,easyadd.error.area.vertex.boundary,顶点验证失败: 子域名顶点超出父域名边界,,,EasyAdd交互式添加,No,No,easyadd
+395,easyadd.error.area_2,§c构建域名数据时发生错误: ,,,EasyAdd交互式添加,No,Yes,easyadd
+396,easyadd.error.area_3,发送域名数据失败: ,,,EasyAdd交互式添加,No,No,easyadd
+397,easyadd.error.area_4,域名数据验证失败,,,EasyAdd交互式添加,No,No,easyadd
+398,easyadd.error.area_5,处理EasyAdd域名数据时发生错误,,,EasyAdd交互式添加,No,No,easyadd
+399,easyadd.error.area_6,处理域名数据时发生错误: ,,,EasyAdd交互式添加,No,No,easyadd
+400,easyadd.error.area_7,服务端处理域名数据时发生错误: ,,,EasyAdd交互式添加,No,No,easyadd
+401,easyadd.error.color,§c无效的颜色格式，请重新输入,,,EasyAdd交互式添加,No,Yes,easyadd
+402,easyadd.error.general,§c当前已有EasyAdd流程在进行中,,,EasyAdd交互式添加,No,Yes,easyadd
+403,easyadd.error.general_2,§c错误：,,,EasyAdd交互式添加,No,Yes,easyadd
+404,easyadd.error.general_3,发送EasyAdd响应到客户端时发生错误,,,EasyAdd交互式添加,No,No,easyadd
+405,easyadd.error.general_4,处理服务端响应时发生错误: ,,,EasyAdd交互式添加,No,No,easyadd
+406,easyadd.error.level,§c没有找到等级为 ,,,EasyAdd交互式添加,No,Yes,easyadd
+407,easyadd.error.record,§c至少需要记录3个点才能形成有效区域,,,EasyAdd交互式添加,No,Yes,easyadd
+408,easyadd.error.save,保存失败: ,,,EasyAdd交互式添加,No,No,easyadd
+409,easyadd.hint.area.surface,§e提示：两个不同的实际域名可以使用相同的联合域名,,,EasyAdd交互式添加,No,Yes,easyadd
+410,easyadd.message.altitude,§最低高度-64,,,EasyAdd交互式添加,No,Yes,easyadd
+411,easyadd.message.altitude.record,§7当前记录点高度范围：,,,EasyAdd交互式添加,No,Yes,easyadd
+412,easyadd.message.altitude.record.expand,§7自动计算会基于记录点扩展高度范围,,,EasyAdd交互式添加,No,Yes,easyadd
+413,easyadd.message.altitude.record.expand_2,自动计算高度范围\n基于记录点高度±扩展值,,,EasyAdd交互式添加,No,No,easyadd
+414,easyadd.message.altitude_2,§最高高度320,,,EasyAdd交互式添加,No,Yes,easyadd
+415,easyadd.message.altitude_3,计算高度范围: ,,,EasyAdd交互式添加,No,No,easyadd
+416,easyadd.message.altitude_4,重置高度管理器状态,,,EasyAdd交互式添加,No,No,easyadd
+417,easyadd.message.area, 通过EasyAdd创建了域名: ,,,EasyAdd交互式添加,No,No,easyadd
+418,easyadd.message.area.color,§7颜色将用于域名显示时的视觉效果,,,EasyAdd交互式添加,No,Yes,easyadd
+419,easyadd.message.area.color_2,§a域名颜色：§6,,,EasyAdd交互式添加,No,Yes,easyadd
+420,easyadd.message.area.coordinate,§7该域名将在所有Y坐标生效,,,EasyAdd交互式添加,No,Yes,easyadd
+421,easyadd.message.area.level,§a已设置域名等级：§6,,,EasyAdd交互式添加,No,Yes,easyadd
+422,easyadd.message.area.name,§7留空则使用实际域名作为显示名称,,,EasyAdd交互式添加,No,Yes,easyadd
+423,easyadd.message.area.name_2,§a已设置域名名称：§6,,,EasyAdd交互式添加,No,Yes,easyadd
+424,easyadd.message.area.name_3,发现重复域名名称: ,,,EasyAdd交互式添加,No,No,easyadd
+425,easyadd.message.area.name_4,域名名称 \,,,EasyAdd交互式添加,No,No,easyadd
+426,easyadd.message.area.parent, 的上级域名,,,EasyAdd交互式添加,No,No,easyadd
+427,easyadd.message.area.save.confirm,确认保存该域名,,,EasyAdd交互式添加,No,No,easyadd
+428,easyadd.message.area.surface,§a已设置联合域名：§6,,,EasyAdd交互式添加,No,Yes,easyadd
+429,easyadd.message.area.vertex.record,§a开始记录域名顶点，按 §6,,,EasyAdd交互式添加,No,Yes,easyadd
+430,easyadd.message.area_2,) 不在父域名内,,,EasyAdd交互式添加,No,No,easyadd
+431,easyadd.message.area_3,§a域名 §6,,,EasyAdd交互式添加,No,Yes,easyadd
+432,easyadd.message.area_4,向服务端发送域名数据: ,,,EasyAdd交互式添加,No,No,easyadd
+433,easyadd.message.cancel,§7EasyAdd流程已取消,,,EasyAdd交互式添加,No,Yes,easyadd
+434,easyadd.message.cancel_2,取消EasyAdd流程,,,EasyAdd交互式添加,No,No,easyadd
+435,easyadd.message.coordinate.record,§a已记录坐标点 ,,,EasyAdd交互式添加,No,Yes,easyadd
+436,easyadd.message.coordinate.record.confirm,完成坐标记录，进入确认阶段,,,EasyAdd交互式添加,No,No,easyadd
+437,easyadd.message.coordinate.record_2,§a现在开始记录坐标点，按 §6,,,EasyAdd交互式添加,No,Yes,easyadd
+438,easyadd.message.coordinate.record_3,记录坐标点: ,,,EasyAdd交互式添加,No,No,easyadd
+439,easyadd.message.dimension, 已存在于当前维度,,,EasyAdd交互式添加,No,No,easyadd
+440,easyadd.message.dimension_2,无法确定当前维度文件名，跳过查重,,,EasyAdd交互式添加,No,No,easyadd
+441,easyadd.message.general, §a已发送到服务端，等待处理...,,,EasyAdd交互式添加,No,Yes,easyadd
+442,easyadd.message.general_10,§7格式要求：以#开头，后跟6位十六进制数字（如 #FF0000）,,,EasyAdd交互式添加,No,Yes,easyadd
+443,easyadd.message.general_11,收到服务端响应: ,,,EasyAdd交互式添加,No,No,easyadd
+444,easyadd.message.general_12,计算包围盒: (,,,EasyAdd交互式添加,No,No,easyadd
+445,easyadd.message.general_2, 内,,,EasyAdd交互式添加,No,No,easyadd
+446,easyadd.message.general_3, 完全包含在 ,,,EasyAdd交互式添加,No,No,easyadd
+447,easyadd.message.general_4, 已存在,,,EasyAdd交互式添加,No,No,easyadd
+448,easyadd.message.general_5, 未重复，可以使用,,,EasyAdd交互式添加,No,No,easyadd
+449,easyadd.message.general_6,) 到 (,,,EasyAdd交互式添加,No,No,easyadd
+450,easyadd.message.general_7,", 总计: ",,,EasyAdd交互式添加,No,No,easyadd
+451,easyadd.message.general_8,§7例如：商业区、住宅区、工业区等,,,EasyAdd交互式添加,No,Yes,easyadd
+452,easyadd.message.general_9,§7格式要求：以#开头，后跟6位十六进制数字,,,EasyAdd交互式添加,No,Yes,easyadd
+453,easyadd.message.record, §a记录当前位置,,,EasyAdd交互式添加,No,Yes,easyadd
+454,easyadd.message.record.finish,§7至少需要3个点才能完成记录,,,EasyAdd交互式添加,No,Yes,easyadd
+455,easyadd.message.record_2, §a键记录当前位置,,,EasyAdd交互式添加,No,Yes,easyadd
+456,easyadd.message.record_3,§7至少需要记录3个点才能形成有效区域,,,EasyAdd交互式添加,No,Yes,easyadd
+457,easyadd.message.vertex,顶点 (,,,EasyAdd交互式添加,No,No,easyadd
+458,easyadd.message.vertex.record,§a记录顶点：§6,,,EasyAdd交互式添加,No,Yes,easyadd
+459,easyadd.prompt.altitude,§a已选择不限制高度范围,,,EasyAdd交互式添加,No,Yes,easyadd
+460,easyadd.prompt.altitude_2,§a已选择自动计算高度范围,,,EasyAdd交互式添加,No,Yes,easyadd
+461,easyadd.prompt.altitude_3,§a已选择自定义高度：,,,EasyAdd交互式添加,No,Yes,easyadd
+462,easyadd.prompt.altitude_4,§a请输入最高高度值：,,,EasyAdd交互式添加,No,Yes,easyadd
+463,easyadd.prompt.altitude_5,§请输入最低高度值：,,,EasyAdd交互式添加,No,Yes,easyadd
+464,easyadd.prompt.altitude_6,开始高度选择流程,,,EasyAdd交互式添加,No,No,easyadd
+465,easyadd.prompt.altitude_7,自定义高度范围\n手动输入最低和最高高度,,,EasyAdd交互式添加,No,No,easyadd
+466,easyadd.prompt.altitude_8,选择高度类型: ,,,EasyAdd交互式添加,No,No,easyadd
+467,easyadd.prompt.area.level,§a请选择域名等级：,,,EasyAdd交互式添加,No,Yes,easyadd
+468,easyadd.prompt.area.name,§7请输入一个不同的域名名称：,,,EasyAdd交互式添加,No,Yes,easyadd
+469,easyadd.prompt.area.name_2,§a请在聊天框中输入域名名称：,,,EasyAdd交互式添加,No,Yes,easyadd
+470,easyadd.prompt.area.parent,§a已选择上级域名：§6,,,EasyAdd交互式添加,No,Yes,easyadd
+471,easyadd.prompt.area.parent_2,§a请选择上级域名：,,,EasyAdd交互式添加,No,Yes,easyadd
+472,easyadd.prompt.area.surface,§a请输入联合域名：,,,EasyAdd交互式添加,No,Yes,easyadd
+473,easyadd.prompt.color,§a请输入自定义颜色（十六进制格式，如 #FF0000）：,,,EasyAdd交互式添加,No,Yes,easyadd
+474,easyadd.prompt.save.confirm,§7请确认以上信息无误后点击保存,,,EasyAdd交互式添加,No,Yes,easyadd
+475,easyadd.success.area,域名验证成功: ,,,EasyAdd交互式添加,No,No,easyadd
+476,easyadd.success.general, 创建成功,,,EasyAdd交互式添加,No,No,easyadd
+477,easyadd.title.area.add,§6=== EasyAdd 交互式域名添加 ===,,,EasyAdd交互式添加,No,Yes,easyadd
+478,easyadd.title.area.color,§6=== 域名颜色设置 ===,,,EasyAdd交互式添加,No,Yes,easyadd
+479,easyadd.title.area.confirm,§6=== 域名信息确认 ===,,,EasyAdd交互式添加,No,Yes,easyadd
+480,expandarea.button.area.record.save,§7记录完成后点击 §6[保存域名] §7按钮完成扩展,,,ExpandArea域名扩展,No,Yes,expandarea
+481,expandarea.button.area.save,§b[保存域名],,,ExpandArea域名扩展,No,Yes,expandarea
+482,expandarea.error.altitude,§c新区域高度范围: ,,,ExpandArea域名扩展,No,Yes,expandarea
+483,expandarea.error.area,DEBUG: 加载域名文件失败: ,,,ExpandArea域名扩展,No,No,expandarea
+484,expandarea.error.area.altitude,§c原域名高度范围: ,,,ExpandArea域名扩展,No,Yes,expandarea
+485,expandarea.error.area.altitude.expand,§c新区域高度超出原域名范围，无法扩展,,,ExpandArea域名扩展,No,Yes,expandarea
+486,expandarea.error.area.cancel.expand,§c已取消域名扩展,,,ExpandArea域名扩展,No,Yes,expandarea
+487,expandarea.error.area.expand,§c域名扩展失败：,,,ExpandArea域名扩展,No,Yes,expandarea
+488,expandarea.error.area.expand_2,§c域名扩展过程中发生错误: ,,,ExpandArea域名扩展,No,Yes,expandarea
+489,expandarea.error.area.expand_3,§c扩展域名时发生错误: ,,,ExpandArea域名扩展,No,Yes,expandarea
+490,expandarea.error.area.expand_4,§c没有可以扩展的域名,,,ExpandArea域名扩展,No,Yes,expandarea
+491,expandarea.error.area.expand_5,§c没有可扩展的域名,,,ExpandArea域名扩展,No,Yes,expandarea
+492,expandarea.error.area.expand_6,发送扩展域名数据失败: ,,,ExpandArea域名扩展,No,No,expandarea
+493,expandarea.error.area.expand_7,处理扩展域名请求失败: ,,,ExpandArea域名扩展,No,No,expandarea
+494,expandarea.error.area.expand_8,处理扩展域名请求时发生错误: ,,,ExpandArea域名扩展,No,No,expandarea
+495,expandarea.error.area.record.expand,§c当前不在域名扩展记录模式中,,,ExpandArea域名扩展,No,Yes,expandarea
+496,expandarea.error.area.save,保存域名失败,,,ExpandArea域名扩展,No,No,expandarea
+497,expandarea.error.area.save.expand,保存扩展域名失败: ,,,ExpandArea域名扩展,No,No,expandarea
+498,expandarea.error.area.vertex.add,§c所有新添加的顶点都在原域名内部，无法扩展,,,ExpandArea域名扩展,No,Yes,expandarea
+499,expandarea.error.area_2,查找域名失败: ,,,ExpandArea域名扩展,No,No,expandarea
+500,expandarea.error.area_3,重新分发域名失败: ,,,ExpandArea域名扩展,No,No,expandarea
+501,expandarea.error.dimension,无效的维度类型: ,,,ExpandArea域名扩展,No,No,expandarea
+502,expandarea.error.permission,检查basename权限时发生错误: ,,,ExpandArea域名扩展,No,No,expandarea
+503,expandarea.error.vertex.record,§c至少需要记录3个顶点才能形成有效区域,,,ExpandArea域名扩展,No,Yes,expandarea
+504,expandarea.message.area,", 基础域名: ",,,ExpandArea域名扩展,No,No,expandarea
+505,expandarea.message.area.add,DEBUG: 玩家创建的域名，添加: ,,,ExpandArea域名扩展,No,No,expandarea
+506,expandarea.message.area.add.expand,DEBUG: 基于玩家域名的扩展，添加: ,,,ExpandArea域名扩展,No,No,expandarea
+507,expandarea.message.area.add.permission,DEBUG: 管理员权限，添加域名: ,,,ExpandArea域名扩展,No,No,expandarea
+508,expandarea.message.area.altitude,§a新区域高度在原域名范围内，保持原高度设置,,,ExpandArea域名扩展,No,Yes,expandarea
+509,expandarea.message.area.dimension,维度类型为null，无法查找域名,,,ExpandArea域名扩展,No,No,expandarea
+510,expandarea.message.area.expand,DEBUG: 没有可扩展的域名,,,ExpandArea域名扩展,No,No,expandarea
+511,expandarea.message.area.expand.permission,您没有权限扩展此域名,,,ExpandArea域名扩展,No,No,expandarea
+512,expandarea.message.area.expand_2,§7您只能扩展自己创建的域名,,,ExpandArea域名扩展,No,Yes,expandarea
+513,expandarea.message.area.expand_3,§e正在处理域名扩展...,,,ExpandArea域名扩展,No,Yes,expandarea
+514,expandarea.message.area.expand_4,已发送扩展域名数据到服务端: ,,,ExpandArea域名扩展,No,No,expandarea
+515,expandarea.message.area.expand_5,未找到要扩展的域名: ,,,ExpandArea域名扩展,No,No,expandarea
+516,expandarea.message.area.finish.expand,§a域名扩展完成！,,,ExpandArea域名扩展,No,Yes,expandarea
+517,expandarea.message.area.modify, 个可修改的域名,,,ExpandArea域名扩展,No,No,expandarea
+518,expandarea.message.area.modify.list,DEBUG: 开始获取可修改的域名列表,,,ExpandArea域名扩展,No,No,expandarea
+519,expandarea.message.area.save,§7至少需要3个点才能保存域名,,,ExpandArea域名扩展,No,Yes,expandarea
+520,expandarea.message.area.save.expand,保存扩展后的域名,,,ExpandArea域名扩展,No,No,expandarea
+521,expandarea.message.area.vertex.expand,警告: 原域名的顶点列表为null，无法进行扩展操作,,,ExpandArea域名扩展,No,No,expandarea
+522,expandarea.message.area_2,DEBUG: 尝试加载域名文件: ,,,ExpandArea域名扩展,No,No,expandarea
+523,expandarea.message.area_3,DEBUG: 检查域名: ,,,ExpandArea域名扩展,No,No,expandarea
+524,expandarea.message.cancel.expand,取消扩展流程,,,ExpandArea域名扩展,No,No,expandarea
+525,expandarea.message.coordinate.list,警告: convertToVertexList 接收到null坐标列表,,,ExpandArea域名扩展,No,No,expandarea
+526,expandarea.message.dimension,DEBUG: 无法确定当前维度的文件名,,,ExpandArea域名扩展,No,No,expandarea
+527,expandarea.message.expand,扩展 ,,,ExpandArea域名扩展,No,No,expandarea
+528,expandarea.message.expand.permission,' 不存在或您没有权限扩展,,,ExpandArea域名扩展,No,No,expandarea
+529,expandarea.message.finish,DEBUG: startExpandArea() 执行完成,,,ExpandArea域名扩展,No,No,expandarea
+530,expandarea.message.general, 加载了 ,,,ExpandArea域名扩展,No,No,expandarea
+531,expandarea.message.general_10,DEBUG: 设置 isActive = true,,,ExpandArea域名扩展,No,No,expandarea
+532,expandarea.message.general_2,", 是否管理员: ",,,ExpandArea域名扩展,No,No,expandarea
+533,expandarea.message.general_3,", 签名: ",,,ExpandArea域名扩展,No,No,expandarea
+534,expandarea.message.general_4,DEBUG: client.player 为 null,,,ExpandArea域名扩展,No,No,expandarea
+535,expandarea.message.general_5,DEBUG: startExpandArea() 被调用,,,ExpandArea域名扩展,No,No,expandarea
+536,expandarea.message.general_6,DEBUG: 从 ,,,ExpandArea域名扩展,No,No,expandarea
+537,expandarea.message.general_7,DEBUG: 找到 ,,,ExpandArea域名扩展,No,No,expandarea
+538,expandarea.message.general_8,DEBUG: 文件不存在: ,,,ExpandArea域名扩展,No,No,expandarea
+539,expandarea.message.general_9,DEBUG: 无法获取当前世界信息,,,ExpandArea域名扩展,No,No,expandarea
+540,expandarea.message.name,DEBUG: 玩家名称: ,,,ExpandArea域名扩展,No,No,expandarea
+541,expandarea.message.vertex.record, §e键开始记录新区域的顶点位置,,,ExpandArea域名扩展,No,Yes,expandarea
+542,expandarea.message.vertex.record.continue,§a继续记录更多顶点，按 §6,,,ExpandArea域名扩展,No,Yes,expandarea
+543,expandarea.message.vertex.record_2,§7至少需要记录3个顶点,,,ExpandArea域名扩展,No,Yes,expandarea
+544,expandarea.message.vertex.record_3,§a开始记录新区域顶点,,,ExpandArea域名扩展,No,Yes,expandarea
+545,expandarea.prompt.area,DEBUG: 显示域名选择界面,,,ExpandArea域名扩展,No,No,expandarea
+546,expandarea.prompt.area.expand,§a请选择要扩展的域名：,,,ExpandArea域名扩展,No,Yes,expandarea
+547,expandarea.prompt.area.expand.permission,§7请确保域名名称正确，且您有权限扩展该域名,,,ExpandArea域名扩展,No,Yes,expandarea
+548,expandarea.prompt.general,警告：GeometryCalculator.expandArea() 已弃用，请使用 ExpandAreaManager 中的新实现,,,ExpandArea域名扩展,No,No,expandarea
+549,expandarea.success.area.expand, 成功扩展域名: ,,,ExpandArea域名扩展,No,No,expandarea
+550,expandarea.success.area.expand_2,§a域名扩展成功！,,,ExpandArea域名扩展,No,Yes,expandarea
+551,expandarea.success.expand,' 扩展成功,,,ExpandArea域名扩展,No,No,expandarea
+552,expandarea.title.area.expand,§6=== 扩展域名 - 选择域名 ===,,,ExpandArea域名扩展,No,Yes,expandarea
+553,gui.button.cancel.delete,§a§l[否 - 取消删除],,,用户界面,No,Yes,gui
+554,gui.button.color,§6[%s] §7(%s) §8颜色: %s,,,用户界面,Yes,Yes,gui
+555,gui.button.color_2,§e[自定义颜色(十六进制)],,,用户界面,No,Yes,gui
+556,gui.button.confirm,§a[确认],,,用户界面,No,Yes,gui
+557,gui.button.general,§7[跳过],,,用户界面,No,Yes,gui
+558,gui.button.general_2,§a[是],,,用户界面,No,Yes,gui
+559,gui.button.general_3,§b[完整样式],,,用户界面,No,Yes,gui
+560,gui.button.general_4,§d[混合样式],,,用户界面,No,Yes,gui
+561,gui.button.general_5,§e[简洁样式],,,用户界面,No,Yes,gui
+562,gui.error.area.confirm.delete,§c§l警告：您确认要删除该域名吗？,,,用户界面,No,Yes,gui
+563,gui.error.area.confirm.delete_2,§c确认删除域名 \,,,用户界面,No,Yes,gui
+564,gui.error.color,§c无效的颜色格式，请重新选择,,,用户界面,No,Yes,gui
+565,gui.error.confirm.delete,§c§l[是 - 确认删除],,,用户界面,No,Yes,gui
+566,gui.error.delete,§c删除后将无法恢复，请谨慎操作！,,,用户界面,No,Yes,gui
+567,gui.error.general,§c[否],,,用户界面,No,Yes,gui
+568,gui.error.general_2,§c§l该过程不可逆！！！,,,用户界面,No,Yes,gui
+569,gui.error.general_3,§c当前已有操作在进行中,,,用户界面,No,Yes,gui
+570,gui.error.language,§c未找到任何语言文件,,,用户界面,No,Yes,gui
+571,gui.hint.confirm,§7提示：按下任意键后将询问您是否确认,,,用户界面,No,Yes,gui
+572,gui.message.area,§6域名信息：\n,,,用户界面,No,Yes,gui
+573,gui.message.area.color.confirm,§f您确认要修改域名颜色吗？,,,用户界面,No,Yes,gui
+574,gui.message.area.color.dimension,§f您确认将该维度域名的颜色更改为该颜色吗？,,,用户界面,No,Yes,gui
+575,gui.message.area.confirm.rename,§f您确认将域名重命名吗？,,,用户界面,No,Yes,gui
+576,gui.message.area.delete.permission,§7只显示您的权限内可以删除的域名,,,用户界面,No,Yes,gui
+577,gui.message.area.dimension.confirm,§f您确认要修改维度域名吗？,,,用户界面,No,Yes,gui
+578,gui.message.area.level,§a域名等级：§6,,,用户界面,No,Yes,gui
+579,gui.message.area.name,§7新名称不能与现有域名重复,,,用户界面,No,Yes,gui
+580,gui.message.area.name_2,§a域名名称：§6,,,用户界面,No,Yes,gui
+581,gui.message.area.parent,\n§a上级域名：§f,,,用户界面,No,Yes,gui
+582,gui.message.area.parent_2,§a上级域名：§6,,,用户界面,No,Yes,gui
+583,gui.message.area.parent_3,§a上级域名：§6无（顶级域名）,,,用户界面,No,Yes,gui
+584,gui.message.area.surface,§7新联合域名: §f,,,用户界面,No,Yes,gui
+585,gui.message.area.surface.name,§7新联合域名: §7(使用域名作为显示名称),,,用户界面,No,Yes,gui
+586,gui.message.area.surface_2,§a联合域名：§6,,,用户界面,No,Yes,gui
+587,gui.message.area.vertex.record,§7确认后，该按键将用于记录域名顶点,,,用户界面,No,Yes,gui
+588,gui.message.area_2,§7原域名: §f,,,用户界面,No,Yes,gui
+589,gui.message.area_3,§7新域名: §f,,,用户界面,No,Yes,gui
+590,gui.message.area_4,§a域名：§6,,,用户界面,No,Yes,gui
+591,gui.message.area_5,只显示当前所在的最低级域名\n例如: 三级域名,,,用户界面,No,No,gui
+592,gui.message.area_6,显示完整的域名层级信息\n例如: 一级域名 > 二级域名 > 三级域名,,,用户界面,No,No,gui
+593,gui.message.area_7,智能显示域名信息\n根据层级自动调整显示方式,,,用户界面,No,No,gui
+594,gui.message.cancel,§7操作已取消,,,用户界面,No,Yes,gui
+595,gui.message.cancel.delete,§a取消删除，返回安全状态,,,用户界面,No,Yes,gui
+596,gui.message.cancel.delete_2,取消删除流程,,,用户界面,No,No,gui
+597,gui.message.cancel.key,取消按键更换,,,用户界面,No,No,gui
+598,gui.message.cancel.modify,取消修改,,,用户界面,No,No,gui
+599,gui.message.cancel.rename,取消重命名,,,用户界面,No,No,gui
+600,gui.message.cancel_2,取消Recolor流程,,,用户界面,No,No,gui
+601,gui.message.cancel_3,取消Rename流程,,,用户界面,No,No,gui
+602,gui.message.cancel_4,取消大小设置,,,用户界面,No,No,gui
+603,gui.message.cancel_5,取消操作,,,用户界面,No,No,gui
+604,gui.message.cancel_6,取消样式设置,,,用户界面,No,No,gui
+605,gui.message.color, 作为新颜色,,,用户界面,No,No,gui
+606,gui.message.color.confirm.modify,确认修改颜色,,,用户界面,No,No,gui
+607,gui.message.color_2,§a原颜色: §7,,,用户界面,No,Yes,gui
+608,gui.message.color_3,§a原颜色：§6,,,用户界面,No,Yes,gui
+609,gui.message.color_4,§a当前颜色: §6,,,用户界面,No,Yes,gui
+610,gui.message.color_5,§a新颜色: §6,,,用户界面,No,Yes,gui
+611,gui.message.color_6,§a新颜色：§6,,,用户界面,No,Yes,gui
+612,gui.message.confirm.key,确认使用该按键,,,用户界面,No,No,gui
+613,gui.message.confirm.modify,确认修改,,,用户界面,No,No,gui
+614,gui.message.confirm.rename,确认重命名,,,用户界面,No,No,gui
+615,gui.message.dimension,§a你进入了一个未命名的维度: §b,,,用户界面,No,Yes,gui
+616,gui.message.dimension_2,§a维度: §b,,,用户界面,No,Yes,gui
+617,gui.message.general, 个,,,用户界面,No,No,gui
+618,gui.message.general_10,§f#FFFFFF(默认),,,用户界面,No,Yes,gui
+619,gui.message.general_11,单字彩虹闪烁,,,用户界面,No,No,gui
+620,gui.message.general_12,单字黑白闪烁,,,用户界面,No,No,gui
+621,gui.message.general_13,天蓝色,,,用户界面,No,No,gui
+622,gui.message.general_14,整体彩虹闪烁,,,用户界面,No,No,gui
+623,gui.message.general_15,整体黑白闪烁,,,用户界面,No,No,gui
+624,gui.message.general_16,未知创建者,,,用户界面,No,No,gui
+625,gui.message.general_17,橙色,,,用户界面,No,No,gui
+626,gui.message.general_18,深灰色,,,用户界面,No,No,gui
+627,gui.message.general_19,深红色,,,用户界面,No,No,gui
+628,gui.message.general_2, 作为字幕大小,,,用户界面,No,No,gui
+629,gui.message.general_20,深绿色,,,用户界面,No,No,gui
+630,gui.message.general_21,深蓝色,,,用户界面,No,No,gui
+631,gui.message.general_22,湖蓝色,,,用户界面,No,No,gui
+632,gui.message.general_23,灰色,,,用户界面,No,No,gui
+633,gui.message.general_24,白色,,,用户界面,No,No,gui
+634,gui.message.general_25,粉红色,,,用户界面,No,No,gui
+635,gui.message.general_26,紫色,,,用户界面,No,No,gui
+636,gui.message.general_27,红色,,,用户界面,No,No,gui
+637,gui.message.general_28,绿色,,,用户界面,No,No,gui
+638,gui.message.general_29,蓝色,,,用户界面,No,No,gui
+639,gui.message.general_3,\n§c此操作不可逆！,,,用户界面,No,Yes,gui
+640,gui.message.general_30,黄色,,,用户界面,No,No,gui
+641,gui.message.general_31,黑色,,,用户界面,No,No,gui
+642,gui.message.general_4,§6--- 闪烁效果 ---,,,用户界面,No,Yes,gui
+643,gui.message.general_5,§7注意：某些特殊键（如ESC、Enter、Shift等）不能使用,,,用户界面,No,Yes,gui
+644,gui.message.general_6,§a创建者：§6,,,用户界面,No,Yes,gui
+645,gui.message.general_7,§a创建者：§f,,,用户界面,No,Yes,gui
+646,gui.message.general_8,§a当前大小: §6,,,用户界面,No,Yes,gui
+647,gui.message.general_9,§a当前样式: §6,,,用户界面,No,Yes,gui
+648,gui.message.language,§a当前语言: §6,,,用户界面,No,Yes,gui
+649,gui.message.level,§a等级：§f,,,用户界面,No,Yes,gui
+650,gui.message.name,§a原名称: §7,,,用户界面,No,Yes,gui
+651,gui.message.name_2,§a名称：§f,,,用户界面,No,Yes,gui
+652,gui.message.name_3,§a当前名称: §6,,,用户界面,No,Yes,gui
+653,gui.message.name_4,§a新名称: §6,,,用户界面,No,Yes,gui
+654,gui.message.name_5,使用默认名称,,,用户界面,No,No,gui
+655,gui.message.rename, 进行重命名\n创建者: ,,,用户界面,No,No,gui
+656,gui.message.vertex,§a顶点数量：§6,,,用户界面,No,Yes,gui
+657,gui.prompt.area,\n\n§e点击选择此域名,,,用户界面,No,Yes,gui
+658,gui.prompt.area.color.dimension,§a正在处理维度域名颜色修改请求...,,,用户界面,No,Yes,gui
+659,gui.prompt.area.delete,§a请选择要删除的域名：,,,用户界面,No,Yes,gui
+660,gui.prompt.area.dimension.modify,§a正在处理维度域名修改请求...,,,用户界面,No,Yes,gui
+661,gui.prompt.area.name,§a请在聊天框中输入新的域名名称：,,,用户界面,No,Yes,gui
+662,gui.prompt.area.rename,§a请选择要重命名的域名：,,,用户界面,No,Yes,gui
+663,gui.prompt.area.surface,§a请输入新的联合域名：,,,用户界面,No,Yes,gui
+664,gui.prompt.cancel.language,取消语言选择,,,用户界面,No,No,gui
+665,gui.prompt.color,§a请选择新的颜色：,,,用户界面,No,Yes,gui
+666,gui.prompt.color_2,点击后输入十六进制颜色，如 #FF0000,,,用户界面,No,No,gui
+667,gui.prompt.confirm,§7请确认以上信息无误后点击按钮,,,用户界面,No,Yes,gui
+668,gui.prompt.confirm_2,§7请确认以上信息无误后点击选择,,,用户界面,No,Yes,gui
+669,gui.prompt.dimension,§a请选择要操作的维度：,,,用户界面,No,Yes,gui
+670,gui.prompt.dimension.name,§a请为这个维度命名（5分钟内未提交将使用默认名称）：,,,用户界面,No,Yes,gui
+671,gui.prompt.dimension.name_2,点击后在聊天栏输入维度名称,,,用户界面,No,No,gui
+672,gui.prompt.general,§7提示：选择大小后将自动重新加载配置,,,用户界面,No,Yes,gui
+673,gui.prompt.general_2,§7提示：选择样式后将自动重新加载配置,,,用户界面,No,Yes,gui
+674,gui.prompt.general_3,§a请选择新的字幕大小：,,,用户界面,No,Yes,gui
+675,gui.prompt.general_4,§a请选择新的字幕样式：,,,用户界面,No,Yes,gui
+676,gui.prompt.key,§a您选择的按键是：§e,,,用户界面,No,Yes,gui
+677,gui.prompt.key_2,§a请按下您想要使用的新按键...,,,用户界面,No,Yes,gui
+678,gui.prompt.name,§e[点击此处输入名称],,,用户界面,No,Yes,gui
+679,gui.prompt.name_2,§e[点击此处输入新名称],,,用户界面,No,Yes,gui
+680,gui.prompt.name_3,点击后在聊天栏输入新名称,,,用户界面,No,No,gui
+681,gui.title.area.color.dimension,§6=== 确认维度域名颜色修改 ===,,,用户界面,No,Yes,gui
+682,gui.title.area.color.dimension_2,§6=== 选择维度域名颜色 ===,,,用户界面,No,Yes,gui
+683,gui.title.area.confirm.rename,§6=== 域名重命名确认 ===,,,用户界面,No,Yes,gui
+684,gui.title.area.delete,§6=== 删除域名 ===,,,用户界面,No,Yes,gui
+685,gui.title.area.dimension,§6=== 输入新的维度域名 ===,,,用户界面,No,Yes,gui
+686,gui.title.area.dimension.confirm,§6=== 确认维度域名修改 ===,,,用户界面,No,Yes,gui
+687,gui.title.area.name,§6=== 输入新域名名称 ===,,,用户界面,No,Yes,gui
+688,gui.title.area.rename,§6=== Rename 交互式域名重命名 ===,,,用户界面,No,Yes,gui
+689,gui.title.color,§6=== 选择新颜色 ===,,,用户界面,No,Yes,gui
+690,gui.title.color.confirm.modify,§6=== 确认颜色修改 ===,,,用户界面,No,Yes,gui
+691,gui.title.confirm.delete,§6=== 确认删除 ===,,,用户界面,No,Yes,gui
+692,gui.title.confirm.key,§6=== 确认新按键 ===,,,用户界面,No,Yes,gui
+693,gui.title.dimension,§6=== 新维度发现 ===,,,用户界面,No,Yes,gui
+694,gui.title.general,§6=== 字幕大小设置 ===,,,用户界面,No,Yes,gui
+695,gui.title.general_2,§6=== 字幕样式设置 ===,,,用户界面,No,Yes,gui
+696,gui.title.record.key,§6=== 更改记录按键 ===,,,用户界面,No,Yes,gui
+697,message.button.altitude,"  区域[%s] 高度范围=%s, 符合条件=%s",,,一般消息,Yes,No,message
+698,message.button.altitude_2,"最大高度 %.1f 超出合理范围 [-64, 320]",,,一般消息,No,No,message
+699,message.button.altitude_3,"最小高度 %.1f 超出合理范围 [-64, 320]",,,一般消息,No,No,message
+700,message.button.boundary,"AABB检测边界: [{}, {}] - [{}, {}]，点({}, {}){}AABB内部",,,一般消息,No,No,message
+701,message.button.color.level,§6[%s] §7(等级%d) §8当前颜色: %s,,,一般消息,Yes,Yes,message
+702,message.button.dimension,[调试] 开始向所有客户端发送所有维度的区域数据,,,一般消息,No,No,message
+703,message.button.dimension.finish,[调试] 完成向所有客户端发送所有维度的区域数据,,,一般消息,No,No,message
+704,message.button.dimension_2,[调试] 重新加载当前维度的区域数据: ,,,一般消息,No,No,message
+705,message.button.dimension_3,§a[点击此处为该维度命名],,,一般消息,No,Yes,message
+706,message.button.general,[%s][%s]离开了[%s] [%s],,,一般消息,Yes,No,message
+707,message.button.general_10,[调试] 区域数据内容预览: ,,,一般消息,No,No,message
+708,message.button.general_11,[调试] 区域文件不存在: {},,,一般消息,No,No,message
+709,message.button.general_12,[调试] 区域文件内容长度: ,,,一般消息,No,No,message
+710,message.button.general_13,[调试] 区域文件内容预览: ,,,一般消息,No,No,message
+711,message.button.general_14,[调试] 区域文件大小: {} 字节,,,一般消息,No,No,message
+712,message.button.general_15,[调试] 区域文件路径: ,,,一般消息,No,No,message
+713,message.button.general_16,[调试] 重新加载区域文件路径: {},,,一般消息,No,No,message
+714,message.button.general_2,[%s][%s]离开了[%s] [%s]的[%s],,,一般消息,Yes,No,message
+715,message.button.general_3,[%s][%s]进入了[%s] [%s],,,一般消息,Yes,No,message
+716,message.button.general_4,[%s][%s]进入了[%s] [%s]的[%s],,,一般消息,Yes,No,message
+717,message.button.general_5,[%s]离开了[%s] [%s],,,一般消息,Yes,No,message
+718,message.button.general_6,[%s]离开了[%s] [%s]的[%s],,,一般消息,Yes,No,message
+719,message.button.general_7,[%s]进入了[%s] [%s],,,一般消息,Yes,No,message
+720,message.button.general_8,[%s]进入了[%s] [%s]的[%s],,,一般消息,Yes,No,message
+721,message.button.general_9,[调试] 区域数据内容长度: ,,,一般消息,No,No,message
+722,message.button.save,[调试] 客户端保存区域数据到文件: ,,,一般消息,No,No,message
+723,message.error.add,区域数据无效，无法添加,,,一般消息,No,No,message
+724,message.error.area,§c无效的域名数据,,,一般消息,No,Yes,message
+725,message.error.area.color.dimension,发送维度域名颜色修改请求失败,,,一般消息,No,No,message
+726,message.error.area.color.dimension_2,处理维度域名颜色修改请求时发生错误,,,一般消息,No,No,message
+727,message.error.area.delete,§c删除域名时发生错误: ,,,一般消息,No,Yes,message
+728,message.error.area.delete.list,§c请求可删除域名列表时发生错误: ,,,一般消息,No,Yes,message
+729,message.error.area.delete.list_2,发送可删除域名列表时发生错误,,,一般消息,No,No,message
+730,message.error.area.delete.list_3,发送空可删除域名列表时发生错误,,,一般消息,No,No,message
+731,message.error.area.delete.list_4,处理可删除域名列表时发生错误: ,,,一般消息,No,No,message
+732,message.error.area.delete.list_5,处理请求可删除域名列表时发生错误,,,一般消息,No,No,message
+733,message.error.area.delete.list_6,请求可删除域名列表失败: ,,,一般消息,No,No,message
+734,message.error.area.delete_2,§c未选择要删除的域名,,,一般消息,No,Yes,message
+735,message.error.area.delete_3,删除域名时发生错误: ,,,一般消息,No,No,message
+736,message.error.area.dimension,加载维度域名配置失败，使用默认配置: ,,,一般消息,No,No,message
+737,message.error.area.dimension.modify,发送维度域名修改请求失败,,,一般消息,No,No,message
+738,message.error.area.dimension.modify_2,处理维度域名修改请求时发生错误,,,一般消息,No,No,message
+739,message.error.area.dimension.rename,§c当前维度中没有您可以重命名的域名,,,一般消息,No,Yes,message
+740,message.error.area.dimension.rename_2,§c当前维度没有您可以重命名的域名,,,一般消息,No,Yes,message
+741,message.error.area.dimension.save,保存维度域名配置失败: ,,,一般消息,No,No,message
+742,message.error.area.dimension_2,发送维度域名配置到客户端失败,,,一般消息,No,No,message
+743,message.error.area.dimension_3,发送维度域名配置到客户端失败: ,,,一般消息,No,No,message
+744,message.error.area.dimension_4,处理维度域名配置时发生错误,,,一般消息,No,No,message
+745,message.error.area.dimension_5,更新维度域名配置失败: ,,,一般消息,No,No,message
+746,message.error.area.name,§c新域名名称不能与原名称相同,,,一般消息,No,Yes,message
+747,message.error.area.rename,§c重命名域名时发生错误: ,,,一般消息,No,Yes,message
+748,message.error.area_2,§c未找到域名: ,,,一般消息,No,Yes,message
+749,message.error.area_3,§c未找到域名: §6,,,一般消息,No,Yes,message
+750,message.error.area_4,发送离开域名消息失败,,,一般消息,No,No,message
+751,message.error.area_5,发送进入域名消息失败,,,一般消息,No,No,message
+752,message.error.delete,§c发送删除请求到服务端时发生错误: ,,,一般消息,No,Yes,message
+753,message.error.delete_2,删除失败: ,,,一般消息,No,No,message
+754,message.error.delete_3,删除旧日志文件失败: {},,,一般消息,No,No,message
+755,message.error.delete_4,发送删除请求失败: ,,,一般消息,No,No,message
+756,message.error.delete_5,处理删除请求时发生错误,,,一般消息,No,No,message
+757,message.error.delete_6,处理服务端删除响应时发生错误: ,,,一般消息,No,No,message
+758,message.error.dimension,§c无法确定当前维度,,,一般消息,No,Yes,message
+759,message.error.dimension_2,§c该维度已被命名,,,一般消息,No,Yes,message
+760,message.error.dimension_3,发送首次维度命名请求失败,,,一般消息,No,No,message
+761,message.error.dimension_4,处理首次维度命名请求时发生错误,,,一般消息,No,No,message
+762,message.error.finish,完成世界文件夹初始化失败,,,一般消息,No,No,message
+763,message.error.general,§c发送请求时发生错误: ,,,一般消息,No,Yes,message
+764,message.error.general_10,写入日志失败,,,一般消息,No,No,message
+765,message.error.general_11,写入配置数据失败: ,,,一般消息,No,No,message
+766,message.error.general_12,创建空区域文件失败: ,,,一般消息,No,No,message
+767,message.error.general_13,创建配置文件失败: ,,,一般消息,No,No,message
+768,message.error.general_14,创建配置目录失败: ,,,一般消息,No,No,message
+769,message.error.general_15,初始化AddHint功能时发生错误,,,一般消息,No,No,message
+770,message.error.general_16,初始化BoundViz功能时发生错误,,,一般消息,No,No,message
+771,message.error.general_17,初始化DeleteHint功能时发生错误,,,一般消息,No,No,message
+772,message.error.general_18,初始化Delete功能时发生错误,,,一般消息,No,No,message
+773,message.error.general_19,初始化DivideArea功能时发生错误,,,一般消息,No,No,message
+774,message.error.general_2,§c当前已有Delete流程在进行中,,,一般消息,No,Yes,message
+775,message.error.general_20,初始化EasyAdd功能时发生错误,,,一般消息,No,No,message
+776,message.error.general_21,初始化ExpandArea功能时发生错误,,,一般消息,No,No,message
+777,message.error.general_22,初始化ReplaceButton功能时发生错误,,,一般消息,No,No,message
+778,message.error.general_23,初始化ShrinkArea功能时发生错误,,,一般消息,No,No,message
+779,message.error.general_24,初始化客户端世界文件夹失败,,,一般消息,No,No,message
+780,message.error.general_25,初始化客户端日志管理器失败,,,一般消息,No,No,message
+781,message.error.general_26,初始化日志文件失败,,,一般消息,No,No,message
+782,message.error.general_27,初始化服务端世界文件夹失败,,,一般消息,No,No,message
+783,message.error.general_28,初始化服务端日志管理器失败,,,一般消息,No,No,message
+784,message.error.general_29,初始化配置目录失败: ,,,一般消息,No,No,message
+785,message.error.general_3,§c当前已有Recolor流程在进行中,,,一般消息,No,Yes,message
+786,message.error.general_30,发送Recolor请求时发生错误: ,,,一般消息,No,No,message
+787,message.error.general_31,发送SetHigh请求时发生错误: ,,,一般消息,No,No,message
+788,message.error.general_32,发送recolor请求失败,,,一般消息,No,No,message
+789,message.error.general_33,发送世界信息到客户端时发生错误,,,一般消息,No,No,message
+790,message.error.general_34,向所有玩家发送区域数据时发生错误: ,,,一般消息,No,No,message
+791,message.error.general_35,处理Delete请求时发生错误,,,一般消息,No,No,message
+792,message.error.general_36,处理SetHigh请求时发生错误,,,一般消息,No,No,message
+793,message.error.general_37,处理recolor请求时发生错误,,,一般消息,No,No,message
+794,message.error.general_38,处理世界信息时发生错误,,,一般消息,No,No,message
+795,message.error.general_39,处理世界信息请求时发生错误,,,一般消息,No,No,message
+796,message.error.general_4,§c当前已有Rename流程在进行中,,,一般消息,No,Yes,message
+797,message.error.general_40,失败,,,一般消息,No,No,message
+798,message.error.general_41,广播世界信息时发生错误,,,一般消息,No,No,message
+799,message.error.general_42,强制重新检测当前区域时发生错误,,,一般消息,No,No,message
+800,message.error.general_43,查找最大文件序号失败,,,一般消息,No,No,message
+801,message.error.general_44,清理旧日志失败,,,一般消息,No,No,message
+802,message.error.general_45,获取当前服务器地址失败,,,一般消息,No,No,message
+803,message.error.general_46,获取服务器地址失败，使用默认地址,,,一般消息,No,No,message
+804,message.error.general_47,解析世界信息包时发生错误,,,一般消息,No,No,message
+805,message.error.general_48,解析世界信息请求时发生错误,,,一般消息,No,No,message
+806,message.error.general_49,解析区域数据失败: ,,,一般消息,No,No,message
+807,message.error.general_5,§c当前已有SubtitleSize流程在进行中,,,一般消息,No,Yes,message
+808,message.error.general_50,请求世界信息时发生错误,,,一般消息,No,No,message
+809,message.error.general_51,读取区域数据失败: ,,,一般消息,No,No,message
+810,message.error.general_52,读取区域文件失败,,,一般消息,No,No,message
+811,message.error.general_53,读取配置数据失败: ,,,一般消息,No,No,message
+812,message.error.general_54,配置项 'frequency' 无效或缺失，已补全为默认值: ,,,一般消息,No,No,message
+813,message.error.general_55,配置项 'language' 无效或缺失，已补全为默认值: ,,,一般消息,No,No,message
+814,message.error.general_56,配置项 'recordKey' 无效或缺失，已补全为默认值: ,,,一般消息,No,No,message
+815,message.error.general_57,配置项 'subtitleRender' 无效或缺失，已补全为默认值: ,,,一般消息,No,No,message
+816,message.error.general_58,配置项 'subtitleSize' 无效或缺失，已补全为默认值: ,,,一般消息,No,No,message
+817,message.error.general_59,配置项 'subtitleStyle' 无效或缺失，已补全为默认值: ,,,一般消息,No,No,message
+818,message.error.general_6,§c当前已有SubtitleStyle流程在进行中,,,一般消息,No,Yes,message
+819,message.error.general_60,重新加载区域数据时发生错误,,,一般消息,No,No,message
+820,message.error.general_7,§c无效的大小选项: ,,,一般消息,No,Yes,message
+821,message.error.general_8,§c无效的样式选项: ,,,一般消息,No,Yes,message
+822,message.error.general_9,写入区域数据失败: ,,,一般消息,No,No,message
+823,message.error.language,创建语言文件夹失败: ,,,一般消息,No,No,message
+824,message.error.language_2,创建默认语言文件失败: ,,,一般消息,No,No,message
+825,message.error.language_3,加载语言文件失败: ,,,一般消息,No,No,message
+826,message.error.language_4,扫描语言文件夹失败: ,,,一般消息,No,No,message
+827,message.error.name,从存档路径获取名称失败,,,一般消息,No,No,message
+828,message.error.name_2,获取服务器世界名称失败，使用默认名称,,,一般消息,No,No,message
+829,message.error.name_3,获取运行目录名称失败,,,一般消息,No,No,message
+830,message.error.permission,§c权限不足,,,一般消息,No,Yes,message
+831,message.error.rename,§c发送重命名请求到服务端时发生错误: ,,,一般消息,No,Yes,message
+832,message.error.rename_2,发送重命名请求失败: ,,,一般消息,No,No,message
+833,message.error.rename_3,重命名失败: ,,,一般消息,No,No,message
+834,message.error.save,保存配置失败,,,一般消息,No,No,message
+835,message.error.vertex,区域顶点格式无效，必须使用标准格式,,,一般消息,No,No,message
+836,message.error.vertex_2,无效的顶点格式: ,,,一般消息,No,No,message
+837,message.hint.dimension,检测到未命名维度: ，已显示命名提示,,,一般消息,No,No,message
+838,message.hint.finish,区域提示模组客户端初始化完成!,,,一般消息,No,No,message
+839,message.hint.finish_2,区域提示模组服务端初始化完成!,,,一般消息,No,No,message
+840,message.hint.general,区域提示模组: 服务器已停止,,,一般消息,No,No,message
+841,message.hint.general_2,区域提示模组客户端初始化中...,,,一般消息,No,No,message
+842,message.hint.general_3,区域提示模组服务端初始化中...,,,一般消息,No,No,message
+843,message.hint.general_4,重新加载区域提示模组配置和区域数据...,,,一般消息,No,No,message
+844,message.hint.start,区域提示模组: 服务器启动中,,,一般消息,No,No,message
+845,message.message.altitude,最大高度不能小于最小高度,,,一般消息,No,No,message
+846,message.message.altitude.finish,"高度预筛选完成: 玩家高度={}, 筛选前={}, 筛选后={}",,,一般消息,No,No,message
+847,message.message.altitude_2,经过高度预筛选后，没有符合条件的区域,,,一般消息,No,No,message
+848,message.message.altitude_3,高度数据为空，允许任意高度,,,一般消息,No,No,message
+849,message.message.altitude_4,高度数据有效,,,一般消息,No,No,message
+850,message.message.altitude_5,"高度预筛选: 玩家高度=%.1f, 原始区域数=%d, 筛选后区域数=%d",,,一般消息,Yes,No,message
+851,message.message.area, §7(实际域名: ,,,一般消息,No,Yes,message
+852,message.message.area.altitude.modify,§a正在获取可修改高度的域名列表...,,,一般消息,No,Yes,message
+853,message.message.area.color.dimension,已更新维度域名颜色: {} -> {},,,一般消息,No,No,message
+854,message.message.area.continue,玩家在一级域名 {} 内，继续检查更高级别域名,,,一般消息,No,No,message
+855,message.message.area.delete, 不是管理员，无法删除旧版本域名,,,一般消息,No,No,message
+856,message.message.area.delete.list, 发送可删除域名列表,,,一般消息,No,No,message
+857,message.message.area.delete.list_2,§a正在获取可删除的域名列表...,,,一般消息,No,Yes,message
+858,message.message.area.delete.list_3,收到服务端可删除域名列表: ,,,一般消息,No,No,message
+859,message.message.area.delete_2, 个可删除的域名,,,一般消息,No,No,message
+860,message.message.area.delete_3, 删除了域名: ,,,一般消息,No,No,message
+861,message.message.area.delete_4, 正在删除旧版本域名,,,一般消息,No,No,message
+862,message.message.area.delete_5,不能删除该域名，因为存在次级域名 \,,,一般消息,No,No,message
+863,message.message.area.delete_6,你不是该域名的创建者，无法删除,,,一般消息,No,No,message
+864,message.message.area.delete_7,该域名没有签名（旧版本域名），只有管理员可以删除,,,一般消息,No,No,message
+865,message.message.area.dimension, 已连接，发送区域数据和维度域名数据,,,一般消息,No,No,message
+866,message.message.area.dimension.delete,§7当前维度没有可删除的域名,,,一般消息,No,Yes,message
+867,message.message.area.dimension.finish,客户端维度域名管理器初始化完成,,,一般消息,No,No,message
+868,message.message.area.dimension.finish_2,客户端维度域名网络处理初始化完成,,,一般消息,No,No,message
+869,message.message.area.dimension.finish_3,维度域名管理器初始化完成,,,一般消息,No,No,message
+870,message.message.area.dimension.finish_4,维度域名网络处理初始化完成,,,一般消息,No,No,message
+871,message.message.area.dimension.list,"接收到SetHigh域名列表: 命令类型={}, 维度={}, 域名数量={}",,,一般消息,No,No,message
+872,message.message.area.dimension.save,维度域名配置已保存,,,一般消息,No,No,message
+873,message.message.area.dimension_10,已向客户端 {} 发送维度域名配置,,,一般消息,No,No,message
+874,message.message.area.dimension_11,已接收并更新维度域名配置,,,一般消息,No,No,message
+875,message.message.area.dimension_12,已更新维度域名: {} -> {},,,一般消息,No,No,message
+876,message.message.area.dimension_13,维度域名数据: {},,,一般消息,No,No,message
+877,message.message.area.dimension_14,维度域名配置保持服务端同步状态,,,一般消息,No,No,message
+878,message.message.area.dimension_15,维度域名配置已重置为默认值,,,一般消息,No,No,message
+879,message.message.area.dimension_16,网络同步后显示维度域名：{},,,一般消息,No,No,message
+880,message.message.area.dimension_17,"触发域名显示 - 刚进入世界: {}, 维度变化: {}, 服务器变化: {}",,,一般消息,No,No,message
+881,message.message.area.dimension_18,进入世界时显示维度域名：{},,,一般消息,No,No,message
+882,message.message.area.dimension_2,切换维度时显示维度域名：{},,,一般消息,No,No,message
+883,message.message.area.dimension_3,切换维度时模组已禁用，不显示域名,,,一般消息,No,No,message
+884,message.message.area.dimension_4,客户端维度域名配置已重置为默认值,,,一般消息,No,No,message
+885,message.message.area.dimension_5,已从服务端更新维度域名配置: {} 个维度,,,一般消息,No,No,message
+886,message.message.area.dimension_6,已创建默认维度域名文件: {},,,一般消息,No,No,message
+887,message.message.area.dimension_7,已创建默认维度域名配置文件: ,,,一般消息,No,No,message
+888,message.message.area.dimension_8,已加载维度域名配置: {} 个维度,,,一般消息,No,No,message
+889,message.message.area.dimension_9,已向 {} 个在线客户端发送维度域名配置,,,一般消息,No,No,message
+890,message.message.area.list,§a可编辑的域名列表:,,,一般消息,No,Yes,message
+891,message.message.area.list_2,从列表中移除域名: ,,,一般消息,No,No,message
+892,message.message.area.list_3,处理SetHigh域名列表时出错: ,,,一般消息,No,No,message
+893,message.message.area.name,§a已设置新域名名称：§6,,,一般消息,No,Yes,message
+894,message.message.area.name_2,加载的区域名称: ,,,一般消息,No,No,message
+895,message.message.area.parent, 的上级域名 \,,,一般消息,No,No,message
+896,message.message.area.parent_2,) 与其上级域名 \,,,一般消息,No,No,message
+897,message.message.area.parent_3,检查 {} 级域名，基于上级域名 {}，符合条件的下级域名数量: {},,,一般消息,No,No,message
+898,message.message.area.surface,§a已设置新联合域名：§6,,,一般消息,No,Yes,message
+899,message.message.area_10,找到更高级别域名: {},,,一般消息,No,No,message
+900,message.message.area_11,找到目标域名: ,,,一般消息,No,No,message
+901,message.message.area_12,未知域名,,,一般消息,No,No,message
+902,message.message.area_13,"检查玩家({}, {})是否在一级域名内，一级域名数量: {}",,,一般消息,No,No,message
+903,message.message.area_14,玩家不在任何一级域名内,,,一般消息,No,No,message
+904,message.message.area_15,级域名,,,一般消息,No,No,message
+905,message.message.area_16,读取域名信息时出错,,,一般消息,No,No,message
+906,message.message.area_17,读取域名信息时出错: ,,,一般消息,No,No,message
+907,message.message.area_18,进入世界时模组已禁用，不显示域名,,,一般消息,No,No,message
+908,message.message.area_19,顶级域名,,,一般消息,No,No,message
+909,message.message.area_2, 不是域名创建者 ,,,一般消息,No,No,message
+910,message.message.area_3, 个域名,,,一般消息,No,No,message
+911,message.message.area_4, 被子域名 ,,,一般消息,No,No,message
+912,message.message.area_5,", 域名: ",,,一般消息,No,No,message
+913,message.message.area_6,三级域名,,,一般消息,No,No,message
+914,message.message.area_7,二级域名,,,一般消息,No,No,message
+915,message.message.area_8,域名 ,,,一般消息,No,No,message
+916,message.message.area_9,域名文件路径: ,,,一般消息,No,No,message
+917,message.message.boundary.visualization,§7边界可视化已关闭,,,一般消息,No,Yes,message
+918,message.message.boundary.visualization_2,§a边界可视化已开启,,,一般消息,No,Yes,message
+919,message.message.boundary.visualization_3,边界可视化数据已重新加载,,,一般消息,No,No,message
+920,message.message.cancel,§7Delete流程已取消,,,一般消息,No,Yes,message
+921,message.message.cancel_2,§7Recolor流程已取消,,,一般消息,No,Yes,message
+922,message.message.cancel_3,§7Rename流程已取消,,,一般消息,No,Yes,message
+923,message.message.cancel_4,§7SubtitleSize流程已取消,,,一般消息,No,Yes,message
+924,message.message.cancel_5,§7SubtitleStyle流程已取消,,,一般消息,No,Yes,message
+925,message.message.color,"§7可用颜色: 白色, 红色, 粉红色, 橙色, 黄色, 棕色, 浅绿色, 深绿色, 浅蓝色, 深蓝色, 浅紫色, 紫色, 灰色, 黑色",,,一般消息,No,Yes,message
+926,message.message.color.level,§7%d. §r%s §7(等级%d) §8- 当前颜色: %s,,,一般消息,Yes,Yes,message
+927,message.message.color.modify, 进行颜色修改,,,一般消息,No,No,message
+928,message.message.color_2,"§7可用颜色: 白色, 红色, 粉红色, 橙色, 黄色, 棕色, 浅绿色, 深绿色, 浅蓝色, 深蓝色, 浅紫色, 紫色, 灰色, 黑色, 或自定义十六进制码(如 #FF0000)",,,一般消息,No,Yes,message
+929,message.message.color_3,§a当前颜色：§6,,,一般消息,No,Yes,message
+930,message.message.coordinate,"线段({}, {}) - ({}, {})与从点({}, {})发射的射线相交，交点X坐标: {}",,,一般消息,No,No,message
+931,message.message.delete, 发送删除响应: ,,,一般消息,No,No,message
+932,message.message.delete_2,删除旧日志文件: {},,,一般消息,No,No,message
+933,message.message.delete_3,发送删除响应时出错: ,,,一般消息,No,No,message
+934,message.message.delete_4,收到服务端删除响应: ,,,一般消息,No,No,message
+935,message.message.dimension, (维度: ,,,一般消息,No,No,message
+936,message.message.dimension.name,未知的维度名称: ,,,一般消息,No,No,message
+937,message.message.dimension_10,无法为维度 ,,,一般消息,No,No,message
+938,message.message.dimension_11,无法确定维度文件 - 维度: ,,,一般消息,No,No,message
+939,message.message.dimension_12,无法确定维度文件（维度: ,,,一般消息,No,No,message
+940,message.message.dimension_13,无法转换维度路径: ,,,一般消息,No,No,message
+941,message.message.dimension_14,检测到维度变化为：{}，加载对应的区域文件：{},,,一般消息,No,No,message
+942,message.message.dimension_15,维度 ,,,一般消息,No,No,message
+943,message.message.dimension_16,维度文件名: ,,,一般消息,No,No,message
+944,message.message.dimension_17,重新加载维度{}的区域文件：{},,,一般消息,No,No,message
+945,message.message.dimension_2,", 维度: ",,,一般消息,No,No,message
+946,message.message.dimension_3,§e您进入了一个未命名的维度: §b,,,一般消息,No,Yes,message
+947,message.message.dimension_4,为维度 ,,,一般消息,No,No,message
+948,message.message.dimension_5,切换维度时位于区域：,,,一般消息,No,No,message
+949,message.message.dimension_6,已向所有在 {} 维度的玩家重新分发区域数据,,,一般消息,No,No,message
+950,message.message.dimension_7,强制重新加载维度{}的区域文件：{},,,一般消息,No,No,message
+951,message.message.dimension_8,当前维度: ,,,一般消息,No,No,message
+952,message.message.dimension_9,接收到未知维度的区域数据: ,,,一般消息,No,No,message
+953,message.message.finish,AddHint功能初始化完成,,,一般消息,No,No,message
+954,message.message.finish_10,ShrinkArea功能初始化完成,,,一般消息,No,No,message
+955,message.message.finish_11,客户端世界文件夹临时初始化完成，等待服务端世界信息,,,一般消息,No,No,message
+956,message.message.finish_12,客户端世界文件夹初始化完成: {},,,一般消息,No,No,message
+957,message.message.finish_13,客户端世界网络处理初始化完成,,,一般消息,No,No,message
+958,message.message.finish_14,客户端日志管理器初始化完成,,,一般消息,No,No,message
+959,message.message.finish_15,开始完成世界文件夹初始化...,,,一般消息,No,No,message
+960,message.message.finish_16,服务端世界文件夹初始化完成: {},,,一般消息,No,No,message
+961,message.message.finish_17,服务端世界网络处理初始化完成,,,一般消息,No,No,message
+962,message.message.finish_18,服务端日志管理器初始化完成,,,一般消息,No,No,message
+963,message.message.finish_19,服务端日志网络处理初始化完成,,,一般消息,No,No,message
+964,message.message.finish_2,BoundViz功能初始化完成,,,一般消息,No,No,message
+965,message.message.finish_20,网络同步完成，重新加载区域数据: {},,,一般消息,No,No,message
+966,message.message.finish_21,配置目录初始化完成: {},,,一般消息,No,No,message
+967,message.message.finish_22,配置目录初始化完成：{},,,一般消息,No,No,message
+968,message.message.finish_3,DEBUG: expandarea_start 执行完成,,,一般消息,No,No,message
+969,message.message.finish_4,DeleteHint功能初始化完成,,,一般消息,No,No,message
+970,message.message.finish_5,Delete功能初始化完成,,,一般消息,No,No,message
+971,message.message.finish_6,DivideArea功能初始化完成,,,一般消息,No,No,message
+972,message.message.finish_7,EasyAdd功能初始化完成,,,一般消息,No,No,message
+973,message.message.finish_8,ExpandArea功能初始化完成,,,一般消息,No,No,message
+974,message.message.finish_9,ReplaceButton功能初始化完成,,,一般消息,No,No,message
+975,message.message.general," (仅显示当前级别), \",,,一般消息,No,No,message
+976,message.message.general_10, 发送完整的游戏数据,,,一般消息,No,No,message
+977,message.message.general_100,处理SubtitleStyle命令时出错: ,,,一般消息,No,No,message
+978,message.message.general_101,处理recolor响应时出错: ,,,一般消息,No,No,message
+979,message.message.general_102,处理客户端命令时出错: ,,,一般消息,No,No,message
+980,message.message.general_103,处理调试命令时出错: ,,,一般消息,No,No,message
+981,message.message.general_104,大,,,一般消息,No,No,message
+982,message.message.general_105,存档路径: '{}',,,一般消息,No,No,message
+983,message.message.general_106,完整样式 (Full),,,一般消息,No,No,message
+984,message.message.general_107,客户端世界文件夹已存在: {},,,一般消息,No,No,message
+985,message.message.general_108,客户端世界文件夹未初始化，使用备用路径,,,一般消息,No,No,message
+986,message.message.general_109,客户端世界文件夹管理器已重置,,,一般消息,No,No,message
+987,message.message.general_11, 发送调试命令: ,,,一般消息,No,No,message
+988,message.message.general_110,射线检测结果: 交点数 {}，点{}多边形内部,,,一般消息,No,No,message
+989,message.message.general_111,小,,,一般消息,No,No,message
+990,message.message.general_112,已创建世界文件夹: {},,,一般消息,No,No,message
+991,message.message.general_113,已创建世界默认文件,,,一般消息,No,No,message
+992,message.message.general_114,已创建客户端世界文件夹: {},,,一般消息,No,No,message
+993,message.message.general_115,已创建客户端世界默认文件,,,一般消息,No,No,message
+994,message.message.general_116,已创建空区域文件: {},,,一般消息,No,No,message
+995,message.message.general_117,已创建空的区域文件: ,,,一般消息,No,No,message
+996,message.message.general_118,已创建配置目录: ,,,一般消息,No,No,message
+997,message.message.general_119,已创建默认配置文件: ,,,一般消息,No,No,message
+998,message.message.general_12, 字节,,,一般消息,No,No,message
+999,message.message.general_120,已加载区域数据: {} 个区域,,,一般消息,No,No,message
+1000,message.message.general_121,"已加载配置: 频率={}, 渲染方式={}, 字幕样式={}, 字幕大小={}",,,一般消息,No,No,message
+1001,message.message.general_122,已向所有在线玩家广播世界信息: {},,,一般消息,No,No,message
+1002,message.message.general_123,已向玩家 ,,,一般消息,No,No,message
+1003,message.message.general_124,已向玩家 {} 发送世界信息: '{}',,,一般消息,No,No,message
+1004,message.message.general_125,开始初始化客户端世界文件夹...,,,一般消息,No,No,message
+1005,message.message.general_126,开始获取服务器地址...,,,一般消息,No,No,message
+1006,message.message.general_127,异步区域检测出错,,,一般消息,No,No,message
+1007,message.message.general_128,异步检测结果 - 区域：{}，之前区域：{},,,一般消息,No,No,message
+1008,message.message.general_129,恶堕之域,,,一般消息,No,No,message
+1009,message.message.general_13, 存在循环引用,,,一般消息,No,No,message
+1010,message.message.general_130,恶堕之域\,,,一般消息,No,No,message
+1011,message.message.general_131,执行boundviz_toggle,,,一般消息,No,No,message
+1012,message.message.general_132,执行delete_cancel,,,一般消息,No,No,message
+1013,message.message.general_133,执行delete_confirm,,,一般消息,No,No,message
+1014,message.message.general_134,执行delete_select: ,,,一般消息,No,No,message
+1015,message.message.general_135,执行delete_start,,,一般消息,No,No,message
+1016,message.message.general_136,执行easyadd_altitude_auto,,,一般消息,No,No,message
+1017,message.message.general_137,执行easyadd_altitude_custom,,,一般消息,No,No,message
+1018,message.message.general_138,执行easyadd_altitude_unlimited,,,一般消息,No,No,message
+1019,message.message.general_139,执行easyadd_base: ,,,一般消息,No,No,message
+1020,message.message.general_14, 对应文件: ,,,一般消息,No,No,message
+1021,message.message.general_140,执行easyadd_cancel,,,一般消息,No,No,message
+1022,message.message.general_141,执行easyadd_color: ,,,一般消息,No,No,message
+1023,message.message.general_142,执行easyadd_continue,,,一般消息,No,No,message
+1024,message.message.general_143,执行easyadd_finish,,,一般消息,No,No,message
+1025,message.message.general_144,执行easyadd_level: ,,,一般消息,No,No,message
+1026,message.message.general_145,执行easyadd_save,,,一般消息,No,No,message
+1027,message.message.general_146,执行easyadd_start,,,一般消息,No,No,message
+1028,message.message.general_147,执行expandarea_cancel,,,一般消息,No,No,message
+1029,message.message.general_148,执行expandarea_continue,,,一般消息,No,No,message
+1030,message.message.general_149,执行expandarea_save,,,一般消息,No,No,message
+1031,message.message.general_15, 引用,,,一般消息,No,No,message
+1032,message.message.general_150,执行expandarea_select: ,,,一般消息,No,No,message
+1033,message.message.general_151,执行expandarea_start,,,一般消息,No,No,message
+1034,message.message.general_152,执行recolor_cancel,,,一般消息,No,No,message
+1035,message.message.general_153,执行recolor_color: ,,,一般消息,No,No,message
+1036,message.message.general_154,执行recolor_confirm,,,一般消息,No,No,message
+1037,message.message.general_155,执行recolor_select: ,,,一般消息,No,No,message
+1038,message.message.general_156,执行rename_cancel,,,一般消息,No,No,message
+1039,message.message.general_157,执行rename_confirm,,,一般消息,No,No,message
+1040,message.message.general_158,执行rename_select: ,,,一般消息,No,No,message
+1041,message.message.general_159,执行replacebutton_cancel,,,一般消息,No,No,message
+1042,message.message.general_16, 引用了它,,,一般消息,No,No,message
+1043,message.message.general_160,执行replacebutton_confirm,,,一般消息,No,No,message
+1044,message.message.general_161,执行replacebutton_start,,,一般消息,No,No,message
+1045,message.message.general_162,执行sethigh_custom,,,一般消息,No,No,message
+1046,message.message.general_163,执行sethigh_start,,,一般消息,No,No,message
+1047,message.message.general_164,执行shrinkarea_cancel,,,一般消息,No,No,message
+1048,message.message.general_165,执行shrinkarea_continue,,,一般消息,No,No,message
+1049,message.message.general_166,执行shrinkarea_save,,,一般消息,No,No,message
+1050,message.message.general_167,执行shrinkarea_select: ,,,一般消息,No,No,message
+1051,message.message.general_168,执行shrinkarea_start,,,一般消息,No,No,message
+1052,message.message.general_169,执行subtitlesize_cancel,,,一般消息,No,No,message
+1053,message.message.general_17, 或 ,,,一般消息,No,No,message
+1054,message.message.general_170,执行subtitlesize_select: ,,,一般消息,No,No,message
+1055,message.message.general_171,执行subtitlesize_start,,,一般消息,No,No,message
+1056,message.message.general_172,执行subtitlestyle_cancel,,,一般消息,No,No,message
+1057,message.message.general_173,执行subtitlestyle_select: ,,,一般消息,No,No,message
+1058,message.message.general_174,执行subtitlestyle_start,,,一般消息,No,No,message
+1059,message.message.general_175,找到 ,,,一般消息,No,No,message
+1060,message.message.general_176,接收到服务端命令: ,,,一般消息,No,No,message
+1061,message.message.general_177,接收到服务端调试命令: ,,,一般消息,No,No,message
+1062,message.message.general_178,收到服务端世界信息: '{}',,,一般消息,No,No,message
+1063,message.message.general_179,无法获取服务器地址，使用 'unknown',,,一般消息,No,No,message
+1064,message.message.general_18, 条翻译),,,一般消息,No,No,message
+1065,message.message.general_180,无法进行强制重新检测：玩家或世界为null,,,一般消息,No,No,message
+1066,message.message.general_181,是,,,一般消息,No,No,message
+1067,message.message.general_182,最终确定玩家在区域: {},,,一般消息,No,No,message
+1068,message.message.general_183,未知渲染模式，使用默认OpenGL,,,一般消息,No,No,message
+1069,message.message.general_184,未知的BoundViz命令: ,,,一般消息,No,No,message
+1070,message.message.general_185,未知的Delete命令: ,,,一般消息,No,No,message
+1071,message.message.general_186,未知的EasyAdd命令: ,,,一般消息,No,No,message
+1072,message.message.general_187,未知的Language命令: ,,,一般消息,No,No,message
+1073,message.message.general_188,未知的Recolor命令: ,,,一般消息,No,No,message
+1074,message.message.general_189,未知的Rename命令: ,,,一般消息,No,No,message
+1075,message.message.general_19, 的区域数据,,,一般消息,No,No,message
+1076,message.message.general_190,未知的ReplaceButton命令: ,,,一般消息,No,No,message
+1077,message.message.general_191,未知的SubtitleSize命令: ,,,一般消息,No,No,message
+1078,message.message.general_192,未知的SubtitleStyle命令: ,,,一般消息,No,No,message
+1079,message.message.general_193,极大,,,一般消息,No,No,message
+1080,message.message.general_194,极小,,,一般消息,No,No,message
+1081,message.message.general_195,检查区域 {} 的AABB: ,,,一般消息,No,No,message
+1082,message.message.general_196,检查区域 {} 的AABB: {},,,一般消息,No,No,message
+1083,message.message.general_197,检查区域 {} 的多边形: {},,,一般消息,No,No,message
+1084,message.message.general_198,检测到单人游戏，返回localhost,,,一般消息,No,No,message
+1085,message.message.general_199,"检测到断开连接,清理世界文件夹管理器状态",,,一般消息,No,No,message
+1086,message.message.general_2," (使用CPU渲染), \",,,一般消息,No,No,message
+1087,message.message.general_20, 获取文件名,,,一般消息,No,No,message
+1088,message.message.general_200,"检测到服务器变化: '{}' -> '{}', 重新初始化世界文件夹",,,一般消息,No,No,message
+1089,message.message.general_201,"检测玩家位置: (%.2f, %.2f, %.2f)",,,一般消息,No,No,message
+1090,message.message.general_202,棕色,,,一般消息,No,No,message
+1091,message.message.general_203,次）,,,一般消息,No,No,message
+1092,message.message.general_204,没有加载任何区域数据，无法检测,,,一般消息,No,No,message
+1093,message.message.general_205,没有找到玩家所在区域,,,一般消息,No,No,message
+1094,message.message.general_206,浅紫色,,,一般消息,No,No,message
+1095,message.message.general_207,浅绿色,,,一般消息,No,No,message
+1096,message.message.general_208,浅蓝色,,,一般消息,No,No,message
+1097,message.message.general_209,混合样式 (Mixed),,,一般消息,No,No,message
+1098,message.message.general_21,", 是否OP: ",,,一般消息,No,No,message
+1099,message.message.general_210,渲染文本时出错: ,,,一般消息,No,No,message
+1100,message.message.general_211,渲染管理器已更新,,,一般消息,No,No,message
+1101,message.message.general_212,玩家进入世界（第,,,一般消息,No,No,message
+1102,message.message.general_213,禁用,,,一般消息,No,No,message
+1103,message.message.general_214,简体中文,,,一般消息,No,No,message
+1104,message.message.general_215,简洁样式 (Simple),,,一般消息,No,No,message
+1105,message.message.general_216,管理员 ,,,一般消息,No,No,message
+1106,message.message.general_217,终末之地,,,一般消息,No,No,message
+1107,message.message.general_218,终末之地\,,,一般消息,No,No,message
+1108,message.message.general_219,网络同步后检测到位于区域：{},,,一般消息,No,No,message
+1109,message.message.general_22,CPURender: 动画状态更新 IN → STAY,,,一般消息,No,No,message
+1110,message.message.general_220,获取的服务器地址: '{}',,,一般消息,No,No,message
+1111,message.message.general_221,蛮荒大陆,,,一般消息,No,No,message
+1112,message.message.general_222,蛮荒大陆\,,,一般消息,No,No,message
+1113,message.message.general_223,解析频率值时出错: ,,,一般消息,No,No,message
+1114,message.message.general_224,读取到 ,,,一般消息,No,No,message
+1115,message.message.general_225,较大,,,一般消息,No,No,message
+1116,message.message.general_226,较小,,,一般消息,No,No,message
+1117,message.message.general_227,边 {} 与射线相交，当前交点数: {},,,一般消息,No,No,message
+1118,message.message.general_228,进入世界时位于区域：{},,,一般消息,No,No,message
+1119,message.message.general_229,配置目录已存在: ,,,一般消息,No,No,message
+1120,message.message.general_23,CPURender: 动画状态更新 OUT → NONE,,,一般消息,No,No,message
+1121,message.message.general_230,重置ClientWorldFolderManager状态,,,一般消息,No,No,message
+1122,message.message.general_24,CPURender: 动画状态更新 STAY → OUT,,,一般消息,No,No,message
+1123,message.message.general_25,"CPURender: 开始显示区域标题: {}, 动画状态: {}",,,一般消息,No,No,message
+1124,message.message.general_26,"CPURender: 渐入动画 - 区域标题: {}, 进度: {}, 透明度: {}",,,一般消息,No,No,message
+1125,message.message.general_27,DEBUG: recordKeyBinding 为 null，无法重新注册,,,一般消息,No,No,message
+1126,message.message.general_28,DEBUG: 开始执行 expandarea_start,,,一般消息,No,No,message
+1127,message.message.general_29,GLRender: 动画状态更新 IN → STAY,,,一般消息,No,No,message
+1128,message.message.general_3," (使用OpenGL渲染), \",,,一般消息,No,No,message
+1129,message.message.general_30,GLRender: 动画状态更新 OUT → NONE,,,一般消息,No,No,message
+1130,message.message.general_31,GLRender: 动画状态更新 STAY → OUT,,,一般消息,No,No,message
+1131,message.message.general_32,"GLRender: 开始显示区域标题: {}, 动画状态: {}",,,一般消息,No,No,message
+1132,message.message.general_33,"GLRender: 渐入动画 - 区域标题: {}, 进度: {}, 透明度: {}",,,一般消息,No,No,message
+1133,message.message.general_34,VulkanRender: 动画状态更新 IN → STAY,,,一般消息,No,No,message
+1134,message.message.general_35,VulkanRender: 动画状态更新 OUT → NONE,,,一般消息,No,No,message
+1135,message.message.general_36,VulkanRender: 动画状态更新 STAY → OUT,,,一般消息,No,No,message
+1136,message.message.general_37,"VulkanRender: 开始显示区域标题: {}, 动画状态: {}",,,一般消息,No,No,message
+1137,message.message.general_38,"VulkanRender: 渐入动画 - 区域标题: {}, 进度: {}, 透明度: {}",,,一般消息,No,No,message
+1138,message.message.general_39,Vulkan渲染器初始化 (注：实际使用兼容模式),,,一般消息,No,No,message
+1139,message.message.general_4, (使用Vulkan渲染)\n,,,一般消息,No,No,message
+1140,message.message.general_40,] 为对象格式,,,一般消息,No,No,message
+1141,message.message.general_41,currentDimension 为 null,,,一般消息,No,No,message
+1142,message.message.general_42,getLevelName() 返回: '{}',,,一般消息,No,No,message
+1143,message.message.general_43,getServerMotd() 返回: '{}',,,一般消息,No,No,message
+1144,message.message.general_44,handleRenameResponse 被调用，但功能已移至 RenameNetworking,,,一般消息,No,No,message
+1145,message.message.general_45,§7或使用十六进制格式，如: #FF0000,,,一般消息,No,Yes,message
+1146,message.message.general_46,§a字幕大小已设置为: §6,,,一般消息,No,Yes,message
+1147,message.message.general_47,§a字幕样式已设置为: §6,,,一般消息,No,Yes,message
+1148,message.message.general_48,§a当前字幕样式为: §6,,,一般消息,No,Yes,message
+1149,message.message.general_49,§a当前字幕渲染方式为: §6,,,一般消息,No,Yes,message
+1150,message.message.general_5," (显示完整路径), \",,,一般消息,No,No,message
+1151,message.message.general_50,§a当前检测频率为: §6,,,一般消息,No,Yes,message
+1152,message.message.general_51,§a配置已重新加载,,,一般消息,No,Yes,message
+1153,message.message.general_52,不在,,,一般消息,No,No,message
+1154,message.message.general_53,世界信息发送给玩家: {} -> {},,,一般消息,No,No,message
+1155,message.message.general_54,世界文件夹已存在: {},,,一般消息,No,No,message
+1156,message.message.general_55,世界文件夹未初始化，使用备用路径,,,一般消息,No,No,message
+1157,message.message.general_56,世界文件夹管理器已重置,,,一般消息,No,No,message
+1158,message.message.general_57,世界文件夹管理器状态已清理,,,一般消息,No,No,message
+1159,message.message.general_58,中,,,一般消息,No,No,message
+1160,message.message.general_59,使用CPU渲染模式,,,一般消息,No,No,message
+1161,message.message.general_6, (混合模式)\n,,,一般消息,No,No,message
+1162,message.message.general_60,使用OpenGL渲染模式,,,一般消息,No,No,message
+1163,message.message.general_61,使用Vulkan渲染模式,,,一般消息,No,No,message
+1164,message.message.general_62,使用服务器MOTD: '{}',,,一般消息,No,No,message
+1165,message.message.general_63,使用服务器地址: '{}',,,一般消息,No,No,message
+1166,message.message.general_64,创建日志文件: {},,,一般消息,No,No,message
+1167,message.message.general_65,创建日志文件夹: {},,,一般消息,No,No,message
+1168,message.message.general_66,初始化客户端网络处理,,,一般消息,No,No,message
+1169,message.message.general_67,初始化服务端网络处理,,,一般消息,No,No,message
+1170,message.message.general_68,区域 ',,,一般消息,No,No,message
+1171,message.message.general_69,区域数据文件不存在: ,,,一般消息,No,No,message
+1172,message.message.general_7, 不存在,,,一般消息,No,No,message
+1173,message.message.general_70,发送区域数据时出错: ,,,一般消息,No,No,message
+1174,message.message.general_71,发送命令到客户端时出错: ,,,一般消息,No,No,message
+1175,message.message.general_72,发送调试命令到客户端时出错: ,,,一般消息,No,No,message
+1176,message.message.general_73,否,,,一般消息,No,No,message
+1177,message.message.general_74,启用,,,一般消息,No,No,message
+1178,message.message.general_75,在,,,一般消息,No,No,message
+1179,message.message.general_76,在内部,,,一般消息,No,No,message
+1180,message.message.general_77,在外部,,,一般消息,No,No,message
+1181,message.message.general_78,在当前级别没有找到区域，停止查找,,,一般消息,No,No,message
+1182,message.message.general_79,处理BoundViz命令: ,,,一般消息,No,No,message
+1183,message.message.general_8, 发送 ,,,一般消息,No,No,message
+1184,message.message.general_80,处理BoundViz命令时出错: ,,,一般消息,No,No,message
+1185,message.message.general_81,处理Delete命令: ,,,一般消息,No,No,message
+1186,message.message.general_82,处理Delete命令时出错: ,,,一般消息,No,No,message
+1187,message.message.general_83,处理DimColor命令时出错: ,,,一般消息,No,No,message
+1188,message.message.general_84,处理DimName命令时出错: ,,,一般消息,No,No,message
+1189,message.message.general_85,处理DivideArea命令时出错: ,,,一般消息,No,No,message
+1190,message.message.general_86,处理EasyAdd命令: ,,,一般消息,No,No,message
+1191,message.message.general_87,处理EasyAdd命令时出错: ,,,一般消息,No,No,message
+1192,message.message.general_88,处理Language命令: ,,,一般消息,No,No,message
+1193,message.message.general_89,处理Language命令时出错: ,,,一般消息,No,No,message
+1194,message.message.general_9, 发送命令: ,,,一般消息,No,No,message
+1195,message.message.general_90,处理Recolor命令: ,,,一般消息,No,No,message
+1196,message.message.general_91,处理Recolor命令时出错: ,,,一般消息,No,No,message
+1197,message.message.general_92,处理Rename命令: ,,,一般消息,No,No,message
+1198,message.message.general_93,处理Rename命令时出错: ,,,一般消息,No,No,message
+1199,message.message.general_94,处理ReplaceButton命令: ,,,一般消息,No,No,message
+1200,message.message.general_95,处理ReplaceButton命令时出错: ,,,一般消息,No,No,message
+1201,message.message.general_96,处理SetHigh响应时出错: ,,,一般消息,No,No,message
+1202,message.message.general_97,处理SubtitleSize命令: ,,,一般消息,No,No,message
+1203,message.message.general_98,处理SubtitleSize命令时出错: ,,,一般消息,No,No,message
+1204,message.message.general_99,处理SubtitleStyle命令: ,,,一般消息,No,No,message
+1205,message.message.language,已创建语言文件夹: ,,,一般消息,No,No,message
+1206,message.message.language_2,已加载语言: ,,,一般消息,No,No,message
+1207,message.message.language_3,语言文件不存在: ,,,一般消息,No,No,message
+1208,message.message.language_4,默认语言文件也不存在，使用空翻译,,,一般消息,No,No,message
+1209,message.message.level, (等级 ,,,一般消息,No,No,message
+1210,message.message.level_2,(等级:,,,一般消息,No,No,message
+1211,message.message.level_3,) 的等级关系不正确,,,一般消息,No,No,message
+1212,message.message.level_4,"玩家在区域: %s, 等级: %d, 格式化后: %s",,,一般消息,Yes,No,message
+1213,message.message.level_5,等级 {} 的区域数量: {},,,一般消息,No,No,message
+1214,message.message.name, 设置名称,,,一般消息,No,No,message
+1215,message.message.name.key,，按键名称：,,,一般消息,No,No,message
+1216,message.message.name_10,使用默认名称: 'Server',,,一般消息,No,No,message
+1217,message.message.name_11,开始获取服务器世界名称...,,,一般消息,No,No,message
+1218,message.message.name_12,"服务器信息 - 地址: '{}', 名称: '{}'",,,一般消息,No,No,message
+1219,message.message.name_13,"服务端 initializeWorldFolder 被调用 - 服务器地址: '{}', 世界名称: '{}'",,,一般消息,No,No,message
+1220,message.message.name_14,"服务端清理后 - 服务器地址: '{}', 世界名称: '{}'",,,一般消息,No,No,message
+1221,message.message.name_15,服务端生成的世界文件夹名称: '{}',,,一般消息,No,No,message
+1222,message.message.name_16,"清理后 - 服务器地址: '{}', 世界名称: '{}'",,,一般消息,No,No,message
+1223,message.message.name_17,"玩家在区域: {}, 格式化后的名称: {}",,,一般消息,No,No,message
+1224,message.message.name_18,生成的世界文件夹名称: '{}',,,一般消息,No,No,message
+1225,message.message.name_19,运行目录名称: '{}',,,一般消息,No,No,message
+1226,message.message.name_2,finalizeWorldInitialization 被调用，世界名称: '{}',,,一般消息,No,No,message
+1227,message.message.name_3,"initializeWorldFolder 被调用 - 服务器地址: '{}', 世界名称: '{}'",,,一般消息,No,No,message
+1228,message.message.name_4,§7命名超时，已使用默认名称: ,,,一般消息,No,Yes,message
+1229,message.message.name_5,世界名称为null，使用备用名称: '{}',,,一般消息,No,No,message
+1230,message.message.name_6,从WorldFolderManager获取的世界名称: '{}',,,一般消息,No,No,message
+1231,message.message.name_7,使用世界名称: '{}',,,一般消息,No,No,message
+1232,message.message.name_8,使用路径名称: '{}',,,一般消息,No,No,message
+1233,message.message.name_9,使用运行目录名称: '{}',,,一般消息,No,No,message
+1234,message.message.record,DEBUG: DivideArea 处理记录键,,,一般消息,No,No,message
+1235,message.message.record_2,DEBUG: EasyAdd 处理记录键,,,一般消息,No,No,message
+1236,message.message.record_3,DEBUG: ExpandArea 处理记录键,,,一般消息,No,No,message
+1237,message.message.record_4,DEBUG: ShrinkArea 处理记录键,,,一般消息,No,No,message
+1238,message.message.record_5,DEBUG: 没有模块处理记录键,,,一般消息,No,No,message
+1239,message.message.record_6,DEBUG: 记录键已更新为键码 ,,,一般消息,No,No,message
+1240,message.message.record_7,DEBUG: 记录键被按下,,,一般消息,No,No,message
+1241,message.message.save,保存接收到的区域数据时出错: ,,,一般消息,No,No,message
+1242,message.message.save_2,已保存配置,,,一般消息,No,No,message
+1243,message.message.save_3,已接收并保存 ,,,一般消息,No,No,message
+1244,message.message.save_4,检测到配置不完整，正在保存补全后的配置...,,,一般消息,No,No,message
+1245,message.message.vertex,' 顶点格式验证通过,,,一般消息,No,No,message
+1246,message.message.vertex.coordinate,"进行射线检测，点坐标({}, {})，多边形顶点数: {}",,,一般消息,No,No,message
+1247,message.message.vertex_2,AABB顶点数量不正确，应为4个点,,,一般消息,No,No,message
+1248,message.message.vertex_3,JsonHelper: 转换数组格式顶点 [,,,一般消息,No,No,message
+1249,message.message.vertex_4,一级顶点数量不足，至少需要3个点,,,一般消息,No,No,message
+1250,message.message.vertex_5,二级顶点数量不正确，必须是4个点,,,一般消息,No,No,message
+1251,message.message.vertex_6,多边形顶点数量不足，无法进行射线检测,,,一般消息,No,No,message
+1252,message.prompt.area,§a已选择域名：§6,,,一般消息,No,Yes,message
+1253,message.prompt.area.altitude,"发送SetHigh请求: 域名={}, 有高度限制={}, 最大高度={}, 最小高度={}",,,一般消息,No,No,message
+1254,message.prompt.area.altitude_2,"接收到SetHigh域名选择: 域名={}, 有高度限制={}, 最大高度={}, 最小高度={}",,,一般消息,No,No,message
+1255,message.prompt.area.color.dimension,"发送Recolor请求: 域名={}, 颜色={}, 维度={}",,,一般消息,No,No,message
+1256,message.prompt.area.color.modify,§a请选择要修改颜色的域名：,,,一般消息,No,Yes,message
+1257,message.prompt.area.delete.list,处理可删除域名列表请求 - 玩家: ,,,一般消息,No,No,message
+1258,message.prompt.area.dimension.delete,向服务端请求可删除域名列表 (维度: ,,,一般消息,No,No,message
+1259,message.prompt.area_2,处理SetHigh域名选择时出错: ,,,一般消息,No,No,message
+1260,message.prompt.color,处理颜色选择时出错: ,,,一般消息,No,No,message
+1261,message.prompt.color.modify,§a正在处理颜色修改请求...,,,一般消息,No,Yes,message
+1262,message.prompt.delete,§a删除请求已发送到服务端，等待处理...,,,一般消息,No,Yes,message
+1263,message.prompt.delete_2,向服务端发送删除请求: ,,,一般消息,No,No,message
+1264,message.prompt.delete_3,处理删除请求 - 玩家: ,,,一般消息,No,No,message
+1265,message.prompt.general,客户端清理输入字符串 - 原始: '{}',,,一般消息,No,No,message
+1266,message.prompt.general_2,客户端清理输入字符串 - 结果: '{}',,,一般消息,No,No,message
+1267,message.prompt.general_3,已向服务端请求世界信息,,,一般消息,No,No,message
+1268,message.prompt.general_4,无法发送世界信息请求包，服务端可能不支持,,,一般消息,No,No,message
+1269,message.prompt.general_5,清理输入字符串 - 原始: '{}',,,一般消息,No,No,message
+1270,message.prompt.general_6,清理输入字符串 - 结果: '{}',,,一般消息,No,No,message
+1271,message.prompt.rename,§a重命名请求已发送到服务端，等待处理...,,,一般消息,No,Yes,message
+1272,message.prompt.rename_2,向服务端发送重命名请求: ,,,一般消息,No,No,message
+1273,message.success.area.delete,成功删除域名: ,,,一般消息,No,No,message
+1274,message.success.area.list,成功解析域名列表: {},,,一般消息,No,No,message
+1275,message.success.general,成功,,,一般消息,No,No,message
+1276,message.title.area.color.modify,§6=== 域名颜色修改 ===,,,一般消息,No,Yes,message
+1277,replacebutton.message.cancel.key,已取消按键更换,,,按键替换,No,No,replacebutton
+1278,replacebutton.message.general,上箭头,,,按键替换,No,No,replacebutton
+1279,replacebutton.message.general_10,左Shift,,,按键替换,No,No,replacebutton
+1280,replacebutton.message.general_11,左箭头,,,按键替换,No,No,replacebutton
+1281,replacebutton.message.general_12,空格,,,按键替换,No,No,replacebutton
+1282,replacebutton.message.general_13,退格,,,按键替换,No,No,replacebutton
+1283,replacebutton.message.general_2,下箭头,,,按键替换,No,No,replacebutton
+1284,replacebutton.message.general_3,右Alt,,,按键替换,No,No,replacebutton
+1285,replacebutton.message.general_4,右Ctrl,,,按键替换,No,No,replacebutton
+1286,replacebutton.message.general_5,右Shift,,,按键替换,No,No,replacebutton
+1287,replacebutton.message.general_6,右箭头,,,按键替换,No,No,replacebutton
+1288,replacebutton.message.general_7,回车,,,按键替换,No,No,replacebutton
+1289,replacebutton.message.general_8,左Alt,,,按键替换,No,No,replacebutton
+1290,replacebutton.message.general_9,左Ctrl,,,按键替换,No,No,replacebutton
+1291,replacebutton.message.key,按键,,,按键替换,No,No,replacebutton
+1292,replacebutton.message.record.key,记录按键已更改为：,,,按键替换,No,No,replacebutton
+1293,replacebutton.message.record.key_2,该按键不能用作记录键！,,,按键替换,No,No,replacebutton
+1294,shrinkarea.button.area.record.save,§7记录完成后点击 §6[保存域名] §7按钮完成收缩,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1295,shrinkarea.button.general,"] 和 [0, ",,,ShrinkArea域名收缩,No,No,shrinkarea
+1296,shrinkarea.error.area,§c加载域名失败: ,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1297,shrinkarea.error.area.altitude,§c原域名没有高度信息,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1298,shrinkarea.error.area.cancel.shrink,§c已取消域名收缩,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1299,shrinkarea.error.area.save.shrink,保存收缩域名失败: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1300,shrinkarea.error.area.shrink,§c域名收缩功能已经在运行中,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1301,shrinkarea.error.area.shrink_10,处理收缩域名响应时发生错误: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1302,shrinkarea.error.area.shrink_11,处理收缩域名请求失败: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1303,shrinkarea.error.area.shrink_12,处理收缩域名请求时发生错误: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1304,shrinkarea.error.area.shrink_2,§c域名收缩失败：,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1305,shrinkarea.error.area.shrink_3,§c域名收缩过程中发生错误: ,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1306,shrinkarea.error.area.shrink_4,§c收缩域名时发生错误: ,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1307,shrinkarea.error.area.shrink_5,§c无法计算收缩后的域名,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1308,shrinkarea.error.area.shrink_6,§c没有可以收缩的域名,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1309,shrinkarea.error.area.shrink_7,§c没有找到可以收缩的域名,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1310,shrinkarea.error.area.shrink_8,发送收缩域名数据失败: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1311,shrinkarea.error.area.shrink_9,域名收缩计算失败: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1312,shrinkarea.error.area_2,原域名数据无效,,,ShrinkArea域名收缩,No,No,shrinkarea
+1313,shrinkarea.error.boundary,临近点和边界点计算失败,,,ShrinkArea域名收缩,No,No,shrinkarea
+1314,shrinkarea.error.boundary_2,边界交叉点计算失败,,,ShrinkArea域名收缩,No,No,shrinkarea
+1315,shrinkarea.error.boundary_3,边界点计算失败,,,ShrinkArea域名收缩,No,No,shrinkarea
+1316,shrinkarea.error.general,§c无法获取玩家信息,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1317,shrinkarea.error.general_2,修复线段交叉失败,,,ShrinkArea域名收缩,No,No,shrinkarea
+1318,shrinkarea.error.general_3,最终排序失败,,,ShrinkArea域名收缩,No,No,shrinkarea
+1319,shrinkarea.error.general_4,输入验证失败,,,ShrinkArea域名收缩,No,No,shrinkarea
+1320,shrinkarea.error.vertex,顶点分离失败,,,ShrinkArea域名收缩,No,No,shrinkarea
+1321,shrinkarea.error.vertex.list,最终顶点列表构造失败,,,ShrinkArea域名收缩,No,No,shrinkarea
+1322,shrinkarea.message.area,§e正在加载可用域名...,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1323,shrinkarea.message.area.finish.shrink,§a域名收缩完成！,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1324,shrinkarea.message.area.save.shrink,保存收缩后的域名,,,ShrinkArea域名收缩,No,No,shrinkarea
+1325,shrinkarea.message.area.shrink, 个可收缩的域名,,,ShrinkArea域名收缩,No,No,shrinkarea
+1326,shrinkarea.message.area.shrink.permission,您没有权限收缩此域名,,,ShrinkArea域名收缩,No,No,shrinkarea
+1327,shrinkarea.message.area.shrink.start,§a域名收缩功能已启动,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1328,shrinkarea.message.area.shrink_2,§7您可以收缩自己创建的域名,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1329,shrinkarea.message.area.shrink_3,§7管理员可以收缩所有域名,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1330,shrinkarea.message.area.shrink_4,§e只能收缩您创建的域名或basename引用您的域名,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1331,shrinkarea.message.area.shrink_5,§e正在处理域名收缩...,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1332,shrinkarea.message.area.shrink_6,已发送收缩域名数据到服务端: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1333,shrinkarea.message.area.shrink_7,未找到要收缩的域名: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1334,shrinkarea.message.area.vertex,原域名顶点数: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1335,shrinkarea.message.area.vertex.shrink,所有收缩顶点都在原域名外部，无法进行收缩,,,ShrinkArea域名收缩,No,No,shrinkarea
+1336,shrinkarea.message.area.vertex_2,原域名顶点数量不足,,,ShrinkArea域名收缩,No,No,shrinkarea
+1337,shrinkarea.message.boundary,开始计算临近点和边界点...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1338,shrinkarea.message.boundary_10,边界点索引: idx1=,,,ShrinkArea域名收缩,No,No,shrinkarea
+1339,shrinkarea.message.boundary_2,开始计算边界交叉点...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1340,shrinkarea.message.boundary_3,检测到跨越边界的线段: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1341,shrinkarea.message.boundary_4,结束边界点: (,,,ShrinkArea域名收缩,No,No,shrinkarea
+1342,shrinkarea.message.boundary_5,结束边界索引: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1343,shrinkarea.message.boundary_6,起始边界点: (,,,ShrinkArea域名收缩,No,No,shrinkarea
+1344,shrinkarea.message.boundary_7,起始边界索引: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1345,shrinkarea.message.boundary_8,边界,,,ShrinkArea域名收缩,No,No,shrinkarea
+1346,shrinkarea.message.boundary_9,边界交叉点数量: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1347,shrinkarea.message.cancel.shrink,取消收缩流程,,,ShrinkArea域名收缩,No,No,shrinkarea
+1348,shrinkarea.message.finish,角度排序完成,,,ShrinkArea域名收缩,No,No,shrinkarea
+1349,shrinkarea.message.general,  交点: (,,,ShrinkArea域名收缩,No,No,shrinkarea
+1350,shrinkarea.message.general_10,开始检查线段交叉...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1351,shrinkarea.message.general_11,开始计算凸包...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1352,shrinkarea.message.general_12,末尾点: (,,,ShrinkArea域名收缩,No,No,shrinkarea
+1353,shrinkarea.message.general_13,末尾点的临近点: (,,,ShrinkArea域名收缩,No,No,shrinkarea
+1354,shrinkarea.message.general_14,检测到线段交叉，开始强制重新排序...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1355,shrinkarea.message.general_15,没有检测到线段交叉,,,ShrinkArea域名收缩,No,No,shrinkarea
+1356,shrinkarea.message.general_16,短路径距离: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1357,shrinkarea.message.general_17,角度排序后仍有交叉，尝试使用凸包算法...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1358,shrinkarea.message.general_18,警告：无法完全消除线段交叉，返回角度排序结果,,,ShrinkArea域名收缩,No,No,shrinkarea
+1359,shrinkarea.message.general_19,重新排序后交叉问题已解决,,,ShrinkArea域名收缩,No,No,shrinkarea
+1360,shrinkarea.message.general_2,§a找到 ,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1361,shrinkarea.message.general_20,重新排序后仍然有交叉，可能存在几何问题,,,ShrinkArea域名收缩,No,No,shrinkarea
+1362,shrinkarea.message.general_21,长路径距离: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1363,shrinkarea.message.general_3,中心点: (,,,ShrinkArea域名收缩,No,No,shrinkarea
+1364,shrinkarea.message.general_4,内部,,,ShrinkArea域名收缩,No,No,shrinkarea
+1365,shrinkarea.message.general_5,凸包算法后仍有交叉，尝试反向排序...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1366,shrinkarea.message.general_6,初始点: (,,,ShrinkArea域名收缩,No,No,shrinkarea
+1367,shrinkarea.message.general_7,初始点的临近点: (,,,ShrinkArea域名收缩,No,No,shrinkarea
+1368,shrinkarea.message.general_8,反转后交叉问题已解决,,,ShrinkArea域名收缩,No,No,shrinkarea
+1369,shrinkarea.message.general_9,外部,,,ShrinkArea域名收缩,No,No,shrinkarea
+1370,shrinkarea.message.level,\n等级: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1371,shrinkarea.message.shrink,收缩 ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1372,shrinkarea.message.shrink.permission,' 不存在或您没有权限收缩,,,ShrinkArea域名收缩,No,No,shrinkarea
+1373,shrinkarea.message.vertex,  顶点 ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1374,shrinkarea.message.vertex.delete,删除短路径的顶点 [,,,ShrinkArea域名收缩,No,No,shrinkarea
+1375,shrinkarea.message.vertex.delete_2,删除长路径的顶点 [,,,ShrinkArea域名收缩,No,No,shrinkarea
+1376,shrinkarea.message.vertex.finish,凸包计算完成，顶点数: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1377,shrinkarea.message.vertex.finish.list,最终顶点列表构造完成，顶点数: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1378,shrinkarea.message.vertex.finish_2,新顶点排序完成，数量: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1379,shrinkarea.message.vertex.list,开始构造最终顶点列表...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1380,shrinkarea.message.vertex.list_2,最终顶点列表:,,,ShrinkArea域名收缩,No,No,shrinkarea
+1381,shrinkarea.message.vertex.record,§a记录顶点 ,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1382,shrinkarea.message.vertex.record.continue,继续记录更多收缩顶点,,,ShrinkArea域名收缩,No,No,shrinkarea
+1383,shrinkarea.message.vertex.record.shrink, §e键开始记录收缩区域的顶点位置,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1384,shrinkarea.message.vertex.shrink, §7个收缩区域顶点,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1385,shrinkarea.message.vertex.shrink_2,", 收缩顶点=",,,ShrinkArea域名收缩,No,No,shrinkarea
+1386,shrinkarea.message.vertex.shrink_3,开始检测收缩顶点位置...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1387,shrinkarea.message.vertex.shrink_4,收缩区域顶点数: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1388,shrinkarea.message.vertex.shrink_5,收缩区域顶点数量不足（至少需要3个）,,,ShrinkArea域名收缩,No,No,shrinkarea
+1389,shrinkarea.message.vertex_2,反转后仍然有交叉，尝试重新排序所有顶点...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1390,shrinkarea.message.vertex_3,开始按角度重新排序顶点...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1391,shrinkarea.message.vertex_4,当前顶点顺序正确，没有交叉,,,ShrinkArea域名收缩,No,No,shrinkarea
+1392,shrinkarea.message.vertex_5,最终顶点数量: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1393,shrinkarea.message.vertex_6,检测到线段交叉，尝试反转新顶点顺序...,,,ShrinkArea域名收缩,No,No,shrinkarea
+1394,shrinkarea.message.vertex_7,没有外部顶点,,,ShrinkArea域名收缩,No,No,shrinkarea
+1395,shrinkarea.message.vertex_8,顶点 ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1396,shrinkarea.prompt.area.shrink,§a请选择要收缩的域名：,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1397,shrinkarea.prompt.area.shrink.permission,§7请确保域名名称正确，且您有权限收缩该域名,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1398,shrinkarea.prompt.area.vertex,输入验证通过: 原域名顶点=,,,ShrinkArea域名收缩,No,No,shrinkarea
+1399,shrinkarea.success.area.shrink, 成功收缩域名: ,,,ShrinkArea域名收缩,No,No,shrinkarea
+1400,shrinkarea.success.area.shrink_2,§a域名收缩成功！,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1401,shrinkarea.success.general,凸包算法成功，没有交叉,,,ShrinkArea域名收缩,No,No,shrinkarea
+1402,shrinkarea.success.general_2,反向排序成功，没有交叉,,,ShrinkArea域名收缩,No,No,shrinkarea
+1403,shrinkarea.success.general_3,角度排序成功，没有交叉,,,ShrinkArea域名收缩,No,No,shrinkarea
+1404,shrinkarea.success.shrink,' 收缩成功,,,ShrinkArea域名收缩,No,No,shrinkarea
+1405,shrinkarea.title.area.finish.shrink,=== 域名收缩计算完成 ===,,,ShrinkArea域名收缩,No,No,shrinkarea
+1406,shrinkarea.title.area.shrink,=== 开始域名收缩计算 ===,,,ShrinkArea域名收缩,No,No,shrinkarea
+1407,shrinkarea.title.area.shrink_2,§6=== 收缩域名 - 选择域名 ===,,,ShrinkArea域名收缩,No,Yes,shrinkarea
+1408,shrinkarea.title.general,=== 开始最终排序，确保没有线段交叉 ===,,,ShrinkArea域名收缩,No,No,shrinkarea

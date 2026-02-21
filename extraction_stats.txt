@@ -1,0 +1,19 @@
+=== 提取统计 ===
+
+总字符串数: 1968
+唯一字符串数: 1411
+生成键值对数: 1414
+
+按模块统计:
+  message: 580
+  command: 230
+  gui: 144
+  shrinkarea: 115
+  easyadd: 97
+  dividearea: 83
+  expandarea: 73
+  addhint: 35
+  deletehint: 20
+  replacebutton: 17
+  debug: 9
+  boundviz: 5
