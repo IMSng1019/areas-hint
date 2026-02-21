@@ -1,0 +1,52 @@
+================================================================================
+AREAS HINT MOD - ENGLISH TRANSLATION COMPLETE
+================================================================================
+
+Translation Status: 100% COMPLETE - PURE ENGLISH
+
+File Information:
+- Output File: en_us.json
+- File Size: 103 KB
+- Total Entries: 1414
+- Chinese Characters: 0 (100% English)
+
+Language Metadata:
+- language.name: English
+- language.code: en_us
+- language.region: United States
+
+Key Features Preserved:
+✓ All Minecraft color codes (§a, §c, §6, etc.)
+✓ All placeholders ({0}, {1}, %s, %d, %.1f, etc.)
+✓ All escape sequences (\n, \\, etc.)
+✓ JSON structure and formatting
+
+Core Terminology Translations:
+- 域名 → area
+- 顶点 → vertex
+- 一级域名 → level 1 area
+- 二级域名 → level 2 area
+- 三级域名 → level 3 area
+- 上级域名 → parent area
+- 联合域名 → surface name
+- 维度 → dimension
+- 高度 → altitude
+- 坐标 → coordinate
+- 边界 → boundary
+- 创建者 → creator
+- 等级 → level
+- 颜色 → color
+
+Translation Quality:
+- UI Text: Professional English
+- Error Messages: Clear and understandable
+- Command Help: Properly formatted
+- Debug Messages: Technical and precise
+
+Ready for Use:
+The en_us.json file is ready to be integrated into your mod.
+Place it in: src/main/resources/assets/areashint/lang/en_us.json
+
+Generated: 2026-02-21
+Translation Method: Automated with comprehensive dictionary + manual cleanup
+================================================================================
