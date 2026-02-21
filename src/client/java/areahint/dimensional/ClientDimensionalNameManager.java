@@ -25,8 +25,15 @@ public class ClientDimensionalNameManager {
     
     // 当前维度名称配置
     private static Map<String, String> dimensionalNames = new HashMap<>(DEFAULT_DIMENSIONAL_NAMES);
+    // 默认维度颜色
+    private static final Map<String, String> DEFAULT_DIMENSIONAL_COLORS = Map.of(
+        "minecraft:overworld", "#FFFFFF",
+        "minecraft:the_nether", "#AA0000",
+        "minecraft:the_end", "#AA00AA"
+    );
+
     // 当前维度颜色配置
-    private static Map<String, String> dimensionalColors = new HashMap<>();
+    private static Map<String, String> dimensionalColors = new HashMap<>(DEFAULT_DIMENSIONAL_COLORS);
     
     /**
      * 初始化客户端维度域名管理器
@@ -47,6 +54,7 @@ public class ClientDimensionalNameManager {
             dimensionalNames.clear();
             dimensionalColors.clear();
             dimensionalNames.putAll(DEFAULT_DIMENSIONAL_NAMES);
+            dimensionalColors.putAll(DEFAULT_DIMENSIONAL_COLORS);
 
             for (DimensionalNameData data : dataList) {
                 dimensionalNames.put(data.getDimensionId(), data.getDisplayName());
@@ -102,6 +110,7 @@ public class ClientDimensionalNameManager {
         dimensionalNames.clear();
         dimensionalNames.putAll(DEFAULT_DIMENSIONAL_NAMES);
         dimensionalColors.clear();
+        dimensionalColors.putAll(DEFAULT_DIMENSIONAL_COLORS);
         AreashintClient.LOGGER.info("客户端维度域名配置已重置为默认值");
     }
 } 
