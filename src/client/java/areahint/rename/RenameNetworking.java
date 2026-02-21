@@ -2,6 +2,7 @@ package areahint.rename;
 
 import areahint.network.Packets;
 import areahint.debug.ClientDebugManager;
+import areahint.i18n.I18nManager;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
@@ -37,7 +38,7 @@ public class RenameNetworking {
 
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                net.minecraft.text.Text.of("§c发送重命名请求到服务端时发生错误: " + e.getMessage()), false);
+                net.minecraft.text.Text.of(I18nManager.translate("message.error.rename") + e.getMessage()), false);
 
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.NETWORK,
                 "发送重命名请求失败: " + e.getMessage());
@@ -98,7 +99,7 @@ public class RenameNetworking {
         client.execute(() -> {
             if (client.player != null) {
                 if (areas.isEmpty()) {
-                    client.player.sendMessage(net.minecraft.text.Text.of("§c当前维度中没有您可以重命名的域名"), false);
+                    client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.error.area.dimension.rename")), false);
                 } else {
                     // 启动交互式Rename流程
                     RenameManager.getInstance().startRename(areas, dimension);

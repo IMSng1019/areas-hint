@@ -5,6 +5,7 @@ import areahint.data.AreaData;
 import areahint.data.ConfigData;
 import areahint.file.FileManager;
 import areahint.file.JsonHelper;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.dimensional.DimensionalNameManager;
@@ -369,31 +370,31 @@ public class ServerCommands {
     private static int executeHelp(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         
-        source.sendMessage(Text.of("§6===== 区域提示模组命令帮助 ====="));
-        source.sendMessage(Text.of("§a/areahint help §7- 显示此帮助"));
-        source.sendMessage(Text.of("§a/areahint reload §7- 重新加载配置和域名文件"));
-        source.sendMessage(Text.of("§a/areahint delete §7- 交互式删除域名"));
-        source.sendMessage(Text.of("§a/areahint frequency [值] §7- 设置或显示检测频率"));
-        source.sendMessage(Text.of("§a/areahint subtitlerender [cpu|opengl|vulkan] §7- 设置或显示字幕渲染方式"));
-        source.sendMessage(Text.of("§a/areahint subtitlestyle §7- 交互式设置字幕样式"));
-        source.sendMessage(Text.of("§a/areahint subtitlesize §7- 交互式设置字幕大小 "));
-        source.sendMessage(Text.of("§a/areahint add <JSON> §7- 添加新的域名 (已弃用)"));
-        source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 "));
-        source.sendMessage(Text.of("§a/areahint recolor §7- 修改指定域名的颜色"));
-        source.sendMessage(Text.of("§a/areahint rename §7- 启动交互式域名重命名流程"));
-        source.sendMessage(Text.of("§a/areahint sethigh §7- 列出当前维度可修改高度的域名"));
-        source.sendMessage(Text.of("§a/areahint replacebutton §7- 更改记录域名顶点的按键"));
-        source.sendMessage(Text.of("§a/areahint check §7- 查看联合域名信息"));
-        source.sendMessage(Text.of("§a/areahint dimensionalityname §7- 管理维度域名 (管理员专用)"));
-        source.sendMessage(Text.of("§a/areahint dimensionalitycolor §7- 修改维度域名颜色 (管理员专用)"));
-        source.sendMessage(Text.of("§a/areahint expandarea §7- 交互式扩展域名区域"));
-        source.sendMessage(Text.of("§a/areahint shrinkarea §7- 交互式收缩域名区域"));
-        source.sendMessage(Text.of("§a/areahint dividearea §7- 交互式分割域名区域"));
-        source.sendMessage(Text.of("§a/areahint addhint §7- 向域名添加顶点"));
-        source.sendMessage(Text.of("§a/areahint deletehint §7- 从域名删除顶点"));
-        source.sendMessage(Text.of("§a/areahint boundviz §7- 切换域名边界可视化显示"));
-        source.sendMessage(Text.of("§a/areahint language §7- 交互式选择模组语言"));
-        source.sendMessage(Text.of("§a/areahint debug §7- 切换调试模式 (管理员)"));
+        source.sendMessage(Text.of(ServerI18nManager.translate("command.title.general")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.help")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.reload")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.delete")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.frequency")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.subtitlerender")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.subtitlestyle")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.subtitlesize")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.add")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.easyadd")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.recolor")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.rename")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.sethigh")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.replacebutton")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.check")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.dimensionalityname")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.dimensionalitycolor")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.expandarea")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.shrinkarea")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.dividearea")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.addhint")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.deletehint")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.boundviz")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.language")));
+        source.sendMessage(Text.of(ServerI18nManager.translate("help.command.debug")));
         
         
         return Command.SINGLE_SUCCESS;
@@ -422,7 +423,7 @@ public class ServerCommands {
         // 通知客户端重载配置
         sendClientCommand(source, "areahint:reload");
         
-        source.sendMessage(Text.of("§a区域数据和维度域名配置已重新加载并发送给所有客户端"));
+        source.sendMessage(Text.of(ServerI18nManager.translate("command.message.area.dimension")));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -440,14 +441,14 @@ public class ServerCommands {
         AreaData areaData = JsonHelper.fromJsonSingle(json);
         
         if (areaData == null) {
-            source.sendMessage(Text.of("§c无效的JSON数据，请检查格式"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_6")));
             return 0;
         }
         
         // 验证高度数据（如果存在）
         if (areaData.getAltitude() != null) {
             if (!areaData.getAltitude().isValid()) {
-                source.sendMessage(Text.of("§c高度数据无效: 最大高度不能小于最小高度"));
+                source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude_8")));
                 return 0;
             }
             
@@ -456,31 +457,31 @@ public class ServerCommands {
             Double maxAlt = areaData.getAltitude().getMax();
             
             if (minAlt != null && (minAlt < -64 || minAlt > 320)) {
-                source.sendMessage(Text.of(String.format("§c最小高度 %.1f 超出合理范围 [-64, 320]", minAlt)));
+                source.sendMessage(Text.of(String.format(ServerI18nManager.translate("command.error.altitude_2"), minAlt)));
                 return 0;
             }
             
             if (maxAlt != null && (maxAlt < -64 || maxAlt > 320)) {
-                source.sendMessage(Text.of(String.format("§c最大高度 %.1f 超出合理范围 [-64, 320]", maxAlt)));
+                source.sendMessage(Text.of(String.format(ServerI18nManager.translate("command.error.altitude"), maxAlt)));
                 return 0;
             }
         }
         
         if (!areaData.isValid()) {
-            source.sendMessage(Text.of("§c域名数据无效，请确保至少有3个点和正确的域名等级"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.level")));
             return 0;
         }
         
         // 根据维度决定写入哪个文件
         String dimensionId = getDimensionFromSource(source);
         if (dimensionId == null) {
-            source.sendMessage(Text.of("§c无法确定当前维度，请指定维度"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension")));
             return 0;
         }
         
         String fileName = Packets.getFileNameForDimension(dimensionId);
         if (fileName == null) {
-            source.sendMessage(Text.of("§c无法确定文件名，维度ID: " + dimensionId));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension_2") + dimensionId));
             return 0;
         }
         
@@ -493,14 +494,14 @@ public class ServerCommands {
         
         // 添加区域数据
         if (FileManager.addAreaData(filePath, areaData)) {
-            source.sendMessage(Text.of("§a成功添加域名: " + areaData.getName()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.success.area.add") + areaData.getName()));
             
             // 通知所有客户端更新
             ServerNetworking.sendAreaDataToAll(dimensionId);
             
             return Command.SINGLE_SUCCESS;
         } else {
-            source.sendMessage(Text.of("§c添加域名失败，请检查日志"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.add")));
             return 0;
         }
     }
@@ -547,7 +548,7 @@ public class ServerCommands {
         // 向客户端发送命令
         sendClientCommand(source, "areahint:frequency_info");
         
-        source.sendMessage(Text.of("§a检测频率信息已发送到客户端"));
+        source.sendMessage(Text.of(ServerI18nManager.translate("command.message.general_15")));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -564,7 +565,7 @@ public class ServerCommands {
         // 向客户端发送命令
         sendClientCommand(source, "areahint:frequency " + value);
         
-        source.sendMessage(Text.of("§a检测频率已设置为: §6" + value + "§a Hz"));
+        source.sendMessage(Text.of(ServerI18nManager.translate("command.message.general_16") + value + "§a Hz"));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -580,7 +581,7 @@ public class ServerCommands {
         // 向客户端发送命令
         sendClientCommand(source, "areahint:subtitlerender_info");
         
-        source.sendMessage(Text.of("§a字幕渲染方式信息已发送到客户端"));
+        source.sendMessage(Text.of(ServerI18nManager.translate("command.message.general_13")));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -600,11 +601,11 @@ public class ServerCommands {
             // 向客户端发送命令
             sendClientCommand(source, "areahint:subtitlerender " + normalizedMode);
             
-            source.sendMessage(Text.of("§a字幕渲染方式已设置为: §6" + normalizedMode));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.message.general_14") + normalizedMode));
             
             return Command.SINGLE_SUCCESS;
         } else {
-            source.sendMessage(Text.of("§c无效的渲染方式: §6" + mode + "§c。有效选项: cpu, opengl, vulkan"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_7") + mode + ServerI18nManager.translate("command.error.general")));
             return 0;
         }
     }
@@ -619,7 +620,7 @@ public class ServerCommands {
 
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -629,7 +630,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlestyle_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c启动SubtitleStyle时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.start_4") + e.getMessage()));
             return 0;
         }
     }
@@ -644,7 +645,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -652,7 +653,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlestyle_select:" + style);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择样式时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_14") + e.getMessage()));
             return 0;
         }
     }
@@ -666,7 +667,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -674,7 +675,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlestyle_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消样式选择时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel_5") + e.getMessage()));
             return 0;
         }
     }
@@ -689,7 +690,7 @@ public class ServerCommands {
 
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -699,7 +700,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlesize_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c启动SubtitleSize时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.start_3") + e.getMessage()));
             return 0;
         }
     }
@@ -714,7 +715,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -722,7 +723,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlesize_select:" + size);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择大小时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_13") + e.getMessage()));
             return 0;
         }
     }
@@ -736,7 +737,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -744,7 +745,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlesize_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消大小选择时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel_3") + e.getMessage()));
             return 0;
         }
     }
@@ -759,7 +760,7 @@ public class ServerCommands {
 
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -769,7 +770,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:delete_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c启动Delete时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.start") + e.getMessage()));
             return 0;
         }
     }
@@ -784,7 +785,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -792,7 +793,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:delete_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择域名时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area_3") + e.getMessage()));
             return 0;
         }
     }
@@ -806,7 +807,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -814,7 +815,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:delete_confirm");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c确认删除时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.confirm.delete") + e.getMessage()));
             return 0;
         }
     }
@@ -828,7 +829,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -836,7 +837,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:delete_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消删除时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel.delete") + e.getMessage()));
             return 0;
         }
     }
@@ -911,7 +912,7 @@ public class ServerCommands {
         
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -921,7 +922,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c启动EasyAdd时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.start_2") + e.getMessage()));
             return 0;
         }
     }
@@ -933,7 +934,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -941,7 +942,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消EasyAdd时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel_2") + e.getMessage()));
             return 0;
         }
     }
@@ -953,7 +954,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -961,7 +962,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_level:" + level);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c设置域名等级时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.level_2") + e.getMessage()));
             return 0;
         }
     }
@@ -973,7 +974,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -981,7 +982,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_base:" + baseName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择上级域名时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.parent") + e.getMessage()));
             return 0;
         }
     }
@@ -993,7 +994,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1001,7 +1002,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_continue");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c继续记录时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.record.continue") + e.getMessage()));
             return 0;
         }
     }
@@ -1013,7 +1014,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1021,7 +1022,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_finish");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c完成记录时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.record.finish") + e.getMessage()));
             return 0;
         }
     }
@@ -1033,7 +1034,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1041,7 +1042,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_save");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c保存域名时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("easyadd.error.area.save") + e.getMessage()));
             return 0;
         }
     }
@@ -1053,7 +1054,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1061,7 +1062,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_altitude_auto");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择自动高度时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude_4") + e.getMessage()));
             return 0;
         }
     }
@@ -1073,7 +1074,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1081,7 +1082,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_altitude_custom");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择自定义高度时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude_5") + e.getMessage()));
             return 0;
         }
     }
@@ -1093,7 +1094,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1101,7 +1102,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_altitude_unlimited");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择不限制高度时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude_3") + e.getMessage()));
             return 0;
         }
     }
@@ -1113,7 +1114,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1121,7 +1122,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_color:" + color);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择颜色时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.color_2") + e.getMessage()));
             return 0;
         }
     }
@@ -1137,13 +1138,13 @@ public class ServerCommands {
         try {
             // 检查是否为玩家执行
             if (source.getPlayer() == null) {
-                source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+                source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
                 return 0;
             }
             
             // 发送客户端命令，启动域名扩展流程
-            source.sendMessage(Text.of("§a启动域名扩展模式..."));
-            source.sendMessage(Text.of("§e请在客户端界面中选择要扩展的域名"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.message.area.expand.start")));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.prompt.area.expand")));
             
             // 通过客户端命令通道发送启动命令
             sendClientCommand(source, "areahint:expandarea_start");
@@ -1151,7 +1152,7 @@ public class ServerCommands {
             return Command.SINGLE_SUCCESS;
             
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c启动域名扩展失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.expand.start") + e.getMessage()));
             e.printStackTrace();
             return 0;
         }
@@ -1166,7 +1167,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1174,7 +1175,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:expandarea_continue");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c继续域名扩展时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.continue.expand") + e.getMessage()));
             return 0;
         }
     }
@@ -1188,7 +1189,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1196,7 +1197,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:expandarea_save");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c保存域名扩展时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.save.expand") + e.getMessage()));
             return 0;
         }
     }
@@ -1212,13 +1213,13 @@ public class ServerCommands {
         try {
             // 检查是否为玩家执行
             if (source.getPlayer() == null) {
-                source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+                source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
                 return 0;
             }
             
             // 发送客户端命令，启动域名收缩流程
-            source.sendMessage(Text.of("§a启动域名收缩模式..."));
-            source.sendMessage(Text.of("§e请在客户端界面中选择要收缩的域名"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.message.area.shrink.start")));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.prompt.area.shrink")));
             
             // 通过客户端命令通道发送启动命令
             sendClientCommand(source, "areahint:shrinkarea_start");
@@ -1226,7 +1227,7 @@ public class ServerCommands {
             return Command.SINGLE_SUCCESS;
             
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c启动域名收缩失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.shrink.start") + e.getMessage()));
             e.printStackTrace();
             return 0;
         }
@@ -1241,7 +1242,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1249,7 +1250,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:shrinkarea_continue");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c继续域名收缩时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.continue.shrink") + e.getMessage()));
             return 0;
         }
     }
@@ -1263,7 +1264,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1271,7 +1272,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:shrinkarea_save");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c保存域名收缩时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.save.shrink") + e.getMessage()));
             return 0;
         }
     }
@@ -1286,7 +1287,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1294,7 +1295,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:expandarea_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择域名时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area_3") + e.getMessage()));
             return 0;
         }
     }
@@ -1308,7 +1309,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1316,7 +1317,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:expandarea_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消扩展时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel.expand") + e.getMessage()));
             return 0;
         }
     }
@@ -1326,25 +1327,25 @@ public class ServerCommands {
     private static int executeDivideAreaStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         try {
-            if (source.getPlayer() == null) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            if (source.getPlayer() == null) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9"))); return 0; }
             sendClientCommand(source, "areahint:dividearea_start");
             return Command.SINGLE_SUCCESS;
-        } catch (Exception e) { source.sendMessage(Text.of("§c启动域名分割失败: " + e.getMessage())); return 0; }
+        } catch (Exception e) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.divide.start") + e.getMessage())); return 0; }
     }
 
     private static int executeDivideAreaSelect(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9"))); return 0; }
             sendClientCommand(source, "areahint:dividearea_select:" + areaName);
             return Command.SINGLE_SUCCESS;
-        } catch (Exception e) { source.sendMessage(Text.of("§c选择域名失败: " + e.getMessage())); return 0; }
+        } catch (Exception e) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area_2") + e.getMessage())); return 0; }
     }
 
     private static int executeDivideAreaContinue(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9"))); return 0; }
             sendClientCommand(source, "areahint:dividearea_continue");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1353,7 +1354,7 @@ public class ServerCommands {
     private static int executeDivideAreaSave(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9"))); return 0; }
             sendClientCommand(source, "areahint:dividearea_save");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1362,7 +1363,7 @@ public class ServerCommands {
     private static int executeDivideAreaName(CommandContext<ServerCommandSource> context, String name) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9"))); return 0; }
             sendClientCommand(source, "areahint:dividearea_name:" + name);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1371,7 +1372,7 @@ public class ServerCommands {
     private static int executeDivideAreaLevel(CommandContext<ServerCommandSource> context, int level) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9"))); return 0; }
             sendClientCommand(source, "areahint:dividearea_level:" + level);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1380,7 +1381,7 @@ public class ServerCommands {
     private static int executeDivideAreaBase(CommandContext<ServerCommandSource> context, String baseName) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9"))); return 0; }
             sendClientCommand(source, "areahint:dividearea_base:" + baseName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1389,7 +1390,7 @@ public class ServerCommands {
     private static int executeDivideAreaColor(CommandContext<ServerCommandSource> context, String color) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9"))); return 0; }
             sendClientCommand(source, "areahint:dividearea_color:" + color);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1398,7 +1399,7 @@ public class ServerCommands {
     private static int executeDivideAreaCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of("§c此命令只能由玩家执行")); return 0; }
+            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9"))); return 0; }
             sendClientCommand(source, "areahint:dividearea_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1410,13 +1411,13 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         try {
             if (source.getPlayer() == null) {
-                source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+                source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
                 return 0;
             }
             sendClientCommand(source, "areahint:addhint_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c启动添加顶点失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.vertex.add.start") + e.getMessage()));
             return 0;
         }
     }
@@ -1424,14 +1425,14 @@ public class ServerCommands {
     private static int executeAddHintSelect(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:addhint_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择域名失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area_2") + e.getMessage()));
             return 0;
         }
     }
@@ -1444,14 +1445,14 @@ public class ServerCommands {
     private static int executeAddHintSubmit(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:addhint_submit");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c提交失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_5") + e.getMessage()));
             return 0;
         }
     }
@@ -1459,14 +1460,14 @@ public class ServerCommands {
     private static int executeAddHintCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:addhint_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel_4") + e.getMessage()));
             return 0;
         }
     }
@@ -1477,13 +1478,13 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         try {
             if (source.getPlayer() == null) {
-                source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+                source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
                 return 0;
             }
             sendClientCommand(source, "areahint:deletehint_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c启动删除顶点失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.vertex.delete.start") + e.getMessage()));
             return 0;
         }
     }
@@ -1491,14 +1492,14 @@ public class ServerCommands {
     private static int executeDeleteHintSelect(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:deletehint_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择域名失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area_2") + e.getMessage()));
             return 0;
         }
     }
@@ -1506,14 +1507,14 @@ public class ServerCommands {
     private static int executeDeleteHintToggle(CommandContext<ServerCommandSource> context, int index) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:deletehint_toggle:" + index);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c切换顶点失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.vertex") + e.getMessage()));
             return 0;
         }
     }
@@ -1521,14 +1522,14 @@ public class ServerCommands {
     private static int executeDeleteHintSubmit(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:deletehint_submit");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c提交失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_5") + e.getMessage()));
             return 0;
         }
     }
@@ -1536,14 +1537,14 @@ public class ServerCommands {
     private static int executeDeleteHintCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:deletehint_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消失败: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel_4") + e.getMessage()));
             return 0;
         }
     }
@@ -1558,7 +1559,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1566,7 +1567,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:shrinkarea_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择域名时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area_3") + e.getMessage()));
             return 0;
         }
     }
@@ -1580,7 +1581,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         
@@ -1588,7 +1589,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:shrinkarea_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消收缩时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel.shrink") + e.getMessage()));
             return 0;
         }
     }
@@ -1889,14 +1890,14 @@ public class ServerCommands {
     private static int executeLanguageStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:language_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c启动语言选择时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.start.language") + e.getMessage()));
             return 0;
         }
     }
@@ -1904,14 +1905,14 @@ public class ServerCommands {
     private static int executeLanguageSelect(CommandContext<ServerCommandSource> context, String langCode) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:language_select:" + langCode);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择语言时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.language") + e.getMessage()));
             return 0;
         }
     }
@@ -1919,14 +1920,14 @@ public class ServerCommands {
     private static int executeLanguageCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:language_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消语言选择时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel.language") + e.getMessage()));
             return 0;
         }
     }
@@ -1936,7 +1937,7 @@ public class ServerCommands {
 
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -1945,7 +1946,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:boundviz_toggle");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c切换边界可视化时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.boundary.visualization") + e.getMessage()));
             return 0;
         }
     }

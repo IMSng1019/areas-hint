@@ -1,5 +1,6 @@
 package areahint.subtitlestyle;
 
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -22,37 +23,37 @@ public class SubtitleStyleUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 字幕样式设置 ==="), false);
-        client.player.sendMessage(Text.of("§a当前样式: §6" + getStyleDisplayName(currentStyle)), false);
-        client.player.sendMessage(Text.of("§a请选择新的字幕样式："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.general_2")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.general_9") + getStyleDisplayName(currentStyle)), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.general_4")), false);
         client.player.sendMessage(Text.of(""), false);
 
         // 创建样式选择按钮
-        MutableText fullButton = Text.literal("§b[完整样式]")
+        MutableText fullButton = Text.literal(I18nManager.translate("gui.button.general_3"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle select full"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of("显示完整的域名层级信息\n例如: 一级域名 > 二级域名 > 三级域名")))
+                    Text.of(I18nManager.translate("gui.message.area_6"))))
                 .withColor(Formatting.AQUA));
 
-        MutableText simpleButton = Text.literal("§e[简洁样式]")
+        MutableText simpleButton = Text.literal(I18nManager.translate("gui.button.general_5"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle select simple"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of("只显示当前所在的最低级域名\n例如: 三级域名")))
+                    Text.of(I18nManager.translate("gui.message.area_5"))))
                 .withColor(Formatting.YELLOW));
 
-        MutableText mixedButton = Text.literal("§d[混合样式]")
+        MutableText mixedButton = Text.literal(I18nManager.translate("gui.button.general_4"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle select mixed"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of("智能显示域名信息\n根据层级自动调整显示方式")))
+                    Text.of(I18nManager.translate("gui.message.area_7"))))
                 .withColor(Formatting.LIGHT_PURPLE));
 
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消样式设置")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_6"))))
                 .withColor(Formatting.RED));
 
         // 组合按钮显示
@@ -67,7 +68,7 @@ public class SubtitleStyleUI {
 
         client.player.sendMessage(buttonRow, false);
         client.player.sendMessage(Text.of(""), false);
-        client.player.sendMessage(Text.of("§7提示：选择样式后将自动重新加载配置"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.general_2")), false);
     }
 
     /**
@@ -76,11 +77,11 @@ public class SubtitleStyleUI {
     private static String getStyleDisplayName(String style) {
         switch (style) {
             case "full":
-                return "完整样式 (Full)";
+                return I18nManager.translate("message.message.general_106");
             case "simple":
-                return "简洁样式 (Simple)";
+                return I18nManager.translate("message.message.general_215");
             case "mixed":
-                return "混合样式 (Mixed)";
+                return I18nManager.translate("message.message.general_209");
             default:
                 return style;
         }
@@ -92,7 +93,7 @@ public class SubtitleStyleUI {
     public static void showError(String message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§c错误：" + message), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.general_2") + message), false);
         }
     }
 

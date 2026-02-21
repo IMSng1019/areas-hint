@@ -19,16 +19,16 @@ public class LanguageUI {
         String currentLang = I18nManager.getCurrentLanguage();
         String currentDisplayName = I18nManager.getLanguageDisplayName(currentLang);
 
-        client.player.sendMessage(Text.of("§6=== 语言设置 / Language Settings ==="), false);
-        client.player.sendMessage(Text.of("§a当前语言: §6" + currentDisplayName + " (" + currentLang + ")"), false);
-        client.player.sendMessage(Text.of("§a请选择语言 / Select language:"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("language.title.settings")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.language") + currentDisplayName + " (" + currentLang + ")"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("language.prompt.select")), false);
         client.player.sendMessage(Text.of(""), false);
 
         List<String> languages = I18nManager.getAvailableLanguages();
 
         if (languages.isEmpty()) {
-            client.player.sendMessage(Text.of("§c未找到任何语言文件"), false);
-            client.player.sendMessage(Text.of("§7请在 areas-hint/lang/ 文件夹中添加语言文件"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("gui.error.language")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("language.error.no_files")), false);
             return;
         }
 
@@ -43,7 +43,7 @@ public class LanguageUI {
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/areahint language select " + langCode))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Text.of("选择 " + displayName)))
+                        Text.of(I18nManager.translate("addhint.prompt.general") + displayName)))
                     .withColor(isCurrent ? Formatting.GREEN : Formatting.AQUA));
 
             client.player.sendMessage(button, false);
@@ -52,10 +52,10 @@ public class LanguageUI {
         client.player.sendMessage(Text.of(""), false);
 
         // 取消按钮
-        MutableText cancelButton = Text.literal("§c[取消 / Cancel]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("language.button.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint language cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消语言选择")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.prompt.cancel.language"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);

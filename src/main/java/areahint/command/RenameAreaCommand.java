@@ -3,6 +3,7 @@ package areahint.command;
 import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import com.mojang.brigadier.context.CommandContext;
@@ -38,11 +39,11 @@ public class RenameAreaCommand {
                 ServerPlayerEntity player = (ServerPlayerEntity) source.getEntity();
                 sendRenameableAreaList(player);
             } else {
-                source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+                source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             }
         } catch (Exception e) {
-            Areashint.LOGGER.error("执行rename命令时发生错误: " + e.getMessage());
-            source.sendMessage(Text.of("§c执行命令时发生错误，请稍后重试"));
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_22") + e.getMessage());
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_4")));
         }
 
         return 1;
@@ -58,7 +59,7 @@ public class RenameAreaCommand {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -68,7 +69,7 @@ public class RenameAreaCommand {
                 "areahint:rename_select:" + areaName);
             return 1;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c选择域名时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area_3") + e.getMessage()));
             return 0;
         }
     }
@@ -82,7 +83,7 @@ public class RenameAreaCommand {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -92,7 +93,7 @@ public class RenameAreaCommand {
                 "areahint:rename_confirm");
             return 1;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c确认重命名时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.confirm.rename") + e.getMessage()));
             return 0;
         }
     }
@@ -106,7 +107,7 @@ public class RenameAreaCommand {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
@@ -116,7 +117,7 @@ public class RenameAreaCommand {
                 "areahint:rename_cancel");
             return 1;
         } catch (Exception e) {
-            source.sendMessage(Text.of("§c取消重命名时发生错误: " + e.getMessage()));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel.rename") + e.getMessage()));
             return 0;
         }
     }
@@ -138,7 +139,7 @@ public class RenameAreaCommand {
                 Packets.convertDimensionPathToType(dimensionPath));
 
             if (fileName == null) {
-                sendRenameResponse(player, false, "无法确定当前维度文件");
+                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.dimension_2"));
                 return;
             }
 
@@ -172,14 +173,14 @@ public class RenameAreaCommand {
 
             for (AreaData area : editableAreas) {
                 buf.writeString(area.getName());
-                buf.writeString(area.getSignature() != null ? area.getSignature() : "未知创建者");
+                buf.writeString(area.getSignature() != null ? area.getSignature() : ServerI18nManager.translate("gui.message.general_16"));
             }
 
             ServerPlayNetworking.send(player, Packets.S2C_RENAME_RESPONSE, buf);
 
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送域名列表时出错: " + e.getMessage());
-            sendRenameResponse(player, false, "读取域名数据时发生错误");
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.message.area.list") + e.getMessage());
+            sendRenameResponse(player, false, ServerI18nManager.translate("command.error.area_4"));
         }
     }
 
@@ -199,7 +200,7 @@ public class RenameAreaCommand {
 
             // 验证新域名格式
             if (newName == null || newName.trim().isEmpty()) {
-                sendRenameResponse(player, false, "新域名不能为空");
+                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.area_11"));
                 return;
             }
 
@@ -216,14 +217,14 @@ public class RenameAreaCommand {
                 Packets.convertDimensionPathToType(dimensionPath));
 
             if (fileName == null) {
-                sendRenameResponse(player, false, "无法确定维度文件");
+                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.dimension_3"));
                 return;
             }
 
             // 获取域名文件
             Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             if (!areaFile.toFile().exists()) {
-                sendRenameResponse(player, false, "维度文件不存在");
+                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.dimension_5"));
                 return;
             }
 
@@ -244,17 +245,17 @@ public class RenameAreaCommand {
 
             // 验证
             if (targetArea == null) {
-                sendRenameResponse(player, false, "未找到域名: " + oldName);
+                sendRenameResponse(player, false, ServerI18nManager.translate("addhint.message.area_3") + oldName);
                 return;
             }
 
             if (newNameExists) {
-                sendRenameResponse(player, false, "域名 \"" + newName + "\" 已存在，请选择其他名称");
+                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.area_10") + newName + "\"" + ServerI18nManager.translate("command.prompt.name"));
                 return;
             }
 
             if (!canRenameArea(targetArea, playerName, isAdmin)) {
-                sendRenameResponse(player, false, "您没有权限重命名域名 \"" + oldName + "\"");
+                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.area.rename.permission") + oldName + "\"");
                 return;
             }
 
@@ -275,23 +276,23 @@ public class RenameAreaCommand {
 
             // 保存文件
             if (FileManager.writeAreaData(areaFile, areas)) {
-                String successMessage = "§a域名重命名成功！\n§7原域名: §f" + oldName + "\n§7新域名: §f" + newName;
+                String successMessage = ServerI18nManager.translate("command.success.area.rename") + oldName + ServerI18nManager.translate("command.message.area_5") + newName;
                 if (newSurfaceName != null) {
-                    successMessage += "\n§7新联合域名: §f" + newSurfaceName;
+                    successMessage += ServerI18nManager.translate("command.message.area.surface_3") + newSurfaceName;
                 }
                 sendRenameResponse(player, true, successMessage);
 
                 // 向所有客户端发送更新后的区域数据
                 ServerNetworking.sendAllAreaDataToAll();
 
-                Areashint.LOGGER.info("玩家 " + playerName + " 将域名 \"" + oldName + "\" 重命名为 \"" + newName + "\"");
+                Areashint.LOGGER.info(ServerI18nManager.translate("command.message.general_28") + playerName + ServerI18nManager.translate("command.message.area_4") + oldName + "\"" + ServerI18nManager.translate("command.message.rename") + newName + "\"");
             } else {
-                sendRenameResponse(player, false, "保存域名数据时失败");
+                sendRenameResponse(player, false, ServerI18nManager.translate("command.error.area.save"));
             }
 
         } catch (Exception e) {
-            Areashint.LOGGER.error("处理重命名请求时发生错误: " + e.getMessage());
-            sendRenameResponse(player, false, "处理请求时发生错误: " + e.getMessage());
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.rename_2") + e.getMessage());
+            sendRenameResponse(player, false, ServerI18nManager.translate("command.error.general_19") + e.getMessage());
         }
     }
 
@@ -344,8 +345,8 @@ public class RenameAreaCommand {
                     });
 
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理重命名请求时发生错误", e);
-                    sendRenameResponse(player, false, "服务端处理请求时发生错误: " + e.getMessage());
+                    Areashint.LOGGER.error(ServerI18nManager.translate("command.error.rename"), e);
+                    sendRenameResponse(player, false, ServerI18nManager.translate("command.error.general_23") + e.getMessage());
                 }
             });
     }

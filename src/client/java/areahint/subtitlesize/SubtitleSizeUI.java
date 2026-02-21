@@ -1,5 +1,6 @@
 package areahint.subtitlesize;
 
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -22,41 +23,41 @@ public class SubtitleSizeUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 字幕大小设置 ==="), false);
-        client.player.sendMessage(Text.of("§a当前大小: §6" + getSizeDisplayName(currentSize)), false);
-        client.player.sendMessage(Text.of("§a请选择新的字幕大小："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.general")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.general_8") + getSizeDisplayName(currentSize)), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.general_3")), false);
         client.player.sendMessage(Text.of(""), false);
 
         // 第一行按钮：极大、大、较大、中
         MutableText row1 = Text.empty()
-            .append(createSizeButton("极大", "extra_large", "§d"))
+            .append(createSizeButton(I18nManager.translate("message.message.general_193"), "extra_large", "§d"))
             .append(Text.of("  "))
-            .append(createSizeButton("大", "large", "§b"))
+            .append(createSizeButton(I18nManager.translate("message.message.general_104"), "large", "§b"))
             .append(Text.of("  "))
-            .append(createSizeButton("较大", "medium_large", "§a"))
+            .append(createSizeButton(I18nManager.translate("message.message.general_225"), "medium_large", "§a"))
             .append(Text.of("  "))
-            .append(createSizeButton("中", "medium", "§e"));
+            .append(createSizeButton(I18nManager.translate("message.message.general_58"), "medium", "§e"));
 
         // 第二行按钮：较小、小、极小
         MutableText row2 = Text.empty()
-            .append(createSizeButton("较小", "medium_small", "§6"))
+            .append(createSizeButton(I18nManager.translate("message.message.general_226"), "medium_small", "§6"))
             .append(Text.of("  "))
-            .append(createSizeButton("小", "small", "§c"))
+            .append(createSizeButton(I18nManager.translate("message.message.general_111"), "small", "§c"))
             .append(Text.of("  "))
-            .append(createSizeButton("极小", "extra_small", "§4"));
+            .append(createSizeButton(I18nManager.translate("message.message.general_194"), "extra_small", "§4"));
 
         // 取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlesize cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消大小设置")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_4"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(row1, false);
         client.player.sendMessage(row2, false);
         client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(cancelButton, false);
-        client.player.sendMessage(Text.of("§7提示：选择大小后将自动重新加载配置"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.general")), false);
     }
 
     /**
@@ -68,7 +69,7 @@ public class SubtitleSizeUI {
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint subtitlesize select " + sizeValue))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of("选择 " + displayName + " 作为字幕大小"))));
+                    Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("gui.message.general_2")))));
     }
 
     /**
@@ -77,19 +78,19 @@ public class SubtitleSizeUI {
     private static String getSizeDisplayName(String size) {
         switch (size) {
             case "extra_large":
-                return "极大";
+                return I18nManager.translate("message.message.general_193");
             case "large":
-                return "大";
+                return I18nManager.translate("message.message.general_104");
             case "medium_large":
-                return "较大";
+                return I18nManager.translate("message.message.general_225");
             case "medium":
-                return "中";
+                return I18nManager.translate("message.message.general_58");
             case "medium_small":
-                return "较小";
+                return I18nManager.translate("message.message.general_226");
             case "small":
-                return "小";
+                return I18nManager.translate("message.message.general_111");
             case "extra_small":
-                return "极小";
+                return I18nManager.translate("message.message.general_194");
             default:
                 return size;
         }
@@ -101,7 +102,7 @@ public class SubtitleSizeUI {
     public static void showError(String message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§c错误：" + message), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.general_2") + message), false);
         }
     }
 

@@ -12,6 +12,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
+import areahint.i18n.ServerI18nManager;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,7 +28,7 @@ public class DimensionalNameCommands {
     public static int executeStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         // 确保所有服务器维度都已注册
@@ -40,7 +42,7 @@ public class DimensionalNameCommands {
     public static int executeSelect(CommandContext<ServerCommandSource> context, String dimensionId) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         // 去除引号
@@ -54,17 +56,17 @@ public class DimensionalNameCommands {
     public static int executeName(CommandContext<ServerCommandSource> context, String newName) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
 
         if (newName == null || newName.trim().isEmpty()) {
-            source.sendError(Text.literal("维度名称不能为空"));
+            source.sendError(Text.literal(ServerI18nManager.translate("command.message.dimension.name_2")));
             return 0;
         }
         final String finalNewName = newName.trim();
         if (finalNewName.length() > 50) {
-            source.sendError(Text.literal("维度名称过长（最多50个字符）"));
+            source.sendError(Text.literal(ServerI18nManager.translate("command.message.dimension.name_3")));
             return 0;
         }
 
@@ -75,7 +77,7 @@ public class DimensionalNameCommands {
     public static int executeConfirm(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         sendClientCommand(source, "areahint:dimname_confirm");
@@ -85,7 +87,7 @@ public class DimensionalNameCommands {
     public static int executeCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         sendClientCommand(source, "areahint:dimname_cancel");
@@ -97,7 +99,7 @@ public class DimensionalNameCommands {
     public static int executeColorStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         syncServerDimensions(source.getServer());
@@ -109,7 +111,7 @@ public class DimensionalNameCommands {
     public static int executeColorSelect(CommandContext<ServerCommandSource> context, String dimensionId) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         if (dimensionId.startsWith("\"") && dimensionId.endsWith("\"") && dimensionId.length() > 1) {
@@ -122,7 +124,7 @@ public class DimensionalNameCommands {
     public static int executeColorColor(CommandContext<ServerCommandSource> context, String colorValue) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         sendClientCommand(source, "areahint:dimcolor_color:" + colorValue);
@@ -132,7 +134,7 @@ public class DimensionalNameCommands {
     public static int executeColorConfirm(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         sendClientCommand(source, "areahint:dimcolor_confirm");
@@ -142,7 +144,7 @@ public class DimensionalNameCommands {
     public static int executeColorCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of("§c此命令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
             return 0;
         }
         sendClientCommand(source, "areahint:dimcolor_cancel");
@@ -160,24 +162,24 @@ public class DimensionalNameCommands {
             DimensionalNameManager.setDimensionalName(dimensionId, newName);
 
             if (DimensionalNameManager.saveDimensionalNames()) {
-                source.sendFeedback(() -> Text.literal("§a维度域名已更新！"), false);
-                source.sendFeedback(() -> Text.literal("§e维度: §b" + dimensionId), false);
-                source.sendFeedback(() -> Text.literal("§e旧名称: §7" + oldName), false);
-                source.sendFeedback(() -> Text.literal("§e新名称: §a" + newName), false);
+                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.area.dimension_2")), false);
+                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.dimension") + dimensionId), false);
+                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.name_3") + oldName), false);
+                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.name_2") + newName), false);
 
                 // 广播到所有客户端
                 DimensionalNameNetworking.sendDimensionalNamesToAllClients(source.getServer());
                 // 通知客户端reload
                 ServerNetworking.sendCommandToAllClients(source.getServer(), "areahint:reload");
 
-                Areashint.LOGGER.info("管理员 {} 将维度 {} 的名称从 '{}' 更改为 '{}'",
+                Areashint.LOGGER.info(ServerI18nManager.translate("command.message.dimension.name"),
                     source.getName(), dimensionId, oldName, newName);
             } else {
-                source.sendError(Text.literal("保存维度域名配置失败"));
+                source.sendError(Text.literal(ServerI18nManager.translate("command.error.area.dimension.save")));
             }
         } catch (Exception e) {
-            source.sendError(Text.literal("设置维度名称时发生错误: " + e.getMessage()));
-            Areashint.LOGGER.error("设置维度名称失败", e);
+            source.sendError(Text.literal(ServerI18nManager.translate("command.error.dimension.name_2") + e.getMessage()));
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.dimension.name"), e);
         }
     }
 
@@ -187,26 +189,26 @@ public class DimensionalNameCommands {
     public static void handleDimColorChange(ServerCommandSource source, String dimensionId, String newColor) {
         try {
             String oldColor = DimensionalNameManager.getDimensionalColor(dimensionId);
-            String oldColorDisplay = oldColor != null ? oldColor : "#FFFFFF (默认白色)";
+            String oldColorDisplay = oldColor != null ? oldColor : ServerI18nManager.translate("command.message.general_6");
             DimensionalNameManager.setDimensionalColor(dimensionId, newColor);
 
             if (DimensionalNameManager.saveDimensionalNames()) {
-                source.sendFeedback(() -> Text.literal("§a维度域名颜色已更新！"), false);
-                source.sendFeedback(() -> Text.literal("§e维度: §b" + dimensionId), false);
-                source.sendFeedback(() -> Text.literal("§e原颜色: §7" + oldColorDisplay), false);
-                source.sendFeedback(() -> Text.literal("§e新颜色: §a" + newColor), false);
+                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.area.color.dimension")), false);
+                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.dimension") + dimensionId), false);
+                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.color_5") + oldColorDisplay), false);
+                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.color_6") + newColor), false);
 
                 DimensionalNameNetworking.sendDimensionalNamesToAllClients(source.getServer());
                 ServerNetworking.sendCommandToAllClients(source.getServer(), "areahint:reload");
 
-                Areashint.LOGGER.info("管理员 {} 将维度 {} 的颜色从 '{}' 更改为 '{}'",
+                Areashint.LOGGER.info(ServerI18nManager.translate("command.message.color.dimension"),
                     source.getName(), dimensionId, oldColorDisplay, newColor);
             } else {
-                source.sendError(Text.literal("保存维度域名配置失败"));
+                source.sendError(Text.literal(ServerI18nManager.translate("command.error.area.dimension.save")));
             }
         } catch (Exception e) {
-            source.sendError(Text.literal("设置维度颜色时发生错误: " + e.getMessage()));
-            Areashint.LOGGER.error("设置维度颜色失败", e);
+            source.sendError(Text.literal(ServerI18nManager.translate("command.error.color.dimension_2") + e.getMessage()));
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.color.dimension"), e);
         }
     }
 
@@ -253,13 +255,13 @@ public class DimensionalNameCommands {
 
         // 仅当维度名称等于维度ID时（未被命名）才允许
         if (!currentName.equals(dimId)) {
-            source.sendMessage(Text.of("§c该维度已被命名为: " + currentName));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension_4") + currentName));
             return 0;
         }
 
         String trimmed = name.trim();
         if (trimmed.isEmpty() || trimmed.length() > 50) {
-            source.sendError(Text.literal("名称无效（1-50个字符）"));
+            source.sendError(Text.literal(ServerI18nManager.translate("command.error.name")));
             return 0;
         }
 
@@ -278,7 +280,7 @@ public class DimensionalNameCommands {
             // 使用维度路径作为默认名称（如 overworld, the_nether）
             String defaultName = source.getPlayer().getWorld().getRegistryKey().getValue().getPath();
             handleDimNameChange(source, dimId, defaultName);
-            source.sendMessage(Text.of("§7已使用默认名称: " + defaultName));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.message.name") + defaultName));
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -289,7 +291,7 @@ public class DimensionalNameCommands {
                 ServerNetworking.sendCommandToClient(source.getPlayer(), command);
             }
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送客户端命令时出错", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.message.general_17"), e);
         }
     }
 }

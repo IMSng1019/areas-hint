@@ -1,6 +1,7 @@
 package areahint;
 
 import areahint.command.ServerCommands;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.ServerNetworking;
 import areahint.file.FileManager;
 import net.fabricmc.api.ModInitializer;
@@ -44,6 +45,9 @@ public class Areashint implements ModInitializer {
 		// Proceed with mild caution.
 
 		LOGGER.info("区域提示模组服务端初始化中...");
+
+		// 初始化服务端国际化
+		ServerI18nManager.init();
 
 		// 初始化文件管理
 		initConfigDir();
@@ -100,14 +104,14 @@ public class Areashint implements ModInitializer {
 				areahint.dimensional.DimensionalNameManager.setDimensionalName(dimId, dimId);
 				areahint.dimensional.DimensionalNameManager.saveDimensionalNames();
 				// 提示OP玩家命名
-				MutableText msg = Text.literal("§e您进入了一个未命名的维度: §b" + dimId);
+				MutableText msg = Text.literal(ServerI18nManager.translate("message.message.dimension_3") + dimId);
 				player.sendMessage(msg, false);
-				MutableText nameBtn = Text.literal("§a[点击此处为该维度命名]")
+				MutableText nameBtn = Text.literal(ServerI18nManager.translate("message.button.dimension_3"))
 					.setStyle(Style.EMPTY
 						.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
 							"/areahint dimensionalityname select \"" + dimId + "\""))
 						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-							Text.of("为维度 " + dimId + " 设置名称"))));
+							Text.of(ServerI18nManager.translate("message.hover.dimension.setname") + dimId))));
 				player.sendMessage(nameBtn, false);
 				// 同步给客户端
 				areahint.network.DimensionalNameNetworking.sendDimensionalNamesToClient(player);

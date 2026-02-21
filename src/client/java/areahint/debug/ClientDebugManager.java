@@ -1,6 +1,7 @@
 package areahint.debug;
 
 import areahint.AreashintClient;
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -19,7 +20,7 @@ public class ClientDebugManager {
     public static void enableDebug() {
         debugEnabled = true;
         AreashintClient.LOGGER.info("客户端调试模式已启用");
-        sendDebugMessage("已启用区域提示调试模式，您将收到实时调试信息", Formatting.GREEN);
+        sendDebugMessage(I18nManager.translate("debug.hint.general"), Formatting.GREEN);
     }
     
     /**
@@ -28,7 +29,7 @@ public class ClientDebugManager {
     public static void disableDebug() {
         debugEnabled = false;
         AreashintClient.LOGGER.info("客户端调试模式已禁用");
-        sendDebugMessage("已禁用区域提示调试模式", Formatting.YELLOW);
+        sendDebugMessage(I18nManager.translate("debug.hint.general_2"), Formatting.YELLOW);
     }
     
     /**
@@ -65,7 +66,7 @@ public class ClientDebugManager {
     private static void sendDebugMessage(String message, Formatting formatting) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            Text text = Text.literal("[区域提示调试] ").formatted(Formatting.GOLD)
+            Text text = Text.literal(I18nManager.translate("debug.button.general")).formatted(Formatting.GOLD)
                     .append(Text.literal(message).formatted(formatting));
             client.player.sendMessage(text, false);
         }

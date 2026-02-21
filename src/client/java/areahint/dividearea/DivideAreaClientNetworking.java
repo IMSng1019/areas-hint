@@ -6,6 +6,7 @@ import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
+import areahint.i18n.I18nManager;
 import com.google.gson.JsonObject;
 
 public class DivideAreaClientNetworking {
@@ -42,11 +43,11 @@ public class DivideAreaClientNetworking {
                         if (client.player != null) {
                             if (success) {
                                 client.player.sendMessage(
-                                    net.minecraft.text.Text.literal("§a域名分割成功！" + message)
+                                    net.minecraft.text.Text.literal(I18nManager.translate("dividearea.success.area.divide") + message)
                                         .formatted(net.minecraft.util.Formatting.GREEN), false);
                             } else {
                                 client.player.sendMessage(
-                                    net.minecraft.text.Text.literal("§c域名分割失败：" + message)
+                                    net.minecraft.text.Text.literal(I18nManager.translate("dividearea.error.area.divide_2") + message)
                                         .formatted(net.minecraft.util.Formatting.RED), false);
                             }
                         }

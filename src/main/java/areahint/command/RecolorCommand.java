@@ -15,6 +15,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 import java.nio.file.Path;
+import areahint.i18n.ServerI18nManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +33,10 @@ public class RecolorCommand {
     public static int executeRecolor(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of("§c此指令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
             return 0;
         }
-        
+
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
         boolean hasOp = source.hasPermissionLevel(2);
@@ -45,7 +47,7 @@ public class RecolorCommand {
         String fileName = Packets.getFileNameForDimension(dimensionType);
         
         if (fileName == null) {
-            source.sendMessage(Text.of("§c无法识别当前维度"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension_3")));
             return 0;
         }
         
@@ -53,14 +55,14 @@ public class RecolorCommand {
         List<AreaData> editableAreas = getEditableAreas(fileName, playerName, hasOp);
         
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.of("§c当前维度没有您可以编辑的域名"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.dimension_3")));
             return 0;
         }
         
         // 发送域名列表到客户端，包含交互式颜色选择界面
         sendInteractiveRecolorToClient(player, editableAreas, dimensionType);
         
-        source.sendMessage(Text.of("§a已向您发送可编辑的域名列表，请在客户端选择要重新着色的域名"));
+        source.sendMessage(Text.of(ServerI18nManager.translate("command.prompt.area.list")));
         return 1;
     }
     
@@ -75,19 +77,19 @@ public class RecolorCommand {
         ServerCommandSource source = context.getSource();
         
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of("§c此指令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
             return 0;
         }
-        
+
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
-        
+
         // 标准化颜色输入
         String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
         if (!areahint.util.ColorUtil.isValidColor(normalizedColor)) {
-            source.sendMessage(Text.of("§c无效的颜色: " + colorInput));
-            source.sendMessage(Text.of("§7可用颜色: 白色, 红色, 粉红色, 橙色, 黄色, 棕色, 浅绿色, 深绿色, 浅蓝色, 深蓝色, 浅紫色, 紫色, 灰色, 黑色"));
-            source.sendMessage(Text.of("§7或使用十六进制格式，如: #FF0000"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.color") + colorInput));
+            source.sendMessage(Text.of(ServerI18nManager.translate("message.message.color")));
+            source.sendMessage(Text.of(ServerI18nManager.translate("message.message.general_45")));
             return 0;
         }
         
@@ -123,7 +125,7 @@ public class RecolorCommand {
             }
             
         } catch (Exception e) {
-            Areashint.LOGGER.error("获取可编辑域名列表时发生错误", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.area.list_2"), e);
         }
         
         return editableAreas;
@@ -149,7 +151,7 @@ public class RecolorCommand {
             ServerPlayNetworking.send(player, Packets.S2C_RECOLOR_RESPONSE, buf);
             
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送域名列表到客户端时发生错误", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.area.list"), e);
         }
     }
     
@@ -163,20 +165,20 @@ public class RecolorCommand {
             
             // 验证颜色格式
             if (!ColorUtil.isValidColor(newColor)) {
-                sendRecolorResponse(player, false, "无效的颜色格式: " + newColor);
+                sendRecolorResponse(player, false, ServerI18nManager.translate("command.error.color_3") + newColor);
                 return;
             }
             
             // 获取维度文件
             String fileName = Packets.getFileNameForDimension(dimension);
             if (fileName == null) {
-                sendRecolorResponse(player, false, "无效的维度: " + dimension);
+                sendRecolorResponse(player, false, ServerI18nManager.translate("addhint.error.dimension") + dimension);
                 return;
             }
             
             Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             if (areaFile == null || !areaFile.toFile().exists()) {
-                sendRecolorResponse(player, false, "维度文件不存在");
+                sendRecolorResponse(player, false, ServerI18nManager.translate("command.message.dimension_5"));
                 return;
             }
             
@@ -189,7 +191,7 @@ public class RecolorCommand {
                 if (area.getName().equals(areaName)) {
                     // 检查权限
                     if (!hasOp && !playerName.equals(area.getSignature())) {
-                        sendRecolorResponse(player, false, "您没有权限修改域名 \"" + areaName + "\" 的颜色");
+                        sendRecolorResponse(player, false, ServerI18nManager.translate("command.message.area.modify.permission") + areaName + "\"");
                         return;
                     }
                     
@@ -201,27 +203,27 @@ public class RecolorCommand {
             }
             
             if (!found) {
-                sendRecolorResponse(player, false, "未找到域名: " + areaName);
+                sendRecolorResponse(player, false, ServerI18nManager.translate("addhint.message.area_3") + areaName);
                 return;
             }
             
             // 保存文件
             if (FileManager.writeAreaData(areaFile, areas)) {
-                sendRecolorResponse(player, true, 
-                    String.format("域名 \"%s\" 颜色已从 %s 更改为 %s", areaName, oldColor, newColor));
+                sendRecolorResponse(player, true,
+                    String.format(ServerI18nManager.translate("command.message.area_10") + ServerI18nManager.translate("command.message.color_4"), areaName, oldColor, newColor));
                 
                 // 重新加载并发送给所有客户端
                 ServerNetworking.sendAllAreaDataToAll();
                 
-                Areashint.LOGGER.info("玩家 " + playerName + " 将域名 \"" + areaName + "\" 的颜色从 " + oldColor + " 更改为 " + newColor);
+                Areashint.LOGGER.info(ServerI18nManager.translate("command.message.general_28") + playerName + ServerI18nManager.translate("command.message.area_4") + areaName + "\"" + ServerI18nManager.translate("command.message.color_3") + oldColor + ServerI18nManager.translate("command.message.general_5") + newColor);
                 
             } else {
-                sendRecolorResponse(player, false, "保存域名数据时失败");
+                sendRecolorResponse(player, false, ServerI18nManager.translate("command.error.area.save"));
             }
             
         } catch (Exception e) {
-            Areashint.LOGGER.error("处理重新着色请求时发生错误", e);
-            sendRecolorResponse(player, false, "处理请求时发生错误: " + e.getMessage());
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_20"), e);
+            sendRecolorResponse(player, false, ServerI18nManager.translate("command.error.general_19") + e.getMessage());
         }
     }
     
@@ -238,7 +240,7 @@ public class RecolorCommand {
             ServerPlayNetworking.send(player, Packets.S2C_RECOLOR_RESPONSE, buf);
             
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送重新着色响应时发生错误", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_18"), e);
         }
     }
     
@@ -262,7 +264,7 @@ public class RecolorCommand {
             ServerPlayNetworking.send(player, Packets.S2C_RECOLOR_RESPONSE, buf);
             
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送交互式recolor界面到客户端时发生错误", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_15"), e);
         }
     }
     

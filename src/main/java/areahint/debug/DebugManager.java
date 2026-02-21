@@ -1,6 +1,7 @@
 package areahint.debug;
 
 import areahint.Areashint;
+import areahint.i18n.ServerI18nManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -32,10 +33,10 @@ public class DebugManager {
         if (!wasEnabled) {
             debugEnabledPlayers.add(playerUUID);
             anyDebugEnabled = true;
-            Areashint.LOGGER.info("为玩家 {} 启用调试模式", player.getName().getString());
-            sendDebugMessage(player, "已启用区域提示调试模式，您将收到实时调试信息", Formatting.GREEN);
+            Areashint.LOGGER.info(ServerI18nManager.translate("debug.message.general"), player.getName().getString());
+            sendDebugMessage(player, ServerI18nManager.translate("debug.hint.general"), Formatting.GREEN);
         } else {
-            sendDebugMessage(player, "调试模式已经启用", Formatting.YELLOW);
+            sendDebugMessage(player, ServerI18nManager.translate("debug.message.general_5"), Formatting.YELLOW);
         }
         
         return !wasEnabled;
@@ -54,10 +55,10 @@ public class DebugManager {
         anyDebugEnabled = !debugEnabledPlayers.isEmpty();
         
         if (wasEnabled) {
-            Areashint.LOGGER.info("为玩家 {} 禁用调试模式", player.getName().getString());
-            sendDebugMessage(player, "已禁用区域提示调试模式", Formatting.YELLOW);
+            Areashint.LOGGER.info(ServerI18nManager.translate("debug.message.general_2"), player.getName().getString());
+            sendDebugMessage(player, ServerI18nManager.translate("debug.hint.general_2"), Formatting.YELLOW);
         } else {
-            sendDebugMessage(player, "调试模式未启用", Formatting.RED);
+            sendDebugMessage(player, ServerI18nManager.translate("debug.message.general_6"), Formatting.RED);
         }
         
         return wasEnabled;
@@ -110,7 +111,7 @@ public class DebugManager {
      * @param formatting 格式
      */
     private static void sendDebugMessage(ServerPlayerEntity player, String message, Formatting formatting) {
-        Text text = Text.literal("[区域提示调试] ").formatted(Formatting.GOLD)
+        Text text = Text.literal(ServerI18nManager.translate("debug.button.general")).formatted(Formatting.GOLD)
                 .append(Text.literal(message).formatted(formatting));
         player.sendMessage(text, false);
     }

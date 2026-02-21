@@ -3,6 +3,7 @@ package areahint.command;
 import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
@@ -34,38 +35,38 @@ public class SetHighCommand {
     public static int executeSetHigh(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of("§c此指令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
             return 0;
         }
-        
+
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
         boolean isAdmin = source.hasPermissionLevel(2);
-        
+
         // 获取玩家当前维度
         String dimension = player.getWorld().getRegistryKey().getValue().toString();
         String dimensionType = convertDimensionIdToType(dimension);
         String fileName = Packets.getFileNameForDimension(dimensionType);
-        
+
         if (fileName == null) {
-            source.sendMessage(Text.of("§c无法识别当前维度"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension_3")));
             return 0;
         }
-        
+
         // 获取可修改高度的域名列表
         List<AreaData> editableAreas = getHeightEditableAreas(fileName, playerName, isAdmin);
-        
+
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.of("§c当前维度没有您可以修改高度的域名"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.altitude.dimension")));
             return 0;
         }
-        
+
         // 启动交互式高度设置流程
         startInteractiveHeightSetting(source, editableAreas);
-        
+
         return 1;
     }
-    
+
     /**
      * 启动交互式高度设置流程
      * @param source 命令源
@@ -110,14 +111,14 @@ public class SetHighCommand {
             
             ServerPlayNetworking.send(source.getPlayer(), Packets.S2C_SETHIGH_AREA_LIST, buf);
             
-            source.sendMessage(Text.of("§a已向您发送可修改高度的域名列表，请在客户端选择要设置高度的域名"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.prompt.area.altitude.modify")));
             
         } catch (Exception e) {
             Areashint.LOGGER.error("启动交互式高度设置流程时发生错误", e);
-            source.sendMessage(Text.of("§c启动高度设置流程时发生错误"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude.start")));
         }
     }
-    
+
     /**
      * 执行设置指定域名高度的命令
      * @param context 命令上下文
@@ -127,32 +128,32 @@ public class SetHighCommand {
     public static int executeSetHighWithArea(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of("§c此指令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
             return 0;
         }
-        
+
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
         boolean isAdmin = source.hasPermissionLevel(2);
-        
+
         // 获取玩家当前维度
         String dimension = player.getWorld().getRegistryKey().getValue().toString();
         String dimensionType = convertDimensionIdToType(dimension);
         String fileName = Packets.getFileNameForDimension(dimensionType);
-        
+
         if (fileName == null) {
-            source.sendMessage(Text.of("§c无法识别当前维度"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension_3")));
             return 0;
         }
-        
+
         // 获取可修改高度的域名列表
         List<AreaData> editableAreas = getHeightEditableAreas(fileName, playerName, isAdmin);
-        
+
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.of("§c当前维度没有您可以修改高度的域名"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.altitude.dimension")));
             return 0;
         }
-        
+
         // 查找指定的域名
         AreaData targetArea = editableAreas.stream()
                 .filter(area -> area.getName().equals(areaName))
@@ -160,7 +161,7 @@ public class SetHighCommand {
                 .orElse(null);
         
         if (targetArea == null) {
-            source.sendMessage(Text.of("§c域名 '" + areaName + "' 不存在或您没有权限修改其高度"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("addhint.error.area") + areaName + ServerI18nManager.translate("command.message.altitude.modify.permission")));
             // 启动交互式流程，让用户选择其他域名
             startInteractiveHeightSetting(source, editableAreas);
             return 0;
@@ -201,14 +202,14 @@ public class SetHighCommand {
             
             ServerPlayNetworking.send(source.getPlayer(), Packets.S2C_SETHIGH_AREA_SELECTION, buf);
             
-            source.sendMessage(Text.of("§a已启动域名 §f" + targetArea.getName() + " §a的高度设置流程"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.message.area.start") + targetArea.getName() + ServerI18nManager.translate("command.message.altitude_3")));
             
         } catch (Exception e) {
             Areashint.LOGGER.error("启动指定域名高度设置流程时发生错误", e);
-            source.sendMessage(Text.of("§c启动高度设置流程时发生错误"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude.start")));
         }
     }
-    
+
     /**
      * 获取可编辑高度的域名列表
      * @param fileName 文件名
@@ -276,11 +277,11 @@ public class SetHighCommand {
      */
     private static void displayEditableAreasInChat(ServerCommandSource source, List<AreaData> editableAreas, boolean isAdmin) {
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.literal("§c当前维度没有您可以修改高度的域名"));
+            source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.altitude.dimension")));
             return;
         }
 
-        MutableText message = Text.literal("§a您可以修改以下域名的高度：\n");
+        MutableText message = Text.literal(ServerI18nManager.translate("command.message.area.altitude.modify"));
         for (AreaData area : editableAreas) {
             message.append(Text.literal("§7- §f" + area.getName() + "§7: " + getHeightDisplayString(area.getAltitude()) + "\n"));
         }
@@ -294,21 +295,21 @@ public class SetHighCommand {
      */
     private static String getHeightDisplayString(AreaData.AltitudeData altitude) {
         if (altitude == null) {
-            return "§7无限制";
+            return ServerI18nManager.translate("command.message.general_10");
         }
-        
+
         StringBuilder sb = new StringBuilder();
         if (altitude.getMax() != null) {
-            sb.append("§c最大: ").append(altitude.getMax());
+            sb.append(ServerI18nManager.translate("command.error.general_8")).append(altitude.getMax());
         }
         if (altitude.getMin() != null) {
             if (sb.length() > 0) {
                 sb.append("§7, ");
             }
-            sb.append("§9最小: ").append(altitude.getMin());
+            sb.append(ServerI18nManager.translate("command.message.general_11")).append(altitude.getMin());
         }
-        
-        return sb.length() > 0 ? sb.toString() : "§7无限制";
+
+        return sb.length() > 0 ? sb.toString() : ServerI18nManager.translate("command.message.general_10");
     }
     
     /**
@@ -347,7 +348,7 @@ public class SetHighCommand {
             String fileName = Packets.getFileNameForDimension(dimensionType);
             
             if (fileName == null) {
-                sendResponse(player, false, "无法识别当前维度");
+                sendResponse(player, false, ServerI18nManager.translate("command.error.dimension_3"));
                 return;
             }
             
@@ -361,22 +362,22 @@ public class SetHighCommand {
                     .orElse(null);
             
             if (targetArea == null) {
-                sendResponse(player, false, "域名 '" + areaName + "' 不存在或您没有权限修改其高度");
+                sendResponse(player, false, ServerI18nManager.translate("addhint.message.area_2") + areaName + ServerI18nManager.translate("command.message.altitude.modify.permission"));
                 return;
             }
             
             // 验证高度数据
             if (hasCustomHeight) {
                 if (maxHeight != null && (maxHeight < -64 || maxHeight > 320)) {
-                    sendResponse(player, false, "最高高度超出合理范围 [-64, 320]");
+                    sendResponse(player, false, ServerI18nManager.translate("command.button.altitude_4"));
                     return;
                 }
                 if (minHeight != null && (minHeight < -64 || minHeight > 320)) {
-                    sendResponse(player, false, "最低高度超出合理范围 [-64, 320]");
+                    sendResponse(player, false, ServerI18nManager.translate("command.button.altitude_3"));
                     return;
                 }
                 if (maxHeight != null && minHeight != null && maxHeight < minHeight) {
-                    sendResponse(player, false, "最高高度不能小于最低高度");
+                    sendResponse(player, false, ServerI18nManager.translate("command.message.altitude_13"));
                     return;
                 }
             }
@@ -406,17 +407,17 @@ public class SetHighCommand {
             areahint.network.ServerNetworking.sendAllAreaDataToAll();
             
             // 发送成功响应
-            String message = hasCustomHeight ? 
-                    "域名 '" + areaName + "' 的高度已设置为 " + 
-                    (maxHeight != null ? maxHeight : "无限制") + " ~ " + 
-                    (minHeight != null ? minHeight : "无限制") :
-                    "域名 '" + areaName + "' 的高度限制已移除";
+            String message = hasCustomHeight ?
+                    ServerI18nManager.translate("addhint.message.area_2") + areaName + ServerI18nManager.translate("command.message.altitude_4") +
+                    (maxHeight != null ? maxHeight : ServerI18nManager.translate("command.message.general_25")) + " ~ " +
+                    (minHeight != null ? minHeight : ServerI18nManager.translate("command.message.general_25")) :
+                    ServerI18nManager.translate("addhint.message.area_2") + areaName + ServerI18nManager.translate("command.message.altitude_5");
             
             sendResponse(player, true, message);
             
         } catch (Exception e) {
             Areashint.LOGGER.error("处理高度设置请求时发生错误", e);
-            sendResponse(player, false, "处理高度设置请求时发生错误");
+            sendResponse(player, false, ServerI18nManager.translate("command.error.altitude_9"));
         }
     }
     
@@ -429,10 +430,10 @@ public class SetHighCommand {
     public static int executeSetHighCustom(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of("§c此指令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
             return 0;
         }
-        
+
         // 发送命令到客户端，启动自定义高度输入流程
         sendClientCommand(source, "areahint:sethigh_custom", areaName);
         return Command.SINGLE_SUCCESS;
@@ -447,7 +448,7 @@ public class SetHighCommand {
     public static int executeSetHighUnlimited(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of("§c此指令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
             return 0;
         }
         
@@ -464,11 +465,11 @@ public class SetHighCommand {
     public static int executeSetHighCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of("§c此指令只能由玩家执行"));
+            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
             return 0;
         }
-        
-        source.sendMessage(Text.of("§c已取消高度设置流程"));
+
+        source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude.cancel")));
         return Command.SINGLE_SUCCESS;
     }
     

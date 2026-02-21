@@ -2,6 +2,7 @@ package areahint.deletehint;
 
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.i18n.I18nManager;
 import areahint.util.AreaDataConverter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
@@ -46,7 +47,7 @@ public class DeleteHintManager {
         List<AreaData> modifiableAreas = getModifiableAreas();
 
         if (modifiableAreas.isEmpty()) {
-            client.player.sendMessage(Text.of("§c没有可修改的域名"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area.modify")), false);
             isActive = false;
             return;
         }
@@ -75,14 +76,14 @@ public class DeleteHintManager {
         }
 
         if (area == null) {
-            client.player.sendMessage(Text.of("§c域名 '" + cleanedName + "' 不存在或您没有权限"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area") + cleanedName + I18nManager.translate("addhint.message.permission")), false);
             return;
         }
 
         selectedArea = area;
         markedIndices.clear();
 
-        client.player.sendMessage(Text.of("§a已选择域名: §6" + AreaDataConverter.getDisplayName(area)), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.prompt.area") + AreaDataConverter.getDisplayName(area)), false);
         showVertexButtons();
     }
 
@@ -94,7 +95,7 @@ public class DeleteHintManager {
 
         List<AreaData.Vertex> vertices = selectedArea.getVertices();
         if (index < 0 || index >= vertices.size()) {
-            client.player.sendMessage(Text.of("§c无效的顶点索引"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("deletehint.error.vertex")), false);
             return;
         }
 
@@ -104,7 +105,7 @@ public class DeleteHintManager {
             // 确保删除后至少剩余3个顶点
             int remaining = vertices.size() - markedIndices.size() - 1;
             if (remaining < 3) {
-                client.player.sendMessage(Text.of("§c不能再删除更多顶点，至少需要保留3个顶点"), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("deletehint.error.vertex.delete")), false);
                 return;
             }
             markedIndices.add(index);
@@ -120,7 +121,7 @@ public class DeleteHintManager {
         if (!isActive || selectedArea == null || client.player == null) return;
 
         if (markedIndices.isEmpty()) {
-            client.player.sendMessage(Text.of("§c请至少选择一个要删除的顶点"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("deletehint.error.vertex.delete_3")), false);
             return;
         }
 
@@ -135,7 +136,7 @@ public class DeleteHintManager {
             }
 
             if (remaining.size() < 3) {
-                client.player.sendMessage(Text.of("§c删除后顶点不足3个，无法提交"), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("deletehint.error.vertex.delete_2")), false);
                 return;
             }
 
@@ -161,10 +162,10 @@ public class DeleteHintManager {
             // 发送到服务端
             DeleteHintClientNetworking.sendToServer(selectedArea, dimension);
 
-            client.player.sendMessage(Text.of("§a已提交域名 §6" + selectedArea.getName() + " §a的顶点删除"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.area") + selectedArea.getName() + I18nManager.translate("deletehint.message.vertex.delete")), false);
 
         } catch (Exception e) {
-            client.player.sendMessage(Text.of("§c处理顶点时发生错误: " + e.getMessage()), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.vertex") + e.getMessage()), false);
         } finally {
             reset();
         }
@@ -176,7 +177,7 @@ public class DeleteHintManager {
     public void cancel() {
         if (!isActive) return;
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§c已取消删除顶点"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("deletehint.error.vertex.cancel.delete")), false);
         }
         reset();
     }
@@ -190,8 +191,8 @@ public class DeleteHintManager {
     // ===== UI方法 =====
 
     private void showAreaSelection(List<AreaData> areas) {
-        client.player.sendMessage(Text.of("§6=== 删除顶点 - 选择域名 ==="), false);
-        client.player.sendMessage(Text.of("§a请选择要删除顶点的域名："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("deletehint.title.area.vertex.delete")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("deletehint.prompt.area.vertex.delete")), false);
 
         for (AreaData area : areas) {
             String displayName = AreaDataConverter.getDisplayName(area);
@@ -200,54 +201,54 @@ public class DeleteHintManager {
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/areahint deletehint select \"" + area.getName() + "\""))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Text.of("选择 " + displayName + "\n创建者: " + area.getSignature()
-                            + "\n顶点数: " + area.getVertices().size())))
+                        Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("addhint.message.general") + area.getSignature()
+                            + I18nManager.translate("deletehint.message.vertex_3") + area.getVertices().size())))
                     .withColor(Formatting.GOLD));
             client.player.sendMessage(btn, false);
         }
 
-        MutableText cancelBtn = Text.literal("§c[取消]")
+        MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint deletehint cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.cancel"))))
                 .withColor(Formatting.RED));
         client.player.sendMessage(cancelBtn, false);
     }
 
     private void showVertexButtons() {
         List<AreaData.Vertex> vertices = selectedArea.getVertices();
-        client.player.sendMessage(Text.of("§6=== 选择要删除的顶点 ==="), false);
-        client.player.sendMessage(Text.of("§7点击顶点按钮标记/取消标记，标记的顶点将被删除"), false);
-        client.player.sendMessage(Text.of("§7已标记 §c" + markedIndices.size() + " §7个顶点，剩余 §a"
-            + (vertices.size() - markedIndices.size()) + " §7个"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("deletehint.title.vertex.delete")), false);
+        client.player.sendMessage(Text.of("§7" + I18nManager.translate("deletehint.message.delete") + "/" + I18nManager.translate("deletehint.message.cancel")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("deletehint.message.general_2") + markedIndices.size() + I18nManager.translate("deletehint.message.vertex")
+            + (vertices.size() - markedIndices.size()) + I18nManager.translate("deletehint.message.general")), false);
 
         for (int i = 0; i < vertices.size(); i++) {
             AreaData.Vertex v = vertices.get(i);
             boolean marked = markedIndices.contains(i);
             String prefix = marked ? "§c✗ " : "§a";
-            String label = prefix + "[顶点" + (i + 1) + ": (" + (int) v.getX() + ", " + (int) v.getZ() + ")]";
+            String label = prefix + I18nManager.translate("deletehint.message.vertex_2") + (i + 1) + ": (" + (int) v.getX() + ", " + (int) v.getZ() + ")]";
 
             MutableText btn = Text.literal(label)
                 .setStyle(Style.EMPTY
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/areahint deletehint toggle " + i))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Text.of(marked ? "点击取消标记" : "点击标记删除")))
+                        Text.of(marked ? I18nManager.translate("deletehint.message.cancel") : I18nManager.translate("deletehint.message.delete"))))
                     .withColor(marked ? Formatting.RED : Formatting.GREEN));
             client.player.sendMessage(btn, false);
         }
 
         // 操作按钮
-        MutableText submitBtn = Text.literal("§b[提交删除]")
+        MutableText submitBtn = Text.literal(I18nManager.translate("deletehint.button.delete"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint deletehint submit"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("提交顶点删除")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("deletehint.message.vertex.delete_2"))))
                 .withColor(Formatting.AQUA));
 
-        MutableText cancelBtn = Text.literal("§c[取消]")
+        MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint deletehint cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.cancel"))))
                 .withColor(Formatting.RED));
 
         MutableText row = Text.empty()

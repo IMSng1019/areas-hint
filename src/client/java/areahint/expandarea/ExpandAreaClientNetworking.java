@@ -1,6 +1,7 @@
 package areahint.expandarea;
 
 import areahint.data.AreaData;
+import areahint.i18n.I18nManager;
 import areahint.network.Packets;
 import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -52,13 +53,13 @@ public class ExpandAreaClientNetworking {
                         if (client.player != null) {
                             if (success) {
                                 client.player.sendMessage(
-                                    net.minecraft.text.Text.literal("§a域名扩展成功！" + message)
+                                    net.minecraft.text.Text.literal(I18nManager.translate("expandarea.success.area.expand_2") + message)
                                         .formatted(net.minecraft.util.Formatting.GREEN),
                                     false
                                 );
                             } else {
                                 client.player.sendMessage(
-                                    net.minecraft.text.Text.literal("§c域名扩展失败：" + message)
+                                    net.minecraft.text.Text.literal(I18nManager.translate("expandarea.error.area.expand") + message)
                                         .formatted(net.minecraft.util.Formatting.RED),
                                     false
                                 );

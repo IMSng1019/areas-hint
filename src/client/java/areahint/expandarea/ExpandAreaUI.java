@@ -1,6 +1,7 @@
 package areahint.expandarea;
 
 import areahint.data.AreaData;
+import areahint.i18n.I18nManager;
 import areahint.util.AreaDataConverter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
@@ -31,16 +32,16 @@ public class ExpandAreaUI {
     public void showAreaSelection(List<AreaData> areas) {
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§6=== 扩展域名 - 选择域名 ==="), false);
-        client.player.sendMessage(Text.of("§a请选择要扩展的域名："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("expandarea.title.area.expand")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("expandarea.prompt.area.expand")), false);
         client.player.sendMessage(Text.of(""), false);
         
         if (areas.isEmpty()) {
-            client.player.sendMessage(Text.of("§c没有可以扩展的域名"), false);
-            MutableText cancelButton = Text.literal("§c[取消]")
+            client.player.sendMessage(Text.of(I18nManager.translate("expandarea.error.area.expand_4")), false);
+            MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
                 .setStyle(Style.EMPTY
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint expandarea cancel"))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消扩展流程")))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("expandarea.message.cancel.expand"))))
                     .withColor(Formatting.RED));
             client.player.sendMessage(cancelButton, false);
             return;
@@ -55,8 +56,8 @@ public class ExpandAreaUI {
                 .setStyle(Style.EMPTY
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, 
                         "/areahint expandarea select \"" + area.getName() + "\""))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                        Text.of("扩展 " + displayName + "\n创建者: " + signature)))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        Text.of(I18nManager.translate("expandarea.message.expand") + displayName + I18nManager.translate("addhint.message.general") + signature)))
                     .withColor(Formatting.GOLD));
             
             client.player.sendMessage(areaButton, false);
@@ -65,10 +66,10 @@ public class ExpandAreaUI {
         client.player.sendMessage(Text.of(""), false);
         
         // 显示取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint expandarea cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消扩展流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("expandarea.message.cancel.expand"))))
                 .withColor(Formatting.RED));
         
         client.player.sendMessage(cancelButton, false);
@@ -80,9 +81,9 @@ public class ExpandAreaUI {
     public void showRecordingInterface() {
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§a开始记录新区域顶点"), false);
-        client.player.sendMessage(Text.of("§e按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §e键记录当前位置"), false);
-        client.player.sendMessage(Text.of("§7至少需要记录3个顶点"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("expandarea.message.vertex.record_3")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.general_2") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("easyadd.message.record_2")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("expandarea.message.vertex.record_2")), false);
     }
     
     /**
@@ -91,19 +92,19 @@ public class ExpandAreaUI {
     public void showPointRecordedOptions(int vertexCount) {
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§7当前已记录 §6" + vertexCount + " §7个坐标点"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.record") + vertexCount + I18nManager.translate("dividearea.message.coordinate")), false);
         
         // 显示操作选项
-        net.minecraft.text.MutableText continueButton = Text.literal("§a[继续记录]")
+        net.minecraft.text.MutableText continueButton = Text.literal(I18nManager.translate("addhint.button.record.continue"))
             .setStyle(net.minecraft.text.Style.EMPTY
                 .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint expandarea continue"))
-                .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("继续记录更多坐标点")))
+                .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.coordinate.record.continue"))))
                 .withColor(net.minecraft.util.Formatting.GREEN));
         
-        net.minecraft.text.MutableText saveButton = Text.literal("§b[保存域名]")
+        net.minecraft.text.MutableText saveButton = Text.literal(I18nManager.translate("expandarea.button.area.save"))
             .setStyle(net.minecraft.text.Style.EMPTY
                 .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint expandarea save"))
-                .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of("保存扩展后的域名")))
+                .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("expandarea.message.area.save.expand"))))
                 .withColor(net.minecraft.util.Formatting.AQUA));
         
         if (vertexCount >= 3) {
@@ -117,7 +118,7 @@ public class ExpandAreaUI {
         } else {
             // 点数不够，只显示继续
             client.player.sendMessage(continueButton, false);
-            client.player.sendMessage(Text.of("§7至少需要3个点才能保存域名"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("expandarea.message.area.save")), false);
         }
     }
     
@@ -128,6 +129,6 @@ public class ExpandAreaUI {
     public void showCancelMessage() {
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§c已取消域名扩展"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("expandarea.error.area.cancel.expand")), false);
     }
 } 

@@ -1,6 +1,7 @@
 package areahint.shrinkarea;
 
 import areahint.data.AreaData;
+import areahint.i18n.I18nManager;
 import areahint.network.Packets;
 import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -73,13 +74,13 @@ public class ShrinkAreaClientNetworking {
             if (client.player != null) {
                 if (success) {
                     client.player.sendMessage(
-                        net.minecraft.text.Text.literal("§a域名收缩成功！" + message)
+                        net.minecraft.text.Text.literal(I18nManager.translate("shrinkarea.success.area.shrink_2") + message)
                             .formatted(net.minecraft.util.Formatting.GREEN),
                         false
                     );
                 } else {
                     client.player.sendMessage(
-                        net.minecraft.text.Text.literal("§c域名收缩失败：" + message)
+                        net.minecraft.text.Text.literal(I18nManager.translate("shrinkarea.error.area.shrink_2") + message)
                             .formatted(net.minecraft.util.Formatting.RED),
                         false
                     );

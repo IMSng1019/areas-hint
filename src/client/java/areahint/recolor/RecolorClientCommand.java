@@ -1,6 +1,7 @@
 package areahint.recolor;
 
 import areahint.AreashintClient;
+import areahint.i18n.I18nManager;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -52,7 +53,7 @@ public class RecolorClientCommand {
             AreashintClient.LOGGER.error("执行recolor select时出错", e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of("§c执行命令时出错: " + e.getMessage()), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
             }
             return 0;
         }
@@ -69,7 +70,7 @@ public class RecolorClientCommand {
             AreashintClient.LOGGER.error("执行recolor color时出错", e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of("§c执行命令时出错: " + e.getMessage()), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
             }
             return 0;
         }
@@ -86,7 +87,7 @@ public class RecolorClientCommand {
             AreashintClient.LOGGER.error("执行recolor confirm时出错", e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of("§c执行命令时出错: " + e.getMessage()), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
             }
             return 0;
         }
@@ -103,7 +104,7 @@ public class RecolorClientCommand {
             AreashintClient.LOGGER.error("执行recolor cancel时出错", e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of("§c执行命令时出错: " + e.getMessage()), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
             }
             return 0;
         }

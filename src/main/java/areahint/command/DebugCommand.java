@@ -12,6 +12,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import areahint.i18n.ServerI18nManager;
 
 /**
  * 调试命令处理类
@@ -53,10 +54,10 @@ public class DebugCommand {
         ServerPlayerEntity player = source.getPlayer();
         
         if (player == null) {
-            source.sendFeedback(() -> Text.literal("该命令只能由玩家执行").formatted(Formatting.RED), false);
+            source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.general_30")).formatted(Formatting.RED), false);
             return 0;
         }
-        
+
         if (DebugManager.isDebugEnabled(player.getUuid())) {
             return disableDebug(context);
         } else {
@@ -74,10 +75,10 @@ public class DebugCommand {
         ServerPlayerEntity player = source.getPlayer();
         
         if (player == null) {
-            source.sendFeedback(() -> Text.literal("该命令只能由玩家执行").formatted(Formatting.RED), false);
+            source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.general_30")).formatted(Formatting.RED), false);
             return 0;
         }
-        
+
         boolean wasEnabled = DebugManager.enableDebug(player);
         
         // 发送调试命令到客户端
@@ -85,7 +86,7 @@ public class DebugCommand {
         
         // 发送当前配置信息
         if (wasEnabled) {
-            DebugManager.sendDebugInfo(DebugCategory.CONFIG, "当前配置已加载");
+            DebugManager.sendDebugInfo(DebugCategory.CONFIG, ServerI18nManager.translate("message.message.general_20"));
         }
         
         return 1;
@@ -101,10 +102,10 @@ public class DebugCommand {
         ServerPlayerEntity player = source.getPlayer();
         
         if (player == null) {
-            source.sendFeedback(() -> Text.literal("该命令只能由玩家执行").formatted(Formatting.RED), false);
+            source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.general_30")).formatted(Formatting.RED), false);
             return 0;
         }
-        
+
         DebugManager.disableDebug(player);
         
         // 发送调试命令到客户端
@@ -123,15 +124,15 @@ public class DebugCommand {
         ServerPlayerEntity player = source.getPlayer();
         
         if (player == null) {
-            source.sendFeedback(() -> Text.literal("该命令只能由玩家执行").formatted(Formatting.RED), false);
+            source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.general_30")).formatted(Formatting.RED), false);
             return 0;
         }
-        
+
         boolean isEnabled = DebugManager.isDebugEnabled(player.getUuid());
-        String status = isEnabled ? "已启用" : "已禁用";
+        String status = isEnabled ? ServerI18nManager.translate("message.message.general_18") : ServerI18nManager.translate("message.message.general_19");
         Formatting color = isEnabled ? Formatting.GREEN : Formatting.RED;
         
-        source.sendFeedback(() -> Text.literal("区域提示调试模式: ")
+        source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.hint.general"))
                 .append(Text.literal(status).formatted(color)), false);
         
         return 1;

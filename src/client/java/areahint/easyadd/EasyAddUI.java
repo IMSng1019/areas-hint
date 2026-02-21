@@ -1,6 +1,7 @@
 package areahint.easyadd;
 
 import areahint.data.AreaData;
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -25,17 +26,17 @@ public class EasyAddUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§6=== EasyAdd 交互式域名添加 ==="), false);
-        client.player.sendMessage(Text.of("§a请在聊天框中输入域名名称："), false);
-        client.player.sendMessage(Text.of("§7例如：商业区、住宅区、工业区等"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.title.area.add")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name_2")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.general_8")), false);
         
         // 显示取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.cancel_2"))))
                 .withColor(Formatting.RED));
-        
+
         client.player.sendMessage(cancelButton, false);
     }
 
@@ -46,22 +47,22 @@ public class EasyAddUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§6=== 联合域名设置 ==="), false);
-        client.player.sendMessage(Text.of("§a请输入联合域名："), false);
-        client.player.sendMessage(Text.of("§7联合域名是显示给玩家看的名称，可以与实际域名不同"), false);
-        client.player.sendMessage(Text.of("§7留空则使用实际域名作为显示名称"), false);
-        client.player.sendMessage(Text.of("§e提示：两个不同的实际域名可以使用相同的联合域名"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("dividearea.title.area.surface")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.surface")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("dividearea.message.area.surface.name")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.name")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.hint.area.surface")), false);
         
         // 显示取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.cancel_2"))))
                 .withColor(Formatting.RED));
-        
+
         client.player.sendMessage(cancelButton, false);
     }
-    
+
     /**
      * 显示域名等级输入界面
      */
@@ -69,31 +70,31 @@ public class EasyAddUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§a请选择域名等级："), false);
-        
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.level")), false);
+
         // 创建等级选择按钮
-        MutableText level1Button = Text.literal("§b[1-顶级域名]")
+        MutableText level1Button = Text.literal(I18nManager.translate("dividearea.button.area"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd level 1"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("选择1级（顶级域名）")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.prompt.area_2"))))
                 .withColor(Formatting.AQUA));
-        
-        MutableText level2Button = Text.literal("§e[2-二级域名]")
+
+        MutableText level2Button = Text.literal(I18nManager.translate("dividearea.button.area_3"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd level 2"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("选择2级（二级域名）")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.prompt.area_3"))))
                 .withColor(Formatting.YELLOW));
-        
-        MutableText level3Button = Text.literal("§d[3-三级域名]")
+
+        MutableText level3Button = Text.literal(I18nManager.translate("dividearea.button.area_2"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd level 3"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("选择3级（三级域名）")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.prompt.area_4"))))
                 .withColor(Formatting.LIGHT_PURPLE));
-        
-        MutableText cancelButton = Text.literal("§c[取消]")
+
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.cancel_2"))))
                 .withColor(Formatting.RED));
         
         // 组合按钮显示
@@ -107,7 +108,7 @@ public class EasyAddUI {
             .append(cancelButton);
         
         client.player.sendMessage(buttonRow, false);
-        client.player.sendMessage(Text.of("§7等级说明：1=顶级域名，2/3=次级域名"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.level.description")), false);
     }
     
     /**
@@ -117,31 +118,31 @@ public class EasyAddUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§a请选择上级域名："), false);
-        
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.parent_2")), false);
+
         for (AreaData area : availableParentAreas) {
             String displayName = areahint.util.AreaDataConverter.getDisplayName(area);
             MutableText areaButton = Text.literal("§6[" + displayName + "]")
                 .setStyle(Style.EMPTY
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, 
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/areahint easyadd base \"" + area.getName() + "\""))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                        Text.of("选择 " + displayName + " 作为上级域名")))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("easyadd.message.area.parent"))))
                     .withColor(Formatting.GOLD));
             
             client.player.sendMessage(areaButton, false);
         }
         
         // 显示取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.cancel_2"))))
                 .withColor(Formatting.RED));
-        
+
         client.player.sendMessage(cancelButton, false);
     }
-    
+
     /**
      * 显示坐标点记录后的界面
      */
@@ -149,25 +150,25 @@ public class EasyAddUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§7当前已记录 §6" + recordedPoints.size() + " §7个坐标点"), false);
-        
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.record") + recordedPoints.size() + I18nManager.translate("easyadd.message.record.point")), false);
+
         // 显示操作选项
-        MutableText continueButton = Text.literal("§a[继续记录]")
+        MutableText continueButton = Text.literal(I18nManager.translate("addhint.button.record.continue"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd continue"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("继续记录更多坐标点")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.coordinate.record.continue"))))
                 .withColor(Formatting.GREEN));
-        
-        MutableText finishButton = Text.literal("§b[完成记录]")
+
+        MutableText finishButton = Text.literal(I18nManager.translate("easyadd.button.record.finish"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd finish"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("完成坐标记录，进入确认阶段")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.coordinate.record.confirm"))))
                 .withColor(Formatting.AQUA));
-        
-        MutableText cancelButton = Text.literal("§c[取消]")
+
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.cancel_2"))))
                 .withColor(Formatting.RED));
         
         if (recordedPoints.size() >= 3) {
@@ -188,7 +189,7 @@ public class EasyAddUI {
                 .append(cancelButton);
             
             client.player.sendMessage(buttonRow, false);
-            client.player.sendMessage(Text.of("§7至少需要3个点才能完成记录"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.record.finish")), false);
         }
     }
     
@@ -199,44 +200,44 @@ public class EasyAddUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§6=== 域名信息确认 ==="), false);
-        client.player.sendMessage(Text.of("§a域名名称：§6" + areaData.getName()), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.title.area.confirm")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.name_2") + areaData.getName()), false);
         if (areaData.getSurfacename() != null && !areaData.getSurfacename().trim().isEmpty()) {
-            client.player.sendMessage(Text.of("§a联合域名：§6" + areaData.getSurfacename()), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.surface_2") + areaData.getSurfacename()), false);
         }
-        client.player.sendMessage(Text.of("§a域名等级：§6" + areaData.getLevel()), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.level") + areaData.getLevel()), false);
         
         if (areaData.getBaseName() != null) {
-            client.player.sendMessage(Text.of("§a上级域名：§6" + areaData.getBaseName()), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.parent_2") + areaData.getBaseName()), false);
         } else {
-            client.player.sendMessage(Text.of("§a上级域名：§6无（顶级域名）"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.parent_3")), false);
         }
         
-        client.player.sendMessage(Text.of("§a记录顶点：§6" + areaData.getVertices().size() + " 个"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.vertex") + areaData.getVertices().size() + I18nManager.translate("gui.message.general")), false);
         
         if (areaData.getAltitude() != null) {
-            client.player.sendMessage(Text.of("§a高度范围：§6" + 
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.altitude_12") +
                 areaData.getAltitude().getMin() + " ~ " + areaData.getAltitude().getMax()), false);
         }
         
         // 显示颜色信息（新增）
         String colorHex = areaData.getColor();
         String colorDisplay = colorHex != null ? colorHex : "#FFFFFF";
-        client.player.sendMessage(Text.of("§a域名颜色：§6" + colorDisplay), false);
-        
-        client.player.sendMessage(Text.of("§a创建者：§6" + areaData.getSignature()), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.color_2") + colorDisplay), false);
+
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.general_6") + areaData.getSignature()), false);
         
         // 显示确认和取消按钮
-        MutableText saveButton = Text.literal("§a[保存域名]")
+        MutableText saveButton = Text.literal(I18nManager.translate("easyadd.button.area.save"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd save"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("确认保存该域名")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.area.save.confirm"))))
                 .withColor(Formatting.GREEN));
-        
-        MutableText cancelButton = Text.literal("§c[取消]")
+
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.cancel_2"))))
                 .withColor(Formatting.RED));
         
         MutableText buttonRow = Text.empty()
@@ -246,7 +247,7 @@ public class EasyAddUI {
         
         client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(buttonRow, false);
-        client.player.sendMessage(Text.of("§7请确认以上信息无误后点击保存"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.save.confirm")), false);
     }
     
     /**
@@ -260,43 +261,41 @@ public class EasyAddUI {
         int minY = recordedPoints.stream().mapToInt(BlockPos::getY).min().orElse(0);
         int maxY = recordedPoints.stream().mapToInt(BlockPos::getY).max().orElse(0);
         
-        client.player.sendMessage(Text.of("§6=== 高度设置 ==="), false);
-        client.player.sendMessage(Text.of("§a请选择高度设置方式："), false);
-        client.player.sendMessage(Text.of("§7当前记录点高度范围：" + minY + " ~ " + maxY), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.title.altitude")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.prompt.altitude_3")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.altitude.record") + minY + " ~ " + maxY), false);
         client.player.sendMessage(Text.of(""), false);
         
         // 自动计算按钮
-        MutableText autoButton = Text.literal("§b[智能高度]")
+        MutableText autoButton = Text.literal(I18nManager.translate("easyadd.button.altitude"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd altitude auto"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                    Text.of("自动计算高度范围\n基于记录点高度±扩展值")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.of(I18nManager.translate("easyadd.message.altitude.record.expand_2"))))
                 .withColor(Formatting.AQUA));
         
         // 自定义按钮
-        MutableText customButton = Text.literal("§d[自定义高度]")
+        MutableText customButton = Text.literal(I18nManager.translate("command.button.altitude"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd altitude custom"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                    Text.of("自定义高度范围\n手动输入最低和最高高度")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.of(I18nManager.translate("easyadd.prompt.altitude_7"))))
                 .withColor(Formatting.LIGHT_PURPLE));
         
         // 不限制高度按钮
-        MutableText unlimitedButton = Text.literal("§e[不限制高度]")
+        MutableText unlimitedButton = Text.literal(I18nManager.translate("command.button.altitude_2"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd altitude unlimited"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                    Text.of("不限制高度范围\n域名在所有Y坐标生效")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.of(I18nManager.translate("command.message.area.altitude.coordinate"))))
                 .withColor(Formatting.YELLOW));
         
         // 取消按钮
-        MutableText cancelButton = Text.literal("§c[取消本次操作]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("command.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.cancel_2"))))
                 .withColor(Formatting.RED));
-        
-        // 组合按钮行
         MutableText buttonRow = Text.empty()
             .append(autoButton)
             .append(Text.of("  "))
@@ -307,8 +306,8 @@ public class EasyAddUI {
             .append(cancelButton);
         
         client.player.sendMessage(buttonRow, false);
-        client.player.sendMessage(Text.of("§7自动计算会基于记录点扩展高度范围"), false);
-        client.player.sendMessage(Text.of("§7自定义可以精确控制域名的高度边界"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.altitude.record.expand")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.message.area.altitude.boundary")), false);
     }
     
     /**
@@ -318,73 +317,73 @@ public class EasyAddUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§6=== 域名颜色设置 ==="), false);
-        client.player.sendMessage(Text.of("§a请选择域名颜色："), false);
-        client.player.sendMessage(Text.of("§7颜色将用于域名显示时的视觉效果"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.title.area.color")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("dividearea.prompt.area.color")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.color")), false);
         client.player.sendMessage(Text.of(""), false);
         
         // 第一行颜色按钮
         MutableText row1 = Text.empty()
-            .append(createColorButton("白色", "#FFFFFF", "§f"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_24"), "#FFFFFF", "§f"))
             .append(Text.of("  "))
-            .append(createColorButton("灰色", "#808080", "§7"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_23"), "#808080", "§7"))
             .append(Text.of("  "))
-            .append(createColorButton("深灰色", "#555555", "§8"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_18"), "#555555", "§8"))
             .append(Text.of("  "))
-            .append(createColorButton("黑色", "#000000", "§0"));
+            .append(createColorButton(I18nManager.translate("gui.message.general_31"), "#000000", "§0"));
         
         // 第二行颜色按钮
         MutableText row2 = Text.empty()
-            .append(createColorButton("深红色", "#AA0000", "§4")) 
+            .append(createColorButton(I18nManager.translate("gui.message.general_19"), "#AA0000", "§4"))
             .append(Text.of("  "))
-            .append(createColorButton("红色", "#FF0000", "§c"))  
+            .append(createColorButton(I18nManager.translate("gui.message.general_27"), "#FF0000", "§c"))
             .append(Text.of("  "))
-            .append(createColorButton("粉红色", "#FF55FF", "§d"))   
-            .append(Text.of("  "))   
-            .append(createColorButton("橙色", "#FFAA00", "§6"));
+            .append(createColorButton(I18nManager.translate("gui.message.general_25"), "#FF55FF", "§d"))
+            .append(Text.of("  "))
+            .append(createColorButton(I18nManager.translate("gui.message.general_17"), "#FFAA00", "§6"));
         
         // 第三行颜色按钮
         MutableText row3 = Text.empty()
-            .append(createColorButton("黄色", "#FFFF55", "§e"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_30"), "#FFFF55", "§e"))
             .append(Text.of("  "))
-            .append(createColorButton("绿色", "#55FF55", "§a"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_28"), "#55FF55", "§a"))
             .append(Text.of("  "))
-            .append(createColorButton("深绿色", "#00AA00", "§2"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_20"), "#00AA00", "§2"))
             .append(Text.of("  "))
-            .append(createColorButton("天蓝色", "#55FFFF", "§b"));
+            .append(createColorButton(I18nManager.translate("gui.message.general_13"), "#55FFFF", "§b"));
         
         // 第四行颜色按钮
         MutableText row4 = Text.empty()
-            .append(createColorButton("湖蓝色", "#00AAAA", "§3"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_22"), "#00AAAA", "§3"))
             .append(Text.of("  "))
-            .append(createColorButton("蓝色", "#5555FF", "§9"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_29"), "#5555FF", "§9"))
             .append(Text.of("  "))
-            .append(createColorButton("深蓝色", "#0000AA", "§1"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_21"), "#0000AA", "§1"))
             .append(Text.of("  "))
-            .append(createColorButton("紫色", "#AA00AA", "§5"));
+            .append(createColorButton(I18nManager.translate("gui.message.general_26"), "#AA00AA", "§5"));
         // 闪烁效果按钮行
         MutableText row5 = Text.empty()
-            .append(createColorButton("整体黑白闪烁", "FLASH_BW_ALL", "§7"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_15"), "FLASH_BW_ALL", "§7"))
             .append(Text.of("  "))
-            .append(createColorButton("整体彩虹闪烁", "FLASH_RAINBOW_ALL", "§b"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_14"), "FLASH_RAINBOW_ALL", "§b"))
             .append(Text.of("  "))
-            .append(createColorButton("单字黑白闪烁", "FLASH_BW_CHAR", "§8"))
+            .append(createColorButton(I18nManager.translate("gui.message.general_12"), "FLASH_BW_CHAR", "§8"))
             .append(Text.of("  "))
-            .append(createColorButton("单字彩虹闪烁", "FLASH_RAINBOW_CHAR", "§d"));
+            .append(createColorButton(I18nManager.translate("gui.message.general_11"), "FLASH_RAINBOW_CHAR", "§d"));
 
         // 取消按钮
-        MutableText cancelButton = Text.literal("§c[取消本次操作]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("command.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint easyadd cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消EasyAdd流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("easyadd.message.cancel_2"))))
                 .withColor(Formatting.RED));
-        
+
         client.player.sendMessage(row1, false);
         client.player.sendMessage(row2, false);
         client.player.sendMessage(row3, false);
         client.player.sendMessage(row4, false);
         client.player.sendMessage(Text.of(""), false);
-        client.player.sendMessage(Text.of("§6--- 闪烁效果 ---"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.general_4")), false);
         client.player.sendMessage(row5, false);
         client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(cancelButton, false);
@@ -402,7 +401,7 @@ public class EasyAddUI {
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                    Text.of("选择 " + colorName + " 作为域名颜色"))));
+                    Text.of(I18nManager.translate("addhint.prompt.general") + colorName + I18nManager.translate("dividearea.message.area.color")))));
     }
     
     /**
@@ -411,7 +410,7 @@ public class EasyAddUI {
     public static void showError(String message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§c错误：" + message), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.general_2") + message), false);
         }
     }
     

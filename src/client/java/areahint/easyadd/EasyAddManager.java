@@ -4,6 +4,7 @@ import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.file.JsonHelper;
 import areahint.debug.ClientDebugManager;
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -73,7 +74,7 @@ public class EasyAddManager {
      */
     public void startEasyAdd() {
         if (currentState != EasyAddState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§c当前已有EasyAdd流程在进行中"), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("easyadd.error.general")), false);
             return;
         }
         
@@ -127,13 +128,13 @@ public class EasyAddManager {
 
                     // 检查域名名称是否已存在（不检查联合域名）
                     if (checkAreaNameExists(areaName)) {
-                        client.player.sendMessage(Text.of("§c域名名称 \"" + areaName + "\" 已存在于当前维度"), false);
-                        client.player.sendMessage(Text.of("§7请输入一个不同的域名名称："), false);
+                        client.player.sendMessage(Text.of("§c" + I18nManager.translate("easyadd.message.area.name_4") + areaName + I18nManager.translate("easyadd.message.dimension")), false);
+                        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
                         // 保持在 INPUT_NAME 状态，等待用户重新输入
                         return;
                     }
 
-                    client.player.sendMessage(Text.of("§a已设置域名名称：§6" + areaName), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.name_2") + areaName), false);
 
                     // 进入联合域名输入
                     currentState = EasyAddState.INPUT_SURFACE_NAME;
@@ -145,9 +146,9 @@ public class EasyAddManager {
                 // 联合域名可以为空
                 surfaceName = input.trim().isEmpty() ? null : input.trim();
                 if (surfaceName != null) {
-                    client.player.sendMessage(Text.of("§a已设置联合域名：§6" + surfaceName), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.surface") + surfaceName), false);
                 } else {
-                    client.player.sendMessage(Text.of("§7跳过联合域名设置"), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("dividearea.message.area.surface")), false);
                 }
                 
                 // 进入等级选择
@@ -183,7 +184,7 @@ public class EasyAddManager {
         areaLevel = level;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§a已设置域名等级：§6" + level), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.level") + level), false);
         }
         
         if (level == 1) {
@@ -191,7 +192,7 @@ public class EasyAddManager {
             baseName = null;
             currentState = EasyAddState.RECORDING_POINTS;
             if (client.player != null) {
-                client.player.sendMessage(Text.of("§a现在开始记录坐标点，按 §6" + EasyAddConfig.getRecordKey() + " §a记录当前位置"), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.coordinate.record_2") + EasyAddConfig.getRecordKey() + I18nManager.translate("easyadd.message.record_2")), false);
             }
         } else {
             // 需要选择上级域名
@@ -217,16 +218,16 @@ public class EasyAddManager {
         
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§a已选择上级域名：§6" + baseName), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.parent") + baseName), false);
         }
         
         // 开始记录坐标点
         currentState = EasyAddState.RECORDING_POINTS;
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§a现在开始记录坐标点，按 §6" + EasyAddConfig.getRecordKey() + " §a记录当前位置"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.coordinate.record_2") + EasyAddConfig.getRecordKey() + I18nManager.translate("easyadd.message.record_2")), false);
         }
     }
-    
+
     /**
      * 加载可选的上级域名
      */
@@ -253,7 +254,7 @@ public class EasyAddManager {
         
         if (availableParentAreas.isEmpty()) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§c没有找到等级为 " + (areaLevel - 1) + " 的上级域名"), false);
+                Text.of(I18nManager.translate("easyadd.error.level") + (areaLevel - 1) + I18nManager.translate("easyadd.message.area.parent")), false);
             cancelEasyAdd();
             return;
         }
@@ -265,9 +266,9 @@ public class EasyAddManager {
     private void startPointRecording() {
         recordedPoints.clear();
         MinecraftClient.getInstance().player.sendMessage(
-            Text.of("§a开始记录域名顶点，按 §6" + EasyAddConfig.getRecordKey() + " §a键记录当前位置"), false);
+            Text.of(I18nManager.translate("easyadd.message.area.vertex.record") + EasyAddConfig.getRecordKey() + I18nManager.translate("easyadd.message.record_2")), false);
         MinecraftClient.getInstance().player.sendMessage(
-            Text.of("§7至少需要记录3个点才能形成有效区域"), false);
+            Text.of(I18nManager.translate("easyadd.message.record_3")), false);
     }
     
     /**
@@ -286,7 +287,7 @@ public class EasyAddManager {
         BlockPos pos = client.player.getBlockPos();
         recordedPoints.add(pos);
 
-        client.player.sendMessage(Text.of("§a已记录坐标点 " + recordedPoints.size() + ": §6(" +
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.coordinate.record") + recordedPoints.size() + ": §6(" +
             pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ")"), false);
 
         // 显示当前状态和选项
@@ -309,7 +310,7 @@ public class EasyAddManager {
         
         if (recordedPoints.size() < 3) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§c至少需要记录3个点才能形成有效区域"), false);
+                Text.of(I18nManager.translate("easyadd.error.record")), false);
             return;
         }
         
@@ -366,12 +367,12 @@ public class EasyAddManager {
                 EasyAddUI.showConfirmSaveScreen(areaData);
             } else {
                 MinecraftClient.getInstance().player.sendMessage(
-                    Text.of("§c域名验证失败，请检查坐标和引用关系"), false);
+                    Text.of(I18nManager.translate("easyadd.error.area.coordinate")), false);
                 cancelEasyAdd();
             }
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§c构建域名数据时发生错误: " + e.getMessage()), false);
+                Text.of(I18nManager.translate("easyadd.error.area_2") + e.getMessage()), false);
                 cancelEasyAdd();
         }
     }
@@ -391,16 +392,16 @@ public class EasyAddManager {
         // 处理自定义颜色输入
         if ("custom".equals(colorInput)) {
             currentState = EasyAddState.COLOR_INPUT;
-            client.player.sendMessage(Text.of("§a请输入自定义颜色（十六进制格式，如 #FF0000）："), false);
-            client.player.sendMessage(Text.of("§7格式要求：以#开头，后跟6位十六进制数字"), false);
-            client.player.sendMessage(Text.of("§c[取消本次操作]"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.color")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.general_9")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("command.error.cancel")), false);
             return;
         }
         
         // 验证颜色格式
         String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
         if (normalizedColor == null) {
-            client.player.sendMessage(Text.of("§c无效的颜色格式，请重新选择"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("gui.error.color")), false);
             return;
         }
         
@@ -419,8 +420,8 @@ public class EasyAddManager {
         // 验证颜色格式
         String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
         if (normalizedColor == null) {
-            client.player.sendMessage(Text.of("§c无效的颜色格式，请重新输入"), false);
-            client.player.sendMessage(Text.of("§7格式要求：以#开头，后跟6位十六进制数字（如 #FF0000）"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.color")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.general_10")), false);
             return;
         }
         
@@ -467,7 +468,7 @@ public class EasyAddManager {
             } else {
                 MinecraftClient client = MinecraftClient.getInstance();
                 if (client.player != null) {
-                    client.player.sendMessage(Text.of("§c未找到上级域名: " + baseName), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.area.parent") + baseName), false);
                 }
                 return false;
             }
@@ -502,13 +503,13 @@ public class EasyAddManager {
             EasyAddNetworking.sendAreaDataToServer(areaData, currentDimension);
             
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§a域名 §6" + areaName + " §a已发送到服务端，等待处理..."), false);
+                Text.of(I18nManager.translate("easyadd.message.area_3") + areaName + I18nManager.translate("easyadd.message.general")), false);
             
             resetState();
             
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§c保存域名时发生错误: " + e.getMessage()), false);
+                Text.of(I18nManager.translate("easyadd.error.area.save") + e.getMessage()), false);
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD, 
                 "保存失败: " + e.getMessage());
         }
@@ -518,7 +519,7 @@ public class EasyAddManager {
      * 取消EasyAdd流程
      */
     public void cancelEasyAdd() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of("§7EasyAdd流程已取消"), false);
+        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("easyadd.message.cancel")), false);
         resetState();
     }
     

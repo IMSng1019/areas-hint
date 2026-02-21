@@ -38,7 +38,7 @@ public class EasyAddNetworking {
             
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                net.minecraft.text.Text.of("§c发送域名数据到服务端时发生错误: " + e.getMessage()), false);
+                net.minecraft.text.Text.of(areahint.i18n.I18nManager.translate("easyadd.error.area") + e.getMessage()), false);
             
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD,
                 "发送域名数据失败: " + e.getMessage());

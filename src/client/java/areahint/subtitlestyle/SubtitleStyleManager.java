@@ -1,6 +1,7 @@
 package areahint.subtitlestyle;
 
 import areahint.config.ClientConfig;
+import areahint.i18n.I18nManager;
 import areahint.AreashintClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -43,7 +44,7 @@ public class SubtitleStyleManager {
      */
     public void startSubtitleStyleSelection() {
         if (currentState != SubtitleStyleState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§c当前已有SubtitleStyle流程在进行中"), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_6")), false);
             return;
         }
 
@@ -74,7 +75,7 @@ public class SubtitleStyleManager {
 
         // 验证样式有效性
         if (!isValidStyle(style)) {
-            client.player.sendMessage(Text.of("§c无效的样式选项: " + style), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.error.general_8") + style), false);
             return;
         }
 
@@ -83,11 +84,11 @@ public class SubtitleStyleManager {
 
         // 显示成功消息
         String styleDisplay = getStyleDisplayName(style);
-        client.player.sendMessage(Text.of("§a字幕样式已设置为: §6" + styleDisplay), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("message.message.general_47") + styleDisplay), false);
 
         // 执行reload
         AreashintClient.reload();
-        client.player.sendMessage(Text.of("§a配置已重新加载"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("message.message.general_51")), false);
 
         // 重置状态
         resetState();
@@ -97,7 +98,7 @@ public class SubtitleStyleManager {
      * 取消SubtitleStyle流程
      */
     public void cancelSubtitleStyle() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of("§7SubtitleStyle流程已取消"), false);
+        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_5")), false);
         resetState();
     }
 
@@ -121,11 +122,11 @@ public class SubtitleStyleManager {
     private String getStyleDisplayName(String style) {
         switch (style) {
             case "full":
-                return "完整样式 (Full)";
+                return I18nManager.translate("message.message.general_106");
             case "simple":
-                return "简洁样式 (Simple)";
+                return I18nManager.translate("message.message.general_215");
             case "mixed":
-                return "混合样式 (Mixed)";
+                return I18nManager.translate("message.message.general_209");
             default:
                 return style;
         }

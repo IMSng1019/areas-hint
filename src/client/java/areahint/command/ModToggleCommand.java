@@ -2,6 +2,7 @@ package areahint.command;
 
 import areahint.AreashintClient;
 import areahint.config.ClientConfig;
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
@@ -47,7 +48,7 @@ public class ModToggleCommand {
         ClientConfig.setEnabled(true);
         
         if (client.player != null) {
-            client.player.sendMessage(Text.literal("§a[AreaHint] 模组已启用！域名显示和检测功能已开启。"), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("command.button.area")), false);
         }
         
         AreashintClient.LOGGER.info("模组已通过命令启用");
@@ -61,7 +62,7 @@ public class ModToggleCommand {
         ClientConfig.setEnabled(false);
         
         if (client.player != null) {
-            client.player.sendMessage(Text.literal("§c[AreaHint] 模组已禁用！域名将不再显示，但仍会接收服务器数据。"), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("command.error.area")), false);
         }
         
         AreashintClient.LOGGER.info("模组已通过命令禁用");
@@ -73,10 +74,10 @@ public class ModToggleCommand {
      */
     private static void showCurrentStatus(MinecraftClient client) {
         boolean enabled = ClientConfig.isEnabled();
-        String status = enabled ? "§a启用" : "§c禁用";
+        String status = enabled ? I18nManager.translate("command.message.general_12") : I18nManager.translate("command.error.general_11");
         
         if (client.player != null) {
-            client.player.sendMessage(Text.literal(String.format("§e[AreaHint] 模组当前状态：%s", status)), false);
+            client.player.sendMessage(Text.literal(String.format(I18nManager.translate("command.button.general"), status)), false);
         }
     }
     
@@ -86,9 +87,9 @@ public class ModToggleCommand {
      */
     private static void showUsage(MinecraftClient client) {
         if (client.player != null) {
-            client.player.sendMessage(Text.literal("§e[AreaHint] 用法："), false);
-            client.player.sendMessage(Text.literal("§7/areahint on  §f- 启用模组"), false);
-            client.player.sendMessage(Text.literal("§7/areahint off §f- 禁用模组"), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("command.button.general_2")), false);
+            client.player.sendMessage(Text.literal("§7/areahint on  §f- " + I18nManager.translate("command.message.general_26")), false);
+            client.player.sendMessage(Text.literal("§7/areahint off §f- " + I18nManager.translate("command.message.general_27")), false);
         }
     }
 } 

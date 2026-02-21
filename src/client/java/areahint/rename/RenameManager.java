@@ -3,6 +3,7 @@ package areahint.rename;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.debug.ClientDebugManager;
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -63,7 +64,7 @@ public class RenameManager {
      */
     public void startRename(List<AreaData> areas, String dimension) {
         if (currentState != RenameState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§c当前已有Rename流程在进行中"), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_4")), false);
             return;
         }
 
@@ -71,7 +72,7 @@ public class RenameManager {
         this.currentDimension = dimension;
 
         if (areas.isEmpty()) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§c当前维度没有您可以重命名的域名"), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.area.dimension.rename_2")), false);
             return;
         }
 
@@ -119,19 +120,19 @@ public class RenameManager {
 
                     // 检查新域名名称是否已存在
                     if (checkAreaNameExists(newAreaName)) {
-                        client.player.sendMessage(Text.of("§c域名名称 \"" + newAreaName + "\" 已存在于当前维度"), false);
-                        client.player.sendMessage(Text.of("§7请输入一个不同的域名名称："), false);
+                        client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area") + newAreaName + I18nManager.translate("easyadd.message.dimension")), false);
+                        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
                         return;
                     }
 
                     // 检查新名称是否与原名称相同
                     if (newAreaName.equals(selectedAreaName)) {
-                        client.player.sendMessage(Text.of("§c新域名名称不能与原名称相同"), false);
-                        client.player.sendMessage(Text.of("§7请输入一个不同的域名名称："), false);
+                        client.player.sendMessage(Text.of(I18nManager.translate("message.error.area.name")), false);
+                        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
                         return;
                     }
 
-                    client.player.sendMessage(Text.of("§a已设置新域名名称：§6" + newAreaName), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.name") + newAreaName), false);
 
                     // 进入联合域名输入
                     currentState = RenameState.INPUT_NEW_SURFACE_NAME;
@@ -143,9 +144,9 @@ public class RenameManager {
                 // 联合域名可以为空
                 newSurfaceName = input.trim().isEmpty() ? null : input.trim();
                 if (newSurfaceName != null) {
-                    client.player.sendMessage(Text.of("§a已设置新联合域名：§6" + newSurfaceName), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.surface") + newSurfaceName), false);
                 } else {
-                    client.player.sendMessage(Text.of("§7跳过联合域名设置"), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("dividearea.message.area.surface")), false);
                 }
 
                 // 进入确认状态
@@ -181,14 +182,14 @@ public class RenameManager {
         }
 
         if (!found) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§c未找到域名: " + areaName), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.area_2") + areaName), false);
             return;
         }
 
         selectedAreaName = areaName;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§a已选择域名：§6" + areaName), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.prompt.area") + areaName), false);
         }
 
         // 进入新名称输入状态
@@ -209,13 +210,13 @@ public class RenameManager {
             RenameNetworking.sendRenameRequest(selectedAreaName, newAreaName, newSurfaceName, currentDimension);
 
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§a重命名请求已发送到服务端，等待处理..."), false);
+                Text.of(I18nManager.translate("message.prompt.rename")), false);
 
             resetState();
 
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§c重命名域名时发生错误: " + e.getMessage()), false);
+                Text.of(I18nManager.translate("message.error.area.rename") + e.getMessage()), false);
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.NETWORK,
                 "重命名失败: " + e.getMessage());
         }
@@ -225,7 +226,7 @@ public class RenameManager {
      * 取消Rename流程
      */
     public void cancelRename() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of("§7Rename流程已取消"), false);
+        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_3")), false);
         resetState();
     }
 

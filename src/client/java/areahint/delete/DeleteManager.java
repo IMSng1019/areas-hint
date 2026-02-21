@@ -3,6 +3,7 @@ package areahint.delete;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.debug.ClientDebugManager;
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
@@ -58,7 +59,7 @@ public class DeleteManager {
      */
     public void startDelete() {
         if (currentState != DeleteState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§c当前已有Delete流程在进行中"), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_2")), false);
             return;
         }
 
@@ -70,7 +71,7 @@ public class DeleteManager {
             currentDimension = areahint.network.Packets.convertDimensionPathToType(dimensionPath);
 
             if (currentDimension == null) {
-                client.player.sendMessage(Text.of("§c无法确定当前维度"), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("message.error.dimension")), false);
                 ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
                     "无法转换维度路径: " + dimensionPath);
                 return;
@@ -83,7 +84,7 @@ public class DeleteManager {
             currentState = DeleteState.SELECT_AREA;
 
             // 向服务端请求可删除的域名列表（服务端会根据权限判断）
-            client.player.sendMessage(Text.of("§a正在获取可删除的域名列表..."), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.delete.list_2")), false);
             DeleteNetworking.requestDeletableAreas(currentDimension);
         }
     }
@@ -100,7 +101,7 @@ public class DeleteManager {
         deletableAreas.addAll(areas);
 
         if (deletableAreas.isEmpty()) {
-            client.player.sendMessage(Text.of("§7当前维度没有可删除的域名"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.dimension.delete")), false);
             resetState();
             return;
         }
@@ -135,7 +136,7 @@ public class DeleteManager {
 
         if (selectedArea == null) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§c未找到域名: §6" + areaName), false);
+                Text.of(I18nManager.translate("message.error.area_3") + areaName), false);
             return;
         }
 
@@ -154,7 +155,7 @@ public class DeleteManager {
 
         if (selectedArea == null || selectedAreaName == null) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§c未选择要删除的域名"), false);
+                Text.of(I18nManager.translate("message.error.area.delete_2")), false);
             cancelDelete();
             return;
         }
@@ -164,13 +165,13 @@ public class DeleteManager {
             DeleteNetworking.sendDeleteRequestToServer(selectedAreaName, currentDimension);
 
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§a删除请求已发送到服务端，等待处理..."), false);
+                Text.of(I18nManager.translate("message.prompt.delete")), false);
 
             resetState();
 
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of("§c删除域名时发生错误: " + e.getMessage()), false);
+                Text.of(I18nManager.translate("message.error.area.delete") + e.getMessage()), false);
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
                 "删除失败: " + e.getMessage());
         }
@@ -180,7 +181,7 @@ public class DeleteManager {
      * 取消Delete流程
      */
     public void cancelDelete() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of("§7Delete流程已取消"), false);
+        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel")), false);
         resetState();
     }
 

@@ -34,7 +34,7 @@ public class LanguageManager {
         if (currentState != State.IDLE) {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of("§c当前已有语言选择流程在进行中"), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("language.error.language")), false);
             }
             return;
         }
@@ -62,7 +62,7 @@ public class LanguageManager {
         I18nManager.loadLanguage(langCode);
 
         String displayName = I18nManager.getLanguageDisplayName(langCode);
-        client.player.sendMessage(Text.of("§a语言已设置为: §6" + displayName + " (" + langCode + ")"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("language.message.language") + displayName + " (" + langCode + ")"), false);
 
         resetState();
     }
@@ -73,7 +73,7 @@ public class LanguageManager {
     public void cancelLanguageSelection() {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§7语言选择已取消"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("language.prompt.cancel.language")), false);
         }
         resetState();
     }

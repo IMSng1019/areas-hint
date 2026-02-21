@@ -1,5 +1,6 @@
 package areahint.replacebutton;
 
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -21,16 +22,16 @@ public class ReplaceButtonUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 更改记录按键 ==="), false);
-        client.player.sendMessage(Text.of("§a请按下您想要使用的新按键..."), false);
-        client.player.sendMessage(Text.of("§7提示：按下任意键后将询问您是否确认"), false);
-        client.player.sendMessage(Text.of("§7注意：某些特殊键（如ESC、Enter、Shift等）不能使用"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.record.key")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.key_2")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.hint.confirm")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.general_5")), false);
 
         // 显示取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint replacebutton cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消按键更换")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.key"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);
@@ -43,21 +44,21 @@ public class ReplaceButtonUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 确认新按键 ==="), false);
-        client.player.sendMessage(Text.of("§a您选择的按键是：§e" + keyName), false);
-        client.player.sendMessage(Text.of("§7确认后，该按键将用于记录域名顶点"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.confirm.key")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.key") + keyName), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.vertex.record")), false);
 
         // 显示确认和取消按钮
-        MutableText confirmButton = Text.literal("§a[确认]")
+        MutableText confirmButton = Text.literal(I18nManager.translate("gui.button.confirm"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint replacebutton confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("确认使用该按键")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.confirm.key"))))
                 .withColor(Formatting.GREEN));
 
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint replacebutton cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消按键更换")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.key"))))
                 .withColor(Formatting.RED));
 
         MutableText buttonRow = Text.empty()
@@ -74,7 +75,7 @@ public class ReplaceButtonUI {
     public static void showError(String message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§c错误：" + message), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.general_2") + message), false);
         }
     }
 

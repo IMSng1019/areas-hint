@@ -2,6 +2,7 @@ package areahint.recolor;
 
 import areahint.AreashintClient;
 import areahint.data.AreaData;
+import areahint.i18n.I18nManager;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
@@ -60,7 +61,7 @@ public class RecolorManager {
      */
     public void startRecolor(List<AreaData> areas, String dimension) {
         if (currentState != RecolorState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§c当前已有Recolor流程在进行中"), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_3")), false);
             return;
         }
 
@@ -91,7 +92,7 @@ public class RecolorManager {
         }
 
         if (selectedArea == null) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§c未找到域名: " + areaName), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.area_2") + areaName), false);
             return;
         }
 
@@ -100,8 +101,8 @@ public class RecolorManager {
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§a已选择域名：§6" + areaName), false);
-            client.player.sendMessage(Text.of("§a当前颜色：§6" + originalColor), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.prompt.area") + areaName), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.message.color_3") + originalColor), false);
         }
 
         // 进入颜色选择状态
@@ -124,7 +125,7 @@ public class RecolorManager {
         // 验证颜色格式
         String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
         if (!areahint.util.ColorUtil.isValidColor(normalizedColor)) {
-            client.player.sendMessage(Text.of("§c无效的颜色格式，请重新选择"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("gui.error.color")), false);
             return;
         }
 
@@ -150,13 +151,13 @@ public class RecolorManager {
             // 发送重新着色请求到服务端
             sendRecolorRequest(selectedAreaName, selectedColor, currentDimension);
 
-            client.player.sendMessage(Text.of("§a正在处理颜色修改请求..."), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.prompt.color.modify")), false);
 
             // 重置状态
             resetState();
 
         } catch (Exception e) {
-            client.player.sendMessage(Text.of("§c发送请求时发生错误: " + e.getMessage()), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.error.general") + e.getMessage()), false);
             AreashintClient.LOGGER.error("发送recolor请求失败", e);
         }
     }
@@ -167,7 +168,7 @@ public class RecolorManager {
     public void cancelRecolor() {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§7Recolor流程已取消"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_2")), false);
         }
         resetState();
     }

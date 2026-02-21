@@ -2,6 +2,7 @@ package areahint.network;
 
 import areahint.Areashint;
 import areahint.file.FileManager;
+import areahint.i18n.ServerI18nManager;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -25,7 +26,7 @@ public class ServerNetworking {
      */
     public static void init() {
         // 注册网络通道和处理器
-        Areashint.LOGGER.info("初始化服务端网络处理");
+        Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_67"));
         
         // 注册网络请求处理器
         registerNetworkHandlers();
@@ -33,7 +34,7 @@ public class ServerNetworking {
         // 注册玩家连接事件，当玩家加入服务器时发送区域数据和维度域名数据
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayerEntity player = handler.getPlayer();
-            Areashint.LOGGER.info("玩家 " + player.getName().getString() + " 已连接，发送区域数据和维度域名数据");
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_28") + player.getName().getString() + ServerI18nManager.translate("message.message.area.dimension"));
             
             // 发送所有维度的区域数据
             sendAllAreaDataToClient(player);
@@ -41,7 +42,7 @@ public class ServerNetworking {
             // 发送维度域名配置
             areahint.network.DimensionalNameNetworking.sendDimensionalNamesToClient(player);
             
-            Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送完整的游戏数据");
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_123") + player.getName().getString() + ServerI18nManager.translate("message.message.general_10"));
         });
     }
     
@@ -54,33 +55,33 @@ public class ServerNetworking {
         try {
             String fileName = Packets.getFileNameForDimension(dimensionName);
             if (fileName == null) {
-                Areashint.LOGGER.warn("未知的维度名称: " + dimensionName);
+                Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.dimension.name") + dimensionName);
                 return;
             }
             
             // 使用世界文件夹管理器获取文件路径
             Path filePath = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-            Areashint.LOGGER.info("[调试] 区域文件路径: " + filePath.toAbsolutePath());
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.button.general_15") + filePath.toAbsolutePath());
             
             if (!Files.exists(filePath)) {
-                Areashint.LOGGER.warn("区域数据文件不存在: " + filePath);
+                Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.general_69") + filePath);
                 // 尝试创建空文件
                 try {
                     FileManager.createEmptyAreaFile(filePath);
-                    Areashint.LOGGER.info("已创建空的区域文件: " + filePath);
+                    Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_117") + filePath);
                 } catch (IOException e) {
-                    Areashint.LOGGER.error("创建空区域文件失败: " + e.getMessage());
+                    Areashint.LOGGER.error(ServerI18nManager.translate("message.error.general_12") + e.getMessage());
                 }
                 return;
             }
             
             // 读取文件内容
             String fileContent = Files.readString(filePath);
-            Areashint.LOGGER.info("[调试] 区域文件内容长度: " + fileContent.length() + " 字节");
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.button.general_12") + fileContent.length() + ServerI18nManager.translate("message.message.general_12"));
             if (fileContent.length() < 100) {
-                Areashint.LOGGER.info("[调试] 区域文件内容预览: " + fileContent);
+                Areashint.LOGGER.info(ServerI18nManager.translate("message.button.general_13") + fileContent);
             } else {
-                Areashint.LOGGER.info("[调试] 区域文件内容预览: " + fileContent.substring(0, 100) + "...");
+                Areashint.LOGGER.info(ServerI18nManager.translate("message.button.general_13") + fileContent.substring(0, 100) + "...");
             }
             
             // 创建数据包
@@ -91,10 +92,10 @@ public class ServerNetworking {
             // 发送数据包
             ServerPlayNetworking.send(player, new Identifier(Packets.S2C_AREA_DATA), buffer);
             
-            Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送 " + dimensionName + " 的区域数据");
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_123") + player.getName().getString() + ServerI18nManager.translate("message.message.general_8") + dimensionName + ServerI18nManager.translate("message.message.general_19"));
             
         } catch (IOException e) {
-            Areashint.LOGGER.error("发送区域数据时出错: " + e.getMessage());
+            Areashint.LOGGER.error(ServerI18nManager.translate("message.message.general_70") + e.getMessage());
         }
     }
     
@@ -117,11 +118,11 @@ public class ServerNetworking {
      * 向所有客户端发送所有维度的区域数据
      */
     public static void sendAllAreaDataToAll() {
-        Areashint.LOGGER.info("[调试] 开始向所有客户端发送所有维度的区域数据");
+        Areashint.LOGGER.info(ServerI18nManager.translate("message.button.dimension"));
         sendAreaDataToAll(Packets.DIMENSION_OVERWORLD);
         sendAreaDataToAll(Packets.DIMENSION_NETHER);
         sendAreaDataToAll(Packets.DIMENSION_END);
-        Areashint.LOGGER.info("[调试] 完成向所有客户端发送所有维度的区域数据");
+        Areashint.LOGGER.info(ServerI18nManager.translate("message.button.dimension.finish"));
     }
     
     /**
@@ -148,9 +149,9 @@ public class ServerNetworking {
             // 发送数据包
             ServerPlayNetworking.send(player, new Identifier(Packets.S2C_CLIENT_COMMAND), buffer);
             
-            Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送命令: " + command);
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_123") + player.getName().getString() + ServerI18nManager.translate("message.message.general_9") + command);
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送命令到客户端时出错: " + e.getMessage());
+            Areashint.LOGGER.error(ServerI18nManager.translate("message.message.general_71") + e.getMessage());
         }
     }
     
@@ -177,9 +178,9 @@ public class ServerNetworking {
             // 发送数据包
             ServerPlayNetworking.send(player, new Identifier(Packets.S2C_DEBUG_COMMAND), buffer);
             
-            Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送调试命令: " + (enabled ? "启用" : "禁用"));
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_123") + player.getName().getString() + ServerI18nManager.translate("message.message.general_11") + (enabled ? ServerI18nManager.translate("message.message.general_74") : ServerI18nManager.translate("message.message.general_213")));
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送调试命令到客户端时出错: " + e.getMessage());
+            Areashint.LOGGER.error(ServerI18nManager.translate("message.message.general_72") + e.getMessage());
         }
     }
     
@@ -203,10 +204,10 @@ public class ServerNetworking {
                 }
             }
             
-            Areashint.LOGGER.info("已向所有在 {} 维度的玩家重新分发区域数据", dimensionType);
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.dimension_6"), dimensionType);
             
         } catch (Exception e) {
-            Areashint.LOGGER.error("向所有玩家发送区域数据时发生错误: " + e.getMessage(), e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("message.error.general_34") + e.getMessage(), e);
         }
     }
     
@@ -226,7 +227,7 @@ public class ServerNetworking {
                         areahint.command.RecolorCommand.handleRecolorRequest(player, areaName, color, dimension);
                     });
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理recolor请求时发生错误", e);
+                    Areashint.LOGGER.error(ServerI18nManager.translate("message.error.general_37"), e);
                 }
             });
 
@@ -253,7 +254,7 @@ public class ServerNetworking {
                         areahint.command.SetHighCommand.handleHeightRequest(player, areaName, hasCustomHeight, maxHeight, minHeight);
                     });
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理SetHigh请求时发生错误", e);
+                    Areashint.LOGGER.error(ServerI18nManager.translate("message.error.general_36"), e);
                 }
             });
 
@@ -267,7 +268,7 @@ public class ServerNetworking {
                         sendDeletableAreasList(player, dimension);
                     });
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理请求可删除域名列表时发生错误", e);
+                    Areashint.LOGGER.error(ServerI18nManager.translate("message.error.area.delete.list_5"), e);
                 }
             });
 
@@ -282,7 +283,7 @@ public class ServerNetworking {
                         handleDeleteRequest(player, areaName, dimension);
                     });
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理Delete请求时发生错误", e);
+                    Areashint.LOGGER.error(ServerI18nManager.translate("message.error.general_35"), e);
                 }
             });
 
@@ -294,14 +295,14 @@ public class ServerNetworking {
                     final String newName = buf.readString();
                     server.execute(() -> {
                         if (!player.hasPermissionLevel(2)) {
-                            player.sendMessage(net.minecraft.text.Text.of("§c权限不足"), false);
+                            player.sendMessage(net.minecraft.text.Text.of(ServerI18nManager.translate("message.error.permission")), false);
                             return;
                         }
                         areahint.command.DimensionalNameCommands.handleDimNameChange(
                             player.getCommandSource(), dimensionId, newName);
                     });
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理维度域名修改请求时发生错误", e);
+                    Areashint.LOGGER.error(ServerI18nManager.translate("message.error.area.dimension.modify_2"), e);
                 }
             });
 
@@ -313,14 +314,14 @@ public class ServerNetworking {
                     final String newColor = buf.readString();
                     server.execute(() -> {
                         if (!player.hasPermissionLevel(2)) {
-                            player.sendMessage(net.minecraft.text.Text.of("§c权限不足"), false);
+                            player.sendMessage(net.minecraft.text.Text.of(ServerI18nManager.translate("message.error.permission")), false);
                             return;
                         }
                         areahint.command.DimensionalNameCommands.handleDimColorChange(
                             player.getCommandSource(), dimensionId, newColor);
                     });
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理维度域名颜色修改请求时发生错误", e);
+                    Areashint.LOGGER.error(ServerI18nManager.translate("message.error.area.dimension.modify_2"), e);
                 }
             });
 
@@ -334,14 +335,14 @@ public class ServerNetworking {
                         String currentName = areahint.dimensional.DimensionalNameManager.getDimensionalName(dimensionId);
                         // 仅当维度名称等于维度ID时（未被命名）才允许
                         if (!currentName.equals(dimensionId)) {
-                            player.sendMessage(net.minecraft.text.Text.of("§c该维度已被命名"), false);
+                            player.sendMessage(net.minecraft.text.Text.of(ServerI18nManager.translate("message.error.dimension_2")), false);
                             return;
                         }
                         areahint.command.DimensionalNameCommands.handleDimNameChange(
                             player.getCommandSource(), dimensionId, newName);
                     });
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理首次维度命名请求时发生错误", e);
+                    Areashint.LOGGER.error(ServerI18nManager.translate("message.error.dimension_4"), e);
                 }
             });
     }
@@ -356,12 +357,12 @@ public class ServerNetworking {
             String playerName = player.getName().getString();
             boolean hasOp = player.hasPermissionLevel(2);
 
-            Areashint.LOGGER.info("处理可删除域名列表请求 - 玩家: " + playerName + ", 维度: " + dimension + ", 是否OP: " + hasOp);
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.prompt.area.delete.list") + playerName + ServerI18nManager.translate("message.message.dimension_2") + dimension + ServerI18nManager.translate("message.message.general_21") + hasOp);
 
             // 获取文件名
             String fileName = Packets.getFileNameForDimension(dimension);
             if (fileName == null) {
-                Areashint.LOGGER.warn("无法确定维度文件 - 维度: " + dimension);
+                Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.dimension_11") + dimension);
                 // 发送空列表
                 sendEmptyDeletableAreasList(player);
                 return;
@@ -404,7 +405,7 @@ public class ServerNetworking {
                 }
             }
 
-            Areashint.LOGGER.info("找到 " + deletableAreas.size() + " 个可删除的域名");
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_175") + deletableAreas.size() + ServerI18nManager.translate("message.message.area.delete_2"));
 
             // 创建数据包
             PacketByteBuf buffer = PacketByteBufs.create();
@@ -418,10 +419,10 @@ public class ServerNetworking {
             // 发送数据包
             ServerPlayNetworking.send(player, Packets.S2C_DELETABLE_AREAS_LIST, buffer);
 
-            Areashint.LOGGER.info("已向玩家 " + playerName + " 发送可删除域名列表");
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_123") + playerName + ServerI18nManager.translate("message.message.area.delete.list"));
 
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送可删除域名列表时发生错误", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("message.error.area.delete.list_2"), e);
             sendEmptyDeletableAreasList(player);
         }
     }
@@ -436,7 +437,7 @@ public class ServerNetworking {
             buffer.writeInt(0);
             ServerPlayNetworking.send(player, Packets.S2C_DELETABLE_AREAS_LIST, buffer);
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送空可删除域名列表时发生错误", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("message.error.area.delete.list_3"), e);
         }
     }
 
@@ -451,24 +452,24 @@ public class ServerNetworking {
             String playerName = player.getName().getString();
             boolean hasOp = player.hasPermissionLevel(2);
 
-            Areashint.LOGGER.info("处理删除请求 - 玩家: " + playerName + ", 域名: " + areaName + ", 维度: " + dimension);
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.prompt.delete_3") + playerName + ServerI18nManager.translate("message.message.area_5") + areaName + ServerI18nManager.translate("message.message.dimension_2") + dimension);
 
             // 获取文件名
             String fileName = Packets.getFileNameForDimension(dimension);
             if (fileName == null) {
-                Areashint.LOGGER.warn("无法确定维度文件 - 维度: " + dimension);
-                sendDeleteResponse(player, false, "无法确定维度文件（维度: " + dimension + "）");
+                Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.dimension_11") + dimension);
+                sendDeleteResponse(player, false, ServerI18nManager.translate("message.message.dimension_12") + dimension + "）");
                 return;
             }
 
-            Areashint.LOGGER.info("维度文件名: " + fileName);
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.dimension_16") + fileName);
 
             Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-            Areashint.LOGGER.info("域名文件路径: " + areaFile.toAbsolutePath());
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.area_9") + areaFile.toAbsolutePath());
 
             // 读取区域数据
             java.util.List<areahint.data.AreaData> areas = FileManager.readAreaData(areaFile);
-            Areashint.LOGGER.info("读取到 " + areas.size() + " 个域名");
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_224") + areas.size() + ServerI18nManager.translate("message.message.area_3"));
 
             // 查找要删除的域名
             areahint.data.AreaData targetArea = null;
@@ -480,29 +481,29 @@ public class ServerNetworking {
             }
 
             if (targetArea == null) {
-                Areashint.LOGGER.warn("未找到域名: " + areaName);
-                sendDeleteResponse(player, false, "未找到域名: " + areaName);
+                Areashint.LOGGER.warn(ServerI18nManager.translate("addhint.message.area_3") + areaName);
+                sendDeleteResponse(player, false, ServerI18nManager.translate("addhint.message.area_3") + areaName);
                 return;
             }
 
-            Areashint.LOGGER.info("找到目标域名: " + areaName + ", 签名: " + targetArea.getSignature());
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.area_11") + areaName + ServerI18nManager.translate("message.message.general_3") + targetArea.getSignature());
 
             // 检查签名权限
             String signature = targetArea.getSignature();
             if (signature == null) {
                 // 没有签名的旧域名：只有管理员可以删除
                 if (!hasOp) {
-                    Areashint.LOGGER.warn("玩家 " + playerName + " 不是管理员，无法删除旧版本域名");
-                    sendDeleteResponse(player, false, "该域名没有签名（旧版本域名），只有管理员可以删除");
+                    Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.general_28") + playerName + ServerI18nManager.translate("message.message.area.delete") + ServerI18nManager.translate("message.message.area.delete_4"));
+                    sendDeleteResponse(player, false, ServerI18nManager.translate("message.message.area.delete_7"));
                     return;
                 }
                 // 管理员可以继续删除
-                Areashint.LOGGER.info("管理员 " + playerName + " 正在删除旧版本域名");
+                Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_216") + playerName + ServerI18nManager.translate("message.message.area.delete_4"));
             } else {
                 // 有签名的新域名：创建者或管理员可以删除
                 if (!signature.equals(playerName) && !hasOp) {
-                    Areashint.LOGGER.warn("玩家 " + playerName + " 不是域名创建者 " + signature);
-                    sendDeleteResponse(player, false, "你不是该域名的创建者，无法删除");
+                    Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.general_28") + playerName + ServerI18nManager.translate("message.message.area_2") + signature);
+                    sendDeleteResponse(player, false, ServerI18nManager.translate("message.message.area.delete_6"));
                     return;
                 }
             }
@@ -510,15 +511,15 @@ public class ServerNetworking {
             // 检查是否有次级域名引用此域名
             for (areahint.data.AreaData area : areas) {
                 if (areaName.equals(area.getBaseName())) {
-                    Areashint.LOGGER.warn("域名 " + areaName + " 被子域名 " + area.getName() + " 引用");
-                    sendDeleteResponse(player, false, "不能删除该域名，因为存在次级域名 \"" + area.getName() + "\" 引用了它");
+                    Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.area_8") + areaName + ServerI18nManager.translate("message.message.area_4") + area.getName() + ServerI18nManager.translate("message.message.general_15"));
+                    sendDeleteResponse(player, false, ServerI18nManager.translate("message.message.area.delete_5") + area.getName() + ServerI18nManager.translate("message.message.general_16"));
                     return;
                 }
             }
 
             // 执行删除
             areas.remove(targetArea);
-            Areashint.LOGGER.info("从列表中移除域名: " + areaName);
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.area.list_2") + areaName);
 
             // 保存文件
             FileManager.writeAreaData(areaFile, areas);
@@ -527,13 +528,13 @@ public class ServerNetworking {
             sendAllAreaDataToAll();
 
             // 发送成功响应
-            sendDeleteResponse(player, true, "成功删除域名: " + areaName);
+            sendDeleteResponse(player, true, ServerI18nManager.translate("message.success.area.delete") + areaName);
 
-            Areashint.LOGGER.info("玩家 " + playerName + " 删除了域名: " + areaName);
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_28") + playerName + ServerI18nManager.translate("message.message.area.delete_3") + areaName);
 
         } catch (Exception e) {
-            Areashint.LOGGER.error("处理删除请求时发生错误", e);
-            sendDeleteResponse(player, false, "删除域名时发生错误: " + e.getMessage());
+            Areashint.LOGGER.error(ServerI18nManager.translate("message.error.delete_5"), e);
+            sendDeleteResponse(player, false, ServerI18nManager.translate("message.error.area.delete_3") + e.getMessage());
         }
     }
 
@@ -551,10 +552,10 @@ public class ServerNetworking {
 
             ServerPlayNetworking.send(player, Packets.S2C_DELETE_RESPONSE, buffer);
 
-            Areashint.LOGGER.info("已向玩家 " + player.getName().getString() + " 发送删除响应: " +
-                (success ? "成功" : "失败") + " - " + message);
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_123") + player.getName().getString() + ServerI18nManager.translate("message.message.delete") +
+                (success ? ServerI18nManager.translate("message.success.general") : ServerI18nManager.translate("message.error.general_40")) + " - " + message);
         } catch (Exception e) {
-            Areashint.LOGGER.error("发送删除响应时出错: " + e.getMessage());
+            Areashint.LOGGER.error(ServerI18nManager.translate("message.message.delete_3") + e.getMessage());
         }
     }
 } 

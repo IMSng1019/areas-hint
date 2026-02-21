@@ -1,6 +1,7 @@
 package areahint.subtitlesize;
 
 import areahint.config.ClientConfig;
+import areahint.i18n.I18nManager;
 import areahint.AreashintClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -43,7 +44,7 @@ public class SubtitleSizeManager {
      */
     public void startSubtitleSizeSelection() {
         if (currentState != SubtitleSizeState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§c当前已有SubtitleSize流程在进行中"), false);
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_5")), false);
             return;
         }
 
@@ -74,7 +75,7 @@ public class SubtitleSizeManager {
 
         // 验证大小有效性
         if (!isValidSize(size)) {
-            client.player.sendMessage(Text.of("§c无效的大小选项: " + size), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("message.error.general_7") + size), false);
             return;
         }
 
@@ -83,11 +84,11 @@ public class SubtitleSizeManager {
 
         // 显示成功消息
         String sizeDisplay = getSizeDisplayName(size);
-        client.player.sendMessage(Text.of("§a字幕大小已设置为: §6" + sizeDisplay), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("message.message.general_46") + sizeDisplay), false);
 
         // 执行reload
         AreashintClient.reload();
-        client.player.sendMessage(Text.of("§a配置已重新加载"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("message.message.general_51")), false);
 
         // 重置状态
         resetState();
@@ -97,7 +98,7 @@ public class SubtitleSizeManager {
      * 取消SubtitleSize流程
      */
     public void cancelSubtitleSize() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of("§7SubtitleSize流程已取消"), false);
+        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_4")), false);
         resetState();
     }
 
@@ -123,19 +124,19 @@ public class SubtitleSizeManager {
     private String getSizeDisplayName(String size) {
         switch (size) {
             case "extra_large":
-                return "极大";
+                return I18nManager.translate("message.message.general_193");
             case "large":
-                return "大";
+                return I18nManager.translate("message.message.general_104");
             case "medium_large":
-                return "较大";
+                return I18nManager.translate("message.message.general_225");
             case "medium":
-                return "中";
+                return I18nManager.translate("message.message.general_58");
             case "medium_small":
-                return "较小";
+                return I18nManager.translate("message.message.general_226");
             case "small":
-                return "小";
+                return I18nManager.translate("message.message.general_111");
             case "extra_small":
-                return "极小";
+                return I18nManager.translate("message.message.general_194");
             default:
                 return size;
         }

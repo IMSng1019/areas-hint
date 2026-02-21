@@ -2,6 +2,7 @@ package areahint.addhint;
 
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.i18n.I18nManager;
 import areahint.util.AreaDataConverter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
@@ -46,7 +47,7 @@ public class AddHintManager {
         List<AreaData> modifiableAreas = getModifiableAreas();
 
         if (modifiableAreas.isEmpty()) {
-            client.player.sendMessage(Text.of("§c没有可修改的域名"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area.modify")), false);
             isActive = false;
             return;
         }
@@ -75,7 +76,7 @@ public class AddHintManager {
         }
 
         if (area == null) {
-            client.player.sendMessage(Text.of("§c域名 '" + cleanedName + "' 不存在或您没有权限"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area") + cleanedName + I18nManager.translate("addhint.message.permission")), false);
             return;
         }
 
@@ -83,9 +84,9 @@ public class AddHintManager {
         isRecording = true;
         newVertices.clear();
 
-        client.player.sendMessage(Text.of("§a已选择域名: §6" + AreaDataConverter.getDisplayName(area)), false);
-        client.player.sendMessage(Text.of("§e按 §6" + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + " §e键记录新顶点"), false);
-        client.player.sendMessage(Text.of("§7记录完成后点击 §6[提交] §7按钮"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.prompt.area") + AreaDataConverter.getDisplayName(area)), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.general_2") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("addhint.message.vertex.record")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.button.record.finish")), false);
     }
 
     /**
@@ -98,7 +99,7 @@ public class AddHintManager {
         int z = (int) Math.round(client.player.getZ());
         newVertices.add(new Double[]{(double) x, (double) z});
 
-        client.player.sendMessage(Text.of("§a已记录顶点 #" + newVertices.size() + ": §6(" + x + ", " + z + ")"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.vertex.record_2") + newVertices.size() + ": §6(" + x + ", " + z + ")"), false);
 
         // 更新边界可视化
         List<BlockPos> blockPosList = new ArrayList<>();
@@ -117,7 +118,7 @@ public class AddHintManager {
         if (!isActive || selectedArea == null || client.player == null) return;
 
         if (newVertices.isEmpty()) {
-            client.player.sendMessage(Text.of("§c至少需要记录1个顶点"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.vertex.record")), false);
             return;
         }
 
@@ -155,10 +156,10 @@ public class AddHintManager {
             // 发送到服务端
             AddHintClientNetworking.sendToServer(selectedArea, dimension);
 
-            client.player.sendMessage(Text.of("§a已提交域名 §6" + selectedArea.getName() + " §a的顶点更新"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.area") + selectedArea.getName() + I18nManager.translate("addhint.message.vertex_2")), false);
 
         } catch (Exception e) {
-            client.player.sendMessage(Text.of("§c处理顶点时发生错误: " + e.getMessage()), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.vertex") + e.getMessage()), false);
         } finally {
             reset();
         }
@@ -171,7 +172,7 @@ public class AddHintManager {
         if (!isActive) return;
         areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§c已取消添加顶点"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.vertex.cancel.add")), false);
         }
         reset();
     }
@@ -286,8 +287,8 @@ public class AddHintManager {
     // UI方法
 
     private void showAreaSelection(List<AreaData> areas) {
-        client.player.sendMessage(Text.of("§6=== 添加顶点 - 选择域名 ==="), false);
-        client.player.sendMessage(Text.of("§a请选择要添加顶点的域名："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.title.area.vertex.add")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.prompt.area.vertex.add")), false);
 
         for (AreaData area : areas) {
             String displayName = AreaDataConverter.getDisplayName(area);
@@ -296,39 +297,39 @@ public class AddHintManager {
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/areahint addhint select \"" + area.getName() + "\""))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Text.of("选择 " + displayName + "\n创建者: " + area.getSignature())))
+                        Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("addhint.message.general") + area.getSignature())))
                     .withColor(Formatting.GOLD));
             client.player.sendMessage(btn, false);
         }
 
-        MutableText cancelBtn = Text.literal("§c[取消]")
+        MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint addhint cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.cancel"))))
                 .withColor(Formatting.RED));
         client.player.sendMessage(cancelBtn, false);
     }
 
     private void showPointRecordedOptions() {
         int count = newVertices.size();
-        client.player.sendMessage(Text.of("§7当前已记录 §6" + count + " §7个新顶点"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.record") + count + I18nManager.translate("addhint.message.vertex")), false);
 
-        MutableText continueBtn = Text.literal("§a[继续记录]")
+        MutableText continueBtn = Text.literal(I18nManager.translate("addhint.button.record.continue"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint addhint continue"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("继续记录")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.record.continue"))))
                 .withColor(Formatting.GREEN));
 
-        MutableText submitBtn = Text.literal("§b[提交]")
+        MutableText submitBtn = Text.literal(I18nManager.translate("addhint.button.general"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint addhint submit"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("提交顶点更新")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.vertex_3"))))
                 .withColor(Formatting.AQUA));
 
-        MutableText cancelBtn = Text.literal("§c[取消]")
+        MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint addhint cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.cancel"))))
                 .withColor(Formatting.RED));
 
         MutableText row = Text.empty()

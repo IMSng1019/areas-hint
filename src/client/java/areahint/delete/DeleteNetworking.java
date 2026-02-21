@@ -3,6 +3,7 @@ package areahint.delete;
 import areahint.data.AreaData;
 import areahint.network.Packets;
 import areahint.debug.ClientDebugManager;
+import areahint.i18n.I18nManager;
 import areahint.file.JsonHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -36,7 +37,7 @@ public class DeleteNetworking {
 
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                net.minecraft.text.Text.of("§c请求可删除域名列表时发生错误: " + e.getMessage()), false);
+                net.minecraft.text.Text.of(I18nManager.translate("message.error.area.delete.list") + e.getMessage()), false);
 
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
                 "请求可删除域名列表失败: " + e.getMessage());
@@ -63,7 +64,7 @@ public class DeleteNetworking {
 
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                net.minecraft.text.Text.of("§c发送删除请求到服务端时发生错误: " + e.getMessage()), false);
+                net.minecraft.text.Text.of(I18nManager.translate("message.error.delete") + e.getMessage()), false);
 
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
                 "发送删除请求失败: " + e.getMessage());

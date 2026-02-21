@@ -2,6 +2,7 @@ package areahint.easyadd;
 
 import areahint.data.AreaData;
 import areahint.debug.ClientDebugManager;
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -69,20 +70,20 @@ public class EasyAddAltitudeManager {
         
         if (type == AltitudeType.AUTOMATIC) {
             // 选择自动计算，直接进入下一步
-            client.player.sendMessage(Text.of("§a已选择自动计算高度范围"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_2")), false);
             EasyAddManager.getInstance().proceedWithAltitudeData(null);
         } else if (type == AltitudeType.UNLIMITED) {
             // 选择不限制高度，使用null值表示无高度限制
-            client.player.sendMessage(Text.of("§a已选择不限制高度范围"), false);
-            client.player.sendMessage(Text.of("§7该域名将在所有Y坐标生效"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.coordinate")), false);
             AreaData.AltitudeData unlimitedAltitude = new AreaData.AltitudeData(null, null);
             EasyAddManager.getInstance().proceedWithAltitudeData(unlimitedAltitude);
         } else {
             // 选择自定义，开始输入流程
-            client.player.sendMessage(Text.of("§a已选择自定义高度："), false);
-            client.player.sendMessage(Text.of("§请输入最低高度值："), false);
-            client.player.sendMessage(Text.of("§最低高度-64"), false);
-            client.player.sendMessage(Text.of("§c[取消本次操作]"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_3")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_5")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.altitude")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("command.error.cancel")), false);
             
             currentInputState = AltitudeInputState.INPUT_MIN_HEIGHT;
         }
@@ -102,7 +103,7 @@ public class EasyAddAltitudeManager {
         
         // 检查取消操作
         if (input.trim().isEmpty() || input.contains("取消")) {
-            client.player.sendMessage(Text.of("§c已取消高度输入"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("command.error.altitude.cancel_2")), false);
             EasyAddManager.getInstance().cancelEasyAdd();
             return true;
         }
@@ -113,23 +114,23 @@ public class EasyAddAltitudeManager {
             switch (currentInputState) {
                 case INPUT_MIN_HEIGHT:
                     customMinHeight = value;
-                    client.player.sendMessage(Text.of("§a已设置最低高度：§6" + value), false);
-                    client.player.sendMessage(Text.of("§a请输入最高高度值："), false);
-                    client.player.sendMessage(Text.of("§最高高度320"), false);
-                    client.player.sendMessage(Text.of("§c[取消]"), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_10") + value), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_4")), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.altitude_2")), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.cancel")), false);
                     
                     currentInputState = AltitudeInputState.INPUT_MAX_HEIGHT;
                     return true;
                     
                 case INPUT_MAX_HEIGHT:
                     if (customMinHeight != null && value <= customMinHeight) {
-                        client.player.sendMessage(Text.of("§c错误：最高高度必须大于最低高度 " + customMinHeight), false);
+                        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.altitude") + customMinHeight), false);
                         return true;
                     }
                     
                     customMaxHeight = value;
-                    client.player.sendMessage(Text.of("§a已设置最高高度：§6" + value), false);
-                    client.player.sendMessage(Text.of("§a高度范围：§6" + customMinHeight + " ~ " + customMaxHeight), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_11") + value), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_12") + customMinHeight + " ~ " + customMaxHeight), false);
                     
                     // 创建自定义高度数据并继续流程
                     AreaData.AltitudeData customAltitude = new AreaData.AltitudeData(customMaxHeight, customMinHeight);
@@ -141,7 +142,7 @@ public class EasyAddAltitudeManager {
             }
             
         } catch (NumberFormatException e) {
-            client.player.sendMessage(Text.of("§c输入格式错误，请输入有效的数字"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_12")), false);
             return true;
         }
     }

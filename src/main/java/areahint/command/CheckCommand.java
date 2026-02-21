@@ -3,6 +3,7 @@ package areahint.command;
 import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.i18n.ServerI18nManager;
 import areahint.util.SurfaceNameHandler;
 import areahint.world.WorldFolderManager;
 import com.mojang.brigadier.CommandDispatcher;
@@ -76,15 +77,15 @@ public class CheckCommand {
             Path areaFile = WorldFolderManager.getWorldDimensionFile(fileName);
             
             if (areaFile == null || !areaFile.toFile().exists()) {
-                source.sendMessage(Text.literal("§c当前维度暂无域名数据").formatted(Formatting.RED));
+                source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.dimension_2")).formatted(Formatting.RED));
                 return 1;
             }
-            
+
             // 读取域名数据
             List<AreaData> areas = FileManager.readAreaData(areaFile);
-            
+
             if (areas.isEmpty()) {
-                source.sendMessage(Text.literal("§c当前维度暂无域名").formatted(Formatting.RED));
+                source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.dimension")).formatted(Formatting.RED));
                 return 1;
             }
             
@@ -102,8 +103,8 @@ public class CheckCommand {
             
             // 发送标题
             source.sendMessage(Text.literal(""));
-            source.sendMessage(Text.literal("§6=== 联合域名列表 ===").formatted(Formatting.GOLD));
-            source.sendMessage(Text.literal("§7点击联合域名查看详细信息").formatted(Formatting.GRAY));
+            source.sendMessage(Text.literal(ServerI18nManager.translate("command.title.area.surface.list")).formatted(Formatting.GOLD));
+            source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.surface_5")).formatted(Formatting.GRAY));
             source.sendMessage(Text.literal(""));
             
             // 显示每个联合域名
@@ -115,8 +116,8 @@ public class CheckCommand {
                 
                 // 添加悬停提示
                 StringBuilder hoverText = new StringBuilder();
-                hoverText.append("§6联合域名: §f").append(unionName).append("\n");
-                hoverText.append("§7包含 §e").append(areasInUnion.size()).append(" §7个域名:\n");
+                hoverText.append(ServerI18nManager.translate("command.message.area.surface_4")).append(unionName).append("\n");
+                hoverText.append(ServerI18nManager.translate("command.message.general_8")).append(areasInUnion.size()).append(ServerI18nManager.translate("command.message.area_3"));
                 
                 for (int i = 0; i < areasInUnion.size(); i++) {
                     AreaData area = areasInUnion.get(i);
@@ -135,16 +136,16 @@ public class CheckCommand {
             }
             
             source.sendMessage(Text.literal(""));
-            source.sendMessage(Text.literal("§7总计: §e" + unionNameGroups.size() + " §7个联合域名，§e" + areas.size() + " §7个域名").formatted(Formatting.GRAY));
+            source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.general_9") + unionNameGroups.size() + ServerI18nManager.translate("command.message.area.surface_2") + areas.size() + ServerI18nManager.translate("command.message.area_2")).formatted(Formatting.GRAY));
             
         } catch (Exception e) {
             Areashint.LOGGER.error("执行check命令时发生错误", e);
-            source.sendMessage(Text.literal("§c命令执行失败: " + e.getMessage()).formatted(Formatting.RED));
+            source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.general_2") + e.getMessage()).formatted(Formatting.RED));
         }
-        
+
         return 1;
     }
-    
+
     /**
      * 执行 /areahint check <联合域名> 命令 - 显示指定联合域名的详细信息
      * @param context 命令上下文
@@ -164,87 +165,87 @@ public class CheckCommand {
             Path areaFile = WorldFolderManager.getWorldDimensionFile(fileName);
             
             if (areaFile == null || !areaFile.toFile().exists()) {
-                source.sendMessage(Text.literal("§c当前维度暂无域名数据").formatted(Formatting.RED));
+                source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.dimension_2")).formatted(Formatting.RED));
                 return 1;
             }
-            
+
             // 读取域名数据
             List<AreaData> areas = FileManager.readAreaData(areaFile);
-            
+
             // 查找匹配的域名
             List<AreaData> matchedAreas = new ArrayList<>();
-            
+
             for (AreaData area : areas) {
                 String areaUnionName = area.getSurfacename();
                 if (areaUnionName == null || areaUnionName.trim().isEmpty()) {
                     areaUnionName = area.getName();
                 }
-                
+
                 if (areaUnionName.equals(unionName)) {
                     matchedAreas.add(area);
                 }
             }
-            
+
             if (matchedAreas.isEmpty()) {
-                source.sendMessage(Text.literal("§c未找到联合域名: " + unionName).formatted(Formatting.RED));
+                source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.surface") + unionName).formatted(Formatting.RED));
                 return 1;
             }
             
             // 发送详细信息
             source.sendMessage(Text.literal(""));
-            source.sendMessage(Text.literal("§6=== 联合域名详细信息 ===").formatted(Formatting.GOLD));
-            source.sendMessage(Text.literal("§6联合域名: §f" + unionName).formatted(Formatting.GOLD));
-            source.sendMessage(Text.literal("§7包含域名数量: §e" + matchedAreas.size()).formatted(Formatting.GRAY));
+            source.sendMessage(Text.literal(ServerI18nManager.translate("command.title.area.surface")).formatted(Formatting.GOLD));
+            source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.surface_4") + unionName).formatted(Formatting.GOLD));
+            source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area_6") + matchedAreas.size()).formatted(Formatting.GRAY));
             source.sendMessage(Text.literal(""));
             
             // 显示每个域名的详细信息
             for (int i = 0; i < matchedAreas.size(); i++) {
                 AreaData area = matchedAreas.get(i);
                 
-                source.sendMessage(Text.literal("§a域名 #" + (i + 1) + ":").formatted(Formatting.GREEN));
-                source.sendMessage(Text.literal("  §7实际域名: §f" + area.getName()));
+                source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area_9") + (i + 1) + ":").formatted(Formatting.GREEN));
+                source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area") + area.getName()));
                 
                 if (area.getSurfacename() != null && !area.getSurfacename().trim().isEmpty()) {
-                    source.sendMessage(Text.literal("  §7联合域名: §f" + area.getSurfacename()));
+                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.surface") + area.getSurfacename()));
                 }
                 
-                source.sendMessage(Text.literal("  §7域名等级: §e" + area.getLevel() + "级").formatted(Formatting.YELLOW));
+                source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.level") + area.getLevel() + ServerI18nManager.translate("command.message.general_29")).formatted(Formatting.YELLOW));
                 
                 if (area.getBaseName() != null) {
-                    source.sendMessage(Text.literal("  §7上级域名: §f" + area.getBaseName()));
+                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.parent") + area.getBaseName()));
                 }
                 
                 if (area.getSignature() != null) {
-                    source.sendMessage(Text.literal("  §7创建者: §f" + area.getSignature()));
+                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.general") + area.getSignature()));
                 }
                 
                 if (area.getColor() != null) {
-                    source.sendMessage(Text.literal("  §7颜色: §f" + area.getColor()));
+                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.color") + area.getColor()));
                 }
                 
                 // 显示高度信息
                 if (area.getAltitude() != null) {
-                    String altitudeText = "  §7高度范围: §f";
+                    String altitudeText = ServerI18nManager.translate("command.message.altitude");
                     if (area.getAltitude().getMin() != null && area.getAltitude().getMax() != null) {
-                        altitudeText += area.getAltitude().getMin() + " 到 " + area.getAltitude().getMax();
+                        altitudeText += area.getAltitude().getMin() + ServerI18nManager.translate("command.message.general_4") + area.getAltitude().getMax();
                     } else if (area.getAltitude().getMin() != null) {
-                        altitudeText += area.getAltitude().getMin() + " 以上";
+                        altitudeText += area.getAltitude().getMin() + ServerI18nManager.translate("command.message.general_2");
                     } else if (area.getAltitude().getMax() != null) {
-                        altitudeText += area.getAltitude().getMax() + " 以下";
+                        altitudeText += area.getAltitude().getMax() + ServerI18nManager.translate("command.message.general_3");
                     } else {
-                        altitudeText += "无限制";
+                        altitudeText += ServerI18nManager.translate("command.message.general_25");
                     }
                     source.sendMessage(Text.literal(altitudeText));
                 } else {
-                    source.sendMessage(Text.literal("  §7高度范围: §f无限制"));
+                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.altitude_2")));
                 }
                 
                 // 显示顶点信息
                 if (area.getVertices() != null && !area.getVertices().isEmpty()) {
-                    source.sendMessage(Text.literal("  §7一级顶点数量: §e" + area.getVertices().size()));
+                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.vertex") + area.getVertices().size()));
                     
                     // 显示前几个顶点作为示例
-                    StringBuilder verticesText = new StringBuilder("  §7顶点坐标: §f");
+                    StringBuilder verticesText = new StringBuilder(ServerI18nManager.translate("command.message.vertex.coordinate"));
                     int maxShow = Math.min(3, area.getVertices().size());
                     for (int j = 0; j < maxShow; j++) {
                         AreaData.Vertex vertex = area.getVertices().get(j);
@@ -266,12 +267,12 @@ public class CheckCommand {
             
         } catch (Exception e) {
             Areashint.LOGGER.error("执行check命令时发生错误", e);
-            source.sendMessage(Text.literal("§c命令执行失败: " + e.getMessage()).formatted(Formatting.RED));
+            source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.general_2") + e.getMessage()).formatted(Formatting.RED));
         }
-        
+
         return 1;
     }
-    
+
     /**
      * 创建联合域名建议提供器
      * @return 建议提供器

@@ -9,6 +9,8 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import areahint.i18n.I18nManager;
+
 import java.util.List;
 
 /**
@@ -24,29 +26,29 @@ public class RenameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== Rename 交互式域名重命名 ==="), false);
-        client.player.sendMessage(Text.of("§a请选择要重命名的域名："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.area.rename")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.area.rename")), false);
 
         for (AreaData area : areas) {
             String displayName = areahint.util.AreaDataConverter.getDisplayName(area);
-            String signature = area.getSignature() != null ? area.getSignature() : "未知创建者";
+            String signature = area.getSignature() != null ? area.getSignature() : I18nManager.translate("gui.message.general_16");
 
             MutableText areaButton = Text.literal("§6[" + displayName + "]")
                 .setStyle(Style.EMPTY
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/areahint rename select \"" + area.getName() + "\""))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Text.of("选择 " + displayName + " 进行重命名\n创建者: " + signature)))
+                        Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("gui.message.rename") + signature)))
                     .withColor(Formatting.GOLD));
 
             client.player.sendMessage(areaButton, false);
         }
 
         // 显示取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消Rename流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_3"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);
@@ -59,15 +61,15 @@ public class RenameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 输入新域名名称 ==="), false);
-        client.player.sendMessage(Text.of("§a请在聊天框中输入新的域名名称："), false);
-        client.player.sendMessage(Text.of("§7新名称不能与现有域名重复"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.area.name")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.area.name")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.name")), false);
 
         // 显示取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消Rename流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_3"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);
@@ -80,17 +82,17 @@ public class RenameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 联合域名设置 ==="), false);
-        client.player.sendMessage(Text.of("§a请输入新的联合域名："), false);
-        client.player.sendMessage(Text.of("§7联合域名是显示给玩家看的名称，可以与实际域名不同"), false);
-        client.player.sendMessage(Text.of("§7留空则使用实际域名作为显示名称"), false);
-        client.player.sendMessage(Text.of("§e提示：两个不同的实际域名可以使用相同的联合域名"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("dividearea.title.area.surface")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.area.surface")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("dividearea.message.area.surface.name")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.name")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.hint.area.surface")), false);
 
         // 显示取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消Rename流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_3"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);
@@ -103,28 +105,28 @@ public class RenameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 域名重命名确认 ==="), false);
-        client.player.sendMessage(Text.of("§f您确认将域名重命名吗？"), false);
-        client.player.sendMessage(Text.of("§7原域名: §f" + oldName), false);
-        client.player.sendMessage(Text.of("§7新域名: §f" + newName), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.area.confirm.rename")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.confirm.rename")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area_2") + oldName), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area_3") + newName), false);
 
         if (newSurfaceName != null && !newSurfaceName.trim().isEmpty()) {
-            client.player.sendMessage(Text.of("§7新联合域名: §f" + newSurfaceName), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.surface") + newSurfaceName), false);
         } else {
-            client.player.sendMessage(Text.of("§7新联合域名: §7(使用域名作为显示名称)"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.surface.name")), false);
         }
 
         // 显示确认和取消按钮
-        MutableText confirmButton = Text.literal("§a[是]")
+        MutableText confirmButton = Text.literal(I18nManager.translate("gui.button.general_2"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("确认重命名")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.confirm.rename"))))
                 .withColor(Formatting.GREEN));
 
-        MutableText cancelButton = Text.literal("§c[否]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("gui.error.general"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消重命名")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.rename"))))
                 .withColor(Formatting.RED));
 
         MutableText buttonRow = Text.empty()
@@ -134,7 +136,7 @@ public class RenameUI {
 
         client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(buttonRow, false);
-        client.player.sendMessage(Text.of("§7请确认以上信息无误后点击选择"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.confirm_2")), false);
     }
 
     /**
@@ -143,7 +145,7 @@ public class RenameUI {
     public static void showError(String message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§c错误：" + message), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.general_2") + message), false);
         }
     }
 

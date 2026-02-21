@@ -4,6 +4,7 @@ import areahint.Areashint;
 import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import areahint.file.FileManager;
+import areahint.i18n.I18nManager;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -273,7 +274,7 @@ public class ClientNetworking {
                         AreashintClient.LOGGER.info("执行sethigh_start");
                         // SetHigh命令由服务端直接处理，客户端只需要等待服务端发送域名列表
                         if (client.player != null) {
-                            client.player.sendMessage(net.minecraft.text.Text.of("§a正在获取可修改高度的域名列表..."), false);
+                            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.area.altitude.modify")), false);
                         }
                     }
                     // 处理SetHigh自定义高度命令
@@ -688,9 +689,9 @@ public class ClientNetworking {
                 MinecraftClient client = MinecraftClient.getInstance();
                 if (client.player != null) {
                     if (manager.isEnabled()) {
-                        client.player.sendMessage(net.minecraft.text.Text.of("§a边界可视化已开启"), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.boundary.visualization_2")), false);
                     } else {
-                        client.player.sendMessage(net.minecraft.text.Text.of("§7边界可视化已关闭"), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.boundary.visualization")), false);
                     }
                 }
             } else {
@@ -708,7 +709,7 @@ public class ClientNetworking {
     private static void displayFrequencyInfo(MinecraftClient client) {
         if (client.player != null) {
             int frequency = ClientConfig.getFrequency();
-            client.player.sendMessage(net.minecraft.text.Text.of("§a当前检测频率为: §6" + frequency + "§a Hz"));
+            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_50") + frequency + "§a Hz"));
         }
     }
     
@@ -719,7 +720,7 @@ public class ClientNetworking {
     private static void displaySubtitleRenderInfo(MinecraftClient client) {
         if (client.player != null) {
             String renderMode = ClientConfig.getSubtitleRender();
-            client.player.sendMessage(net.minecraft.text.Text.of("§a当前字幕渲染方式为: §6" + renderMode));
+            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_49") + renderMode));
         }
     }
     
@@ -730,7 +731,7 @@ public class ClientNetworking {
     private static void displaySubtitleStyleInfo(MinecraftClient client) {
         if (client.player != null) {
             String style = ClientConfig.getSubtitleStyle();
-            client.player.sendMessage(net.minecraft.text.Text.of("§a当前字幕样式为: §6" + style));
+            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_48") + style));
         }
     }
     
@@ -780,7 +781,7 @@ public class ClientNetworking {
                 
                 client.execute(() -> {
                     if (client.player != null) {
-                        client.player.sendMessage(net.minecraft.text.Text.of("§a可编辑的域名列表:"), false);
+                        client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.area.list")), false);
                         
                         for (int i = 0; i < count; i++) {
                             try {
@@ -790,7 +791,7 @@ public class ClientNetworking {
                                 String baseName = buf.readString();
                                 
                                 client.player.sendMessage(net.minecraft.text.Text.of(
-                                    String.format("§7%d. §r%s §7(等级%d) §8- 当前颜色: %s", 
+                                    String.format(I18nManager.translate("message.message.color.level"),
                                         i + 1, areaName, level, currentColor)
                                 ), false);
                             } catch (Exception e) {
@@ -799,10 +800,7 @@ public class ClientNetworking {
                         }
                         
                         client.player.sendMessage(net.minecraft.text.Text.of(
-                            "§a请使用 §e/areahint recolor <域名> <颜色> §a来修改颜色"
-                        ), false);
-                        client.player.sendMessage(net.minecraft.text.Text.of(
-                            "§7可用颜色: 白色, 红色, 粉红色, 橙色, 黄色, 棕色, 浅绿色, 深绿色, 浅蓝色, 深蓝色, 浅紫色, 紫色, 灰色, 黑色, 或自定义十六进制码(如 #FF0000)"
+                            I18nManager.translate("message.message.color_2")
                         ), false);
                     }
                 });
@@ -879,8 +877,8 @@ public class ClientNetworking {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        client.player.sendMessage(net.minecraft.text.Text.of("§6=== 域名颜色修改 ==="), false);
-        client.player.sendMessage(net.minecraft.text.Text.of("§a请选择要修改颜色的域名："), false);
+        client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.title.area.color.modify")), false);
+        client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.prompt.area.color.modify")), false);
         client.player.sendMessage(net.minecraft.text.Text.of(""), false);
         
         for (int i = 0; i < count; i++) {
@@ -892,14 +890,14 @@ public class ClientNetworking {
                 
                 // 创建域名选择按钮
                 net.minecraft.text.MutableText areaButton = net.minecraft.text.Text.literal(
-                    String.format("§6[%s] §7(等级%d) §8当前颜色: %s", areaName, level, currentColor)
+                    String.format(I18nManager.translate("message.button.color.level"), areaName, level, currentColor)
                 ).setStyle(net.minecraft.text.Style.EMPTY
                     .withClickEvent(new net.minecraft.text.ClickEvent(
                         net.minecraft.text.ClickEvent.Action.RUN_COMMAND, 
                         "/areahint recolor " + areaName))
                     .withHoverEvent(new net.minecraft.text.HoverEvent(
                         net.minecraft.text.HoverEvent.Action.SHOW_TEXT, 
-                        net.minecraft.text.Text.of("选择 " + areaName + " 进行颜色修改"))));
+                        net.minecraft.text.Text.of(I18nManager.translate("addhint.prompt.general") + areaName + I18nManager.translate("message.message.color.modify")))));
                 
                 client.player.sendMessage(areaButton, false);
                 
@@ -910,13 +908,10 @@ public class ClientNetworking {
         
         client.player.sendMessage(net.minecraft.text.Text.of(""), false);
         client.player.sendMessage(net.minecraft.text.Text.of(
-            "§7点击域名按钮后，使用 §e/areahint recolor <域名> <颜色> §7来修改颜色"
+            I18nManager.translate("message.message.color_2")
         ), false);
         client.player.sendMessage(net.minecraft.text.Text.of(
-            "§7可用颜色: 白色, 红色, 粉红色, 橙色, 黄色, 棕色, 浅绿色, 深绿色, 浅蓝色, 深蓝色, 浅紫色, 紫色, 灰色, 黑色"
-        ), false);
-        client.player.sendMessage(net.minecraft.text.Text.of(
-            "§7或使用十六进制格式，如: #FF0000"
+            I18nManager.translate("message.message.general_45")
         ), false);
     }
     

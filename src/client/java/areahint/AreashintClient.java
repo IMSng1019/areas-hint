@@ -14,6 +14,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.util.Identifier;
 
+import areahint.i18n.I18nManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -460,7 +461,7 @@ public class AreashintClient implements ClientModInitializer {
 					String dimPath = currentDimension != null ? currentDimension.getPath() : pendingFirstNameDimId;
 					areahint.network.ClientDimNameNetworking.sendFirstDimName(pendingFirstNameDimId, dimPath);
 					if (player != null) {
-						player.sendMessage(net.minecraft.text.Text.of("§7命名超时，已使用默认名称: " + dimPath), false);
+						player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.name_4") + dimPath), false);
 					}
 					pendingFirstNameDimId = null;
 					firstNameTimeoutTicks = 0;

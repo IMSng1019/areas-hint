@@ -1,5 +1,6 @@
 package areahint.command;
 
+import areahint.i18n.I18nManager;
 import areahint.network.ClientNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
@@ -63,17 +64,17 @@ public class SetHighClientCommand {
         if (client.player == null) return;
         
         if (areaNames.isEmpty()) {
-            client.player.sendMessage(Text.of("§c当前维度没有您可以修改高度的域名"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("command.error.area.altitude.dimension")), false);
             return;
         }
         
         // 显示域名列表
-        client.player.sendMessage(Text.of("§6===== 可修改高度的域名列表 ====="), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.title.area.altitude.modify")), false);
         for (int i = 0; i < areaNames.size(); i++) {
             String areaName = areaNames.get(i);
             client.player.sendMessage(Text.of(String.format("§a%d. §f%s", i + 1, areaName)), false);
         }
-        client.player.sendMessage(Text.of("§e请在指令中输入域名名称来选择要修改的域名"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.prompt.area.modify.name")), false);
         
     }
     
@@ -93,44 +94,44 @@ public class SetHighClientCommand {
         currentSelectedArea = selectedArea;
         
         // 显示当前高度设置
-        client.player.sendMessage(Text.of("§6===== 域名高度设置: " + selectedArea + " ====="), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.title.area.altitude") + selectedArea + " ====="), false);
         
         if (hasAltitude) {
-            String maxStr = maxHeight != null ? String.format("%.1f", maxHeight) : "无限制";
-            String minStr = minHeight != null ? String.format("%.1f", minHeight) : "无限制";
-            client.player.sendMessage(Text.of("§7当前高度: 最高:" + maxStr + ", 最低:" + minStr), false);
+            String maxStr = maxHeight != null ? String.format("%.1f", maxHeight) : I18nManager.translate("command.message.general_10");
+            String minStr = minHeight != null ? String.format("%.1f", minHeight) : I18nManager.translate("command.message.general_10");
+            client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_8") + maxStr + I18nManager.translate("command.message.general_7") + minStr), false);
         } else {
-            client.player.sendMessage(Text.of("§7当前高度: 无限制"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_7")), false);
         }
         
         // 显示高度选择界面，像easyadd一样提供按钮选择
-        client.player.sendMessage(Text.of("§6=== 高度设置 ==="), false);
-        client.player.sendMessage(Text.of("§a请选择高度设置方式："), false);
-        client.player.sendMessage(Text.of("§7域名：" + selectedArea), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.title.altitude")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.prompt.altitude_3")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.message.area_7") + selectedArea), false);
         client.player.sendMessage(Text.of(""), false);
         
         // 自定义高度按钮
-        MutableText customButton = Text.literal("§d[自定义高度]")
+        MutableText customButton = Text.literal(I18nManager.translate("command.button.altitude"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint sethigh custom " + selectedArea))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                    Text.of("自定义高度范围\n依次输入最高和最低高度")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.of(I18nManager.translate("command.prompt.altitude_5"))))
                 .withColor(Formatting.LIGHT_PURPLE));
         
         // 不限制高度按钮
-        MutableText unlimitedButton = Text.literal("§e[不限制高度]")
+        MutableText unlimitedButton = Text.literal(I18nManager.translate("command.button.altitude_2"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint sethigh unlimited " + selectedArea))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                    Text.of("不限制高度范围\n域名在所有Y坐标生效")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.of(I18nManager.translate("command.message.area.altitude.coordinate"))))
                 .withColor(Formatting.YELLOW));
         
         // 取消按钮
-        MutableText cancelButton = Text.literal("§c[取消本次操作]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("command.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint sethigh cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                    Text.of("取消高度设置流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.of(I18nManager.translate("command.message.altitude.cancel"))))
                 .withColor(Formatting.RED));
         
         // 组合按钮行
@@ -142,9 +143,9 @@ public class SetHighClientCommand {
             .append(cancelButton);
         
         client.player.sendMessage(buttonRow, false);
-        client.player.sendMessage(Text.of("§7自定义可以精确控制域名的高度边界"), false);
-        client.player.sendMessage(Text.of("§7不限制高度适用于跨越多个高度层的大型区域"), false);
-        client.player.sendMessage(Text.of("§a域名 " + selectedArea + " 的高度设置流程已启动"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.message.area.altitude.boundary")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_6")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.message.area_8") + selectedArea + I18nManager.translate("command.message.altitude.start")), false);
     }
     
     /**
@@ -158,7 +159,7 @@ public class SetHighClientCommand {
         
         // 检查取消操作
         if (input.trim().isEmpty() || input.contains("取消")) {
-            client.player.sendMessage(Text.of("§c已取消高度输入"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("command.error.altitude.cancel_2")), false);
             resetCustomHeightState();
             return;
         }
@@ -168,7 +169,7 @@ public class SetHighClientCommand {
             
             // 验证高度范围
             if (value < -64 || value > 320) {
-                client.player.sendMessage(Text.of("§c高度值超出合理范围 [-64, 320]"), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.error.altitude_7")), false);
                 return;
             }
             
@@ -176,9 +177,9 @@ public class SetHighClientCommand {
             if (currentInputState == AltitudeInputState.INPUT_MAX_HEIGHT) {
                 // 输入最高高度
                 customMaxHeight = value;
-                client.player.sendMessage(Text.of("§a已设置最高高度：§6" + value), false);
-                client.player.sendMessage(Text.of("§a请输入最低高度值："), false);
-                client.player.sendMessage(Text.of("§7高度范围: -64 到 320"), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_11") + value), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.prompt.altitude_2")), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_9")), false);
                 
                 
                 currentInputState = AltitudeInputState.INPUT_MIN_HEIGHT;
@@ -186,13 +187,13 @@ public class SetHighClientCommand {
             } else if (currentInputState == AltitudeInputState.INPUT_MIN_HEIGHT) {
                 // 输入最低高度
                 if (customMaxHeight != null && value >= customMaxHeight) {
-                    client.player.sendMessage(Text.of("§c错误：最低高度必须小于最高高度 " + customMaxHeight), false);
+                    client.player.sendMessage(Text.of(I18nManager.translate("command.error.altitude_6") + customMaxHeight), false);
                     return;
                 }
                 
                 customMinHeight = value;
-                client.player.sendMessage(Text.of("§a已设置最低高度：§6" + value), false);
-                client.player.sendMessage(Text.of("§a高度范围：§6" + customMaxHeight + " ~ " + customMinHeight), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_10") + value), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_12") + customMaxHeight + " ~ " + customMinHeight), false);
                 
                 // 创建自定义高度数据并发送请求
                 sendHeightRequest(areaName, true, customMaxHeight, customMinHeight);
@@ -202,7 +203,7 @@ public class SetHighClientCommand {
             }
             
         } catch (NumberFormatException e) {
-            client.player.sendMessage(Text.of("§c输入格式错误，请输入有效的数字"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_12")), false);
         }
     }
     
@@ -218,7 +219,7 @@ public class SetHighClientCommand {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§a正在发送高度设置请求到服务器..."), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.prompt.altitude")), false);
         
         // 发送网络请求
         ClientNetworking.sendSetHighRequest(areaName, hasAltitude, maxHeight, minHeight);
@@ -267,9 +268,9 @@ public class SetHighClientCommand {
         // 开始输入最高高度
         currentInputState = AltitudeInputState.INPUT_MAX_HEIGHT;
         
-        client.player.sendMessage(Text.of("§6===== 设置自定义高度 ====="), false);
-        client.player.sendMessage(Text.of("§e请输入最高高度值："), false);
-        client.player.sendMessage(Text.of("§7高度范围: -64 到 320"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.title.altitude_2")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.prompt.altitude_4")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("command.message.altitude_9")), false);
         
     }
     
@@ -296,7 +297,7 @@ public class SetHighClientCommand {
             resetCustomHeightState();
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of("§c已取消高度设置流程"), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.error.altitude.cancel")), false);
             }
             return true;
         }

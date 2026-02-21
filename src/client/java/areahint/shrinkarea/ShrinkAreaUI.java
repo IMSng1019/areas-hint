@@ -1,6 +1,7 @@
 package areahint.shrinkarea;
 
 import areahint.data.AreaData;
+import areahint.i18n.I18nManager;
 import areahint.util.AreaDataConverter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
@@ -33,23 +34,23 @@ public class ShrinkAreaUI {
         
         List<AreaData> areas = manager.getAvailableAreas();
         
-        client.player.sendMessage(Text.of("§6=== 收缩域名 - 选择域名 ==="), false);
-        client.player.sendMessage(Text.of("§a请选择要收缩的域名："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("shrinkarea.title.area.shrink_2")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("shrinkarea.prompt.area.shrink")), false);
         
         if (manager.isAdmin()) {
-            client.player.sendMessage(Text.of("§7管理员可以收缩所有域名"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("shrinkarea.message.area.shrink_3")), false);
         } else {
-            client.player.sendMessage(Text.of("§7您可以收缩自己创建的域名"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("shrinkarea.message.area.shrink_2")), false);
         }
         
         client.player.sendMessage(Text.of(""), false);
         
         if (areas.isEmpty()) {
-            client.player.sendMessage(Text.of("§c没有可以收缩的域名"), false);
-            MutableText cancelButton = Text.literal("§c[取消]")
+            client.player.sendMessage(Text.of(I18nManager.translate("shrinkarea.error.area.shrink_6")), false);
+            MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
                 .setStyle(Style.EMPTY
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint shrinkarea cancel"))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消收缩流程")))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("shrinkarea.message.cancel.shrink"))))
                     .withColor(Formatting.RED));
             client.player.sendMessage(cancelButton, false);
             return;
@@ -64,8 +65,8 @@ public class ShrinkAreaUI {
                 .setStyle(Style.EMPTY
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, 
                         "/areahint shrinkarea select \"" + area.getName() + "\""))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                        Text.of("收缩 " + displayName + "\n创建者: " + signature + "\n等级: " + area.getLevel())))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        Text.of(I18nManager.translate("shrinkarea.message.shrink") + displayName + I18nManager.translate("addhint.message.general") + signature + I18nManager.translate("shrinkarea.message.level") + area.getLevel())))
                     .withColor(Formatting.GOLD));
             
             client.player.sendMessage(areaButton, false);
@@ -74,10 +75,10 @@ public class ShrinkAreaUI {
         client.player.sendMessage(Text.of(""), false);
         
         // 显示取消按钮
-        MutableText cancelButton = Text.literal("§c[取消]")
+        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint shrinkarea cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消收缩流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("shrinkarea.message.cancel.shrink"))))
                 .withColor(Formatting.RED));
         
         client.player.sendMessage(cancelButton, false);
@@ -89,19 +90,19 @@ public class ShrinkAreaUI {
     public void showPointRecordedOptions(int vertexCount) {
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§7当前已记录 §6" + vertexCount + " §7个收缩区域顶点"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.record") + vertexCount + I18nManager.translate("shrinkarea.message.vertex.shrink")), false);
         
         // 显示操作选项
-        MutableText continueButton = Text.literal("§a[继续记录]")
+        MutableText continueButton = Text.literal(I18nManager.translate("addhint.button.record.continue"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint shrinkarea continue"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("继续记录更多收缩顶点")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("shrinkarea.message.vertex.record.continue"))))
                 .withColor(Formatting.GREEN));
         
-        MutableText saveButton = Text.literal("§b[保存域名]")
+        MutableText saveButton = Text.literal(I18nManager.translate("expandarea.button.area.save"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint shrinkarea save"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("保存收缩后的域名")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("shrinkarea.message.area.save.shrink"))))
                 .withColor(Formatting.AQUA));
         
         if (vertexCount >= 3) {
@@ -115,7 +116,7 @@ public class ShrinkAreaUI {
         } else {
             // 点数不够，只显示继续
             client.player.sendMessage(continueButton, false);
-            client.player.sendMessage(Text.of("§7至少需要3个点才能保存域名"), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("expandarea.message.area.save")), false);
         }
     }
     
@@ -125,6 +126,6 @@ public class ShrinkAreaUI {
     public void showCancelMessage() {
         if (client.player == null) return;
         
-        client.player.sendMessage(Text.of("§c已取消域名收缩"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("shrinkarea.error.area.cancel.shrink")), false);
     }
 } 

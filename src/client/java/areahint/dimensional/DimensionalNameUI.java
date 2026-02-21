@@ -1,5 +1,6 @@
 package areahint.dimensional;
 
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -23,7 +24,7 @@ public class DimensionalNameUI {
         String cmdBase = commandPrefix.equals("dimname") ? "dimensionalityname" : "dimensionalitycolor";
 
         client.player.sendMessage(Text.of("§6=== " + title + " ==="), false);
-        client.player.sendMessage(Text.of("§a请选择要操作的维度："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.dimension")), false);
         client.player.sendMessage(Text.of(""), false);
 
         Map<String, String> names = ClientDimensionalNameManager.getAllDimensionalNames();
@@ -31,11 +32,11 @@ public class DimensionalNameUI {
             String dimId = entry.getKey();
             String dimName = entry.getValue();
             String color = ClientDimensionalNameManager.getDimensionalColor(dimId);
-            String colorDisplay = color != null ? color : "§f#FFFFFF(默认)";
+            String colorDisplay = color != null ? color : I18nManager.translate("gui.message.general_10");
 
             String label;
             if (commandPrefix.equals("dimcolor")) {
-                label = String.format("§6[%s] §7(%s) §8颜色: %s", dimName, dimId, colorDisplay);
+                label = String.format(I18nManager.translate("gui.button.color"), dimName, dimId, colorDisplay);
             } else {
                 label = String.format("§6[%s] §7(%s)", dimName, dimId);
             }
@@ -45,17 +46,17 @@ public class DimensionalNameUI {
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/areahint " + cmdBase + " select \"" + dimId + "\""))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Text.of("选择 " + dimName)))
+                        Text.of(I18nManager.translate("addhint.prompt.general") + dimName)))
                     .withColor(Formatting.GOLD));
             client.player.sendMessage(btn, false);
         }
 
         client.player.sendMessage(Text.of(""), false);
-        MutableText cancelBtn = Text.literal("§c[取消]")
+        MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint " + cmdBase + " cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消操作")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_5"))))
                 .withColor(Formatting.RED));
         client.player.sendMessage(cancelBtn, false);
     }
@@ -67,26 +68,26 @@ public class DimensionalNameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 输入新的维度域名 ==="), false);
-        client.player.sendMessage(Text.of("§a维度: §b" + dimensionId), false);
-        client.player.sendMessage(Text.of("§a当前名称: §6" + currentName), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.area.dimension")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.dimension_2") + dimensionId), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.name_3") + currentName), false);
         client.player.sendMessage(Text.of(""), false);
 
         // 提供一个可点击的建议命令
-        MutableText inputHint = Text.literal("§e[点击此处输入新名称]")
+        MutableText inputHint = Text.literal(I18nManager.translate("gui.prompt.name_2"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
                     "/areahint dimensionalityname name "))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of("点击后在聊天栏输入新名称"))));
+                    Text.of(I18nManager.translate("gui.prompt.name_3")))));
         client.player.sendMessage(inputHint, false);
 
         client.player.sendMessage(Text.of(""), false);
-        MutableText cancelBtn = Text.literal("§c[取消]")
+        MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint dimensionalityname cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消操作")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_5"))))
                 .withColor(Formatting.RED));
         client.player.sendMessage(cancelBtn, false);
     }
@@ -98,26 +99,26 @@ public class DimensionalNameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 确认维度域名修改 ==="), false);
-        client.player.sendMessage(Text.of("§f您确认要修改维度域名吗？"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.area.dimension.confirm")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.dimension.confirm")), false);
         client.player.sendMessage(Text.of(""), false);
-        client.player.sendMessage(Text.of("§a维度: §b" + dimensionId), false);
-        client.player.sendMessage(Text.of("§a原名称: §7" + oldName), false);
-        client.player.sendMessage(Text.of("§a新名称: §6" + newName), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.dimension_2") + dimensionId), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.name") + oldName), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.name_4") + newName), false);
         client.player.sendMessage(Text.of(""), false);
 
-        MutableText confirmBtn = Text.literal("§a[是]")
+        MutableText confirmBtn = Text.literal(I18nManager.translate("gui.button.general_2"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint dimensionalityname confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("确认修改")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.confirm.modify"))))
                 .withColor(Formatting.GREEN));
 
-        MutableText cancelBtn = Text.literal("§c[否]")
+        MutableText cancelBtn = Text.literal(I18nManager.translate("gui.error.general"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint dimensionalityname cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消修改")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.modify"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(Text.empty().append(confirmBtn).append(Text.of("  ")).append(cancelBtn), false);
@@ -130,86 +131,86 @@ public class DimensionalNameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 选择维度域名颜色 ==="), false);
-        client.player.sendMessage(Text.of("§a维度: §b" + dimName + " §7(" + dimensionId + ")"), false);
-        client.player.sendMessage(Text.of("§a当前颜色: §6" + currentColor), false);
-        client.player.sendMessage(Text.of("§a请选择新的颜色："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.area.color.dimension_2")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.dimension_2") + dimName + " §7(" + dimensionId + ")"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.color_4") + currentColor), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.color")), false);
         client.player.sendMessage(Text.of(""), false);
 
         // 颜色按钮行
         showColorRows(client);
 
         client.player.sendMessage(Text.of(""), false);
-        MutableText cancelBtn = Text.literal("§c[取消]")
+        MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint dimensionalitycolor cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消操作")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_5"))))
                 .withColor(Formatting.RED));
         client.player.sendMessage(cancelBtn, false);
     }
 
     private static void showColorRows(MinecraftClient client) {
         MutableText row1 = Text.empty()
-            .append(colorBtn("白色", "#FFFFFF", "§f"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_24"), "#FFFFFF", "§f"))
             .append(Text.of("  "))
-            .append(colorBtn("灰色", "#808080", "§7"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_23"), "#808080", "§7"))
             .append(Text.of("  "))
-            .append(colorBtn("深灰色", "#555555", "§8"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_18"), "#555555", "§8"))
             .append(Text.of("  "))
-            .append(colorBtn("黑色", "#000000", "§0"));
+            .append(colorBtn(I18nManager.translate("gui.message.general_31"), "#000000", "§0"));
 
         MutableText row2 = Text.empty()
-            .append(colorBtn("深红色", "#AA0000", "§4"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_19"), "#AA0000", "§4"))
             .append(Text.of("  "))
-            .append(colorBtn("红色", "#FF5555", "§c"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_27"), "#FF5555", "§c"))
             .append(Text.of("  "))
-            .append(colorBtn("粉红色", "#FF55FF", "§d"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_25"), "#FF55FF", "§d"))
             .append(Text.of("  "))
-            .append(colorBtn("橙色", "#FFAA00", "§6"));
+            .append(colorBtn(I18nManager.translate("gui.message.general_17"), "#FFAA00", "§6"));
 
         MutableText row3 = Text.empty()
-            .append(colorBtn("黄色", "#FFFF55", "§e"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_30"), "#FFFF55", "§e"))
             .append(Text.of("  "))
-            .append(colorBtn("绿色", "#55FF55", "§a"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_28"), "#55FF55", "§a"))
             .append(Text.of("  "))
-            .append(colorBtn("深绿色", "#00AA00", "§2"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_20"), "#00AA00", "§2"))
             .append(Text.of("  "))
-            .append(colorBtn("天蓝色", "#55FFFF", "§b"));
+            .append(colorBtn(I18nManager.translate("gui.message.general_13"), "#55FFFF", "§b"));
 
         MutableText row4 = Text.empty()
-            .append(colorBtn("湖蓝色", "#00AAAA", "§3"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_22"), "#00AAAA", "§3"))
             .append(Text.of("  "))
-            .append(colorBtn("蓝色", "#5555FF", "§9"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_29"), "#5555FF", "§9"))
             .append(Text.of("  "))
-            .append(colorBtn("深蓝色", "#0000AA", "§1"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_21"), "#0000AA", "§1"))
             .append(Text.of("  "))
-            .append(colorBtn("紫色", "#AA00AA", "§5"));
+            .append(colorBtn(I18nManager.translate("gui.message.general_26"), "#AA00AA", "§5"));
 
         MutableText row5 = Text.empty()
-            .append(colorBtn("整体黑白闪烁", "FLASH_BW_ALL", "§7"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_15"), "FLASH_BW_ALL", "§7"))
             .append(Text.of("  "))
-            .append(colorBtn("整体彩虹闪烁", "FLASH_RAINBOW_ALL", "§b"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_14"), "FLASH_RAINBOW_ALL", "§b"))
             .append(Text.of("  "))
-            .append(colorBtn("单字黑白闪烁", "FLASH_BW_CHAR", "§8"))
+            .append(colorBtn(I18nManager.translate("gui.message.general_12"), "FLASH_BW_CHAR", "§8"))
             .append(Text.of("  "))
-            .append(colorBtn("单字彩虹闪烁", "FLASH_RAINBOW_CHAR", "§d"));
+            .append(colorBtn(I18nManager.translate("gui.message.general_11"), "FLASH_RAINBOW_CHAR", "§d"));
 
         client.player.sendMessage(row1, false);
         client.player.sendMessage(row2, false);
         client.player.sendMessage(row3, false);
         client.player.sendMessage(row4, false);
         client.player.sendMessage(Text.of(""), false);
-        client.player.sendMessage(Text.of("§6--- 闪烁效果 ---"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.general_4")), false);
         client.player.sendMessage(row5, false);
 
         client.player.sendMessage(Text.of(""), false);
-        MutableText customBtn = Text.literal("§e[自定义颜色(十六进制)]")
+        MutableText customBtn = Text.literal(I18nManager.translate("gui.button.color_2"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
                     "/areahint dimensionalitycolor color #"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of("点击后输入十六进制颜色，如 #FF0000"))));
+                    Text.of(I18nManager.translate("gui.prompt.color_2")))));
         client.player.sendMessage(customBtn, false);
     }
 
@@ -219,7 +220,7 @@ public class DimensionalNameUI {
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint dimensionalitycolor color " + value))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of("选择 " + name))));
+                    Text.of(I18nManager.translate("addhint.prompt.general") + name))));
     }
 
     /**
@@ -230,26 +231,26 @@ public class DimensionalNameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 确认维度域名颜色修改 ==="), false);
-        client.player.sendMessage(Text.of("§f您确认将该维度域名的颜色更改为该颜色吗？"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.area.color.dimension")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.area.color.dimension")), false);
         client.player.sendMessage(Text.of(""), false);
-        client.player.sendMessage(Text.of("§a维度: §b" + dimName + " §7(" + dimensionId + ")"), false);
-        client.player.sendMessage(Text.of("§a原颜色: §7" + oldColor), false);
-        client.player.sendMessage(Text.of("§a新颜色: §6" + newColor), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.dimension_2") + dimName + " §7(" + dimensionId + ")"), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.color_2") + oldColor), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.color_5") + newColor), false);
         client.player.sendMessage(Text.of(""), false);
 
-        MutableText confirmBtn = Text.literal("§a[是]")
+        MutableText confirmBtn = Text.literal(I18nManager.translate("gui.button.general_2"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint dimensionalitycolor confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("确认修改")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.confirm.modify"))))
                 .withColor(Formatting.GREEN));
 
-        MutableText cancelBtn = Text.literal("§c[否]")
+        MutableText cancelBtn = Text.literal(I18nManager.translate("gui.error.general"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint dimensionalitycolor cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消修改")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.modify"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(Text.empty().append(confirmBtn).append(Text.of("  ")).append(cancelBtn), false);
@@ -262,26 +263,26 @@ public class DimensionalNameUI {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of("§6=== 新维度发现 ==="), false);
-        client.player.sendMessage(Text.of("§a你进入了一个未命名的维度: §b" + dimensionId), false);
-        client.player.sendMessage(Text.of("§a请为这个维度命名（5分钟内未提交将使用默认名称）："), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.dimension")), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.dimension") + dimensionId), false);
+        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.dimension.name")), false);
         client.player.sendMessage(Text.of(""), false);
 
-        MutableText inputBtn = Text.literal("§e[点击此处输入名称]")
+        MutableText inputBtn = Text.literal(I18nManager.translate("gui.prompt.name"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
                     "/areahint firstdimname "))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of("点击后在聊天栏输入维度名称"))));
+                    Text.of(I18nManager.translate("gui.prompt.dimension.name_2")))));
         client.player.sendMessage(inputBtn, false);
 
         client.player.sendMessage(Text.of(""), false);
-        MutableText skipBtn = Text.literal("§7[跳过]")
+        MutableText skipBtn = Text.literal(I18nManager.translate("gui.button.general"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint firstdimname_skip"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of("使用默认名称"))));
+                    Text.of(I18nManager.translate("gui.message.name_5")))));
         client.player.sendMessage(skipBtn, false);
     }
 }
