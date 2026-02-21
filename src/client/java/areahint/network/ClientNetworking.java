@@ -236,6 +236,14 @@ public class ClientNetworking {
                     else if (action.startsWith("recolor")) {
                         handleRecolorCommand(action);
                     }
+                    // 处理DimName命令
+                    else if (action.startsWith("dimname")) {
+                        handleDimNameCommand(action);
+                    }
+                    // 处理DimColor命令
+                    else if (action.startsWith("dimcolor")) {
+                        handleDimColorCommand(action);
+                    }
                     // 处理Rename命令
                     else if (action.startsWith("rename")) {
                         handleRenameCommand(action);
@@ -429,6 +437,50 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理Recolor命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理DimName命令
+     */
+    private static void handleDimNameCommand(String action) {
+        try {
+            areahint.dimensional.DimensionalNameUIManager mgr = areahint.dimensional.DimensionalNameUIManager.getInstance();
+            if (action.equals("dimname_start")) {
+                mgr.startDimName();
+            } else if (action.startsWith("dimname_select:")) {
+                mgr.handleDimNameSelect(action.substring("dimname_select:".length()));
+            } else if (action.startsWith("dimname_name:")) {
+                mgr.handleDimNameInput(action.substring("dimname_name:".length()));
+            } else if (action.equals("dimname_confirm")) {
+                mgr.confirmDimName();
+            } else if (action.equals("dimname_cancel")) {
+                mgr.cancel();
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理DimName命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理DimColor命令
+     */
+    private static void handleDimColorCommand(String action) {
+        try {
+            areahint.dimensional.DimensionalNameUIManager mgr = areahint.dimensional.DimensionalNameUIManager.getInstance();
+            if (action.equals("dimcolor_start")) {
+                mgr.startDimColor();
+            } else if (action.startsWith("dimcolor_select:")) {
+                mgr.handleDimColorSelect(action.substring("dimcolor_select:".length()));
+            } else if (action.startsWith("dimcolor_color:")) {
+                mgr.handleDimColorInput(action.substring("dimcolor_color:".length()));
+            } else if (action.equals("dimcolor_confirm")) {
+                mgr.confirmDimColor();
+            } else if (action.equals("dimcolor_cancel")) {
+                mgr.cancel();
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理DimColor命令时出错: " + e.getMessage(), e);
         }
     }
 

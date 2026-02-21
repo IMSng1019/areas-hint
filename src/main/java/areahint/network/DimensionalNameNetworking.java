@@ -38,26 +38,12 @@ public class DimensionalNameNetworking {
      */
     public static void sendDimensionalNamesToAllClients(MinecraftServer server) {
         try {
-            // 获取所有维度域名配置
-            Map<String, String> dimensionalNames = DimensionalNameManager.getAllDimensionalNames();
-            
-            // 转换为数据传输格式
-            List<DimensionalNameData> dataList = new ArrayList<>();
-            for (Map.Entry<String, String> entry : dimensionalNames.entrySet()) {
-                dataList.add(new DimensionalNameData(entry.getKey(), entry.getValue()));
-            }
-            
-            // 序列化为JSON
-            String jsonData = GSON.toJson(dataList);
-            
-            // 向所有在线玩家发送
+            String jsonData = buildJsonData();
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 sendDimensionalNamesToClient(player, jsonData);
             }
-            
-            Areashint.LOGGER.info("已向 {} 个在线客户端发送维度域名配置", 
+            Areashint.LOGGER.info("已向 {} 个在线客户端发送维度域名配置",
                 server.getPlayerManager().getPlayerList().size());
-                
         } catch (Exception e) {
             Areashint.LOGGER.error("发送维度域名配置到客户端失败", e);
         }
@@ -69,23 +55,21 @@ public class DimensionalNameNetworking {
      */
     public static void sendDimensionalNamesToClient(ServerPlayerEntity player) {
         try {
-            // 获取所有维度域名配置
-            Map<String, String> dimensionalNames = DimensionalNameManager.getAllDimensionalNames();
-            
-            // 转换为数据传输格式
-            List<DimensionalNameData> dataList = new ArrayList<>();
-            for (Map.Entry<String, String> entry : dimensionalNames.entrySet()) {
-                dataList.add(new DimensionalNameData(entry.getKey(), entry.getValue()));
-            }
-            
-            // 序列化为JSON
-            String jsonData = GSON.toJson(dataList);
-            
-            sendDimensionalNamesToClient(player, jsonData);
-            
+            sendDimensionalNamesToClient(player, buildJsonData());
         } catch (Exception e) {
             Areashint.LOGGER.error("发送维度域名配置到客户端失败: " + player.getName().getString(), e);
         }
+    }
+
+    private static String buildJsonData() {
+        Map<String, String> names = DimensionalNameManager.getAllDimensionalNames();
+        Map<String, String> colors = DimensionalNameManager.getAllDimensionalColors();
+        List<DimensionalNameData> dataList = new ArrayList<>();
+        for (Map.Entry<String, String> entry : names.entrySet()) {
+            dataList.add(new DimensionalNameData(entry.getKey(), entry.getValue(),
+                colors.get(entry.getKey())));
+        }
+        return GSON.toJson(dataList);
     }
     
     /**

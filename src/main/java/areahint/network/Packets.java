@@ -74,6 +74,10 @@ public class Packets {
     public static final Identifier DIVIDE_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "divide_area");
     public static final Identifier DIVIDE_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "divide_area_response");
 
+    // DimensionalName功能相关的包ID
+    public static final Identifier C2S_DIMNAME_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_dimname_request");
+    public static final Identifier C2S_DIMCOLOR_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_dimcolor_request");
+
     // ReplaceButton功能相关的包ID
     public static final Identifier REPLACEBUTTON_START = new Identifier(Areashint.MOD_ID, "replacebutton_start");
     public static final Identifier REPLACEBUTTON_CANCEL = new Identifier(Areashint.MOD_ID, "replacebutton_cancel");

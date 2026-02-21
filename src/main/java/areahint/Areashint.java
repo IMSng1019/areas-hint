@@ -4,8 +4,11 @@ import areahint.command.ServerCommands;
 import areahint.network.ServerNetworking;
 import areahint.file.FileManager;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +92,28 @@ public class Areashint implements ModInitializer {
 		// 初始化DivideArea服务端网络处理
 		areahint.dividearea.DivideAreaServerNetworking.registerServerNetworking();
 		
+		// 注册维度变更事件 - 首次进入未命名维度时提示OP命名
+		ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
+			String dimId = destination.getRegistryKey().getValue().toString();
+			if (player.hasPermissionLevel(2) && !areahint.dimensional.DimensionalNameManager.hasDimensionalName(dimId)) {
+				// 自动注册该维度（使用维度ID作为默认名称）
+				areahint.dimensional.DimensionalNameManager.setDimensionalName(dimId, dimId);
+				areahint.dimensional.DimensionalNameManager.saveDimensionalNames();
+				// 提示OP玩家命名
+				MutableText msg = Text.literal("§e您进入了一个未命名的维度: §b" + dimId);
+				player.sendMessage(msg, false);
+				MutableText nameBtn = Text.literal("§a[点击此处为该维度命名]")
+					.setStyle(Style.EMPTY
+						.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+							"/areahint dimensionalityname select \"" + dimId + "\""))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+							Text.of("为维度 " + dimId + " 设置名称"))));
+				player.sendMessage(nameBtn, false);
+				// 同步给客户端
+				areahint.network.DimensionalNameNetworking.sendDimensionalNamesToClient(player);
+			}
+		});
+
 		// 注册命令
 		ServerCommands.register();
 		

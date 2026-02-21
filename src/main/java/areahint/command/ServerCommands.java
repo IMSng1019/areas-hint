@@ -69,15 +69,39 @@ public class ServerCommands {
             .then(literal("reload")
                 .executes(ServerCommands::executeReload))
             
-            // dimensionalityname 命令 (维度域名管理)
+            // dimensionalityname 命令 (交互式维度域名管理)
             .then(literal("dimensionalityname")
-                .requires(source -> source.hasPermissionLevel(2)) // 需要OP权限
-                .executes(DimensionalNameCommands::listAllDimensions)
-                .then(argument("dimension", StringArgumentType.string())
-                    .suggests(DimensionalNameCommands.createDimensionSuggestionProvider())
-                    .executes(DimensionalNameCommands::showCurrentDimensionalName)
+                .requires(source -> source.hasPermissionLevel(2))
+                .executes(DimensionalNameCommands::executeStart)
+                .then(literal("select")
+                    .then(argument("dimension", StringArgumentType.greedyString())
+                        .executes(context -> DimensionalNameCommands.executeSelect(context,
+                            StringArgumentType.getString(context, "dimension")))))
+                .then(literal("name")
                     .then(argument("newName", StringArgumentType.greedyString())
-                        .executes(DimensionalNameCommands::setDimensionalName))))
+                        .executes(context -> DimensionalNameCommands.executeName(context,
+                            StringArgumentType.getString(context, "newName")))))
+                .then(literal("confirm")
+                    .executes(DimensionalNameCommands::executeConfirm))
+                .then(literal("cancel")
+                    .executes(DimensionalNameCommands::executeCancel)))
+
+            // dimensionalitycolor 命令 (交互式维度域名颜色管理)
+            .then(literal("dimensionalitycolor")
+                .requires(source -> source.hasPermissionLevel(2))
+                .executes(DimensionalNameCommands::executeColorStart)
+                .then(literal("select")
+                    .then(argument("dimension", StringArgumentType.greedyString())
+                        .executes(context -> DimensionalNameCommands.executeColorSelect(context,
+                            StringArgumentType.getString(context, "dimension")))))
+                .then(literal("color")
+                    .then(argument("colorValue", StringArgumentType.greedyString())
+                        .executes(context -> DimensionalNameCommands.executeColorColor(context,
+                            StringArgumentType.getString(context, "colorValue")))))
+                .then(literal("confirm")
+                    .executes(DimensionalNameCommands::executeColorConfirm))
+                .then(literal("cancel")
+                    .executes(DimensionalNameCommands::executeColorCancel)))
             
             // add 命令 (仅服务端)
             .then(literal("add")
@@ -348,7 +372,6 @@ public class ServerCommands {
         source.sendMessage(Text.of("§a/areahint subtitlesize §7- 交互式设置字幕大小 "));
         source.sendMessage(Text.of("§a/areahint add <JSON> §7- 添加新的域名 (已弃用)"));
         source.sendMessage(Text.of("§a/areahint easyadd §7- 启动交互式域名添加 "));
-        source.sendMessage(Text.of("§a/areahint recolor §7- 列出当前维度可编辑的域名"));
         source.sendMessage(Text.of("§a/areahint recolor §7- 修改指定域名的颜色"));
         source.sendMessage(Text.of("§a/areahint rename §7- 启动交互式域名重命名流程"));
         source.sendMessage(Text.of("§a/areahint sethigh §7- 列出当前维度可修改高度的域名"));

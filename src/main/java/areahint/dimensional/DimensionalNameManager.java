@@ -29,6 +29,8 @@ public class DimensionalNameManager {
     
     // 当前维度名称配置
     private static Map<String, String> dimensionalNames = new HashMap<>();
+    // 当前维度颜色配置
+    private static Map<String, String> dimensionalColors = new HashMap<>();
     
     /**
      * 初始化维度域名管理器
@@ -55,8 +57,12 @@ public class DimensionalNameManager {
                 new TypeToken<List<DimensionalNameData>>(){}.getType());
             
             dimensionalNames.clear();
+            dimensionalColors.clear();
             for (DimensionalNameData data : dataList) {
                 dimensionalNames.put(data.getDimensionId(), data.getDisplayName());
+                if (data.getColor() != null) {
+                    dimensionalColors.put(data.getDimensionId(), data.getColor());
+                }
             }
             
             Areashint.LOGGER.info("已加载维度域名配置: {} 个维度", dimensionalNames.size());
@@ -78,7 +84,8 @@ public class DimensionalNameManager {
         try {
             List<DimensionalNameData> dataList = new ArrayList<>();
             for (Map.Entry<String, String> entry : dimensionalNames.entrySet()) {
-                dataList.add(new DimensionalNameData(entry.getKey(), entry.getValue()));
+                dataList.add(new DimensionalNameData(entry.getKey(), entry.getValue(),
+                    dimensionalColors.get(entry.getKey())));
             }
             
             String json = GSON.toJson(dataList);
@@ -161,21 +168,27 @@ public class DimensionalNameManager {
         return new HashSet<>(dimensionalNames.keySet());
     }
     
-    /**
-     * 检查维度是否有自定义名称
-     * @param dimensionId 维度标识符
-     * @return 是否有自定义名称
-     */
     public static boolean hasDimensionalName(String dimensionId) {
         return dimensionalNames.containsKey(dimensionId);
     }
-    
-    /**
-     * 重置所有维度名称为默认值
-     */
+
+    public static String getDimensionalColor(String dimensionId) {
+        return dimensionalColors.getOrDefault(dimensionId, null);
+    }
+
+    public static void setDimensionalColor(String dimensionId, String color) {
+        dimensionalColors.put(dimensionId, color);
+        Areashint.LOGGER.info("已更新维度域名颜色: {} -> {}", dimensionId, color);
+    }
+
+    public static Map<String, String> getAllDimensionalColors() {
+        return new HashMap<>(dimensionalColors);
+    }
+
     public static void resetToDefaults() {
         dimensionalNames.clear();
         dimensionalNames.putAll(DEFAULT_DIMENSIONAL_NAMES);
+        dimensionalColors.clear();
         Areashint.LOGGER.info("维度域名配置已重置为默认值");
     }
 } 

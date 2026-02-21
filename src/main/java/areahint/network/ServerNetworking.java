@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -154,6 +155,15 @@ public class ServerNetworking {
     }
     
     /**
+     * 向所有在线客户端发送命令
+     */
+    public static void sendCommandToAllClients(MinecraftServer server, String command) {
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            sendCommandToClient(player, command);
+        }
+    }
+
+    /**
      * 向客户端发送调试命令
      * @param player 目标玩家
      * @param enabled 是否启用调试
@@ -276,8 +286,43 @@ public class ServerNetworking {
                 }
             });
 
-        // 注意：高度设置功能已简化，不再需要网络处理器
-        // 玩家直接使用 /areahint sethigh 命令即可
+        // 注册维度域名修改请求处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_DIMNAME_REQUEST,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    final String dimensionId = buf.readString();
+                    final String newName = buf.readString();
+                    server.execute(() -> {
+                        if (!player.hasPermissionLevel(2)) {
+                            player.sendMessage(net.minecraft.text.Text.of("§c权限不足"), false);
+                            return;
+                        }
+                        areahint.command.DimensionalNameCommands.handleDimNameChange(
+                            player.getCommandSource(), dimensionId, newName);
+                    });
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理维度域名修改请求时发生错误", e);
+                }
+            });
+
+        // 注册维度域名颜色修改请求处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_DIMCOLOR_REQUEST,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    final String dimensionId = buf.readString();
+                    final String newColor = buf.readString();
+                    server.execute(() -> {
+                        if (!player.hasPermissionLevel(2)) {
+                            player.sendMessage(net.minecraft.text.Text.of("§c权限不足"), false);
+                            return;
+                        }
+                        areahint.command.DimensionalNameCommands.handleDimColorChange(
+                            player.getCommandSource(), dimensionId, newColor);
+                    });
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理维度域名颜色修改请求时发生错误", e);
+                }
+            });
     }
 
     /**

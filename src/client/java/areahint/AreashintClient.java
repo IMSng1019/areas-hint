@@ -415,7 +415,8 @@ public class AreashintClient implements ClientModInitializer {
 						// 如果不在区域内，显示维度域名
 						String dimensionId = currentDimension.toString();
 						String dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
-						renderManager.showAreaTitle(dimensionalName);
+						String dimColor = areahint.dimensional.ClientDimensionalNameManager.getDimensionalColor(dimensionId);
+						renderManager.showAreaTitle(dimensionalName, dimColor != null ? dimColor : "#FFFFFF");
 						hasShownDimensionalName = true;
 						if (justEnteredWorld) {
 							LOGGER.info("进入世界时显示维度域名：{}", dimensionalName);
@@ -461,7 +462,9 @@ public class AreashintClient implements ClientModInitializer {
 								? currentDimension.toString() : "minecraft:overworld";
 							String dimensionalName = areahint.dimensional
 								.ClientDimensionalNameManager.getDimensionalName(dimensionId);
-							renderManager.showAreaTitle(dimensionalName);
+							String dimColor = areahint.dimensional
+								.ClientDimensionalNameManager.getDimensionalColor(dimensionId);
+							renderManager.showAreaTitle(dimensionalName, dimColor != null ? dimColor : "#FFFFFF");
 							hasShownDimensionalName = true;
 						}
 					}
@@ -541,7 +544,8 @@ public class AreashintClient implements ClientModInitializer {
 					// 如果不在区域内，显示维度域名
 					String dimensionId = currentDimension.toString();
 					String dimensionalName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
-					renderManager.showAreaTitle(dimensionalName);
+					String dimColor = areahint.dimensional.ClientDimensionalNameManager.getDimensionalColor(dimensionId);
+					renderManager.showAreaTitle(dimensionalName, dimColor != null ? dimColor : "#FFFFFF");
 					hasShownDimensionalName = true;
 					LOGGER.info("网络同步后显示维度域名：{}", dimensionalName);
 				}
@@ -565,9 +569,8 @@ public class AreashintClient implements ClientModInitializer {
 			LOGGER.info("渲染管理器已更新");
 		}
 
-		// 重新加载维度域名配置
-		areahint.dimensional.ClientDimensionalNameManager.resetToDefaults();
-		LOGGER.info("维度域名配置已重置");
+		// 维度域名配置由服务端同步，不在此处重置
+		LOGGER.info("维度域名配置保持服务端同步状态");
 
 		// 重新加载边界可视化数据
 		areahint.boundviz.BoundVizManager.getInstance().reload();
