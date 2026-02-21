@@ -254,4 +254,34 @@ public class DimensionalNameUI {
 
         client.player.sendMessage(Text.empty().append(confirmBtn).append(Text.of("  ")).append(cancelBtn), false);
     }
+
+    /**
+     * 显示首次维度命名提示
+     */
+    public static void showFirstNamePrompt(String dimensionId) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+
+        client.player.sendMessage(Text.of("§6=== 新维度发现 ==="), false);
+        client.player.sendMessage(Text.of("§a你进入了一个未命名的维度: §b" + dimensionId), false);
+        client.player.sendMessage(Text.of("§a请为这个维度命名（5分钟内未提交将使用默认名称）："), false);
+        client.player.sendMessage(Text.of(""), false);
+
+        MutableText inputBtn = Text.literal("§e[点击此处输入名称]")
+            .setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+                    "/areahint firstdimname "))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.of("点击后在聊天栏输入维度名称"))));
+        client.player.sendMessage(inputBtn, false);
+
+        client.player.sendMessage(Text.of(""), false);
+        MutableText skipBtn = Text.literal("§7[跳过]")
+            .setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    "/areahint firstdimname_skip"))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    Text.of("使用默认名称"))));
+        client.player.sendMessage(skipBtn, false);
+    }
 }

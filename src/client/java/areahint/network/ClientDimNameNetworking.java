@@ -32,6 +32,17 @@ public class ClientDimNameNetworking {
         }
     }
 
+    public static void sendFirstDimName(String dimensionId, String newName) {
+        try {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeString(dimensionId);
+            buf.writeString(newName);
+            ClientPlayNetworking.send(Packets.C2S_FIRST_DIMNAME, buf);
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("发送首次维度命名请求失败", e);
+        }
+    }
+
     public static void sendToServer(String action) {
         if (action.startsWith("dimname_apply:")) {
             String rest = action.substring("dimname_apply:".length());

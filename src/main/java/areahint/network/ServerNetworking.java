@@ -323,6 +323,27 @@ public class ServerNetworking {
                     Areashint.LOGGER.error("处理维度域名颜色修改请求时发生错误", e);
                 }
             });
+
+        // 注册首次维度命名处理器（无权限要求，仅限未命名维度）
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_FIRST_DIMNAME,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    final String dimensionId = buf.readString();
+                    final String newName = buf.readString();
+                    server.execute(() -> {
+                        String currentName = areahint.dimensional.DimensionalNameManager.getDimensionalName(dimensionId);
+                        // 仅当维度名称等于维度ID时（未被命名）才允许
+                        if (!currentName.equals(dimensionId)) {
+                            player.sendMessage(net.minecraft.text.Text.of("§c该维度已被命名"), false);
+                            return;
+                        }
+                        areahint.command.DimensionalNameCommands.handleDimNameChange(
+                            player.getCommandSource(), dimensionId, newName);
+                    });
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理首次维度命名请求时发生错误", e);
+                }
+            });
     }
 
     /**

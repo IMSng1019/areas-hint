@@ -146,6 +146,9 @@ public class Areashint implements ModInitializer {
 		
 		// 初始化世界文件夹管理器
 		areahint.world.WorldFolderManager.initializeServerWorld(minecraftServer);
+
+		// 世界文件夹就绪后重新加载维度域名（init时世界路径尚未初始化）
+		areahint.dimensional.DimensionalNameManager.loadDimensionalNames();
 	}
 	
 	/**

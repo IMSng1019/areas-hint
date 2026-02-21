@@ -45,6 +45,10 @@ public class AreashintClient implements ClientModInitializer {
 	// 上一次tick时玩家是否为null（用于检测进入世界）
 	private static boolean wasPlayerNull = true;
 	private static boolean hasShownDimensionalName = false; // 是否已经显示过维度域名
+	// 首次维度命名相关
+	private static String pendingFirstNameDimId = null; // 等待命名的维度ID
+	private static int firstNameTimeoutTicks = 0; // 超时计数器
+	private static final int FIRST_NAME_TIMEOUT = 6000; // 5分钟 = 6000 ticks
 	
 	@Override
 	public void onInitializeClient() {
@@ -320,6 +324,8 @@ public class AreashintClient implements ClientModInitializer {
 			currentServerAddress = null;
 			wasPlayerNull = true;
 			hasShownDimensionalName = false;
+			pendingFirstNameDimId = null;
+			firstNameTimeoutTicks = 0;
 
 			// 重置区域追踪器和异步检测器
 			areahint.log.AreaChangeTracker.reset();
@@ -390,6 +396,20 @@ public class AreashintClient implements ClientModInitializer {
 				// 每次触发时都重置状态并立即检测（包括刚进入世界的情况）
 				currentAreaName = null;
 				hasShownDimensionalName = false; // 重置维度域名显示标记
+				pendingFirstNameDimId = null; // 重置首次命名状态
+				firstNameTimeoutTicks = 0;
+
+				// 检查是否为未命名维度（displayName == dimensionId）
+				{
+					String dimId = dimension.toString();
+					String dimDisplayName = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimId);
+					if (dimDisplayName.equals(dimId)) {
+						pendingFirstNameDimId = dimId;
+						firstNameTimeoutTicks = FIRST_NAME_TIMEOUT;
+						areahint.dimensional.DimensionalNameUI.showFirstNamePrompt(dimId);
+						LOGGER.info("检测到未命名维度: ，已显示命名提示", dimId);
+					}
+				}
 
 				// 立即检测一次当前位置
 				double playerX = player.getX();
@@ -432,7 +452,21 @@ public class AreashintClient implements ClientModInitializer {
 					}
 				}
 			}
-			
+
+			// 首次维度命名超时处理
+			if (pendingFirstNameDimId != null) {
+				firstNameTimeoutTicks--;
+				if (firstNameTimeoutTicks <= 0) {
+					String dimPath = currentDimension != null ? currentDimension.getPath() : pendingFirstNameDimId;
+					areahint.network.ClientDimNameNetworking.sendFirstDimName(pendingFirstNameDimId, dimPath);
+					if (player != null) {
+						player.sendMessage(net.minecraft.text.Text.of("§7命名超时，已使用默认名称: " + dimPath), false);
+					}
+					pendingFirstNameDimId = null;
+					firstNameTimeoutTicks = 0;
+				}
+			}
+
 			// 异步检测：提交检测任务（移动阈值在AsyncAreaDetector内部判断）
 			if (ClientConfig.isEnabled() && areaDetector.shouldDetect()) {
 				asyncAreaDetector.submitDetection(player.getX(), player.getY(), player.getZ());
@@ -511,6 +545,14 @@ public class AreashintClient implements ClientModInitializer {
 	/**
 	 * 强制重新检测当前区域（在网络同步完成后调用）
 	 */
+	/**
+	 * 清除首次维度命名的pending状态（命名成功后调用）
+	 */
+	public static void clearPendingFirstName() {
+		pendingFirstNameDimId = null;
+		firstNameTimeoutTicks = 0;
+	}
+
 	public static void forceRedetectCurrentArea() {
 		try {
 			MinecraftClient client = MinecraftClient.getInstance();

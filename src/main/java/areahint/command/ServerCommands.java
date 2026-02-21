@@ -102,7 +102,15 @@ public class ServerCommands {
                     .executes(DimensionalNameCommands::executeColorConfirm))
                 .then(literal("cancel")
                     .executes(DimensionalNameCommands::executeColorCancel)))
-            
+
+            // firstdimname 命令（首次维度命名，无权限要求）
+            .then(literal("firstdimname")
+                .then(argument("name", StringArgumentType.greedyString())
+                    .executes(context -> DimensionalNameCommands.executeFirstDimName(context,
+                        StringArgumentType.getString(context, "name")))))
+            .then(literal("firstdimname_skip")
+                .executes(DimensionalNameCommands::executeFirstDimNameSkip))
+
             // add 命令 (仅服务端)
             .then(literal("add")
                 .requires(source -> source.hasPermissionLevel(2)) // 需要管理员权限

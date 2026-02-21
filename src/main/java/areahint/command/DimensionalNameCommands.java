@@ -242,6 +242,47 @@ public class DimensionalNameCommands {
         DimensionalNameManager.saveDimensionalNames();
     }
 
+    // ===== 首次维度命名（无权限要求） =====
+
+    public static int executeFirstDimName(CommandContext<ServerCommandSource> context, String name) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) return 0;
+
+        String dimId = source.getPlayer().getWorld().getRegistryKey().getValue().toString();
+        String currentName = DimensionalNameManager.getDimensionalName(dimId);
+
+        // 仅当维度名称等于维度ID时（未被命名）才允许
+        if (!currentName.equals(dimId)) {
+            source.sendMessage(Text.of("§c该维度已被命名为: " + currentName));
+            return 0;
+        }
+
+        String trimmed = name.trim();
+        if (trimmed.isEmpty() || trimmed.length() > 50) {
+            source.sendError(Text.literal("名称无效（1-50个字符）"));
+            return 0;
+        }
+
+        handleDimNameChange(source, dimId, trimmed);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static int executeFirstDimNameSkip(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) return 0;
+
+        String dimId = source.getPlayer().getWorld().getRegistryKey().getValue().toString();
+        String currentName = DimensionalNameManager.getDimensionalName(dimId);
+
+        if (currentName.equals(dimId)) {
+            // 使用维度路径作为默认名称（如 overworld, the_nether）
+            String defaultName = source.getPlayer().getWorld().getRegistryKey().getValue().getPath();
+            handleDimNameChange(source, dimId, defaultName);
+            source.sendMessage(Text.of("§7已使用默认名称: " + defaultName));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
     private static void sendClientCommand(ServerCommandSource source, String command) {
         try {
             if (source.getPlayer() != null) {
