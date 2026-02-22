@@ -6,7 +6,13 @@
       "mcp__ide__getDiagnostics",
       "Bash(cd J:\\\\mc\\\\mods:*)",
       "Bash(cd:*)",
-      "Bash(cd \"J:/mc/mods\" && python3 -c \"\nimport json\nwith open\\('src/main/resources/assets/areas-hint/lang/zh_cn.json','r',encoding='utf-8'\\) as f:\n    zh = json.load\\(f\\)\nwith open\\('src/main/resources/assets/areas-hint/lang/en_us.json','r',encoding='utf-8'\\) as f:\n    en = json.load\\(f\\)\nmissing = [k for k in zh if k not in en]\nprint\\(f'zh_cn keys: {len\\(zh\\)}, en_us keys: {len\\(en\\)}, missing in en_us: {len\\(missing\\)}'\\)\nif missing:\n    for k in missing[:20]:\n        print\\(f'  {k}: {zh[k]}'\\)\n    if len\\(missing\\) > 20:\n        print\\(f'  ... and {len\\(missing\\)-20} more'\\)\n\" 2>&1)"
+      "Bash(cd \"J:/mc/mods\" && python3 -c \"\nimport json\nwith open\\('src/main/resources/assets/areas-hint/lang/zh_cn.json','r',encoding='utf-8'\\) as f:\n    zh = json.load\\(f\\)\nwith open\\('src/main/resources/assets/areas-hint/lang/en_us.json','r',encoding='utf-8'\\) as f:\n    en = json.load\\(f\\)\nmissing = [k for k in zh if k not in en]\nprint\\(f'zh_cn keys: {len\\(zh\\)}, en_us keys: {len\\(en\\)}, missing in en_us: {len\\(missing\\)}'\\)\nif missing:\n    for k in missing[:20]:\n        print\\(f'  {k}: {zh[k]}'\\)\n    if len\\(missing\\) > 20:\n        print\\(f'  ... and {len\\(missing\\)-20} more'\\)\n\" 2>&1)",
+      "WebFetch(domain:fabricmc.net)",
+      "WebFetch(domain:modrinth.com)",
+      "WebFetch(domain:maven.fabricmc.net)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch",
+      "WebFetch(domain:meta.fabricmc.net)"
     ],
     "deny": [],
     "ask": []

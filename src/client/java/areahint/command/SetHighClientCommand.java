@@ -244,14 +244,14 @@ public class SetHighClientCommand {
      * @param success 是否成功
      * @param message 响应消息
      */
-    public static void handleServerResponse(boolean success, String message) {
+    public static void handleServerResponse(boolean success, MutableText message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
-        
+
         if (success) {
-            client.player.sendMessage(Text.of("§a" + message), false);
+            client.player.sendMessage(Text.literal("§a").append(message), false);
         } else {
-            client.player.sendMessage(Text.of("§c" + message), false);
+            client.player.sendMessage(Text.literal("§c").append(message), false);
         }
     }
     

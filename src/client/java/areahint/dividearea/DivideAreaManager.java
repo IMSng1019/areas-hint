@@ -457,7 +457,7 @@ public class DivideAreaManager {
             .append(colorBtn(I18nManager.translate("gui.message.general_22"), "#00AAAA", "§3")).append(Text.of("  "))
             .append(colorBtn(I18nManager.translate("gui.message.general_29"), "#5555FF", "§9")).append(Text.of("  "))
             .append(colorBtn(I18nManager.translate("gui.message.general_21"), "#0000AA", "§1")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_26"), "#800080", "§5"));
+            .append(colorBtn(I18nManager.translate("gui.message.general_26"), "#AA00AA", "§5"));
         net.minecraft.text.MutableText row5 = Text.empty()
             .append(colorBtn(I18nManager.translate("gui.message.general_15"), "FLASH_BW_ALL", "§7")).append(Text.of("  "))
             .append(colorBtn(I18nManager.translate("gui.message.general_14"), "FLASH_RAINBOW_ALL", "§b")).append(Text.of("  "))

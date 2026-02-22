@@ -1044,7 +1044,7 @@ public class ClientNetworking {
         client.execute(() -> {
             try {
                 boolean success = buf.readBoolean();
-                String message = buf.readString();
+                net.minecraft.text.MutableText message = TranslatableMessage.read(buf);
                 areahint.command.SetHighClientCommand.handleServerResponse(success, message);
             } catch (Exception e) {
                 AreashintClient.LOGGER.error("处理SetHigh响应时出错: " + e.getMessage());
