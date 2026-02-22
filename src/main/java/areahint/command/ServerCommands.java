@@ -415,9 +415,9 @@ public class ServerCommands {
         try {
             MinecraftServer server = source.getServer();
             areahint.network.DimensionalNameNetworking.sendDimensionalNamesToAllClients(server);
-            Areashint.LOGGER.info("已重新发送维度域名配置给所有客户端");
+            Areashint.LOGGER.info(ServerI18nManager.translate("command.message.area.dimension_3"));
         } catch (Exception e) {
-            Areashint.LOGGER.error("重新发送维度域名配置失败", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.area.dimension_4"), e);
         }
         
         // 通知客户端重载配置

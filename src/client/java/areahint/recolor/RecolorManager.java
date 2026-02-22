@@ -158,7 +158,7 @@ public class RecolorManager {
 
         } catch (Exception e) {
             client.player.sendMessage(Text.of(I18nManager.translate("message.error.general") + e.getMessage()), false);
-            AreashintClient.LOGGER.error("发送recolor请求失败", e);
+            AreashintClient.LOGGER.error(I18nManager.translate("message.error.general_32"), e);
         }
     }
 
@@ -200,11 +200,11 @@ public class RecolorManager {
 
             ClientPlayNetworking.send(areahint.network.Packets.C2S_RECOLOR_REQUEST, buf);
 
-            AreashintClient.LOGGER.info("发送Recolor请求: 域名={}, 颜色={}, 维度={}",
+            AreashintClient.LOGGER.info(I18nManager.translate("message.prompt.area.color.dimension"),
                 areaName, color, dimension);
 
         } catch (Exception e) {
-            AreashintClient.LOGGER.error("发送Recolor请求时发生错误: " + e.getMessage(), e);
+            AreashintClient.LOGGER.error(I18nManager.translate("message.error.general_30") + e.getMessage(), e);
         }
     }
 

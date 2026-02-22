@@ -41,7 +41,7 @@ public class ShrinkAreaServerNetworking {
                 } catch (Exception e) {
                     System.err.println("处理收缩域名请求时发生错误: " + e.getMessage());
                     e.printStackTrace();
-                    sendErrorResponse(player, "处理请求时发生内部错误");
+                    sendErrorResponse(player, "shrinkarea.server.error.internal");
                 }
             }
         );
@@ -62,20 +62,20 @@ public class ShrinkAreaServerNetworking {
 
             // 验证权限（只在玩家所在维度查找）
             if (!validatePermission(player, shrunkArea, playerDimensionType)) {
-                sendErrorResponse(player, "您没有权限收缩此域名");
+                sendErrorResponse(player, "shrinkarea.server.error.permission");
                 return;
             }
 
             // 验证域名数据
             if (!validateAreaData(shrunkArea)) {
-                sendErrorResponse(player, "域名数据验证失败");
+                sendErrorResponse(player, "shrinkarea.server.error.validation");
                 return;
             }
 
             // 保存收缩后的域名
             boolean success = saveShrunkArea(shrunkArea, dimension);
             if (!success) {
-                sendErrorResponse(player, "保存域名失败");
+                sendErrorResponse(player, "shrinkarea.server.error.save");
                 return;
             }
 
@@ -83,7 +83,7 @@ public class ShrinkAreaServerNetworking {
             redistributeAreasToAllPlayers(player.getServer());
 
             // 发送成功响应
-            sendSuccessResponse(player, "域名 '" + shrunkArea.getName() + "' 收缩成功");
+            sendSuccessResponse(player, shrunkArea.getName());
 
             // 服务端日志
             System.out.println("玩家 " + player.getGameProfile().getName() +
@@ -92,7 +92,7 @@ public class ShrinkAreaServerNetworking {
         } catch (Exception e) {
             System.err.println("处理收缩域名请求失败: " + e.getMessage());
             e.printStackTrace();
-            sendErrorResponse(player, "处理请求失败: " + e.getMessage());
+            sendErrorResponse(player, "shrinkarea.server.error.process");
         }
     }
 

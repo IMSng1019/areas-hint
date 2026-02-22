@@ -199,7 +199,6 @@ public class ExpandAreaManager {
         this.selectedAreaName = selectedArea.getName();
         
         sendMessage(I18nManager.translate("dividearea.prompt.area") + areahint.util.AreaDataConverter.getDisplayName(selectedArea), Formatting.GREEN);
-        sendMessage(I18nManager.translate("addhint.message.general_2") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("expandarea.message.vertex.record"), Formatting.YELLOW);
         sendMessage(I18nManager.translate("expandarea.button.area.record.save"), Formatting.GRAY);
         
         // 开始记录模式

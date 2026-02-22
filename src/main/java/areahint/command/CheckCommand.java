@@ -139,7 +139,7 @@ public class CheckCommand {
             source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.general_9") + unionNameGroups.size() + ServerI18nManager.translate("command.message.area.surface_2") + areas.size() + ServerI18nManager.translate("command.message.area_2")).formatted(Formatting.GRAY));
             
         } catch (Exception e) {
-            Areashint.LOGGER.error("执行check命令时发生错误", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_21"), e);
             source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.general_2") + e.getMessage()).formatted(Formatting.RED));
         }
 
@@ -266,7 +266,7 @@ public class CheckCommand {
             }
             
         } catch (Exception e) {
-            Areashint.LOGGER.error("执行check命令时发生错误", e);
+            Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_21"), e);
             source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.general_2") + e.getMessage()).formatted(Formatting.RED));
         }
 

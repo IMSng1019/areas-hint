@@ -2,6 +2,7 @@ package areahint.addhint;
 
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.util.AreaDataConverter;
@@ -29,7 +30,7 @@ public class AddHintServerNetworking {
                     String dimension = buf.readString(32767);
                     server.execute(() -> handleRequest(player, jsonStr, dimension));
                 } catch (Exception e) {
-                    sendResponse(player, false, "服务端处理错误: " + e.getMessage());
+                    sendResponse(player, false, ServerI18nManager.translate("addhint.error.general_2") + e.getMessage());
                 }
             }
         );
@@ -42,12 +43,12 @@ public class AddHintServerNetworking {
 
             // 验证基本数据
             if (updatedArea == null || updatedArea.getName() == null) {
-                sendResponse(player, false, "域名数据无效");
+                sendResponse(player, false, ServerI18nManager.translate("addhint.error.area_2"));
                 return;
             }
 
             if (updatedArea.getVertices() == null || updatedArea.getVertices().size() < 3) {
-                sendResponse(player, false, "顶点数量不足");
+                sendResponse(player, false, ServerI18nManager.translate("addhint.message.vertex_4"));
                 return;
             }
 
@@ -55,7 +56,7 @@ public class AddHintServerNetworking {
             String dimType = convertDimensionIdToType(dimension);
             String fileName = Packets.getFileNameForDimension(dimType);
             if (fileName == null) {
-                sendResponse(player, false, "无效的维度: " + dimension);
+                sendResponse(player, false, ServerI18nManager.translate("addhint.error.dimension") + dimension);
                 return;
             }
 
@@ -63,7 +64,7 @@ public class AddHintServerNetworking {
             String playerDimType = convertDimensionIdToType(
                 player.getWorld().getRegistryKey().getValue().toString());
             if (!validatePermission(player, updatedArea, playerDimType)) {
-                sendResponse(player, false, "您没有权限修改此域名");
+                sendResponse(player, false, ServerI18nManager.translate("addhint.message.area.modify.permission"));
                 return;
             }
 
@@ -81,21 +82,21 @@ public class AddHintServerNetworking {
             }
 
             if (!found) {
-                sendResponse(player, false, "未找到域名: " + updatedArea.getName());
+                sendResponse(player, false, ServerI18nManager.translate("addhint.message.area_3") + updatedArea.getName());
                 return;
             }
 
             if (!FileManager.writeAreaData(areaFile, areas)) {
-                sendResponse(player, false, "保存文件失败");
+                sendResponse(player, false, ServerI18nManager.translate("addhint.error.save"));
                 return;
             }
 
             // 重新分发给所有玩家
             ServerNetworking.sendAllAreaDataToAll();
-            sendResponse(player, true, "域名 '" + updatedArea.getName() + "' 顶点更新成功");
+            sendResponse(player, true, ServerI18nManager.translate("addhint.message.area_2") + updatedArea.getName() + ServerI18nManager.translate("addhint.success.vertex"));
 
         } catch (Exception e) {
-            sendResponse(player, false, "处理失败: " + e.getMessage());
+            sendResponse(player, false, ServerI18nManager.translate("addhint.error.general") + e.getMessage());
         }
     }
 

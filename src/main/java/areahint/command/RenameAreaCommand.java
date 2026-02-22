@@ -276,11 +276,13 @@ public class RenameAreaCommand {
 
             // 保存文件
             if (FileManager.writeAreaData(areaFile, areas)) {
-                String successMessage = ServerI18nManager.translate("command.success.area.rename") + oldName + ServerI18nManager.translate("command.message.area_5") + newName;
+                player.sendMessage(Text.of(ServerI18nManager.translate("command.success.area.rename")));
+                player.sendMessage(Text.of(ServerI18nManager.translate("command.success.area.rename.old") + oldName));
+                player.sendMessage(Text.of(ServerI18nManager.translate("command.message.area_5") + newName));
                 if (newSurfaceName != null) {
-                    successMessage += ServerI18nManager.translate("command.message.area.surface_3") + newSurfaceName;
+                    player.sendMessage(Text.of(ServerI18nManager.translate("command.message.area.surface_3") + newSurfaceName));
                 }
-                sendRenameResponse(player, true, successMessage);
+                sendRenameResponse(player, true, ServerI18nManager.translate("command.success.area.rename"));
 
                 // 向所有客户端发送更新后的区域数据
                 ServerNetworking.sendAllAreaDataToAll();

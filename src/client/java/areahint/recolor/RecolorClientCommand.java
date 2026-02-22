@@ -50,7 +50,7 @@ public class RecolorClientCommand {
             RecolorManager.getInstance().handleAreaSelection(areaName);
             return 1;
         } catch (Exception e) {
-            AreashintClient.LOGGER.error("执行recolor select时出错", e);
+            AreashintClient.LOGGER.error(I18nManager.translate("command.message.general_24"), e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
                 client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
@@ -67,7 +67,7 @@ public class RecolorClientCommand {
             RecolorManager.getInstance().handleColorSelection(colorValue);
             return 1;
         } catch (Exception e) {
-            AreashintClient.LOGGER.error("执行recolor color时出错", e);
+            AreashintClient.LOGGER.error(I18nManager.translate("command.message.general_22"), e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
                 client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
@@ -84,7 +84,7 @@ public class RecolorClientCommand {
             RecolorManager.getInstance().confirmChange();
             return 1;
         } catch (Exception e) {
-            AreashintClient.LOGGER.error("执行recolor confirm时出错", e);
+            AreashintClient.LOGGER.error(I18nManager.translate("command.message.general_23"), e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
                 client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
@@ -101,7 +101,7 @@ public class RecolorClientCommand {
             RecolorManager.getInstance().cancelRecolor();
             return 1;
         } catch (Exception e) {
-            AreashintClient.LOGGER.error("执行recolor cancel时出错", e);
+            AreashintClient.LOGGER.error(I18nManager.translate("command.message.general_21"), e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
                 client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);

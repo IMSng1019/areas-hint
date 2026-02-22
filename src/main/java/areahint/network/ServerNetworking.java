@@ -528,7 +528,7 @@ public class ServerNetworking {
             sendAllAreaDataToAll();
 
             // 发送成功响应
-            sendDeleteResponse(player, true, ServerI18nManager.translate("message.success.area.delete") + areaName);
+            sendDeleteResponse(player, true, areaName);
 
             Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_28") + playerName + ServerI18nManager.translate("message.message.area.delete_3") + areaName);
 

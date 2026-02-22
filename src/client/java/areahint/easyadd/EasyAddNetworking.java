@@ -55,16 +55,18 @@ public class EasyAddNetworking {
                 try {
                     boolean success = buf.readBoolean();
                     String message = buf.readString();
-                    
+                    int argCount = buf.readInt();
+                    String[] args = new String[argCount];
+                    for (int i = 0; i < argCount; i++) {
+                        args[i] = buf.readString();
+                    }
+
                     client.execute(() -> {
                         if (client.player != null) {
-                            if (success) {
-                                client.player.sendMessage(
-                                    net.minecraft.text.Text.of("§a" + message), false);
-                            } else {
-                                client.player.sendMessage(
-                                    net.minecraft.text.Text.of("§c" + message), false);
-                            }
+                            String translated = areahint.i18n.I18nManager.translate(message, (Object[]) args);
+                            String color = success ? "§a" : "§c";
+                            client.player.sendMessage(
+                                net.minecraft.text.Text.of(color + translated), false);
                         }
                     });
                     

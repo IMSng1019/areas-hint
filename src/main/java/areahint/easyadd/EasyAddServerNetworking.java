@@ -84,7 +84,7 @@ public class EasyAddServerNetworking {
             // 保存到文件
             if (FileManager.writeAreaData(areaFile, existingAreas)) {
                 // 发送成功响应
-                sendResponseToClient(player, true, "域名 \"" + areaData.getName() + "\" 创建成功");
+                sendResponseToClient(player, true, "easyadd.success.created", areaData.getName());
                 
                 // 向所有客户端发送更新
                 ServerNetworking.sendAllAreaDataToAll();
@@ -143,14 +143,18 @@ public class EasyAddServerNetworking {
     /**
      * 向客户端发送响应
      */
-    private static void sendResponseToClient(ServerPlayerEntity player, boolean success, String message) {
+    private static void sendResponseToClient(ServerPlayerEntity player, boolean success, String message, String... args) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(success);
             buf.writeString(message);
-            
+            buf.writeInt(args.length);
+            for (String arg : args) {
+                buf.writeString(arg);
+            }
+
             ServerPlayNetworking.send(player, Packets.S2C_EASYADD_RESPONSE, buf);
-            
+
         } catch (Exception e) {
             Areashint.LOGGER.error("发送EasyAdd响应到客户端时发生错误", e);
         }

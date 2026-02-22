@@ -1,6 +1,7 @@
 package areahint.dimensional;
 
 import areahint.AreashintClient;
+import areahint.i18n.I18nManager;
 import areahint.util.ColorUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -45,7 +46,7 @@ public class DimensionalNameUIManager {
 
     public void startDimName() {
         if (currentState != State.IDLE) {
-            sendMsg("§c当前已有操作在进行中");
+            sendMsg(I18nManager.translate("gui.error.general_3"));
             return;
         }
         currentState = State.DIMNAME_SELECT;
@@ -71,7 +72,7 @@ public class DimensionalNameUIManager {
         if (currentState != State.DIMNAME_CONFIRM) return;
         // 发送命令到服务端执行实际更改
         sendServerCommand("dimname_apply:" + selectedDimensionId + ":" + newName);
-        sendMsg("§a正在处理维度域名修改请求...");
+        sendMsg(I18nManager.translate("gui.prompt.area.dimension.modify"));
         resetState();
     }
 
@@ -79,7 +80,7 @@ public class DimensionalNameUIManager {
 
     public void startDimColor() {
         if (currentState != State.IDLE) {
-            sendMsg("§c当前已有操作在进行中");
+            sendMsg(I18nManager.translate("gui.error.general_3"));
             return;
         }
         currentState = State.DIMCOLOR_SELECT;
@@ -100,7 +101,7 @@ public class DimensionalNameUIManager {
         if (currentState != State.DIMCOLOR_INPUT) return;
         String normalized = ColorUtil.normalizeColor(colorInput);
         if (!ColorUtil.isValidColor(normalized)) {
-            sendMsg("§c无效的颜色格式，请重新选择");
+            sendMsg(I18nManager.translate("gui.error.color"));
             return;
         }
         this.newColor = normalized;
@@ -112,14 +113,14 @@ public class DimensionalNameUIManager {
     public void confirmDimColor() {
         if (currentState != State.DIMCOLOR_CONFIRM) return;
         sendServerCommand("dimcolor_apply:" + selectedDimensionId + ":" + newColor);
-        sendMsg("§a正在处理维度域名颜色修改请求...");
+        sendMsg(I18nManager.translate("gui.prompt.area.color.dimension"));
         resetState();
     }
 
     // ===== 通用 =====
 
     public void cancel() {
-        sendMsg("§7操作已取消");
+        sendMsg(I18nManager.translate("gui.message.cancel"));
         resetState();
     }
 

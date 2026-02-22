@@ -114,7 +114,7 @@ public class DeleteNetworking {
                         if (client.player != null) {
                             if (success) {
                                 client.player.sendMessage(
-                                    net.minecraft.text.Text.of("§a" + message), false);
+                                    net.minecraft.text.Text.of("§a" + I18nManager.translate("message.success.area.delete") + message), false);
                             } else {
                                 client.player.sendMessage(
                                     net.minecraft.text.Text.of("§c" + message), false);

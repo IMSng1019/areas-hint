@@ -80,7 +80,7 @@ public class ShrinkAreaClientNetworking {
                     );
                 } else {
                     client.player.sendMessage(
-                        net.minecraft.text.Text.literal(I18nManager.translate("shrinkarea.error.area.shrink_2") + message)
+                        net.minecraft.text.Text.literal(I18nManager.translate("shrinkarea.error.area.shrink_2") + I18nManager.translate(message))
                             .formatted(net.minecraft.util.Formatting.RED),
                         false
                     );
