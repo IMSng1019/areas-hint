@@ -79,6 +79,24 @@ public class ClientNetworking {
                 new Identifier(Packets.S2C_CLIENT_COMMAND),
                 ClientNetworking::handleClientCommand
         );
+
+        // 连接服务器时同步模组语言设置
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.register(
+            (handler, sender, client) -> sendLanguageToServer()
+        );
+    }
+
+    /** 将客户端模组语言同步给服务端 */
+    public static void sendLanguageToServer() {
+        try {
+            if (ClientPlayNetworking.canSend(Packets.C2S_LANGUAGE_SYNC)) {
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeString(I18nManager.getCurrentLanguage());
+                ClientPlayNetworking.send(Packets.C2S_LANGUAGE_SYNC, buf);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("Failed to sync language: " + e.getMessage());
+        }
     }
     
     /**

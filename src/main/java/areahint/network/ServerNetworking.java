@@ -49,6 +49,11 @@ public class ServerNetworking {
             
             Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_123") + player.getName().getString() + ServerI18nManager.translate("message.message.general_10"));
         });
+
+        // 玩家断开连接时清理语言偏好
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            ServerI18nManager.removePlayer(handler.getPlayer().getUuid());
+        });
     }
     
     /**
@@ -220,6 +225,13 @@ public class ServerNetworking {
      * 注册网络请求处理器
      */
     private static void registerNetworkHandlers() {
+        // 注册语言同步处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_LANGUAGE_SYNC,
+            (server, player, handler, buf, responseSender) -> {
+                String lang = buf.readString();
+                server.execute(() -> ServerI18nManager.setPlayerLanguage(player.getUuid(), lang));
+            });
+
         // 注册recolor请求处理器
         ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_RECOLOR_REQUEST,
             (server, player, handler, buf, responseSender) -> {

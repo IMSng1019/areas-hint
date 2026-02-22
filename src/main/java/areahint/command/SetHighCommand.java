@@ -4,6 +4,7 @@ import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.i18n.ServerI18nManager;
+
 import areahint.network.Packets;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
@@ -285,9 +286,10 @@ public class SetHighCommand {
             return;
         }
 
+        java.util.UUID playerUuid = source.getPlayer() != null ? source.getPlayer().getUuid() : null;
         MutableText message = Text.translatable("command.message.area.altitude.modify");
         for (AreaData area : editableAreas) {
-            message.append(Text.literal("§7- §f" + area.getName() + "§7: " + getHeightDisplayString(area.getAltitude()) + "\n"));
+            message.append(Text.literal("§7- §f" + area.getName() + "§7: ")).append(getHeightDisplayText(area.getAltitude(), playerUuid)).append(Text.literal("\n"));
         }
         source.sendMessage(message);
     }
@@ -297,23 +299,29 @@ public class SetHighCommand {
      * @param altitude 高度数据
      * @return 显示字符串
      */
-    private static String getHeightDisplayString(AreaData.AltitudeData altitude) {
+    private static MutableText getHeightDisplayText(AreaData.AltitudeData altitude, java.util.UUID playerUuid) {
         if (altitude == null) {
-            return ServerI18nManager.translate("command.message.general_10");
+            return playerUuid != null ? Text.literal(ServerI18nManager.translateForPlayer(playerUuid, "command.message.general_10")) : Text.translatable("command.message.general_10");
         }
 
-        StringBuilder sb = new StringBuilder();
+        MutableText result = Text.empty();
+        boolean hasMax = false;
         if (altitude.getMax() != null) {
-            sb.append(ServerI18nManager.translate("command.error.general_8")).append(altitude.getMax());
+            String label = playerUuid != null ? ServerI18nManager.translateForPlayer(playerUuid, "command.error.general_8") : ServerI18nManager.translate("command.error.general_8");
+            result.append(Text.literal(label + altitude.getMax()));
+            hasMax = true;
         }
         if (altitude.getMin() != null) {
-            if (sb.length() > 0) {
-                sb.append("§7, ");
-            }
-            sb.append(ServerI18nManager.translate("command.message.general_11")).append(altitude.getMin());
+            if (hasMax) result.append(Text.literal("§7, "));
+            String label = playerUuid != null ? ServerI18nManager.translateForPlayer(playerUuid, "command.message.general_11") : ServerI18nManager.translate("command.message.general_11");
+            result.append(Text.literal(label + altitude.getMin()));
+            hasMax = true;
         }
 
-        return sb.length() > 0 ? sb.toString() : ServerI18nManager.translate("command.message.general_10");
+        if (!hasMax) {
+            return playerUuid != null ? Text.literal(ServerI18nManager.translateForPlayer(playerUuid, "command.message.general_10")) : Text.translatable("command.message.general_10");
+        }
+        return result;
     }
     
     /**

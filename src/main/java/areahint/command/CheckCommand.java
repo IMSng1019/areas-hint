@@ -115,20 +115,19 @@ public class CheckCommand {
                 MutableText unionText = Text.literal("§a▶ " + unionName).formatted(Formatting.GREEN);
                 
                 // 添加悬停提示
-                StringBuilder hoverText = new StringBuilder();
-                hoverText.append(ServerI18nManager.translate("command.message.area.surface_4")).append(unionName).append("\n");
-                hoverText.append(ServerI18nManager.translate("command.message.general_8")).append(areasInUnion.size()).append(ServerI18nManager.translate("command.message.area_3"));
-                
+                MutableText hoverContent = Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "command.message.area.surface_4") + unionName + "\n");
+                hoverContent.append(Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "command.message.general_8") + areasInUnion.size() + ServerI18nManager.translateForPlayer(player.getUuid(), "command.message.area_3")));
+
                 for (int i = 0; i < areasInUnion.size(); i++) {
                     AreaData area = areasInUnion.get(i);
-                    hoverText.append("§f- ").append(area.getName());
+                    hoverContent.append(Text.literal("§f- " + area.getName()));
                     if (i < areasInUnion.size() - 1) {
-                        hoverText.append("\n");
+                        hoverContent.append(Text.literal("\n"));
                     }
                 }
-                
+
                 unionText.styled(style -> style
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(hoverText.toString())))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverContent))
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint check \"" + unionName + "\""))
                 );
                 

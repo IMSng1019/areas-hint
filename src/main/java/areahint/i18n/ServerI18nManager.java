@@ -9,47 +9,81 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 服务端国际化管理器
- * 从JAR资源加载翻译文件
+ * 支持多语言加载和按玩家语言翻译
  */
 public class ServerI18nManager {
     private static final Gson GSON = new Gson();
     private static final String DEFAULT_LANGUAGE = "zh_cn";
+
+    // 语言代码 -> 翻译映射
+    private static final Map<String, Map<String, String>> allTranslations = new HashMap<>();
+    // 玩家UUID -> 语言代码
+    private static final Map<UUID, String> playerLanguages = new ConcurrentHashMap<>();
+    // 服务端日志用的当前语言
     private static Map<String, String> translations = new HashMap<>();
     private static String currentLanguage = DEFAULT_LANGUAGE;
 
     public static void init() {
-        loadLanguage(DEFAULT_LANGUAGE);
+        loadLanguageFile(DEFAULT_LANGUAGE);
+        loadLanguageFile("en_us");
+        translations = allTranslations.getOrDefault(DEFAULT_LANGUAGE, new HashMap<>());
+        currentLanguage = DEFAULT_LANGUAGE;
     }
 
-    public static void loadLanguage(String language) {
-        if (language == null || language.isEmpty()) {
-            language = DEFAULT_LANGUAGE;
-        }
+    private static void loadLanguageFile(String language) {
         String path = "assets/areas-hint/lang/" + language + ".json";
         try (InputStream is = ServerI18nManager.class.getClassLoader().getResourceAsStream(path)) {
             if (is == null) {
                 Areashint.LOGGER.warn("Server lang file not found: " + path);
-                if (!language.equals(DEFAULT_LANGUAGE)) {
-                    loadLanguage(DEFAULT_LANGUAGE);
-                }
                 return;
             }
             Map<String, String> loaded = GSON.fromJson(
                 new InputStreamReader(is, StandardCharsets.UTF_8),
                 new TypeToken<Map<String, String>>(){}.getType()
             );
-            translations = loaded != null ? loaded : new HashMap<>();
-            currentLanguage = language;
-            Areashint.LOGGER.info("Server loaded language: " + language + " (" + translations.size() + " entries)");
+            if (loaded != null) {
+                allTranslations.put(language, loaded);
+                Areashint.LOGGER.info("Server loaded language: " + language + " (" + loaded.size() + " entries)");
+            }
         } catch (Exception e) {
             Areashint.LOGGER.error("Failed to load server lang: " + e.getMessage());
-            translations = new HashMap<>();
         }
     }
 
+    public static void setPlayerLanguage(UUID playerUuid, String language) {
+        playerLanguages.put(playerUuid, language);
+        // 确保该语言已加载
+        if (!allTranslations.containsKey(language)) {
+            loadLanguageFile(language);
+        }
+    }
+
+    public static void removePlayer(UUID playerUuid) {
+        playerLanguages.remove(playerUuid);
+    }
+
+    /** 按玩家语言翻译 */
+    public static String translateForPlayer(UUID playerUuid, String key) {
+        String lang = playerLanguages.getOrDefault(playerUuid, DEFAULT_LANGUAGE);
+        Map<String, String> langMap = allTranslations.getOrDefault(lang, translations);
+        return langMap.getOrDefault(key, key);
+    }
+
+    /** 按玩家语言翻译（带参数） */
+    public static String translateForPlayer(UUID playerUuid, String key, Object... args) {
+        String text = translateForPlayer(playerUuid, key);
+        for (int i = 0; i < args.length; i++) {
+            text = text.replace("{" + i + "}", String.valueOf(args[i]));
+        }
+        return text;
+    }
+
+    /** 服务端日志用（默认语言） */
     public static String translate(String key) {
         return translations.getOrDefault(key, key);
     }
@@ -60,6 +94,13 @@ public class ServerI18nManager {
             text = text.replace("{" + i + "}", String.valueOf(args[i]));
         }
         return text;
+    }
+
+    public static void loadLanguage(String language) {
+        if (language == null || language.isEmpty()) language = DEFAULT_LANGUAGE;
+        if (!allTranslations.containsKey(language)) loadLanguageFile(language);
+        translations = allTranslations.getOrDefault(language, new HashMap<>());
+        currentLanguage = language;
     }
 
     public static String getCurrentLanguage() {

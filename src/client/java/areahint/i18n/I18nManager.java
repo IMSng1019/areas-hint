@@ -149,6 +149,10 @@ public class I18nManager {
      * @param key 翻译键
      * @return 翻译后的文本，如果不存在则返回key本身
      */
+    public static boolean hasKey(String key) {
+        return translations.containsKey(key);
+    }
+
     public static String translate(String key) {
         return translations.getOrDefault(key, key);
     }

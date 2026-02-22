@@ -61,6 +61,9 @@ public class LanguageManager {
         // 重新加载语言
         I18nManager.loadLanguage(langCode);
 
+        // 同步语言给服务端
+        areahint.network.ClientNetworking.sendLanguageToServer();
+
         String displayName = I18nManager.getLanguageDisplayName(langCode);
         client.player.sendMessage(Text.of(I18nManager.translate("language.message.language") + displayName + " (" + langCode + ")"), false);
 

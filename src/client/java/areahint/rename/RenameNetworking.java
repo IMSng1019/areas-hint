@@ -87,7 +87,7 @@ public class RenameNetworking {
                 // 创建简化的AreaData对象（只包含必要信息）
                 areahint.data.AreaData area = new areahint.data.AreaData();
                 area.setName(areaName);
-                area.setSignature(signature);
+                area.setSignature(signature.isEmpty() ? null : signature);
 
                 areas.add(area);
             } catch (Exception e) {

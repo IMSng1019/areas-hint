@@ -3,6 +3,7 @@ package areahint.command;
 import areahint.Areashint;
 import areahint.debug.DebugManager;
 import areahint.debug.DebugManager.DebugCategory;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.ServerNetworking;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -12,7 +13,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import areahint.i18n.ServerI18nManager;
+
 
 /**
  * 调试命令处理类
@@ -86,7 +87,7 @@ public class DebugCommand {
         
         // 发送当前配置信息
         if (wasEnabled) {
-            DebugManager.sendDebugInfo(DebugCategory.CONFIG, ServerI18nManager.translate("message.message.general_20"));
+            DebugManager.sendTranslatableDebugInfo(DebugCategory.CONFIG, "message.message.general_20");
         }
         
         return 1;
@@ -129,10 +130,10 @@ public class DebugCommand {
         }
 
         boolean isEnabled = DebugManager.isDebugEnabled(player.getUuid());
-        String status = isEnabled ? ServerI18nManager.translate("message.message.general_18") : ServerI18nManager.translate("message.message.general_19");
+        String status = isEnabled ? ServerI18nManager.translateForPlayer(player.getUuid(), "message.message.general_18") : ServerI18nManager.translateForPlayer(player.getUuid(), "message.message.general_19");
         Formatting color = isEnabled ? Formatting.GREEN : Formatting.RED;
-        
-        source.sendFeedback(() -> Text.translatable("command.hint.general")
+
+        source.sendFeedback(() -> Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "command.hint.general"))
                 .append(Text.literal(status).formatted(color)), false);
         
         return 1;

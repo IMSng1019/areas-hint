@@ -117,9 +117,22 @@ public class DebugManager {
     }
 
     private static void sendTranslatableDebugMessage(ServerPlayerEntity player, String key, Formatting formatting) {
-        Text text = Text.translatable("debug.button.general").formatted(Formatting.GOLD)
-                .append(Text.translatable(key).formatted(formatting));
+        Text text = Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "debug.button.general")).formatted(Formatting.GOLD)
+                .append(Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), key)).formatted(formatting));
         player.sendMessage(text, false);
+    }
+
+    public static void sendTranslatableDebugInfo(DebugCategory category, String key) {
+        if (!anyDebugEnabled) return;
+        for (UUID playerUUID : debugEnabledPlayers) {
+            ServerPlayerEntity player = Areashint.getServer().getPlayerManager().getPlayer(playerUUID);
+            if (player != null && player.isAlive()) {
+                Text text = Text.literal(ServerI18nManager.translateForPlayer(playerUUID, "debug.button.general")).formatted(Formatting.GOLD)
+                        .append(Text.literal("[" + category.name() + "] ").formatted(category.getFormatting()))
+                        .append(Text.literal(ServerI18nManager.translateForPlayer(playerUUID, key)).formatted(category.getFormatting()));
+                player.sendMessage(text, false);
+            }
+        }
     }
     
     /**

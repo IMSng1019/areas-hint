@@ -177,7 +177,7 @@ public class RenameAreaCommand {
 
             for (AreaData area : editableAreas) {
                 buf.writeString(area.getName());
-                buf.writeString(area.getSignature() != null ? area.getSignature() : ServerI18nManager.translate("gui.message.general_16"));
+                buf.writeString(area.getSignature() != null ? area.getSignature() : "");
             }
 
             ServerPlayNetworking.send(player, Packets.S2C_RENAME_RESPONSE, buf);
