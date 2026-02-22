@@ -12,7 +12,9 @@
       "WebFetch(domain:maven.fabricmc.net)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebSearch",
-      "WebFetch(domain:meta.fabricmc.net)"
+      "WebFetch(domain:meta.fabricmc.net)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "WebFetch(domain:api.modrinth.com)"
     ],
     "deny": [],
     "ask": []
