@@ -2,7 +2,7 @@ package areahint.expandarea;
 
 import areahint.data.AreaData;
 import areahint.file.FileManager;
-import areahint.i18n.I18nManager;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.util.AreaDataConverter;
@@ -37,7 +37,7 @@ public class ExpandAreaServerNetworking {
                 } catch (Exception e) {
                     System.err.println("处理扩展域名请求时发生错误: " + e.getMessage());
                     e.printStackTrace();
-                    sendErrorResponse(player, I18nManager.translate("dividearea.error.general_2"));
+                    sendErrorResponse(player, ServerI18nManager.translate("dividearea.error.general_2"));
                 }
             }
         );
@@ -58,20 +58,20 @@ public class ExpandAreaServerNetworking {
 
             // 验证权限（只在玩家所在维度查找）
             if (!validatePermission(player, expandedArea, playerDimensionType)) {
-                sendErrorResponse(player, I18nManager.translate("expandarea.message.area.expand.permission"));
+                sendErrorResponse(player, ServerI18nManager.translate("expandarea.message.area.expand.permission"));
                 return;
             }
 
             // 验证域名数据
             if (!validateAreaData(expandedArea)) {
-                sendErrorResponse(player, I18nManager.translate("easyadd.error.area_4"));
+                sendErrorResponse(player, ServerI18nManager.translate("easyadd.error.area_4"));
                 return;
             }
 
             // 保存扩展后的域名
             boolean success = saveExpandedArea(expandedArea, dimension);
             if (!success) {
-                sendErrorResponse(player, I18nManager.translate("expandarea.error.area.save"));
+                sendErrorResponse(player, ServerI18nManager.translate("expandarea.error.area.save"));
                 return;
             }
 
@@ -79,7 +79,7 @@ public class ExpandAreaServerNetworking {
             redistributeAreasToAllPlayers(player.getServer());
 
             // 发送成功响应
-            sendSuccessResponse(player, I18nManager.translate("addhint.message.area_2") + expandedArea.getName() + I18nManager.translate("expandarea.success.expand"));
+            sendSuccessResponse(player, ServerI18nManager.translate("addhint.message.area_2") + expandedArea.getName() + ServerI18nManager.translate("expandarea.success.expand"));
 
             // 服务端日志
             System.out.println("玩家 " + player.getGameProfile().getName() +
@@ -88,7 +88,7 @@ public class ExpandAreaServerNetworking {
         } catch (Exception e) {
             System.err.println("处理扩展域名请求失败: " + e.getMessage());
             e.printStackTrace();
-            sendErrorResponse(player, I18nManager.translate("dividearea.error.general") + e.getMessage());
+            sendErrorResponse(player, ServerI18nManager.translate("dividearea.error.general") + e.getMessage());
         }
     }
     
