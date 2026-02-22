@@ -1,8 +1,8 @@
 package areahint.expandarea;
 
 import areahint.data.AreaData;
-import areahint.i18n.I18nManager;
 import areahint.network.Packets;
+import areahint.network.TranslatableMessage;
 import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -47,23 +47,12 @@ public class ExpandAreaClientNetworking {
             (client, handler, buf, responseSender) -> {
                 try {
                     boolean success = buf.readBoolean();
-                    String message = buf.readString(32767);
-                    
+                    net.minecraft.text.MutableText message = TranslatableMessage.read(buf);
+
                     client.execute(() -> {
                         if (client.player != null) {
-                            if (success) {
-                                client.player.sendMessage(
-                                    net.minecraft.text.Text.literal(I18nManager.translate("expandarea.success.area.expand_2") + message)
-                                        .formatted(net.minecraft.util.Formatting.GREEN),
-                                    false
-                                );
-                            } else {
-                                client.player.sendMessage(
-                                    net.minecraft.text.Text.literal(I18nManager.translate("expandarea.error.area.expand") + message)
-                                        .formatted(net.minecraft.util.Formatting.RED),
-                                    false
-                                );
-                            }
+                            client.player.sendMessage(
+                                message.formatted(success ? net.minecraft.util.Formatting.GREEN : net.minecraft.util.Formatting.RED), false);
                         }
                     });
                 } catch (Exception e) {

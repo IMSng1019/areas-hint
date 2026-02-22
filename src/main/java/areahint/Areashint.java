@@ -104,14 +104,14 @@ public class Areashint implements ModInitializer {
 				areahint.dimensional.DimensionalNameManager.setDimensionalName(dimId, dimId);
 				areahint.dimensional.DimensionalNameManager.saveDimensionalNames();
 				// 提示OP玩家命名
-				MutableText msg = Text.literal(ServerI18nManager.translate("message.message.dimension_3") + dimId);
+				MutableText msg = Text.translatable("message.message.dimension_3").append(Text.literal(dimId));
 				player.sendMessage(msg, false);
-				MutableText nameBtn = Text.literal(ServerI18nManager.translate("message.button.dimension_3"))
+				MutableText nameBtn = Text.translatable("message.button.dimension_3")
 					.setStyle(Style.EMPTY
 						.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
 							"/areahint dimensionalityname select \"" + dimId + "\""))
 						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-							Text.of(ServerI18nManager.translate("message.hover.dimension.setname") + dimId))));
+							Text.translatable("message.hover.dimension.setname").append(Text.literal(dimId)))));
 				player.sendMessage(nameBtn, false);
 				// 同步给客户端
 				areahint.network.DimensionalNameNetworking.sendDimensionalNamesToClient(player);

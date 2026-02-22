@@ -6,7 +6,7 @@ import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
-import areahint.i18n.I18nManager;
+import areahint.network.TranslatableMessage;
 import com.google.gson.JsonObject;
 
 public class DivideAreaClientNetworking {
@@ -38,18 +38,11 @@ public class DivideAreaClientNetworking {
             (client, handler, buf, responseSender) -> {
                 try {
                     boolean success = buf.readBoolean();
-                    String message = buf.readString(32767);
+                    net.minecraft.text.MutableText message = TranslatableMessage.read(buf);
                     client.execute(() -> {
                         if (client.player != null) {
-                            if (success) {
-                                client.player.sendMessage(
-                                    net.minecraft.text.Text.literal(I18nManager.translate("dividearea.success.area.divide") + message)
-                                        .formatted(net.minecraft.util.Formatting.GREEN), false);
-                            } else {
-                                client.player.sendMessage(
-                                    net.minecraft.text.Text.literal(I18nManager.translate("dividearea.error.area.divide_2") + message)
-                                        .formatted(net.minecraft.util.Formatting.RED), false);
-                            }
+                            client.player.sendMessage(
+                                message.formatted(success ? net.minecraft.util.Formatting.GREEN : net.minecraft.util.Formatting.RED), false);
                         }
                     });
                 } catch (Exception e) {

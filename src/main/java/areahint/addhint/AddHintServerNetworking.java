@@ -2,9 +2,10 @@ package areahint.addhint;
 
 import areahint.data.AreaData;
 import areahint.file.FileManager;
-import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
+import areahint.network.TranslatableMessage;
+import areahint.network.TranslatableMessage.Part;
 import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -12,6 +13,9 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import static areahint.network.TranslatableMessage.key;
+import static areahint.network.TranslatableMessage.lit;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -30,7 +34,7 @@ public class AddHintServerNetworking {
                     String dimension = buf.readString(32767);
                     server.execute(() -> handleRequest(player, jsonStr, dimension));
                 } catch (Exception e) {
-                    sendResponse(player, false, ServerI18nManager.translate("addhint.error.general_2") + e.getMessage());
+                    sendResponse(player, false, key("addhint.error.general_2"), lit(e.getMessage()));
                 }
             }
         );
@@ -43,12 +47,12 @@ public class AddHintServerNetworking {
 
             // 验证基本数据
             if (updatedArea == null || updatedArea.getName() == null) {
-                sendResponse(player, false, ServerI18nManager.translate("addhint.error.area_2"));
+                sendResponse(player, false, key("addhint.error.area_2"));
                 return;
             }
 
             if (updatedArea.getVertices() == null || updatedArea.getVertices().size() < 3) {
-                sendResponse(player, false, ServerI18nManager.translate("addhint.message.vertex_4"));
+                sendResponse(player, false, key("addhint.message.vertex_4"));
                 return;
             }
 
@@ -56,7 +60,7 @@ public class AddHintServerNetworking {
             String dimType = convertDimensionIdToType(dimension);
             String fileName = Packets.getFileNameForDimension(dimType);
             if (fileName == null) {
-                sendResponse(player, false, ServerI18nManager.translate("addhint.error.dimension") + dimension);
+                sendResponse(player, false, key("addhint.error.dimension"), lit(dimension));
                 return;
             }
 
@@ -64,7 +68,7 @@ public class AddHintServerNetworking {
             String playerDimType = convertDimensionIdToType(
                 player.getWorld().getRegistryKey().getValue().toString());
             if (!validatePermission(player, updatedArea, playerDimType)) {
-                sendResponse(player, false, ServerI18nManager.translate("addhint.message.area.modify.permission"));
+                sendResponse(player, false, key("addhint.message.area.modify.permission"));
                 return;
             }
 
@@ -82,21 +86,21 @@ public class AddHintServerNetworking {
             }
 
             if (!found) {
-                sendResponse(player, false, ServerI18nManager.translate("addhint.message.area_3") + updatedArea.getName());
+                sendResponse(player, false, key("addhint.message.area_3"), lit(updatedArea.getName()));
                 return;
             }
 
             if (!FileManager.writeAreaData(areaFile, areas)) {
-                sendResponse(player, false, ServerI18nManager.translate("addhint.error.save"));
+                sendResponse(player, false, key("addhint.error.save"));
                 return;
             }
 
             // 重新分发给所有玩家
             ServerNetworking.sendAllAreaDataToAll();
-            sendResponse(player, true, ServerI18nManager.translate("addhint.message.area_2") + updatedArea.getName() + ServerI18nManager.translate("addhint.success.vertex"));
+            sendResponse(player, true, key("addhint.message.area_2"), lit(updatedArea.getName()), key("addhint.success.vertex"));
 
         } catch (Exception e) {
-            sendResponse(player, false, ServerI18nManager.translate("addhint.error.general") + e.getMessage());
+            sendResponse(player, false, key("addhint.error.general"), lit(e.getMessage()));
         }
     }
 
@@ -131,11 +135,11 @@ public class AddHintServerNetworking {
         return null;
     }
 
-    private static void sendResponse(ServerPlayerEntity player, boolean success, String message) {
+    private static void sendResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(success);
-            buf.writeString(message);
+            TranslatableMessage.write(buf, parts);
             ServerPlayNetworking.send(player, Packets.ADDHINT_AREA_RESPONSE_CHANNEL, buf);
         } catch (Exception e) {
             e.printStackTrace();

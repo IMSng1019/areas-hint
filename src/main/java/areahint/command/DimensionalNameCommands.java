@@ -28,7 +28,7 @@ public class DimensionalNameCommands {
     public static int executeStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
         // 确保所有服务器维度都已注册
@@ -42,7 +42,7 @@ public class DimensionalNameCommands {
     public static int executeSelect(CommandContext<ServerCommandSource> context, String dimensionId) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
         // 去除引号
@@ -56,17 +56,17 @@ public class DimensionalNameCommands {
     public static int executeName(CommandContext<ServerCommandSource> context, String newName) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
 
         if (newName == null || newName.trim().isEmpty()) {
-            source.sendError(Text.literal(ServerI18nManager.translate("command.message.dimension.name_2")));
+            source.sendError(Text.translatable("command.message.dimension.name_2"));
             return 0;
         }
         final String finalNewName = newName.trim();
         if (finalNewName.length() > 50) {
-            source.sendError(Text.literal(ServerI18nManager.translate("command.message.dimension.name_3")));
+            source.sendError(Text.translatable("command.message.dimension.name_3"));
             return 0;
         }
 
@@ -77,7 +77,7 @@ public class DimensionalNameCommands {
     public static int executeConfirm(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
         sendClientCommand(source, "areahint:dimname_confirm");
@@ -87,7 +87,7 @@ public class DimensionalNameCommands {
     public static int executeCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
         sendClientCommand(source, "areahint:dimname_cancel");
@@ -99,7 +99,7 @@ public class DimensionalNameCommands {
     public static int executeColorStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
         syncServerDimensions(source.getServer());
@@ -111,7 +111,7 @@ public class DimensionalNameCommands {
     public static int executeColorSelect(CommandContext<ServerCommandSource> context, String dimensionId) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
         if (dimensionId.startsWith("\"") && dimensionId.endsWith("\"") && dimensionId.length() > 1) {
@@ -124,7 +124,7 @@ public class DimensionalNameCommands {
     public static int executeColorColor(CommandContext<ServerCommandSource> context, String colorValue) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
         sendClientCommand(source, "areahint:dimcolor_color:" + colorValue);
@@ -134,7 +134,7 @@ public class DimensionalNameCommands {
     public static int executeColorConfirm(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
         sendClientCommand(source, "areahint:dimcolor_confirm");
@@ -144,7 +144,7 @@ public class DimensionalNameCommands {
     public static int executeColorCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
         sendClientCommand(source, "areahint:dimcolor_cancel");
@@ -162,10 +162,10 @@ public class DimensionalNameCommands {
             DimensionalNameManager.setDimensionalName(dimensionId, newName);
 
             if (DimensionalNameManager.saveDimensionalNames()) {
-                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.area.dimension_2")), false);
-                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.dimension") + dimensionId), false);
-                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.name_3") + oldName), false);
-                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.name_2") + newName), false);
+                source.sendFeedback(() -> Text.translatable("command.message.area.dimension_2"), false);
+                source.sendFeedback(() -> Text.translatable("command.message.dimension").append(Text.literal(dimensionId)), false);
+                source.sendFeedback(() -> Text.translatable("command.message.name_3").append(Text.literal(oldName)), false);
+                source.sendFeedback(() -> Text.translatable("command.message.name_2").append(Text.literal(newName)), false);
 
                 // 广播到所有客户端
                 DimensionalNameNetworking.sendDimensionalNamesToAllClients(source.getServer());
@@ -175,10 +175,10 @@ public class DimensionalNameCommands {
                 Areashint.LOGGER.info(ServerI18nManager.translate("command.message.dimension.name"),
                     source.getName(), dimensionId, oldName, newName);
             } else {
-                source.sendError(Text.literal(ServerI18nManager.translate("command.error.area.dimension.save")));
+                source.sendError(Text.translatable("command.error.area.dimension.save"));
             }
         } catch (Exception e) {
-            source.sendError(Text.literal(ServerI18nManager.translate("command.error.dimension.name_2") + e.getMessage()));
+            source.sendError(Text.translatable("command.error.dimension.name_2").append(Text.literal(e.getMessage())));
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.dimension.name"), e);
         }
     }
@@ -193,10 +193,10 @@ public class DimensionalNameCommands {
             DimensionalNameManager.setDimensionalColor(dimensionId, newColor);
 
             if (DimensionalNameManager.saveDimensionalNames()) {
-                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.area.color.dimension")), false);
-                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.dimension") + dimensionId), false);
-                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.color_5") + oldColorDisplay), false);
-                source.sendFeedback(() -> Text.literal(ServerI18nManager.translate("command.message.color_6") + newColor), false);
+                source.sendFeedback(() -> Text.translatable("command.message.area.color.dimension"), false);
+                source.sendFeedback(() -> Text.translatable("command.message.dimension").append(Text.literal(dimensionId)), false);
+                source.sendFeedback(() -> Text.translatable("command.message.color_5").append(Text.literal(oldColorDisplay)), false);
+                source.sendFeedback(() -> Text.translatable("command.message.color_6").append(Text.literal(newColor)), false);
 
                 DimensionalNameNetworking.sendDimensionalNamesToAllClients(source.getServer());
                 ServerNetworking.sendCommandToAllClients(source.getServer(), "areahint:reload");
@@ -204,10 +204,10 @@ public class DimensionalNameCommands {
                 Areashint.LOGGER.info(ServerI18nManager.translate("command.message.color.dimension"),
                     source.getName(), dimensionId, oldColorDisplay, newColor);
             } else {
-                source.sendError(Text.literal(ServerI18nManager.translate("command.error.area.dimension.save")));
+                source.sendError(Text.translatable("command.error.area.dimension.save"));
             }
         } catch (Exception e) {
-            source.sendError(Text.literal(ServerI18nManager.translate("command.error.color.dimension_2") + e.getMessage()));
+            source.sendError(Text.translatable("command.error.color.dimension_2").append(Text.literal(e.getMessage())));
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.color.dimension"), e);
         }
     }
@@ -255,13 +255,13 @@ public class DimensionalNameCommands {
 
         // 仅当维度名称等于维度ID时（未被命名）才允许
         if (!currentName.equals(dimId)) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension_4") + currentName));
+            source.sendMessage(Text.translatable("command.error.dimension_4").append(Text.literal(currentName)));
             return 0;
         }
 
         String trimmed = name.trim();
         if (trimmed.isEmpty() || trimmed.length() > 50) {
-            source.sendError(Text.literal(ServerI18nManager.translate("command.error.name")));
+            source.sendError(Text.translatable("command.error.name"));
             return 0;
         }
 
@@ -280,7 +280,7 @@ public class DimensionalNameCommands {
             // 使用维度路径作为默认名称（如 overworld, the_nether）
             String defaultName = source.getPlayer().getWorld().getRegistryKey().getValue().getPath();
             handleDimNameChange(source, dimId, defaultName);
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.message.name") + defaultName));
+            source.sendMessage(Text.translatable("command.message.name").append(Text.literal(defaultName)));
         }
         return Command.SINGLE_SUCCESS;
     }

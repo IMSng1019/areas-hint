@@ -2,9 +2,12 @@ package areahint.expandarea;
 
 import areahint.data.AreaData;
 import areahint.file.FileManager;
-import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
+import areahint.network.TranslatableMessage;
+import areahint.network.TranslatableMessage.Part;
+import static areahint.network.TranslatableMessage.key;
+import static areahint.network.TranslatableMessage.lit;
 import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -37,7 +40,7 @@ public class ExpandAreaServerNetworking {
                 } catch (Exception e) {
                     System.err.println("处理扩展域名请求时发生错误: " + e.getMessage());
                     e.printStackTrace();
-                    sendErrorResponse(player, ServerI18nManager.translate("dividearea.error.general_2"));
+                    sendResponse(player, false, key("dividearea.error.general_2"));
                 }
             }
         );
@@ -58,20 +61,20 @@ public class ExpandAreaServerNetworking {
 
             // 验证权限（只在玩家所在维度查找）
             if (!validatePermission(player, expandedArea, playerDimensionType)) {
-                sendErrorResponse(player, ServerI18nManager.translate("expandarea.message.area.expand.permission"));
+                sendResponse(player, false, key("expandarea.message.area.expand.permission"));
                 return;
             }
 
             // 验证域名数据
             if (!validateAreaData(expandedArea)) {
-                sendErrorResponse(player, ServerI18nManager.translate("easyadd.error.area_4"));
+                sendResponse(player, false, key("easyadd.error.area_4"));
                 return;
             }
 
             // 保存扩展后的域名
             boolean success = saveExpandedArea(expandedArea, dimension);
             if (!success) {
-                sendErrorResponse(player, ServerI18nManager.translate("expandarea.error.area.save"));
+                sendResponse(player, false, key("expandarea.error.area.save"));
                 return;
             }
 
@@ -79,7 +82,7 @@ public class ExpandAreaServerNetworking {
             redistributeAreasToAllPlayers(player.getServer());
 
             // 发送成功响应
-            sendSuccessResponse(player, ServerI18nManager.translate("addhint.message.area_2") + expandedArea.getName() + ServerI18nManager.translate("expandarea.success.expand"));
+            sendResponse(player, true, key("addhint.message.area_2"), lit(expandedArea.getName()), key("expandarea.success.expand"));
 
             // 服务端日志
             System.out.println("玩家 " + player.getGameProfile().getName() +
@@ -88,7 +91,7 @@ public class ExpandAreaServerNetworking {
         } catch (Exception e) {
             System.err.println("处理扩展域名请求失败: " + e.getMessage());
             e.printStackTrace();
-            sendErrorResponse(player, ServerI18nManager.translate("dividearea.error.general") + e.getMessage());
+            sendResponse(player, false, key("dividearea.error.general"), lit(e.getMessage()));
         }
     }
     
@@ -264,30 +267,11 @@ public class ExpandAreaServerNetworking {
         }
     }
     
-    /**
-     * 发送成功响应
-     */
-    private static void sendSuccessResponse(ServerPlayerEntity player, String message) {
+    private static void sendResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeBoolean(true);  // 成功
-            buf.writeString(message);
-            
-            ServerPlayNetworking.send(player, Packets.EXPAND_AREA_RESPONSE_CHANNEL, buf);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    /**
-     * 发送错误响应
-     */
-    private static void sendErrorResponse(ServerPlayerEntity player, String errorMessage) {
-        try {
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeBoolean(false); // 失败
-            buf.writeString(errorMessage);
-            
+            buf.writeBoolean(success);
+            TranslatableMessage.write(buf, parts);
             ServerPlayNetworking.send(player, Packets.EXPAND_AREA_RESPONSE_CHANNEL, buf);
         } catch (Exception e) {
             e.printStackTrace();

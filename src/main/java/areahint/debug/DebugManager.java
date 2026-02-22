@@ -34,9 +34,9 @@ public class DebugManager {
             debugEnabledPlayers.add(playerUUID);
             anyDebugEnabled = true;
             Areashint.LOGGER.info(ServerI18nManager.translate("debug.message.general"), player.getName().getString());
-            sendDebugMessage(player, ServerI18nManager.translate("debug.hint.general"), Formatting.GREEN);
+            sendTranslatableDebugMessage(player, "debug.hint.general", Formatting.GREEN);
         } else {
-            sendDebugMessage(player, ServerI18nManager.translate("debug.message.general_5"), Formatting.YELLOW);
+            sendTranslatableDebugMessage(player, "debug.message.general_5", Formatting.YELLOW);
         }
         
         return !wasEnabled;
@@ -56,9 +56,9 @@ public class DebugManager {
         
         if (wasEnabled) {
             Areashint.LOGGER.info(ServerI18nManager.translate("debug.message.general_2"), player.getName().getString());
-            sendDebugMessage(player, ServerI18nManager.translate("debug.hint.general_2"), Formatting.YELLOW);
+            sendTranslatableDebugMessage(player, "debug.hint.general_2", Formatting.YELLOW);
         } else {
-            sendDebugMessage(player, ServerI18nManager.translate("debug.message.general_6"), Formatting.RED);
+            sendTranslatableDebugMessage(player, "debug.message.general_6", Formatting.RED);
         }
         
         return wasEnabled;
@@ -111,8 +111,14 @@ public class DebugManager {
      * @param formatting 格式
      */
     private static void sendDebugMessage(ServerPlayerEntity player, String message, Formatting formatting) {
-        Text text = Text.literal(ServerI18nManager.translate("debug.button.general")).formatted(Formatting.GOLD)
+        Text text = Text.translatable("debug.button.general").formatted(Formatting.GOLD)
                 .append(Text.literal(message).formatted(formatting));
+        player.sendMessage(text, false);
+    }
+
+    private static void sendTranslatableDebugMessage(ServerPlayerEntity player, String key, Formatting formatting) {
+        Text text = Text.translatable("debug.button.general").formatted(Formatting.GOLD)
+                .append(Text.translatable(key).formatted(formatting));
         player.sendMessage(text, false);
     }
     

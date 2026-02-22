@@ -4,13 +4,15 @@ import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
+import areahint.network.TranslatableMessage;
+import areahint.network.TranslatableMessage.Part;
+import static areahint.network.TranslatableMessage.key;
+import static areahint.network.TranslatableMessage.lit;
 import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -41,7 +43,7 @@ public class ShrinkAreaServerNetworking {
                 } catch (Exception e) {
                     System.err.println("处理收缩域名请求时发生错误: " + e.getMessage());
                     e.printStackTrace();
-                    sendErrorResponse(player, "shrinkarea.server.error.internal");
+                    sendResponse(player, false, key("shrinkarea.server.error.internal"));
                 }
             }
         );
@@ -62,20 +64,20 @@ public class ShrinkAreaServerNetworking {
 
             // 验证权限（只在玩家所在维度查找）
             if (!validatePermission(player, shrunkArea, playerDimensionType)) {
-                sendErrorResponse(player, "shrinkarea.server.error.permission");
+                sendResponse(player, false, key("shrinkarea.server.error.permission"));
                 return;
             }
 
             // 验证域名数据
             if (!validateAreaData(shrunkArea)) {
-                sendErrorResponse(player, "shrinkarea.server.error.validation");
+                sendResponse(player, false, key("shrinkarea.server.error.validation"));
                 return;
             }
 
             // 保存收缩后的域名
             boolean success = saveShrunkArea(shrunkArea, dimension);
             if (!success) {
-                sendErrorResponse(player, "shrinkarea.server.error.save");
+                sendResponse(player, false, key("shrinkarea.server.error.save"));
                 return;
             }
 
@@ -83,7 +85,7 @@ public class ShrinkAreaServerNetworking {
             redistributeAreasToAllPlayers(player.getServer());
 
             // 发送成功响应
-            sendSuccessResponse(player, shrunkArea.getName());
+            sendResponse(player, true, key("shrinkarea.success.area.shrink_2"), lit(shrunkArea.getName()));
 
             // 服务端日志
             System.out.println("玩家 " + player.getGameProfile().getName() +
@@ -92,7 +94,7 @@ public class ShrinkAreaServerNetworking {
         } catch (Exception e) {
             System.err.println("处理收缩域名请求失败: " + e.getMessage());
             e.printStackTrace();
-            sendErrorResponse(player, "shrinkarea.server.error.process");
+            sendResponse(player, false, key("shrinkarea.server.error.process"));
         }
     }
 
@@ -261,30 +263,11 @@ public class ShrinkAreaServerNetworking {
         return null;
     }
     
-    /**
-     * 发送成功响应
-     */
-    private static void sendSuccessResponse(ServerPlayerEntity player, String message) {
+    private static void sendResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeBoolean(true);  // 成功
-            buf.writeString(message);
-            
-            ServerPlayNetworking.send(player, Packets.SHRINK_AREA_RESPONSE_CHANNEL, buf);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    /**
-     * 发送错误响应
-     */
-    private static void sendErrorResponse(ServerPlayerEntity player, String errorMessage) {
-        try {
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeBoolean(false); // 失败
-            buf.writeString(errorMessage);
-            
+            buf.writeBoolean(success);
+            TranslatableMessage.write(buf, parts);
             ServerPlayNetworking.send(player, Packets.SHRINK_AREA_RESPONSE_CHANNEL, buf);
         } catch (Exception e) {
             e.printStackTrace();

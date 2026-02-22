@@ -77,7 +77,7 @@ public class CheckCommand {
             Path areaFile = WorldFolderManager.getWorldDimensionFile(fileName);
             
             if (areaFile == null || !areaFile.toFile().exists()) {
-                source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.dimension_2")).formatted(Formatting.RED));
+                source.sendMessage(Text.translatable("command.error.area.dimension_2").formatted(Formatting.RED));
                 return 1;
             }
 
@@ -85,7 +85,7 @@ public class CheckCommand {
             List<AreaData> areas = FileManager.readAreaData(areaFile);
 
             if (areas.isEmpty()) {
-                source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.dimension")).formatted(Formatting.RED));
+                source.sendMessage(Text.translatable("command.error.area.dimension").formatted(Formatting.RED));
                 return 1;
             }
             
@@ -103,8 +103,8 @@ public class CheckCommand {
             
             // 发送标题
             source.sendMessage(Text.literal(""));
-            source.sendMessage(Text.literal(ServerI18nManager.translate("command.title.area.surface.list")).formatted(Formatting.GOLD));
-            source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.surface_5")).formatted(Formatting.GRAY));
+            source.sendMessage(Text.translatable("command.title.area.surface.list").formatted(Formatting.GOLD));
+            source.sendMessage(Text.translatable("command.message.area.surface_5").formatted(Formatting.GRAY));
             source.sendMessage(Text.literal(""));
             
             // 显示每个联合域名
@@ -136,11 +136,11 @@ public class CheckCommand {
             }
             
             source.sendMessage(Text.literal(""));
-            source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.general_9") + unionNameGroups.size() + ServerI18nManager.translate("command.message.area.surface_2") + areas.size() + ServerI18nManager.translate("command.message.area_2")).formatted(Formatting.GRAY));
+            source.sendMessage(Text.translatable("command.message.general_9").append(Text.literal(String.valueOf(unionNameGroups.size()))).append(Text.translatable("command.message.area.surface_2")).append(Text.literal(String.valueOf(areas.size()))).append(Text.translatable("command.message.area_2")).formatted(Formatting.GRAY));
             
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_21"), e);
-            source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.general_2") + e.getMessage()).formatted(Formatting.RED));
+            source.sendMessage(Text.translatable("command.error.general_2").append(Text.literal(e.getMessage())).formatted(Formatting.RED));
         }
 
         return 1;
@@ -165,7 +165,7 @@ public class CheckCommand {
             Path areaFile = WorldFolderManager.getWorldDimensionFile(fileName);
             
             if (areaFile == null || !areaFile.toFile().exists()) {
-                source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.dimension_2")).formatted(Formatting.RED));
+                source.sendMessage(Text.translatable("command.error.area.dimension_2").formatted(Formatting.RED));
                 return 1;
             }
 
@@ -187,77 +187,77 @@ public class CheckCommand {
             }
 
             if (matchedAreas.isEmpty()) {
-                source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.surface") + unionName).formatted(Formatting.RED));
+                source.sendMessage(Text.translatable("command.error.area.surface").append(Text.literal(unionName)).formatted(Formatting.RED));
                 return 1;
             }
             
             // 发送详细信息
             source.sendMessage(Text.literal(""));
-            source.sendMessage(Text.literal(ServerI18nManager.translate("command.title.area.surface")).formatted(Formatting.GOLD));
-            source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.surface_4") + unionName).formatted(Formatting.GOLD));
-            source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area_6") + matchedAreas.size()).formatted(Formatting.GRAY));
+            source.sendMessage(Text.translatable("command.title.area.surface").formatted(Formatting.GOLD));
+            source.sendMessage(Text.translatable("command.message.area.surface_4").append(Text.literal(unionName)).formatted(Formatting.GOLD));
+            source.sendMessage(Text.translatable("command.message.area_6").append(Text.literal(String.valueOf(matchedAreas.size()))).formatted(Formatting.GRAY));
             source.sendMessage(Text.literal(""));
             
             // 显示每个域名的详细信息
             for (int i = 0; i < matchedAreas.size(); i++) {
                 AreaData area = matchedAreas.get(i);
                 
-                source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area_9") + (i + 1) + ":").formatted(Formatting.GREEN));
-                source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area") + area.getName()));
+                source.sendMessage(Text.translatable("command.message.area_9").append(Text.literal((i + 1) + ":")).formatted(Formatting.GREEN));
+                source.sendMessage(Text.translatable("command.message.area").append(Text.literal(area.getName())));
                 
                 if (area.getSurfacename() != null && !area.getSurfacename().trim().isEmpty()) {
-                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.surface") + area.getSurfacename()));
+                    source.sendMessage(Text.translatable("command.message.area.surface").append(Text.literal(area.getSurfacename())));
                 }
                 
-                source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.level") + area.getLevel() + ServerI18nManager.translate("command.message.general_29")).formatted(Formatting.YELLOW));
+                source.sendMessage(Text.translatable("command.message.area.level").append(Text.literal(String.valueOf(area.getLevel()))).append(Text.translatable("command.message.general_29")).formatted(Formatting.YELLOW));
                 
                 if (area.getBaseName() != null) {
-                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.area.parent") + area.getBaseName()));
+                    source.sendMessage(Text.translatable("command.message.area.parent").append(Text.literal(area.getBaseName())));
                 }
                 
                 if (area.getSignature() != null) {
-                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.general") + area.getSignature()));
+                    source.sendMessage(Text.translatable("command.message.general").append(Text.literal(area.getSignature())));
                 }
                 
                 if (area.getColor() != null) {
-                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.color") + area.getColor()));
+                    source.sendMessage(Text.translatable("command.message.color").append(Text.literal(area.getColor())));
                 }
                 
                 // 显示高度信息
                 if (area.getAltitude() != null) {
-                    String altitudeText = ServerI18nManager.translate("command.message.altitude");
+                    MutableText altitudeText = Text.translatable("command.message.altitude");
                     if (area.getAltitude().getMin() != null && area.getAltitude().getMax() != null) {
-                        altitudeText += area.getAltitude().getMin() + ServerI18nManager.translate("command.message.general_4") + area.getAltitude().getMax();
+                        altitudeText.append(Text.literal(String.valueOf(area.getAltitude().getMin()))).append(Text.translatable("command.message.general_4")).append(Text.literal(String.valueOf(area.getAltitude().getMax())));
                     } else if (area.getAltitude().getMin() != null) {
-                        altitudeText += area.getAltitude().getMin() + ServerI18nManager.translate("command.message.general_2");
+                        altitudeText.append(Text.literal(String.valueOf(area.getAltitude().getMin()))).append(Text.translatable("command.message.general_2"));
                     } else if (area.getAltitude().getMax() != null) {
-                        altitudeText += area.getAltitude().getMax() + ServerI18nManager.translate("command.message.general_3");
+                        altitudeText.append(Text.literal(String.valueOf(area.getAltitude().getMax()))).append(Text.translatable("command.message.general_3"));
                     } else {
-                        altitudeText += ServerI18nManager.translate("command.message.general_25");
+                        altitudeText.append(Text.translatable("command.message.general_25"));
                     }
-                    source.sendMessage(Text.literal(altitudeText));
+                    source.sendMessage(altitudeText);
                 } else {
-                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.altitude_2")));
+                    source.sendMessage(Text.translatable("command.message.altitude_2"));
                 }
                 
                 // 显示顶点信息
                 if (area.getVertices() != null && !area.getVertices().isEmpty()) {
-                    source.sendMessage(Text.literal(ServerI18nManager.translate("command.message.vertex") + area.getVertices().size()));
+                    source.sendMessage(Text.translatable("command.message.vertex").append(Text.literal(String.valueOf(area.getVertices().size()))));
                     
                     // 显示前几个顶点作为示例
-                    StringBuilder verticesText = new StringBuilder(ServerI18nManager.translate("command.message.vertex.coordinate"));
+                    MutableText verticesText = Text.translatable("command.message.vertex.coordinate");
                     int maxShow = Math.min(3, area.getVertices().size());
                     for (int j = 0; j < maxShow; j++) {
                         AreaData.Vertex vertex = area.getVertices().get(j);
-                        verticesText.append("(").append(vertex.getX()).append(", ").append(vertex.getZ()).append(")");
+                        verticesText.append(Text.literal("(" + vertex.getX() + ", " + vertex.getZ() + ")"));
                         if (j < maxShow - 1) {
-                            verticesText.append(", ");
+                            verticesText.append(Text.literal(", "));
                         }
                     }
                     if (area.getVertices().size() > 3) {
-                        verticesText.append("...");
+                        verticesText.append(Text.literal("..."));
                     }
-                    source.sendMessage(Text.literal(verticesText.toString()));
+                    source.sendMessage(verticesText);
                 }
                 
                 if (i < matchedAreas.size() - 1) {
@@ -267,7 +267,7 @@ public class CheckCommand {
             
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_21"), e);
-            source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.general_2") + e.getMessage()).formatted(Formatting.RED));
+            source.sendMessage(Text.translatable("command.error.general_2").append(Text.literal(e.getMessage())).formatted(Formatting.RED));
         }
 
         return 1;

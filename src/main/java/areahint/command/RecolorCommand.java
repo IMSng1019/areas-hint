@@ -5,6 +5,10 @@ import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
+import areahint.network.TranslatableMessage;
+import areahint.network.TranslatableMessage.Part;
+import static areahint.network.TranslatableMessage.key;
+import static areahint.network.TranslatableMessage.lit;
 import areahint.util.ColorUtil;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -33,36 +37,36 @@ public class RecolorCommand {
     public static int executeRecolor(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
+            source.sendMessage(Text.translatable("command.error.general_10"));
             return 0;
         }
 
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
         boolean hasOp = source.hasPermissionLevel(2);
-        
+
         // 获取玩家当前维度
         String dimension = player.getWorld().getRegistryKey().getValue().toString();
         String dimensionType = convertDimensionIdToType(dimension);
         String fileName = Packets.getFileNameForDimension(dimensionType);
-        
+
         if (fileName == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension_3")));
+            source.sendMessage(Text.translatable("command.error.dimension_3"));
             return 0;
         }
-        
+
         // 获取可编辑的域名列表
         List<AreaData> editableAreas = getEditableAreas(fileName, playerName, hasOp);
-        
+
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.dimension_3")));
+            source.sendMessage(Text.translatable("command.error.area.dimension_3"));
             return 0;
         }
-        
+
         // 发送域名列表到客户端，包含交互式颜色选择界面
         sendInteractiveRecolorToClient(player, editableAreas, dimensionType);
-        
-        source.sendMessage(Text.of(ServerI18nManager.translate("command.prompt.area.list")));
+
+        source.sendMessage(Text.translatable("command.prompt.area.list"));
         return 1;
     }
     
@@ -77,7 +81,7 @@ public class RecolorCommand {
         ServerCommandSource source = context.getSource();
         
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
+            source.sendMessage(Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -87,9 +91,9 @@ public class RecolorCommand {
         // 标准化颜色输入
         String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
         if (!areahint.util.ColorUtil.isValidColor(normalizedColor)) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.color") + colorInput));
-            source.sendMessage(Text.of(ServerI18nManager.translate("message.message.color")));
-            source.sendMessage(Text.of(ServerI18nManager.translate("message.message.general_45")));
+            source.sendMessage(Text.translatable("command.error.color").append(Text.literal(colorInput)));
+            source.sendMessage(Text.translatable("message.message.color"));
+            source.sendMessage(Text.translatable("message.message.general_45"));
             return 0;
         }
         
@@ -165,20 +169,20 @@ public class RecolorCommand {
             
             // 验证颜色格式
             if (!ColorUtil.isValidColor(newColor)) {
-                sendRecolorResponse(player, false, ServerI18nManager.translate("command.error.color_3") + newColor);
+                sendRecolorResponse(player, false, key("command.error.color_3"), lit(newColor));
                 return;
             }
             
             // 获取维度文件
             String fileName = Packets.getFileNameForDimension(dimension);
             if (fileName == null) {
-                sendRecolorResponse(player, false, ServerI18nManager.translate("addhint.error.dimension") + dimension);
+                sendRecolorResponse(player, false, key("addhint.error.dimension"), lit(dimension));
                 return;
             }
             
             Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             if (areaFile == null || !areaFile.toFile().exists()) {
-                sendRecolorResponse(player, false, ServerI18nManager.translate("command.message.dimension_5"));
+                sendRecolorResponse(player, false, key("command.message.dimension_5"));
                 return;
             }
             
@@ -191,7 +195,7 @@ public class RecolorCommand {
                 if (area.getName().equals(areaName)) {
                     // 检查权限
                     if (!hasOp && !playerName.equals(area.getSignature())) {
-                        sendRecolorResponse(player, false, ServerI18nManager.translate("command.message.area.modify.permission") + areaName + "\"");
+                        sendRecolorResponse(player, false, key("command.message.area.modify.permission"), lit(areaName + "\""));
                         return;
                     }
                     
@@ -203,14 +207,13 @@ public class RecolorCommand {
             }
             
             if (!found) {
-                sendRecolorResponse(player, false, ServerI18nManager.translate("addhint.message.area_3") + areaName);
+                sendRecolorResponse(player, false, key("addhint.message.area_3"), lit(areaName));
                 return;
             }
             
             // 保存文件
             if (FileManager.writeAreaData(areaFile, areas)) {
-                sendRecolorResponse(player, true,
-                    String.format(ServerI18nManager.translate("command.message.area_10") + ServerI18nManager.translate("command.message.color_4"), areaName, oldColor, newColor));
+                sendRecolorResponse(player, true, key("command.message.area_10"), lit(areaName), key("command.message.color_4"), lit(oldColor), lit(" → "), lit(newColor));
                 
                 // 重新加载并发送给所有客户端
                 ServerNetworking.sendAllAreaDataToAll();
@@ -218,27 +221,25 @@ public class RecolorCommand {
                 Areashint.LOGGER.info(ServerI18nManager.translate("command.message.general_28") + playerName + ServerI18nManager.translate("command.message.area_4") + areaName + "\"" + ServerI18nManager.translate("command.message.color_3") + oldColor + ServerI18nManager.translate("command.message.general_5") + newColor);
                 
             } else {
-                sendRecolorResponse(player, false, ServerI18nManager.translate("command.error.area.save"));
+                sendRecolorResponse(player, false, key("command.error.area.save"));
             }
             
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_20"), e);
-            sendRecolorResponse(player, false, ServerI18nManager.translate("command.error.general_19") + e.getMessage());
+            sendRecolorResponse(player, false, key("command.error.general_19"), lit(e.getMessage()));
         }
     }
     
     /**
      * 发送重新着色响应
      */
-    private static void sendRecolorResponse(ServerPlayerEntity player, boolean success, String message) {
+    private static void sendRecolorResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeString("recolor_response");
             buf.writeBoolean(success);
-            buf.writeString(message);
-            
+            TranslatableMessage.write(buf, parts);
             ServerPlayNetworking.send(player, Packets.S2C_RECOLOR_RESPONSE, buf);
-            
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_18"), e);
         }

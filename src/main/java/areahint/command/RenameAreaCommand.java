@@ -6,6 +6,10 @@ import areahint.file.FileManager;
 import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
+import areahint.network.TranslatableMessage;
+import areahint.network.TranslatableMessage.Part;
+import static areahint.network.TranslatableMessage.key;
+import static areahint.network.TranslatableMessage.lit;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -39,11 +43,11 @@ public class RenameAreaCommand {
                 ServerPlayerEntity player = (ServerPlayerEntity) source.getEntity();
                 sendRenameableAreaList(player);
             } else {
-                source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+                source.sendMessage(Text.translatable("command.error.general_9"));
             }
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_22") + e.getMessage());
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_4")));
+            source.sendMessage(Text.translatable("command.error.general_4"));
         }
 
         return 1;
@@ -59,7 +63,7 @@ public class RenameAreaCommand {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -69,7 +73,7 @@ public class RenameAreaCommand {
                 "areahint:rename_select:" + areaName);
             return 1;
         } catch (Exception e) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area_3") + e.getMessage()));
+            source.sendMessage(Text.translatable("command.error.area_3").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -83,7 +87,7 @@ public class RenameAreaCommand {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -93,7 +97,7 @@ public class RenameAreaCommand {
                 "areahint:rename_confirm");
             return 1;
         } catch (Exception e) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.confirm.rename") + e.getMessage()));
+            source.sendMessage(Text.translatable("command.error.confirm.rename").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -107,7 +111,7 @@ public class RenameAreaCommand {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_9")));
+            source.sendMessage(Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -117,7 +121,7 @@ public class RenameAreaCommand {
                 "areahint:rename_cancel");
             return 1;
         } catch (Exception e) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.cancel.rename") + e.getMessage()));
+            source.sendMessage(Text.translatable("command.error.cancel.rename").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -139,7 +143,7 @@ public class RenameAreaCommand {
                 Packets.convertDimensionPathToType(dimensionPath));
 
             if (fileName == null) {
-                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.dimension_2"));
+                sendRenameResponse(player, false, key("command.message.dimension_2"));
                 return;
             }
 
@@ -180,7 +184,7 @@ public class RenameAreaCommand {
 
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.message.area.list") + e.getMessage());
-            sendRenameResponse(player, false, ServerI18nManager.translate("command.error.area_4"));
+            sendRenameResponse(player, false, key("command.error.area_4"));
         }
     }
 
@@ -200,7 +204,7 @@ public class RenameAreaCommand {
 
             // 验证新域名格式
             if (newName == null || newName.trim().isEmpty()) {
-                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.area_11"));
+                sendRenameResponse(player, false, key("command.message.area_11"));
                 return;
             }
 
@@ -217,14 +221,14 @@ public class RenameAreaCommand {
                 Packets.convertDimensionPathToType(dimensionPath));
 
             if (fileName == null) {
-                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.dimension_3"));
+                sendRenameResponse(player, false, key("command.message.dimension_3"));
                 return;
             }
 
             // 获取域名文件
             Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             if (!areaFile.toFile().exists()) {
-                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.dimension_5"));
+                sendRenameResponse(player, false, key("command.message.dimension_5"));
                 return;
             }
 
@@ -245,17 +249,17 @@ public class RenameAreaCommand {
 
             // 验证
             if (targetArea == null) {
-                sendRenameResponse(player, false, ServerI18nManager.translate("addhint.message.area_3") + oldName);
+                sendRenameResponse(player, false, key("addhint.message.area_3"), lit(oldName));
                 return;
             }
 
             if (newNameExists) {
-                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.area_10") + newName + "\"" + ServerI18nManager.translate("command.prompt.name"));
+                sendRenameResponse(player, false, key("command.message.area_10"), lit(newName + "\""), key("command.prompt.name"));
                 return;
             }
 
             if (!canRenameArea(targetArea, playerName, isAdmin)) {
-                sendRenameResponse(player, false, ServerI18nManager.translate("command.message.area.rename.permission") + oldName + "\"");
+                sendRenameResponse(player, false, key("command.message.area.rename.permission"), lit(oldName + "\""));
                 return;
             }
 
@@ -276,25 +280,25 @@ public class RenameAreaCommand {
 
             // 保存文件
             if (FileManager.writeAreaData(areaFile, areas)) {
-                player.sendMessage(Text.of(ServerI18nManager.translate("command.success.area.rename")));
-                player.sendMessage(Text.of(ServerI18nManager.translate("command.success.area.rename.old") + oldName));
-                player.sendMessage(Text.of(ServerI18nManager.translate("command.message.area_5") + newName));
+                player.sendMessage(Text.translatable("command.success.area.rename"));
+                player.sendMessage(Text.translatable("command.success.area.rename.old").append(Text.literal(oldName)));
+                player.sendMessage(Text.translatable("command.message.area_5").append(Text.literal(newName)));
                 if (newSurfaceName != null) {
-                    player.sendMessage(Text.of(ServerI18nManager.translate("command.message.area.surface_3") + newSurfaceName));
+                    player.sendMessage(Text.translatable("command.message.area.surface_3").append(Text.literal(newSurfaceName)));
                 }
-                sendRenameResponse(player, true, ServerI18nManager.translate("command.success.area.rename"));
+                sendRenameResponse(player, true, key("command.success.area.rename"));
 
                 // 向所有客户端发送更新后的区域数据
                 ServerNetworking.sendAllAreaDataToAll();
 
                 Areashint.LOGGER.info(ServerI18nManager.translate("command.message.general_28") + playerName + ServerI18nManager.translate("command.message.area_4") + oldName + "\"" + ServerI18nManager.translate("command.message.rename") + newName + "\"");
             } else {
-                sendRenameResponse(player, false, ServerI18nManager.translate("command.error.area.save"));
+                sendRenameResponse(player, false, key("command.error.area.save"));
             }
 
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.rename_2") + e.getMessage());
-            sendRenameResponse(player, false, ServerI18nManager.translate("command.error.general_19") + e.getMessage());
+            sendRenameResponse(player, false, key("command.error.general_19"), lit(e.getMessage()));
         }
     }
 
@@ -321,11 +325,11 @@ public class RenameAreaCommand {
      * @param success 是否成功
      * @param message 消息
      */
-    private static void sendRenameResponse(ServerPlayerEntity player, boolean success, String message) {
+    private static void sendRenameResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeString("rename_response");
         buf.writeBoolean(success);
-        buf.writeString(message);
+        TranslatableMessage.write(buf, parts);
         ServerPlayNetworking.send(player, Packets.S2C_RENAME_RESPONSE, buf);
     }
 
@@ -348,7 +352,7 @@ public class RenameAreaCommand {
 
                 } catch (Exception e) {
                     Areashint.LOGGER.error(ServerI18nManager.translate("command.error.rename"), e);
-                    sendRenameResponse(player, false, ServerI18nManager.translate("command.error.general_23") + e.getMessage());
+                    sendRenameResponse(player, false, key("command.error.general_23"), lit(e.getMessage()));
                 }
             });
     }

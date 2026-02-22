@@ -4,12 +4,17 @@ import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
+import areahint.network.TranslatableMessage;
+import areahint.network.TranslatableMessage.Part;
 import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import com.google.gson.JsonParser;
+
+import static areahint.network.TranslatableMessage.key;
+import static areahint.network.TranslatableMessage.lit;
 
 import java.util.List;
 import java.nio.file.Path;
@@ -28,7 +33,7 @@ public class DivideAreaServerNetworking {
                     server.execute(() -> handleDivideRequest(player, area1Json, area2Json, originalName, dimension));
                 } catch (Exception e) {
                     System.err.println("处理分割域名请求时发生错误: " + e.getMessage());
-                    sendResponse(player, false, "处理请求时发生内部错误");
+                    sendResponse(player, false, key("dividearea.error.internal"));
                 }
             }
         );
@@ -41,18 +46,18 @@ public class DivideAreaServerNetworking {
             String dimType = convertDimId(dimension);
 
             if (!validatePermission(player, origName, dimType)) {
-                sendResponse(player, false, "您没有权限分割此域名");
+                sendResponse(player, false, key("dividearea.error.permission"));
                 return;
             }
             if (!saveDividedAreas(area1, area2, origName, dimension)) {
-                sendResponse(player, false, "保存分割域名失败");
+                sendResponse(player, false, key("dividearea.error.save"));
                 return;
             }
             ServerNetworking.sendAllAreaDataToAll();
-            sendResponse(player, true, "域名 '" + origName + "' 已分割为 '" + area1.getName() + "' 和 '" + area2.getName() + "'");
+            sendResponse(player, true, key("dividearea.success.divide_prefix"), lit(origName), key("dividearea.success.divide_mid1"), lit(area1.getName()), key("dividearea.success.divide_mid2"), lit(area2.getName()), key("dividearea.success.divide_suffix"));
         } catch (Exception e) {
             System.err.println("处理分割域名请求失败: " + e.getMessage());
-            sendResponse(player, false, "处理请求失败: " + e.getMessage());
+            sendResponse(player, false, key("dividearea.error.process"), lit(e.getMessage()));
         }
     }
 
@@ -104,11 +109,11 @@ public class DivideAreaServerNetworking {
         return null;
     }
 
-    private static void sendResponse(ServerPlayerEntity player, boolean success, String msg) {
+    private static void sendResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(success);
-            buf.writeString(msg);
+            TranslatableMessage.write(buf, parts);
             ServerPlayNetworking.send(player, Packets.DIVIDE_AREA_RESPONSE_CHANNEL, buf);
         } catch (Exception e) { e.printStackTrace(); }
     }

@@ -2,6 +2,7 @@ package areahint.addhint;
 
 import areahint.data.AreaData;
 import areahint.network.Packets;
+import areahint.network.TranslatableMessage;
 import areahint.util.AreaDataConverter;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -36,12 +37,11 @@ public class AddHintClientNetworking {
             Packets.ADDHINT_AREA_RESPONSE_CHANNEL,
             (client, handler, buf, responseSender) -> {
                 boolean success = buf.readBoolean();
-                String message = buf.readString(32767);
+                net.minecraft.text.MutableText message = TranslatableMessage.read(buf);
                 client.execute(() -> {
                     if (client.player != null) {
-                        String prefix = success ? "§a" : "§c";
                         client.player.sendMessage(
-                            net.minecraft.text.Text.of(prefix + message), false);
+                            message.formatted(success ? net.minecraft.util.Formatting.GREEN : net.minecraft.util.Formatting.RED), false);
                     }
                 });
             }

@@ -15,6 +15,10 @@ import net.minecraft.network.PacketByteBuf;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.util.Identifier;
+import areahint.network.TranslatableMessage;
+import areahint.network.TranslatableMessage.Part;
+import static areahint.network.TranslatableMessage.key;
+import static areahint.network.TranslatableMessage.lit;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -35,7 +39,7 @@ public class SetHighCommand {
     public static int executeSetHigh(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
+            source.sendMessage(Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -49,7 +53,7 @@ public class SetHighCommand {
         String fileName = Packets.getFileNameForDimension(dimensionType);
 
         if (fileName == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension_3")));
+            source.sendMessage(Text.translatable("command.error.dimension_3"));
             return 0;
         }
 
@@ -57,7 +61,7 @@ public class SetHighCommand {
         List<AreaData> editableAreas = getHeightEditableAreas(fileName, playerName, isAdmin);
 
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.altitude.dimension")));
+            source.sendMessage(Text.translatable("command.error.area.altitude.dimension"));
             return 0;
         }
 
@@ -111,11 +115,11 @@ public class SetHighCommand {
             
             ServerPlayNetworking.send(source.getPlayer(), Packets.S2C_SETHIGH_AREA_LIST, buf);
             
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.prompt.area.altitude.modify")));
-            
+            source.sendMessage(Text.translatable("command.prompt.area.altitude.modify"));
+
         } catch (Exception e) {
             Areashint.LOGGER.error("启动交互式高度设置流程时发生错误", e);
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude.start")));
+            source.sendMessage(Text.translatable("command.error.altitude.start"));
         }
     }
 
@@ -128,7 +132,7 @@ public class SetHighCommand {
     public static int executeSetHighWithArea(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
+            source.sendMessage(Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -142,7 +146,7 @@ public class SetHighCommand {
         String fileName = Packets.getFileNameForDimension(dimensionType);
 
         if (fileName == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.dimension_3")));
+            source.sendMessage(Text.translatable("command.error.dimension_3"));
             return 0;
         }
 
@@ -150,7 +154,7 @@ public class SetHighCommand {
         List<AreaData> editableAreas = getHeightEditableAreas(fileName, playerName, isAdmin);
 
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.area.altitude.dimension")));
+            source.sendMessage(Text.translatable("command.error.area.altitude.dimension"));
             return 0;
         }
 
@@ -159,9 +163,9 @@ public class SetHighCommand {
                 .filter(area -> area.getName().equals(areaName))
                 .findFirst()
                 .orElse(null);
-        
+
         if (targetArea == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("addhint.error.area") + areaName + ServerI18nManager.translate("command.message.altitude.modify.permission")));
+            source.sendMessage(Text.translatable("addhint.error.area").append(Text.literal(areaName)).append(Text.translatable("command.message.altitude.modify.permission")));
             // 启动交互式流程，让用户选择其他域名
             startInteractiveHeightSetting(source, editableAreas);
             return 0;
@@ -202,11 +206,11 @@ public class SetHighCommand {
             
             ServerPlayNetworking.send(source.getPlayer(), Packets.S2C_SETHIGH_AREA_SELECTION, buf);
             
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.message.area.start") + targetArea.getName() + ServerI18nManager.translate("command.message.altitude_3")));
-            
+            source.sendMessage(Text.translatable("command.message.area.start").append(Text.literal(targetArea.getName())).append(Text.translatable("command.message.altitude_3")));
+
         } catch (Exception e) {
             Areashint.LOGGER.error("启动指定域名高度设置流程时发生错误", e);
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude.start")));
+            source.sendMessage(Text.translatable("command.error.altitude.start"));
         }
     }
 
@@ -277,11 +281,11 @@ public class SetHighCommand {
      */
     private static void displayEditableAreasInChat(ServerCommandSource source, List<AreaData> editableAreas, boolean isAdmin) {
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.literal(ServerI18nManager.translate("command.error.area.altitude.dimension")));
+            source.sendMessage(Text.translatable("command.error.area.altitude.dimension"));
             return;
         }
 
-        MutableText message = Text.literal(ServerI18nManager.translate("command.message.area.altitude.modify"));
+        MutableText message = Text.translatable("command.message.area.altitude.modify");
         for (AreaData area : editableAreas) {
             message.append(Text.literal("§7- §f" + area.getName() + "§7: " + getHeightDisplayString(area.getAltitude()) + "\n"));
         }
@@ -348,7 +352,7 @@ public class SetHighCommand {
             String fileName = Packets.getFileNameForDimension(dimensionType);
             
             if (fileName == null) {
-                sendResponse(player, false, ServerI18nManager.translate("command.error.dimension_3"));
+                sendResponse(player, false, key("command.error.dimension_3"));
                 return;
             }
             
@@ -362,22 +366,22 @@ public class SetHighCommand {
                     .orElse(null);
             
             if (targetArea == null) {
-                sendResponse(player, false, ServerI18nManager.translate("addhint.message.area_2") + areaName + ServerI18nManager.translate("command.message.altitude.modify.permission"));
+                sendResponse(player, false, key("addhint.message.area_2"), lit(areaName), key("command.message.altitude.modify.permission"));
                 return;
             }
             
             // 验证高度数据
             if (hasCustomHeight) {
                 if (maxHeight != null && (maxHeight < -64 || maxHeight > 320)) {
-                    sendResponse(player, false, ServerI18nManager.translate("command.button.altitude_4"));
+                    sendResponse(player, false, key("command.button.altitude_4"));
                     return;
                 }
                 if (minHeight != null && (minHeight < -64 || minHeight > 320)) {
-                    sendResponse(player, false, ServerI18nManager.translate("command.button.altitude_3"));
+                    sendResponse(player, false, key("command.button.altitude_3"));
                     return;
                 }
                 if (maxHeight != null && minHeight != null && maxHeight < minHeight) {
-                    sendResponse(player, false, ServerI18nManager.translate("command.message.altitude_13"));
+                    sendResponse(player, false, key("command.message.altitude_13"));
                     return;
                 }
             }
@@ -407,17 +411,19 @@ public class SetHighCommand {
             areahint.network.ServerNetworking.sendAllAreaDataToAll();
             
             // 发送成功响应
-            String message = hasCustomHeight ?
-                    ServerI18nManager.translate("addhint.message.area_2") + areaName + ServerI18nManager.translate("command.message.altitude_4") +
-                    (maxHeight != null ? maxHeight : ServerI18nManager.translate("command.message.general_25")) + " ~ " +
-                    (minHeight != null ? minHeight : ServerI18nManager.translate("command.message.general_25")) :
-                    ServerI18nManager.translate("addhint.message.area_2") + areaName + ServerI18nManager.translate("command.message.altitude_5");
-            
-            sendResponse(player, true, message);
+            if (hasCustomHeight) {
+                String maxStr = maxHeight != null ? String.valueOf(maxHeight) : "";
+                String minStr = minHeight != null ? String.valueOf(minHeight) : "";
+                sendResponse(player, true, key("addhint.message.area_2"), lit(areaName), key("command.message.altitude_4"),
+                    maxHeight != null ? lit(maxStr) : key("command.message.general_25"), lit(" ~ "),
+                    minHeight != null ? lit(minStr) : key("command.message.general_25"));
+            } else {
+                sendResponse(player, true, key("addhint.message.area_2"), lit(areaName), key("command.message.altitude_5"));
+            }
             
         } catch (Exception e) {
             Areashint.LOGGER.error("处理高度设置请求时发生错误", e);
-            sendResponse(player, false, ServerI18nManager.translate("command.error.altitude_9"));
+            sendResponse(player, false, key("command.error.altitude_9"));
         }
     }
     
@@ -430,7 +436,7 @@ public class SetHighCommand {
     public static int executeSetHighCustom(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
+            source.sendMessage(Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -448,10 +454,10 @@ public class SetHighCommand {
     public static int executeSetHighUnlimited(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
+            source.sendMessage(Text.translatable("command.error.general_10"));
             return 0;
         }
-        
+
         // 直接处理不限制高度请求
         handleHeightRequest(source.getPlayer(), areaName, false, null, null);
         return Command.SINGLE_SUCCESS;
@@ -465,11 +471,11 @@ public class SetHighCommand {
     public static int executeSetHighCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.of(ServerI18nManager.translate("command.error.general_10")));
+            source.sendMessage(Text.translatable("command.error.general_10"));
             return 0;
         }
 
-        source.sendMessage(Text.of(ServerI18nManager.translate("command.error.altitude.cancel")));
+        source.sendMessage(Text.translatable("command.error.altitude.cancel"));
         return Command.SINGLE_SUCCESS;
     }
     
@@ -479,14 +485,12 @@ public class SetHighCommand {
      * @param success 是否成功
      * @param message 消息
      */
-    private static void sendResponse(ServerPlayerEntity player, boolean success, String message) {
+    private static void sendResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBoolean(success);
-            buf.writeString(message);
-            
+            TranslatableMessage.write(buf, parts);
             ServerPlayNetworking.send(player, Packets.S2C_SETHIGH_RESPONSE, buf);
-            
         } catch (Exception e) {
             Areashint.LOGGER.error("发送响应时发生错误", e);
         }
