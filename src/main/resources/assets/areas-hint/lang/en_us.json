@@ -1453,5 +1453,15 @@
   "shrinkarea.server.error.validation": "Area data validation failed",
   "shrinkarea.server.error.save": "Failed to save area",
   "shrinkarea.server.error.internal": "Internal error while processing request",
-  "shrinkarea.server.error.process": "Failed to process request"
+  "shrinkarea.server.error.process": "Failed to process request",
+  "server.log.enter": "[{0}][{1}] entered [{2}] [{3}]",
+  "server.log.enter.surface": "[{0}][{1}] entered [{2}] [{3}]'s [{4}]",
+  "server.log.leave": "[{0}][{1}] left [{2}] [{3}]",
+  "server.log.leave.surface": "[{0}][{1}] left [{2}] [{3}]'s [{4}]",
+  "server.log.level.1": "Top-level domain",
+  "server.log.level.2": "Second-level domain",
+  "server.log.level.3": "Third-level domain",
+  "server.log.level.other": "Level-{0} domain",
+  "command.success.serverlanguage": "Server language set to: {0}",
+  "help.command.serverlanguage": "§a/areahint serverlanguage <lang_code> §7- Set server log language (console only)"
 }

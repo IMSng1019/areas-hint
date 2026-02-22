@@ -1453,5 +1453,15 @@
   "shrinkarea.server.error.validation": "域名数据验证失败",
   "shrinkarea.server.error.save": "保存域名失败",
   "shrinkarea.server.error.internal": "处理请求时发生内部错误",
-  "shrinkarea.server.error.process": "处理请求失败"
+  "shrinkarea.server.error.process": "处理请求失败",
+  "server.log.enter": "[{0}][{1}]进入了[{2}] [{3}]",
+  "server.log.enter.surface": "[{0}][{1}]进入了[{2}] [{3}]的[{4}]",
+  "server.log.leave": "[{0}][{1}]离开了[{2}] [{3}]",
+  "server.log.leave.surface": "[{0}][{1}]离开了[{2}] [{3}]的[{4}]",
+  "server.log.level.1": "顶级域名",
+  "server.log.level.2": "二级域名",
+  "server.log.level.3": "三级域名",
+  "server.log.level.other": "{0}级域名",
+  "command.success.serverlanguage": "服务端语言已设置为: {0}",
+  "help.command.serverlanguage": "§a/areahint serverlanguage <语言代码> §7- 设置服务端日志语言 (仅控制台)"
 }

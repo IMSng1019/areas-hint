@@ -2,6 +2,7 @@ package areahint.log;
 
 import areahint.Areashint;
 import areahint.file.FileManager;
+import areahint.i18n.ServerI18nManager;
 
 import java.nio.file.Path;
 
@@ -43,14 +44,13 @@ public class ServerLogManager {
         }
 
         String levelText = getLevelText(areaLevel);
+        String dim = dimensionalName != null ? dimensionalName : "";
         String message;
 
         if (surfaceName != null && !surfaceName.isEmpty()) {
-            message = String.format("[%s][%s]进入了[%s] [%s]的[%s]",
-                dimensionalName != null ? dimensionalName : "", playerName, levelText, surfaceName, areaName);
+            message = ServerI18nManager.translate("server.log.enter.surface", dim, playerName, levelText, surfaceName, areaName);
         } else {
-            message = String.format("[%s][%s]进入了[%s] [%s]",
-                dimensionalName != null ? dimensionalName : "", playerName, levelText, areaName);
+            message = ServerI18nManager.translate("server.log.enter", dim, playerName, levelText, areaName);
         }
 
         logManager.log(message);
@@ -71,14 +71,13 @@ public class ServerLogManager {
         }
 
         String levelText = getLevelText(areaLevel);
+        String dim = dimensionalName != null ? dimensionalName : "";
         String message;
 
         if (surfaceName != null && !surfaceName.isEmpty()) {
-            message = String.format("[%s][%s]离开了[%s] [%s]的[%s]",
-                dimensionalName != null ? dimensionalName : "", playerName, levelText, surfaceName, areaName);
+            message = ServerI18nManager.translate("server.log.leave.surface", dim, playerName, levelText, surfaceName, areaName);
         } else {
-            message = String.format("[%s][%s]离开了[%s] [%s]",
-                dimensionalName != null ? dimensionalName : "", playerName, levelText, areaName);
+            message = ServerI18nManager.translate("server.log.leave", dim, playerName, levelText, areaName);
         }
 
         logManager.log(message);
@@ -91,15 +90,10 @@ public class ServerLogManager {
      * @return 等级文本
      */
     private static String getLevelText(int level) {
-        if (level == 1) {
-            return "顶级域名";
-        } else if (level == 2) {
-            return "二级域名";
-        } else if (level == 3) {
-            return "三级域名";
-        } else {
-            return level + "级域名";
+        if (level >= 1 && level <= 3) {
+            return ServerI18nManager.translate("server.log.level." + level);
         }
+        return ServerI18nManager.translate("server.log.level.other", level);
     }
 
     /**

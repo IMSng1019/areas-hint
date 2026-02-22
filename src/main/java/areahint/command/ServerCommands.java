@@ -359,6 +359,12 @@ public class ServerCommands {
             // boundviz 命令
             .then(literal("boundviz")
                 .executes(ServerCommands::executeBoundViz))
+
+            // serverlanguage 命令（服务端语言，权限等级4）
+            .then(literal("serverlanguage")
+                .requires(source -> source.hasPermissionLevel(4))
+                .then(argument("langCode", StringArgumentType.word())
+                    .executes(context -> executeServerLanguage(context, StringArgumentType.getString(context, "langCode")))))
         );
     }
     
@@ -397,7 +403,7 @@ public class ServerCommands {
         source.sendMessage(Text.translatable("help.command.firstdimname"));
         source.sendMessage(Text.translatable("help.command.firstdimname_skip"));
         source.sendMessage(Text.translatable("help.command.debug"));
-
+        source.sendMessage(Text.translatable("help.command.serverlanguage"));
 
         return Command.SINGLE_SUCCESS;
     }
@@ -1924,6 +1930,14 @@ public class ServerCommands {
             source.sendMessage(Text.translatable("command.error.cancel.language").append(Text.literal(e.getMessage())));
             return 0;
         }
+    }
+
+    private static int executeServerLanguage(CommandContext<ServerCommandSource> context, String langCode) {
+        ServerCommandSource source = context.getSource();
+        ServerI18nManager.loadLanguage(langCode);
+        source.sendMessage(Text.literal(ServerI18nManager.translate("command.success.serverlanguage", langCode)));
+        Areashint.LOGGER.info(ServerI18nManager.translate("command.success.serverlanguage", langCode));
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int executeBoundViz(CommandContext<ServerCommandSource> context) {
