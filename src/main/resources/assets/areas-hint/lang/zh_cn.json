@@ -1441,6 +1441,8 @@
   "help.command.deletehint": "§a/areahint deletehint §7- 从域名删除顶点",
   "help.command.boundviz": "§a/areahint boundviz §7- 切换域名边界可视化显示",
   "help.command.language": "§a/areahint language §7- 交互式选择模组语言",
+  "help.command.firstdimname": "§a/areahint firstdimname <名称> §7- 为当前维度设置首次命名",
+  "help.command.firstdimname_skip": "§a/areahint firstdimname_skip §7- 跳过维度首次命名（使用默认名称）",
   "help.command.debug": "§a/areahint debug §7- 切换调试模式 (管理员)",
   "language.title.settings": "§6=== 语言设置 / Language Settings ===",
   "language.prompt.select": "§a请选择语言 / Select language:",

@@ -394,9 +394,11 @@ public class ServerCommands {
         source.sendMessage(Text.translatable("help.command.deletehint"));
         source.sendMessage(Text.translatable("help.command.boundviz"));
         source.sendMessage(Text.translatable("help.command.language"));
+        source.sendMessage(Text.translatable("help.command.firstdimname"));
+        source.sendMessage(Text.translatable("help.command.firstdimname_skip"));
         source.sendMessage(Text.translatable("help.command.debug"));
-        
-        
+
+
         return Command.SINGLE_SUCCESS;
     }
     

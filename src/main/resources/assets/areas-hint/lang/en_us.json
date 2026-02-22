@@ -1441,6 +1441,8 @@
   "help.command.deletehint": "§a/areahint deletehint §7- Delete vertices from area",
   "help.command.boundviz": "§a/areahint boundviz §7- Toggle boundary visualization",
   "help.command.language": "§a/areahint language §7- Interactive language selection",
+  "help.command.firstdimname": "§a/areahint firstdimname <name> §7- Set first-time dimension name",
+  "help.command.firstdimname_skip": "§a/areahint firstdimname_skip §7- Skip dimension naming (use default)",
   "help.command.debug": "§a/areahint debug §7- Toggle debug mode (admin)",
   "language.title.settings": "§6=== Language Settings ===",
   "language.prompt.select": "§aSelect language:",
