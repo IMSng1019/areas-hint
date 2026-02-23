@@ -521,7 +521,7 @@ public class ServerCommands {
      */
     private static String getDimensionFromSource(ServerCommandSource source) {
         try {
-            Identifier dimension = source.getWorld().getDimensionKey().getValue();
+            Identifier dimension = source.getWorld().getRegistryKey().getValue();
             return Packets.convertDimensionPathToType(dimension.getPath());
         } catch (Exception e) {
             return null;

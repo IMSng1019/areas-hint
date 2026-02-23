@@ -46,6 +46,9 @@ public class Areashint implements ModInitializer {
 
 		LOGGER.info("区域提示模组服务端初始化中...");
 
+		// 注册所有网络 payload 类型（必须在网络处理器注册之前）
+		areahint.network.Packets.registerAll();
+
 		// 初始化服务端国际化
 		ServerI18nManager.init();
 

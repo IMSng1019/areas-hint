@@ -19,18 +19,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(WorldRenderer.class)
 public class WorldRendererMixin {
 
-    @Inject(
-        method = "render",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/client/render/WorldRenderer;renderChunkDebugInfo(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/client/render/Camera;)V",
-            shift = At.Shift.AFTER
-        )
-    )
-    private void onRender(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline,
+    @Inject(method = "render", at = @At("TAIL"))
+    private void onRender(float tickDelta, long limitTime, boolean renderBlockOutline,
                          Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager,
-                         Matrix4f projectionMatrix, CallbackInfo ci) {
-        // 渲染边界可视化
+                         Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
+        MatrixStack matrices = new MatrixStack();
+        matrices.multiplyPositionMatrix(positionMatrix);
         BoundVizRenderer.render(matrices, tickDelta);
     }
 }

@@ -1,10 +1,11 @@
 package areahint.rename;
 
+import areahint.network.BufPayload;
 import areahint.network.Packets;
 import areahint.debug.ClientDebugManager;
 import areahint.i18n.I18nManager;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 
@@ -24,14 +25,14 @@ public class RenameNetworking {
     public static void sendRenameRequest(String oldName, String newName, String newSurfaceName, String dimension) {
         try {
             // 创建数据包
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString(oldName);
             buf.writeString(newName);
-            buf.writeString(newSurfaceName != null ? newSurfaceName : ""); // 空字符串表示null
+            buf.writeString(newSurfaceName != null ? newSurfaceName : "");
             buf.writeString(dimension);
 
             // 发送到服务端
-            ClientPlayNetworking.send(Packets.C2S_RENAME_REQUEST, buf);
+            ClientPlayNetworking.send(BufPayload.of(Packets.C2S_RENAME_REQUEST, buf));
 
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.NETWORK,
                 "向服务端发送重命名请求: " + oldName + " -> " + newName + " (维度: " + dimension + ")");
@@ -51,7 +52,9 @@ public class RenameNetworking {
     public static void registerClientReceivers() {
         // 注册服务端响应接收器
         ClientPlayNetworking.registerGlobalReceiver(Packets.S2C_RENAME_RESPONSE,
-            (client, handler, buf, responseSender) -> {
+            (payload, context) -> {
+                PacketByteBuf buf = payload.buf();
+                var client = context.client();
                 try {
                     String action = buf.readString();
 

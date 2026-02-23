@@ -13,9 +13,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.network.PacketByteBuf;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.util.Identifier;
+import areahint.network.BufPayload;
+import io.netty.buffer.Unpooled;
 import areahint.network.TranslatableMessage;
 import areahint.network.TranslatableMessage.Part;
 import static areahint.network.TranslatableMessage.key;
@@ -89,7 +89,7 @@ public class SetHighCommand {
             String dimensionType = convertDimensionIdToType(dimension);
             
             // 发送数据包到客户端，格式与客户端期望的一致
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString("sethigh_area_list"); // 命令类型
             buf.writeString(dimensionType); // 维度类型
             buf.writeInt(editableAreas.size()); // 域名数量
@@ -114,7 +114,7 @@ public class SetHighCommand {
                 }
             }
             
-            ServerPlayNetworking.send(source.getPlayer(), Packets.S2C_SETHIGH_AREA_LIST, buf);
+            ServerPlayNetworking.send(source.getPlayer(), BufPayload.of(Packets.S2C_SETHIGH_AREA_LIST, buf));
             
             source.sendMessage(Text.translatable("command.prompt.area.altitude.modify"));
 
@@ -186,7 +186,7 @@ public class SetHighCommand {
     private static void startInteractiveHeightSettingForSpecificArea(ServerCommandSource source, AreaData targetArea) {
         try {
             // 发送指定域名的数据到客户端
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString(targetArea.getName());
             
             // 写入当前高度信息
@@ -205,7 +205,7 @@ public class SetHighCommand {
                 }
             }
             
-            ServerPlayNetworking.send(source.getPlayer(), Packets.S2C_SETHIGH_AREA_SELECTION, buf);
+            ServerPlayNetworking.send(source.getPlayer(), BufPayload.of(Packets.S2C_SETHIGH_AREA_SELECTION, buf));
             
             source.sendMessage(Text.translatable("command.message.area.start").append(Text.literal(targetArea.getName())).append(Text.translatable("command.message.altitude_3")));
 
@@ -495,10 +495,10 @@ public class SetHighCommand {
      */
     private static void sendResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeBoolean(success);
             TranslatableMessage.write(buf, parts);
-            ServerPlayNetworking.send(player, Packets.S2C_SETHIGH_RESPONSE, buf);
+            ServerPlayNetworking.send(player, BufPayload.of(Packets.S2C_SETHIGH_RESPONSE, buf));
         } catch (Exception e) {
             Areashint.LOGGER.error("发送响应时发生错误", e);
         }
@@ -512,14 +512,14 @@ public class SetHighCommand {
      */
     private static void sendClientCommand(ServerCommandSource source, String command, String... args) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString(command);
             buf.writeInt(args.length);
             for (String arg : args) {
                 buf.writeString(arg);
             }
             
-            ServerPlayNetworking.send(source.getPlayer(), new Identifier(Packets.S2C_CLIENT_COMMAND), buf);
+            ServerPlayNetworking.send(source.getPlayer(), BufPayload.of(Packets.S2C_CLIENT_COMMAND, buf));
             
         } catch (Exception e) {
             Areashint.LOGGER.error("发送客户端命令时发生错误", e);

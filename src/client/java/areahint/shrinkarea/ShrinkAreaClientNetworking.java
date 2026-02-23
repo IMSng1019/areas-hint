@@ -1,13 +1,13 @@
 package areahint.shrinkarea;
 
 import areahint.data.AreaData;
+import areahint.network.BufPayload;
 import areahint.network.Packets;
 import areahint.network.TranslatableMessage;
 import areahint.util.AreaDataConverter;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
 import com.google.gson.JsonObject;
 
 /**
@@ -21,7 +21,7 @@ public class ShrinkAreaClientNetworking {
      */
     public static void sendShrunkAreaToServer(AreaData shrunkArea, String dimension) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 
             // 将AreaData转换为JsonObject
             JsonObject areaJson = AreaDataConverter.toJsonObject(shrunkArea);
@@ -31,7 +31,7 @@ public class ShrinkAreaClientNetworking {
             buf.writeString(dimension);  // 添加维度信息
 
             // 发送到服务端
-            ClientPlayNetworking.send(Packets.SHRINK_AREA_CHANNEL, buf);
+            ClientPlayNetworking.send(BufPayload.of(Packets.SHRINK_AREA_CHANNEL, buf));
 
             System.out.println("已发送收缩域名数据到服务端: " + shrunkArea.getName() + " (维度: " + dimension + ")");
 
@@ -48,12 +48,13 @@ public class ShrinkAreaClientNetworking {
         // 注册接收服务端响应的处理器
         ClientPlayNetworking.registerGlobalReceiver(
             Packets.SHRINK_AREA_RESPONSE_CHANNEL,
-            (client, handler, buf, responseSender) -> {
+            (payload, context) -> {
+                PacketByteBuf buf = payload.buf();
                 try {
                     boolean success = buf.readBoolean();
                     net.minecraft.text.MutableText message = TranslatableMessage.read(buf);
 
-                    client.execute(() -> {
+                    context.client().execute(() -> {
                         handleShrinkAreaResponse(success, message);
                     });
                     

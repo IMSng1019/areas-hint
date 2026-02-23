@@ -11,9 +11,10 @@ import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
 import areahint.util.ColorUtil;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
+import areahint.network.BufPayload;
+import io.netty.buffer.Unpooled;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -140,7 +141,7 @@ public class RecolorCommand {
      */
     private static void sendAreaListToClient(ServerPlayerEntity player, List<AreaData> areas, String dimension) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString("recolor_list");
             buf.writeString(dimension);
             buf.writeInt(areas.size());
@@ -152,8 +153,8 @@ public class RecolorCommand {
                 buf.writeString(area.getBaseName() != null ? area.getBaseName() : "");
             }
             
-            ServerPlayNetworking.send(player, Packets.S2C_RECOLOR_RESPONSE, buf);
-            
+            ServerPlayNetworking.send(player, BufPayload.of(Packets.S2C_RECOLOR_RESPONSE, buf));
+
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.area.list"), e);
         }
@@ -235,11 +236,11 @@ public class RecolorCommand {
      */
     private static void sendRecolorResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString("recolor_response");
             buf.writeBoolean(success);
             TranslatableMessage.write(buf, parts);
-            ServerPlayNetworking.send(player, Packets.S2C_RECOLOR_RESPONSE, buf);
+            ServerPlayNetworking.send(player, BufPayload.of(Packets.S2C_RECOLOR_RESPONSE, buf));
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_18"), e);
         }
@@ -250,7 +251,7 @@ public class RecolorCommand {
      */
     private static void sendInteractiveRecolorToClient(ServerPlayerEntity player, List<AreaData> areas, String dimension) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString("recolor_interactive");
             buf.writeString(dimension);
             buf.writeInt(areas.size());
@@ -262,8 +263,8 @@ public class RecolorCommand {
                 buf.writeString(area.getBaseName() != null ? area.getBaseName() : "");
             }
             
-            ServerPlayNetworking.send(player, Packets.S2C_RECOLOR_RESPONSE, buf);
-            
+            ServerPlayNetworking.send(player, BufPayload.of(Packets.S2C_RECOLOR_RESPONSE, buf));
+
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_15"), e);
         }

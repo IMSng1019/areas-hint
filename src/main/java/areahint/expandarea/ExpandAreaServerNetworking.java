@@ -9,7 +9,8 @@ import areahint.network.TranslatableMessage.Part;
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
 import areahint.util.AreaDataConverter;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import areahint.network.BufPayload;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -28,12 +29,14 @@ public class ExpandAreaServerNetworking {
         // 注册接收客户端扩展域名请求的处理器
         ServerPlayNetworking.registerGlobalReceiver(
             Packets.EXPAND_AREA_CHANNEL,
-            (server, player, handler, buf, responseSender) -> {
+            (payload, context) -> {
+                PacketByteBuf buf = payload.buf();
+                ServerPlayerEntity player = context.player();
                 try {
                     String areaJsonString = buf.readString(32767);
-                    String dimension = buf.readString(32767);  // 接收维度信息
+                    String dimension = buf.readString(32767);
 
-                    server.execute(() -> {
+                    context.player().server.execute(() -> {
                         handleExpandAreaRequest(player, areaJsonString, dimension);
                     });
 
@@ -269,10 +272,10 @@ public class ExpandAreaServerNetworking {
     
     private static void sendResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeBoolean(success);
             TranslatableMessage.write(buf, parts);
-            ServerPlayNetworking.send(player, Packets.EXPAND_AREA_RESPONSE_CHANNEL, buf);
+            ServerPlayNetworking.send(player, BufPayload.of(Packets.EXPAND_AREA_RESPONSE_CHANNEL, buf));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -3,6 +3,7 @@ package areahint.log;
 import areahint.AreashintClient;
 import areahint.network.Packets;
 import io.netty.buffer.Unpooled;
+import areahint.network.BufPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 
@@ -32,7 +33,7 @@ public class ClientLogNetworking {
             buf.writeString(surfaceName != null ? surfaceName : "");
             buf.writeString(dimensionalName != null ? dimensionalName : "");
 
-            ClientPlayNetworking.send(Packets.C2S_AREA_LOG, buf);
+            ClientPlayNetworking.send(BufPayload.of(Packets.C2S_AREA_LOG, buf));
 
             // 同时记录到客户端日志
             ClientLogManager.logEnterArea(areaLevel, surfaceName, areaName, dimensionalName);
@@ -62,7 +63,7 @@ public class ClientLogNetworking {
             buf.writeString(surfaceName != null ? surfaceName : "");
             buf.writeString(dimensionalName != null ? dimensionalName : "");
 
-            ClientPlayNetworking.send(Packets.C2S_AREA_LOG, buf);
+            ClientPlayNetworking.send(BufPayload.of(Packets.C2S_AREA_LOG, buf));
 
             // 同时记录到客户端日志
             ClientLogManager.logLeaveArea(areaLevel, surfaceName, areaName, dimensionalName);

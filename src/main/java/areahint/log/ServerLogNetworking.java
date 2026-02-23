@@ -4,7 +4,6 @@ import areahint.Areashint;
 import areahint.network.Packets;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
 
 /**
  * 服务端日志网络处理
@@ -17,7 +16,9 @@ public class ServerLogNetworking {
      */
     public static void init() {
         // 注册接收客户端日志消息的处理器
-        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_AREA_LOG, (server, player, handler, buf, responseSender) -> {
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_AREA_LOG, (payload, context) -> {
+            PacketByteBuf buf = payload.buf();
+            var player = context.player();
             // 读取数据
             String action = buf.readString(); // "enter" 或 "leave"
             String areaName = buf.readString();
@@ -28,7 +29,7 @@ public class ServerLogNetworking {
             String dimensionalName = dimensionalNameRaw.isEmpty() ? null : dimensionalNameRaw;
 
             // 在服务器线程上处理
-            server.execute(() -> {
+            context.player().server.execute(() -> {
                 String playerName = player.getName().getString();
 
                 if ("enter".equals(action)) {

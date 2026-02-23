@@ -7,7 +7,8 @@ import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
 import areahint.network.TranslatableMessage.Part;
 import areahint.util.AreaDataConverter;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import areahint.network.BufPayload;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -24,13 +25,15 @@ public class DivideAreaServerNetworking {
     public static void registerServerNetworking() {
         ServerPlayNetworking.registerGlobalReceiver(
             Packets.DIVIDE_AREA_CHANNEL,
-            (server, player, handler, buf, responseSender) -> {
+            (payload, context) -> {
+                PacketByteBuf buf = payload.buf();
+                ServerPlayerEntity player = context.player();
                 try {
                     String area1Json = buf.readString(32767);
                     String area2Json = buf.readString(32767);
                     String originalName = buf.readString(32767);
                     String dimension = buf.readString(32767);
-                    server.execute(() -> handleDivideRequest(player, area1Json, area2Json, originalName, dimension));
+                    context.player().server.execute(() -> handleDivideRequest(player, area1Json, area2Json, originalName, dimension));
                 } catch (Exception e) {
                     System.err.println("处理分割域名请求时发生错误: " + e.getMessage());
                     sendResponse(player, false, key("dividearea.error.internal"));
@@ -111,10 +114,10 @@ public class DivideAreaServerNetworking {
 
     private static void sendResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeBoolean(success);
             TranslatableMessage.write(buf, parts);
-            ServerPlayNetworking.send(player, Packets.DIVIDE_AREA_RESPONSE_CHANNEL, buf);
+            ServerPlayNetworking.send(player, BufPayload.of(Packets.DIVIDE_AREA_RESPONSE_CHANNEL, buf));
         } catch (Exception e) { e.printStackTrace(); }
     }
 }

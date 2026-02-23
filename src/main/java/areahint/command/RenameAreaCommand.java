@@ -11,9 +11,10 @@ import areahint.network.TranslatableMessage.Part;
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
+import areahint.network.BufPayload;
+import io.netty.buffer.Unpooled;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -150,11 +151,11 @@ public class RenameAreaCommand {
             // 获取域名文件路径
             Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             if (!areaFile.toFile().exists()) {
-                PacketByteBuf buf = PacketByteBufs.create();
+                PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                 buf.writeString("rename_list");
                 buf.writeString(dimensionId);
                 buf.writeInt(0); // 域名数量
-                ServerPlayNetworking.send(player, Packets.S2C_RENAME_RESPONSE, buf);
+                ServerPlayNetworking.send(player, BufPayload.of(Packets.S2C_RENAME_RESPONSE, buf));
                 return;
             }
 
@@ -170,7 +171,7 @@ public class RenameAreaCommand {
             }
 
             // 发送到客户端
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString("rename_list");
             buf.writeString(dimensionId);
             buf.writeInt(editableAreas.size());
@@ -180,7 +181,7 @@ public class RenameAreaCommand {
                 buf.writeString(area.getSignature() != null ? area.getSignature() : "");
             }
 
-            ServerPlayNetworking.send(player, Packets.S2C_RENAME_RESPONSE, buf);
+            ServerPlayNetworking.send(player, BufPayload.of(Packets.S2C_RENAME_RESPONSE, buf));
 
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.message.area.list") + e.getMessage());
@@ -326,11 +327,11 @@ public class RenameAreaCommand {
      * @param message 消息
      */
     private static void sendRenameResponse(ServerPlayerEntity player, boolean success, Part... parts) {
-        PacketByteBuf buf = PacketByteBufs.create();
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeString("rename_response");
         buf.writeBoolean(success);
         TranslatableMessage.write(buf, parts);
-        ServerPlayNetworking.send(player, Packets.S2C_RENAME_RESPONSE, buf);
+        ServerPlayNetworking.send(player, BufPayload.of(Packets.S2C_RENAME_RESPONSE, buf));
     }
 
     /**
@@ -339,7 +340,10 @@ public class RenameAreaCommand {
     public static void registerServerReceivers() {
         // 注册重命名请求接收器
         ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_RENAME_REQUEST,
-            (server, player, handler, buf, responseSender) -> {
+            (payload, context) -> {
+                PacketByteBuf buf = payload.buf();
+                ServerPlayerEntity player = context.player();
+                var server = context.player().server;
                 try {
                     String oldName = buf.readString();
                     String newName = buf.readString();

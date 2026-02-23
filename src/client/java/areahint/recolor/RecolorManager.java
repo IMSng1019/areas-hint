@@ -3,8 +3,9 @@ package areahint.recolor;
 import areahint.AreashintClient;
 import areahint.data.AreaData;
 import areahint.i18n.I18nManager;
+import areahint.network.BufPayload;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
@@ -193,12 +194,12 @@ public class RecolorManager {
      */
     private void sendRecolorRequest(String areaName, String color, String dimension) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString(areaName);
             buf.writeString(color);
             buf.writeString(dimension);
 
-            ClientPlayNetworking.send(areahint.network.Packets.C2S_RECOLOR_REQUEST, buf);
+            ClientPlayNetworking.send(BufPayload.of(areahint.network.Packets.C2S_RECOLOR_REQUEST, buf));
 
             AreashintClient.LOGGER.info(I18nManager.translate("message.prompt.area.color.dimension"),
                 areaName, color, dimension);

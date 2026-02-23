@@ -2,10 +2,11 @@ package areahint.easyadd;
 
 import areahint.data.AreaData;
 import areahint.file.JsonHelper;
+import areahint.network.BufPayload;
 import areahint.network.Packets;
 import areahint.debug.ClientDebugManager;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 
@@ -26,12 +27,12 @@ public class EasyAddNetworking {
             String jsonData = JsonHelper.toJsonSingle(areaData);
             
             // 创建数据包
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString(jsonData);
             buf.writeString(dimension);
-            
+
             // 发送到服务端
-            ClientPlayNetworking.send(Packets.C2S_EASYADD_AREA_DATA, buf);
+            ClientPlayNetworking.send(BufPayload.of(Packets.C2S_EASYADD_AREA_DATA, buf));
             
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD,
                 "向服务端发送域名数据: " + areaData.getName() + " (维度: " + dimension + ")");
@@ -50,8 +51,10 @@ public class EasyAddNetworking {
      */
     public static void registerClientReceivers() {
         // 注册服务端响应接收器
-        ClientPlayNetworking.registerGlobalReceiver(Packets.S2C_EASYADD_RESPONSE, 
-            (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(Packets.S2C_EASYADD_RESPONSE,
+            (payload, context) -> {
+                PacketByteBuf buf = payload.buf();
+                net.minecraft.client.MinecraftClient client = context.client();
                 try {
                     boolean success = buf.readBoolean();
                     String message = buf.readString();

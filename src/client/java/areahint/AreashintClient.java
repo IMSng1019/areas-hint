@@ -352,7 +352,7 @@ public class AreashintClient implements ClientModInitializer {
 			}
 			
 			// 检查当前维度和服务器地址，如果改变则重新加载区域数据
-			Identifier dimension = client.world.getDimensionKey().getValue();
+			Identifier dimension = client.world.getRegistryKey().getValue();
 			String serverAddress = getCurrentServerAddress(client);
 			
 			boolean dimensionChanged = currentDimension == null || !currentDimension.equals(dimension);

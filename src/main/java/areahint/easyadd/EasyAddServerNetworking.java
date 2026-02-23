@@ -6,7 +6,8 @@ import areahint.file.FileManager;
 import areahint.file.JsonHelper;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import areahint.network.BufPayload;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -25,13 +26,15 @@ public class EasyAddServerNetworking {
      */
     public static void registerServerReceivers() {
         // 注册EasyAdd域名数据接收器
-        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_EASYADD_AREA_DATA, 
-            (server, player, handler, buf, responseSender) -> {
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_EASYADD_AREA_DATA,
+            (payload, context) -> {
+                PacketByteBuf buf = payload.buf();
+                ServerPlayerEntity player = context.player();
                 try {
                     String jsonData = buf.readString();
                     String dimension = buf.readString();
-                    
-                    server.execute(() -> {
+
+                    context.player().server.execute(() -> {
                         handleEasyAddAreaData(player, jsonData, dimension);
                     });
                     
@@ -145,7 +148,7 @@ public class EasyAddServerNetworking {
      */
     private static void sendResponseToClient(ServerPlayerEntity player, boolean success, String message, String... args) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeBoolean(success);
             buf.writeString(message);
             buf.writeInt(args.length);
@@ -153,7 +156,7 @@ public class EasyAddServerNetworking {
                 buf.writeString(arg);
             }
 
-            ServerPlayNetworking.send(player, Packets.S2C_EASYADD_RESPONSE, buf);
+            ServerPlayNetworking.send(player, BufPayload.of(Packets.S2C_EASYADD_RESPONSE, buf));
 
         } catch (Exception e) {
             Areashint.LOGGER.error("发送EasyAdd响应到客户端时发生错误", e);

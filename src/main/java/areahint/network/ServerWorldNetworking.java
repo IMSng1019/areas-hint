@@ -2,68 +2,51 @@ package areahint.network;
 
 import areahint.Areashint;
 import areahint.world.WorldFolderManager;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
 
 /**
  * 服务端世界网络处理
  * 负责响应客户端的世界信息请求
  */
 public class ServerWorldNetworking {
-    
-    // 网络包标识符
-    public static final String C2S_REQUEST_WORLD_INFO = "areashint:request_world_info";
-    public static final String S2C_WORLD_INFO = "areashint:world_info";
-    
+
     /**
      * 初始化服务端世界网络处理
      */
     public static void init() {
         // 注册世界信息请求处理器
-        ServerPlayNetworking.registerGlobalReceiver(
-            new Identifier(C2S_REQUEST_WORLD_INFO),
-            ServerWorldNetworking::handleWorldInfoRequest
-        );
-        
-        Areashint.LOGGER.info("服务端世界网络处理初始化完成");
-    }
-    
-    /**
-     * 处理客户端的世界信息请求
-     */
-    private static void handleWorldInfoRequest(net.minecraft.server.MinecraftServer server,
-                                             ServerPlayerEntity player,
-                                             net.minecraft.server.network.ServerPlayNetworkHandler handler,
-                                             PacketByteBuf buf,
-                                             net.fabricmc.fabric.api.networking.v1.PacketSender responseSender) {
-        try {
-            // 在服务器主线程中处理
-            server.execute(() -> {
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_REQUEST_WORLD_INFO,
+            (payload, context) -> {
                 try {
-                    String worldName = WorldFolderManager.getCurrentWorldName();
-                    Areashint.LOGGER.info("从WorldFolderManager获取的世界名称: '{}'", worldName);
-                    
-                    if (worldName == null) {
-                        worldName = "Server"; // 备用名称
-                        Areashint.LOGGER.warn("世界名称为null，使用备用名称: '{}'", worldName);
-                    }
-                    
-                    sendWorldInfoToClient(player, worldName);
-                    
-                    Areashint.LOGGER.info("已向玩家 {} 发送世界信息: '{}'", 
-                        player.getName().getString(), worldName);
-                    
+                    net.minecraft.server.network.ServerPlayerEntity player = context.player();
+                    player.server.execute(() -> {
+                        try {
+                            String worldName = WorldFolderManager.getCurrentWorldName();
+                            Areashint.LOGGER.info("从WorldFolderManager获取的世界名称: '{}'", worldName);
+
+                            if (worldName == null) {
+                                worldName = "Server";
+                                Areashint.LOGGER.warn("世界名称为null，使用备用名称: '{}'", worldName);
+                            }
+
+                            sendWorldInfoToClient(player, worldName);
+
+                            Areashint.LOGGER.info("已向玩家 {} 发送世界信息: '{}'",
+                                player.getName().getString(), worldName);
+
+                        } catch (Exception e) {
+                            Areashint.LOGGER.error("处理世界信息请求时发生错误", e);
+                        }
+                    });
                 } catch (Exception e) {
-                    Areashint.LOGGER.error("处理世界信息请求时发生错误", e);
+                    Areashint.LOGGER.error("解析世界信息请求时发生错误", e);
                 }
             });
-            
-        } catch (Exception e) {
-            Areashint.LOGGER.error("解析世界信息请求时发生错误", e);
-        }
+
+        Areashint.LOGGER.info("服务端世界网络处理初始化完成");
     }
     
     /**
@@ -73,10 +56,10 @@ public class ServerWorldNetworking {
      */
     public static void sendWorldInfoToClient(ServerPlayerEntity player, String worldName) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString(worldName);
-            
-            ServerPlayNetworking.send(player, new Identifier(S2C_WORLD_INFO), buf);
+
+            ServerPlayNetworking.send(player, BufPayload.of(Packets.S2C_WORLD_INFO, buf));
             
             Areashint.LOGGER.debug("世界信息发送给玩家: {} -> {}", player.getName().getString(), worldName);
             

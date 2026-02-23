@@ -12,7 +12,12 @@
       "WebFetch(domain:maven.fabricmc.net)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebSearch",
-      "WebFetch(domain:meta.fabricmc.net)"
+      "WebFetch(domain:meta.fabricmc.net)",
+      "WebFetch(domain:www.fabricmc.net)",
+      "Bash(java:*)",
+      "Bash(where java:*)",
+      "Bash(grep:*)",
+      "Bash(tail:*)"
     ],
     "deny": [],
     "ask": []

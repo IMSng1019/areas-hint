@@ -1,8 +1,8 @@
 package areahint.network;
 
 import areahint.AreashintClient;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 
 /**
@@ -12,10 +12,10 @@ public class ClientDimNameNetworking {
 
     public static void sendDimNameChange(String dimensionId, String newName) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString(dimensionId);
             buf.writeString(newName);
-            ClientPlayNetworking.send(Packets.C2S_DIMNAME_REQUEST, buf);
+            ClientPlayNetworking.send(BufPayload.of(Packets.C2S_DIMNAME_REQUEST, buf));
         } catch (Exception e) {
             AreashintClient.LOGGER.error("发送维度域名修改请求失败", e);
         }
@@ -23,10 +23,10 @@ public class ClientDimNameNetworking {
 
     public static void sendDimColorChange(String dimensionId, String newColor) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString(dimensionId);
             buf.writeString(newColor);
-            ClientPlayNetworking.send(Packets.C2S_DIMCOLOR_REQUEST, buf);
+            ClientPlayNetworking.send(BufPayload.of(Packets.C2S_DIMCOLOR_REQUEST, buf));
         } catch (Exception e) {
             AreashintClient.LOGGER.error("发送维度域名颜色修改请求失败", e);
         }
@@ -34,10 +34,10 @@ public class ClientDimNameNetworking {
 
     public static void sendFirstDimName(String dimensionId, String newName) {
         try {
-            PacketByteBuf buf = PacketByteBufs.create();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeString(dimensionId);
             buf.writeString(newName);
-            ClientPlayNetworking.send(Packets.C2S_FIRST_DIMNAME, buf);
+            ClientPlayNetworking.send(BufPayload.of(Packets.C2S_FIRST_DIMNAME, buf));
         } catch (Exception e) {
             AreashintClient.LOGGER.error("发送首次维度命名请求失败", e);
         }
