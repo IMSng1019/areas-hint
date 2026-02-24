@@ -74,14 +74,13 @@ public class BoundVizRenderer {
 
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
 
         if (manager.isEnabled()) {
-            renderCachedAreas(matrix, buffer, cameraPos);
+            renderCachedAreas(matrix, tessellator, cameraPos);
         }
 
         if (hasTempVertices) {
-            renderTemporaryVertices(matrices, buffer, manager.getTemporaryVerticesDirect(), client);
+            renderTemporaryVertices(matrices, tessellator, manager.getTemporaryVerticesDirect(), client);
         }
 
         matrices.pop();
@@ -242,7 +241,7 @@ public class BoundVizRenderer {
      * 渲染所有可见域名：视锥剔除 + 批量提交
      * 所有三角形合并为1次draw call，所有线段合并为1次draw call
      */
-    private static void renderCachedAreas(Matrix4f matrix, BufferBuilder buffer, Vec3d cam) {
+    private static void renderCachedAreas(Matrix4f matrix, Tessellator tessellator, Vec3d cam) {
         MinecraftClient client = MinecraftClient.getInstance();
         int playerBX = (int) Math.floor(cam.x);
         int playerBY = (int) Math.floor(cam.y);
@@ -279,36 +278,34 @@ public class BoundVizRenderer {
         }
 
         // === Pass 1: 批量三角形 ===
-        boolean hasTriangles = false;
+        BufferBuilder buffer = null;
         for (int i = 0; i < size; i++) {
             if (!visibleFlags[i]) continue;
-            if (!hasTriangles) {
-                buffer.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
-                hasTriangles = true;
+            if (buffer == null) {
+                buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
             }
             emitAreaTriangles(matrix, buffer, cachedAreas.get(i));
         }
-        if (hasTriangles) BufferRenderer.drawWithGlobalProgram(buffer.end());
+        if (buffer != null) BufferRenderer.drawWithGlobalProgram(buffer.end());
 
         // === Pass 2: 批量线段 ===
-        boolean hasLines = false;
+        buffer = null;
         for (int i = 0; i < size; i++) {
             if (!visibleFlags[i]) continue;
             CachedArea ca = cachedAreas.get(i);
-            if (!hasLines) {
-                buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
-                hasLines = true;
+            if (buffer == null) {
+                buffer = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
             }
             emitAreaLines(matrix, buffer, ca);
             updateBlockIntersectionsIfNeeded(ca, playerBX, playerBY, playerBZ, client);
             if (ca.blockIntersections != null) {
                 for (float[] seg : ca.blockIntersections) {
-                    buffer.vertex(matrix, seg[0], seg[1], seg[2]).color(ca.r, ca.g, ca.b, 0.8f).next();
-                    buffer.vertex(matrix, seg[3], seg[4], seg[5]).color(ca.r, ca.g, ca.b, 0.8f).next();
+                    buffer.vertex(matrix, seg[0], seg[1], seg[2]).color(ca.r, ca.g, ca.b, 0.8f);
+                    buffer.vertex(matrix, seg[3], seg[4], seg[5]).color(ca.r, ca.g, ca.b, 0.8f);
                 }
             }
         }
-        if (hasLines) BufferRenderer.drawWithGlobalProgram(buffer.end());
+        if (buffer != null) BufferRenderer.drawWithGlobalProgram(buffer.end());
     }
 
     /**
@@ -326,11 +323,11 @@ public class BoundVizRenderer {
         for (int[] tri : ca.triangles) {
             for (int idx : tri) {
                 float cr = perVertex ? vr[idx] : r, cg = perVertex ? vg[idx] : g, cb = perVertex ? vb[idx] : b;
-                buffer.vertex(matrix, vx[idx], minY, vz[idx]).color(cr, cg, cb, 0.2f).next();
+                buffer.vertex(matrix, vx[idx], minY, vz[idx]).color(cr, cg, cb, 0.2f);
             }
             for (int idx : tri) {
                 float cr = perVertex ? vr[idx] : r, cg = perVertex ? vg[idx] : g, cb = perVertex ? vb[idx] : b;
-                buffer.vertex(matrix, vx[idx], maxY, vz[idx]).color(cr, cg, cb, 0.2f).next();
+                buffer.vertex(matrix, vx[idx], maxY, vz[idx]).color(cr, cg, cb, 0.2f);
             }
         }
 
@@ -340,12 +337,12 @@ public class BoundVizRenderer {
             int j = (i + 1) % n;
             float ri = perVertex ? vr[i] : r, gi = perVertex ? vg[i] : g, bi = perVertex ? vb[i] : b;
             float rj = perVertex ? vr[j] : r, gj = perVertex ? vg[j] : g, bj = perVertex ? vb[j] : b;
-            buffer.vertex(matrix, vx[i], minY, vz[i]).color(ri, gi, bi, 0.2f).next();
-            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.2f).next();
-            buffer.vertex(matrix, vx[j], minY, vz[j]).color(rj, gj, bj, 0.2f).next();
-            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.2f).next();
-            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(rj, gj, bj, 0.2f).next();
-            buffer.vertex(matrix, vx[j], minY, vz[j]).color(rj, gj, bj, 0.2f).next();
+            buffer.vertex(matrix, vx[i], minY, vz[i]).color(ri, gi, bi, 0.2f);
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.2f);
+            buffer.vertex(matrix, vx[j], minY, vz[j]).color(rj, gj, bj, 0.2f);
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.2f);
+            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(rj, gj, bj, 0.2f);
+            buffer.vertex(matrix, vx[j], minY, vz[j]).color(rj, gj, bj, 0.2f);
         }
     }
 
@@ -365,16 +362,16 @@ public class BoundVizRenderer {
             int j = (i + 1) % n;
             float ri = perVertex ? vr[i] : r, gi = perVertex ? vg[i] : g, bi = perVertex ? vb[i] : b;
             float rj = perVertex ? vr[j] : r, gj = perVertex ? vg[j] : g, bj = perVertex ? vb[j] : b;
-            buffer.vertex(matrix, vx[i], minY, vz[i]).color(ri, gi, bi, 0.8f).next();
-            buffer.vertex(matrix, vx[j], minY, vz[j]).color(rj, gj, bj, 0.8f).next();
-            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.8f).next();
-            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(rj, gj, bj, 0.8f).next();
+            buffer.vertex(matrix, vx[i], minY, vz[i]).color(ri, gi, bi, 0.8f);
+            buffer.vertex(matrix, vx[j], minY, vz[j]).color(rj, gj, bj, 0.8f);
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.8f);
+            buffer.vertex(matrix, vx[j], maxY, vz[j]).color(rj, gj, bj, 0.8f);
         }
 
         for (int i = 0; i < n; i++) {
             float ri = perVertex ? vr[i] : r, gi = perVertex ? vg[i] : g, bi = perVertex ? vb[i] : b;
-            buffer.vertex(matrix, vx[i], minY, vz[i]).color(ri, gi, bi, 0.8f).next();
-            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.8f).next();
+            buffer.vertex(matrix, vx[i], minY, vz[i]).color(ri, gi, bi, 0.8f);
+            buffer.vertex(matrix, vx[i], maxY, vz[i]).color(ri, gi, bi, 0.8f);
         }
     }
 
@@ -564,20 +561,20 @@ public class BoundVizRenderer {
 
     // ========== 临时顶点渲染 ==========
 
-    private static void renderTemporaryVertices(MatrixStack matrices, BufferBuilder buffer, List<BlockPos> vertices, MinecraftClient client) {
+    private static void renderTemporaryVertices(MatrixStack matrices, Tessellator tessellator, List<BlockPos> vertices, MinecraftClient client) {
         if (vertices.isEmpty()) return;
 
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         float py = (float) client.player.getY();
 
-        buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+        BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
         for (BlockPos pos : vertices) {
             float px = pos.getX() + 0.5f, pz = pos.getZ() + 0.5f;
             float size = 0.4f;
-            buffer.vertex(matrix, px - size, py, pz).color(1f, 1f, 1f, 1f).next();
-            buffer.vertex(matrix, px + size, py, pz).color(1f, 1f, 1f, 1f).next();
-            buffer.vertex(matrix, px, py, pz - size).color(1f, 1f, 1f, 1f).next();
-            buffer.vertex(matrix, px, py, pz + size).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, px - size, py, pz).color(1f, 1f, 1f, 1f);
+            buffer.vertex(matrix, px + size, py, pz).color(1f, 1f, 1f, 1f);
+            buffer.vertex(matrix, px, py, pz - size).color(1f, 1f, 1f, 1f);
+            buffer.vertex(matrix, px, py, pz + size).color(1f, 1f, 1f, 1f);
         }
         // 虚线连接（批量）
         for (int i = 0; i < vertices.size() - 1; i++) {
@@ -598,8 +595,8 @@ public class BoundVizRenderer {
         for (double d = 0; d < distance; d += total) {
             double t1 = d / distance;
             double t2 = Math.min((d + segLen) / distance, 1.0);
-            buffer.vertex(matrix, (float)(x1 + dx * t1), y, (float)(z1 + dz * t1)).color(1f, 1f, 1f, 1f).next();
-            buffer.vertex(matrix, (float)(x1 + dx * t2), y, (float)(z1 + dz * t2)).color(1f, 1f, 1f, 1f).next();
+            buffer.vertex(matrix, (float)(x1 + dx * t1), y, (float)(z1 + dz * t1)).color(1f, 1f, 1f, 1f);
+            buffer.vertex(matrix, (float)(x1 + dx * t2), y, (float)(z1 + dz * t2)).color(1f, 1f, 1f, 1f);
         }
     }
 

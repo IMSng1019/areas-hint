@@ -8,6 +8,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.client.render.RenderTickCounter;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 
 import java.awt.image.BufferedImage;
@@ -84,7 +85,7 @@ public class CPURender implements RenderManager.IRender {
      * @param drawContext 绘制上下文
      * @param tickDelta tick间隔时间
      */
-    private void onHudRender(DrawContext drawContext, float tickDelta) {
+    private void onHudRender(DrawContext drawContext, RenderTickCounter tickCounter) {
         if (animationState == AnimationState.NONE || currentText == null || client.player == null) {
             return;
         }
