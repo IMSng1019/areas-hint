@@ -719,7 +719,7 @@ public class ClientNetworking {
     private static void displayFrequencyInfo(MinecraftClient client) {
         if (client.player != null) {
             int frequency = ClientConfig.getFrequency();
-            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_50") + frequency + "§a Hz"));
+            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_50") + frequency + "§a Hz"), false);
         }
     }
     
@@ -730,7 +730,7 @@ public class ClientNetworking {
     private static void displaySubtitleRenderInfo(MinecraftClient client) {
         if (client.player != null) {
             String renderMode = ClientConfig.getSubtitleRender();
-            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_49") + renderMode));
+            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_49") + renderMode), false);
         }
     }
     
@@ -741,7 +741,7 @@ public class ClientNetworking {
     private static void displaySubtitleStyleInfo(MinecraftClient client) {
         if (client.player != null) {
             String style = ClientConfig.getSubtitleStyle();
-            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_48") + style));
+            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_48") + style), false);
         }
     }
     

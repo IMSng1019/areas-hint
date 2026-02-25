@@ -5,6 +5,7 @@ import areahint.render.FlashColorHelper;
 import areahint.util.ColorUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
@@ -67,7 +68,7 @@ public class BoundVizRenderer {
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.disableCull();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
 
         matrices.push();
         matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
@@ -522,18 +523,18 @@ public class BoundVizRenderer {
 
         for (int by = yMin; by <= yMax; by++) {
             pos.set(bx, by, bz);
-            if (!world.getBlockState(pos).isOpaqueFullCube(world, pos)) continue;
+            if (!world.getBlockState(pos).isOpaqueFullCube()) continue;
 
             float bottom = Math.max(by, fMinY);
             float top = Math.min(by + 1, fMaxY);
             if (top <= bottom) continue;
 
             pos.set(bx, by + 1, bz);
-            if (top == by + 1 && !world.getBlockState(pos).isOpaqueFullCube(world, pos)) {
+            if (top == by + 1 && !world.getBlockState(pos).isOpaqueFullCube()) {
                 segments.add(new float[]{x1, top + FACE_OFFSET, z1, x2, top + FACE_OFFSET, z2});
             }
             pos.set(bx, by - 1, bz);
-            if (bottom == by && !world.getBlockState(pos).isOpaqueFullCube(world, pos)) {
+            if (bottom == by && !world.getBlockState(pos).isOpaqueFullCube()) {
                 segments.add(new float[]{x1, bottom - FACE_OFFSET, z1, x2, bottom - FACE_OFFSET, z2});
             }
         }
@@ -549,7 +550,7 @@ public class BoundVizRenderer {
         BlockPos.Mutable pos = new BlockPos.Mutable();
         for (int by = yMin; by <= yMax; by++) {
             pos.set(bx, by, bz);
-            if (!world.getBlockState(pos).isOpaqueFullCube(world, pos)) continue;
+            if (!world.getBlockState(pos).isOpaqueFullCube()) continue;
 
             float lineBottom = Math.max(by, fMinY);
             float lineTop = Math.min(by + 1, fMaxY);

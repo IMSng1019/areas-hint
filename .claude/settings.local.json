@@ -20,7 +20,9 @@
       "Bash(tail:*)",
       "WebFetch(domain:github.com)",
       "mcp__plugin_context7_context7__resolve-library-id",
-      "mcp__plugin_context7_context7__query-docs"
+      "mcp__plugin_context7_context7__query-docs",
+      "Skill(planning-with-files)",
+      "Bash(grep void render\\(:*)"
     ],
     "deny": [],
     "ask": []
