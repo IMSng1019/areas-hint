@@ -15,7 +15,9 @@
       "WebFetch(domain:meta.fabricmc.net)",
       "mcp__plugin_context7_context7__resolve-library-id",
       "WebFetch(domain:api.modrinth.com)",
-      "Skill(planning-with-files)"
+      "Skill(planning-with-files)",
+      "WebFetch(domain:store.dyzhkj.cn)",
+      "WebFetch(domain:pc.dyzhkj.cn)"
     ],
     "deny": [],
     "ask": []
