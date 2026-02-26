@@ -3,7 +3,6 @@ package areahint.mixin.client;
 import areahint.boundviz.BoundVizRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.ObjectAllocator;
@@ -23,7 +22,7 @@ public class WorldRendererMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline,
-                         Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager,
+                         Camera camera, GameRenderer gameRenderer,
                          Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
         MatrixStack matrices = new MatrixStack();
         matrices.multiplyPositionMatrix(positionMatrix);
