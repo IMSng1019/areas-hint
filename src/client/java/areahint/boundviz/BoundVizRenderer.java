@@ -3,9 +3,10 @@ package areahint.boundviz;
 import areahint.data.AreaData;
 import areahint.render.FlashColorHelper;
 import areahint.util.ColorUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
@@ -43,6 +44,32 @@ public class BoundVizRenderer {
     private static final Matrix4f vpMatrix = new Matrix4f();
     // 可见性缓存，避免两个pass重复视锥检测
     private static boolean[] visibleFlags = new boolean[0];
+    private static final RenderLayer.MultiPhase BOUNDVIZ_TRIANGLES_LAYER = RenderLayer.of(
+            "areas_hint_boundviz_triangles",
+            1536,
+            false,
+            true,
+            RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
+                    .withLocation("pipeline/areas_hint_boundviz_triangles")
+                    .withCull(false)
+                    .withDepthWrite(false)
+                    .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
+                    .build(),
+            RenderLayer.MultiPhaseParameters.builder().build(false)
+    );
+    private static final RenderLayer.MultiPhase BOUNDVIZ_LINES_LAYER = RenderLayer.of(
+            "areas_hint_boundviz_lines",
+            1536,
+            false,
+            true,
+            RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
+                    .withLocation("pipeline/areas_hint_boundviz_lines")
+                    .withCull(false)
+                    .withDepthWrite(false)
+                    .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.DEBUG_LINES)
+                    .build(),
+            RenderLayer.MultiPhaseParameters.builder().build(false)
+    );
 
     // ========== 主渲染方法 ==========
     public static void render(MatrixStack matrices, float tickDelta) {
@@ -56,19 +83,12 @@ public class BoundVizRenderer {
         Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
 
         // 提取视锥平面（每帧动态更新，跟随玩家视角）
-        extractFrustumPlanes(matrices.peek().getPositionMatrix(), RenderSystem.getProjectionMatrix());
+        extractFrustumPlanes(matrices.peek().getPositionMatrix(), client.gameRenderer.getBasicProjectionMatrix(client.options.getFov().getValue().floatValue()));
 
         // 更新几何缓存（仅在数据变化时重建）
         if (manager.isEnabled()) {
             updateCache(manager, client);
         }
-
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.disableCull();
-        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
 
         matrices.push();
         matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
@@ -85,9 +105,6 @@ public class BoundVizRenderer {
         }
 
         matrices.pop();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.disableBlend();
     }
 
     // ========== 视锥剔除 ==========
@@ -287,7 +304,7 @@ public class BoundVizRenderer {
             }
             emitAreaTriangles(matrix, buffer, cachedAreas.get(i));
         }
-        if (buffer != null) BufferRenderer.drawWithGlobalProgram(buffer.end());
+        if (buffer != null) BOUNDVIZ_TRIANGLES_LAYER.draw(buffer.end());
 
         // === Pass 2: 批量线段 ===
         buffer = null;
@@ -306,7 +323,7 @@ public class BoundVizRenderer {
                 }
             }
         }
-        if (buffer != null) BufferRenderer.drawWithGlobalProgram(buffer.end());
+        if (buffer != null) BOUNDVIZ_LINES_LAYER.draw(buffer.end());
     }
 
     /**
@@ -583,7 +600,7 @@ public class BoundVizRenderer {
             emitDashedLine(matrix, buffer, v1.getX() + 0.5f, v2.getX() + 0.5f,
                     v1.getZ() + 0.5f, v2.getZ() + 0.5f, py);
         }
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        BOUNDVIZ_LINES_LAYER.draw(buffer.end());
     }
 
     private static void emitDashedLine(Matrix4f matrix, BufferBuilder buffer,

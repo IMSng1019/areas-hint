@@ -28,9 +28,9 @@ public class DivideAreaUI {
             String displayName = AreaDataConverter.getDisplayName(area);
             MutableText btn = Text.literal("§6[" + displayName + "]")
                 .setStyle(Style.EMPTY
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    .withClickEvent(new ClickEvent.RunCommand(
                         "/areahint dividearea select \"" + area.getName() + "\""))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    .withHoverEvent(new HoverEvent.ShowText(
                         Text.of(I18nManager.translate("dividearea.message.divide_4") + displayName + I18nManager.translate("addhint.message.general") + area.getSignature())))
                     .withColor(Formatting.GOLD));
             client.player.sendMessage(btn, false);
@@ -39,8 +39,8 @@ public class DivideAreaUI {
         client.player.sendMessage(Text.of(""), false);
         MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint dividearea cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
                 .withColor(Formatting.RED));
         client.player.sendMessage(cancelBtn, false);
     }
@@ -53,8 +53,8 @@ public class DivideAreaUI {
 
         MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint dividearea cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
                 .withColor(Formatting.RED));
         client.player.sendMessage(cancelBtn, false);
     }
@@ -65,20 +65,20 @@ public class DivideAreaUI {
 
         MutableText continueBtn = Text.literal(I18nManager.translate("addhint.button.record.continue"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint dividearea continue"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.coordinate.record.continue"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint dividearea continue"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("dividearea.message.coordinate.record.continue"))))
                 .withColor(Formatting.GREEN));
 
         MutableText saveBtn = Text.literal(I18nManager.translate("dividearea.button.record.finish"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint dividearea save"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.coordinate.record.finish"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint dividearea save"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("dividearea.message.coordinate.record.finish"))))
                 .withColor(Formatting.AQUA));
 
         MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint dividearea cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
                 .withColor(Formatting.RED));
 
         if (count >= 2) {

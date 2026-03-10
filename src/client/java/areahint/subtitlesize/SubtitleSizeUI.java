@@ -49,8 +49,8 @@ public class SubtitleSizeUI {
         // 取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlesize cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_4"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint subtitlesize cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel_4"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(row1, false);
@@ -66,9 +66,9 @@ public class SubtitleSizeUI {
     private static MutableText createSizeButton(String displayName, String sizeValue, String colorCode) {
         return Text.literal(colorCode + "[" + displayName + "]")
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                .withClickEvent(new ClickEvent.RunCommand(
                     "/areahint subtitlesize select " + sizeValue))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                .withHoverEvent(new HoverEvent.ShowText(
                     Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("gui.message.general_2")))));
     }
 

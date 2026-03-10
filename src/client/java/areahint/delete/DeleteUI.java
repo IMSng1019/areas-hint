@@ -48,9 +48,9 @@ public class DeleteUI {
 
             MutableText areaButton = Text.literal("§6[" + displayName + "]")
                 .setStyle(Style.EMPTY
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    .withClickEvent(new ClickEvent.RunCommand(
                         "/areahint delete select \"" + area.getName() + "\""))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    .withHoverEvent(new HoverEvent.ShowText(
                         Text.of(hoverText)))
                     .withColor(Formatting.GOLD));
 
@@ -62,8 +62,8 @@ public class DeleteUI {
         // 显示取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint delete cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.delete_2"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint delete cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel.delete_2"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);
@@ -118,16 +118,16 @@ public class DeleteUI {
         // 显示确认和取消按钮
         MutableText confirmButton = Text.literal(I18nManager.translate("gui.error.confirm.delete"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint delete confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint delete confirm"))
+                .withHoverEvent(new HoverEvent.ShowText(
                     Text.of(I18nManager.translate("gui.error.area.confirm.delete_2") + displayName + I18nManager.translate("gui.message.general_3"))))
                 .withColor(Formatting.RED)
                 .withBold(true));
 
         MutableText cancelButton = Text.literal(I18nManager.translate("gui.button.cancel.delete"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint delete cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.delete"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint delete cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel.delete"))))
                 .withColor(Formatting.GREEN)
                 .withBold(true));
 

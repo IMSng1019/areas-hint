@@ -49,8 +49,8 @@ public class ShrinkAreaUI {
             client.player.sendMessage(Text.of(I18nManager.translate("shrinkarea.error.area.shrink_6")), false);
             MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
                 .setStyle(Style.EMPTY
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint shrinkarea cancel"))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("shrinkarea.message.cancel.shrink"))))
+                    .withClickEvent(new ClickEvent.RunCommand( "/areahint shrinkarea cancel"))
+                    .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("shrinkarea.message.cancel.shrink"))))
                     .withColor(Formatting.RED));
             client.player.sendMessage(cancelButton, false);
             return;
@@ -63,9 +63,9 @@ public class ShrinkAreaUI {
             
             MutableText areaButton = Text.literal("§6[" + displayName + "]")
                 .setStyle(Style.EMPTY
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, 
+                    .withClickEvent(new ClickEvent.RunCommand( 
                         "/areahint shrinkarea select \"" + area.getName() + "\""))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    .withHoverEvent(new HoverEvent.ShowText(
                         Text.of(I18nManager.translate("shrinkarea.message.shrink") + displayName + I18nManager.translate("addhint.message.general") + signature + I18nManager.translate("shrinkarea.message.level") + area.getLevel())))
                     .withColor(Formatting.GOLD));
             
@@ -77,8 +77,8 @@ public class ShrinkAreaUI {
         // 显示取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint shrinkarea cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("shrinkarea.message.cancel.shrink"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint shrinkarea cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("shrinkarea.message.cancel.shrink"))))
                 .withColor(Formatting.RED));
         
         client.player.sendMessage(cancelButton, false);
@@ -95,14 +95,14 @@ public class ShrinkAreaUI {
         // 显示操作选项
         MutableText continueButton = Text.literal(I18nManager.translate("addhint.button.record.continue"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint shrinkarea continue"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("shrinkarea.message.vertex.record.continue"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint shrinkarea continue"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("shrinkarea.message.vertex.record.continue"))))
                 .withColor(Formatting.GREEN));
         
         MutableText saveButton = Text.literal(I18nManager.translate("expandarea.button.area.save"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint shrinkarea save"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("shrinkarea.message.area.save.shrink"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint shrinkarea save"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("shrinkarea.message.area.save.shrink"))))
                 .withColor(Formatting.AQUA));
         
         if (vertexCount >= 3) {

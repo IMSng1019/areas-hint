@@ -900,11 +900,9 @@ public class ClientNetworking {
                 net.minecraft.text.MutableText areaButton = net.minecraft.text.Text.literal(
                     String.format(I18nManager.translate("message.button.color.level"), areaName, level, currentColor)
                 ).setStyle(net.minecraft.text.Style.EMPTY
-                    .withClickEvent(new net.minecraft.text.ClickEvent(
-                        net.minecraft.text.ClickEvent.Action.RUN_COMMAND, 
+                    .withClickEvent(new net.minecraft.text.ClickEvent.RunCommand( 
                         "/areahint recolor " + areaName))
-                    .withHoverEvent(new net.minecraft.text.HoverEvent(
-                        net.minecraft.text.HoverEvent.Action.SHOW_TEXT, 
+                    .withHoverEvent(new net.minecraft.text.HoverEvent.ShowText( 
                         net.minecraft.text.Text.of(I18nManager.translate("addhint.prompt.general") + areaName + I18nManager.translate("message.message.color.modify")))));
                 
                 client.player.sendMessage(areaButton, false);

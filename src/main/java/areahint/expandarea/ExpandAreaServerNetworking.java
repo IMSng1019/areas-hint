@@ -36,7 +36,7 @@ public class ExpandAreaServerNetworking {
                     String areaJsonString = buf.readString(32767);
                     String dimension = buf.readString(32767);
 
-                    context.player().server.execute(() -> {
+                    context.server().execute(() -> {
                         handleExpandAreaRequest(player, areaJsonString, dimension);
                     });
 

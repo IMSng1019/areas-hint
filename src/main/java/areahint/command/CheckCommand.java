@@ -127,8 +127,8 @@ public class CheckCommand {
                 }
 
                 unionText.styled(style -> style
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverContent))
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint check \"" + unionName + "\""))
+                    .withHoverEvent(new HoverEvent.ShowText(hoverContent))
+                    .withClickEvent(new ClickEvent.RunCommand("/areahint check \"" + unionName + "\""))
                 );
                 
                 source.sendMessage(unionText);

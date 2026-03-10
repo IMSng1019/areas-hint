@@ -343,7 +343,7 @@ public class RenameAreaCommand {
             (payload, context) -> {
                 PacketByteBuf buf = payload.buf();
                 ServerPlayerEntity player = context.player();
-                var server = context.player().server;
+                var server = context.server();
                 try {
                     String oldName = buf.readString();
                     String newName = buf.readString();

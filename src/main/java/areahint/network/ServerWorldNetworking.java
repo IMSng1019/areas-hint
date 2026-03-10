@@ -22,7 +22,7 @@ public class ServerWorldNetworking {
             (payload, context) -> {
                 try {
                     net.minecraft.server.network.ServerPlayerEntity player = context.player();
-                    player.server.execute(() -> {
+                    player.getServer().execute(() -> {
                         try {
                             String worldName = WorldFolderManager.getCurrentWorldName();
                             Areashint.LOGGER.info("从WorldFolderManager获取的世界名称: '{}'", worldName);

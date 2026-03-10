@@ -30,8 +30,8 @@ public class ReplaceButtonUI {
         // 显示取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint replacebutton cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.key"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint replacebutton cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel.key"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);
@@ -51,14 +51,14 @@ public class ReplaceButtonUI {
         // 显示确认和取消按钮
         MutableText confirmButton = Text.literal(I18nManager.translate("gui.button.confirm"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint replacebutton confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.confirm.key"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint replacebutton confirm"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.confirm.key"))))
                 .withColor(Formatting.GREEN));
 
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint replacebutton cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.key"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint replacebutton cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel.key"))))
                 .withColor(Formatting.RED));
 
         MutableText buttonRow = Text.empty()

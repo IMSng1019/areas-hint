@@ -34,7 +34,7 @@ public class EasyAddServerNetworking {
                     String jsonData = buf.readString();
                     String dimension = buf.readString();
 
-                    context.player().server.execute(() -> {
+                    context.server().execute(() -> {
                         handleEasyAddAreaData(player, jsonData, dimension);
                     });
                     

@@ -40,9 +40,9 @@ public class LanguageUI {
             String prefix = isCurrent ? "§a✓ " : "§b  ";
             MutableText button = Text.literal(prefix + "[" + displayName + " (" + langCode + ")]")
                 .setStyle(Style.EMPTY
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    .withClickEvent(new ClickEvent.RunCommand(
                         "/areahint language select " + langCode))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    .withHoverEvent(new HoverEvent.ShowText(
                         Text.of(I18nManager.translate("addhint.prompt.general") + displayName)))
                     .withColor(isCurrent ? Formatting.GREEN : Formatting.AQUA));
 
@@ -54,8 +54,8 @@ public class LanguageUI {
         // 取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("language.button.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint language cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.prompt.cancel.language"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint language cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.prompt.cancel.language"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);

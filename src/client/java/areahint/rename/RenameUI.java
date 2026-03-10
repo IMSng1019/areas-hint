@@ -35,9 +35,9 @@ public class RenameUI {
 
             MutableText areaButton = Text.literal("§6[" + displayName + "]")
                 .setStyle(Style.EMPTY
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    .withClickEvent(new ClickEvent.RunCommand(
                         "/areahint rename select \"" + area.getName() + "\""))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    .withHoverEvent(new HoverEvent.ShowText(
                         Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("gui.message.rename") + signature)))
                     .withColor(Formatting.GOLD));
 
@@ -47,8 +47,8 @@ public class RenameUI {
         // 显示取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_3"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint rename cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel_3"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);
@@ -68,8 +68,8 @@ public class RenameUI {
         // 显示取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_3"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint rename cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel_3"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);
@@ -91,8 +91,8 @@ public class RenameUI {
         // 显示取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_3"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint rename cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel_3"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(cancelButton, false);
@@ -119,14 +119,14 @@ public class RenameUI {
         // 显示确认和取消按钮
         MutableText confirmButton = Text.literal(I18nManager.translate("gui.button.general_2"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.confirm.rename"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint rename confirm"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.confirm.rename"))))
                 .withColor(Formatting.GREEN));
 
         MutableText cancelButton = Text.literal(I18nManager.translate("gui.error.general"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint rename cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.rename"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint rename cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel.rename"))))
                 .withColor(Formatting.RED));
 
         MutableText buttonRow = Text.empty()

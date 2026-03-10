@@ -29,7 +29,7 @@ public class ServerLogNetworking {
             String dimensionalName = dimensionalNameRaw.isEmpty() ? null : dimensionalNameRaw;
 
             // 在服务器线程上处理
-            context.player().server.execute(() -> {
+            context.server().execute(() -> {
                 String playerName = player.getName().getString();
 
                 if ("enter".equals(action)) {

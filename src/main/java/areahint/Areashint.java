@@ -111,9 +111,9 @@ public class Areashint implements ModInitializer {
 				player.sendMessage(msg, false);
 				MutableText nameBtn = Text.translatable("message.button.dimension_3")
 					.setStyle(Style.EMPTY
-						.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+						.withClickEvent(new ClickEvent.SuggestCommand(
 							"/areahint dimensionalityname select \"" + dimId + "\""))
-						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+						.withHoverEvent(new HoverEvent.ShowText(
 							Text.translatable("message.hover.dimension.setname").append(Text.literal(dimId)))));
 				player.sendMessage(nameBtn, false);
 				// 同步给客户端

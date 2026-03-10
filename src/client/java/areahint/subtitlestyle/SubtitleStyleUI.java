@@ -31,29 +31,29 @@ public class SubtitleStyleUI {
         // 创建样式选择按钮
         MutableText fullButton = Text.literal(I18nManager.translate("gui.button.general_3"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle select full"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint subtitlestyle select full"))
+                .withHoverEvent(new HoverEvent.ShowText(
                     Text.of(I18nManager.translate("gui.message.area_6"))))
                 .withColor(Formatting.AQUA));
 
         MutableText simpleButton = Text.literal(I18nManager.translate("gui.button.general_5"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle select simple"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint subtitlestyle select simple"))
+                .withHoverEvent(new HoverEvent.ShowText(
                     Text.of(I18nManager.translate("gui.message.area_5"))))
                 .withColor(Formatting.YELLOW));
 
         MutableText mixedButton = Text.literal(I18nManager.translate("gui.button.general_4"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle select mixed"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint subtitlestyle select mixed"))
+                .withHoverEvent(new HoverEvent.ShowText(
                     Text.of(I18nManager.translate("gui.message.area_7"))))
                 .withColor(Formatting.LIGHT_PURPLE));
 
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_6"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint subtitlestyle cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel_6"))))
                 .withColor(Formatting.RED));
 
         // 组合按钮显示

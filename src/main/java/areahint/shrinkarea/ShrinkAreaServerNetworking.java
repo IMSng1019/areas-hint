@@ -39,7 +39,7 @@ public class ShrinkAreaServerNetworking {
                     String areaJsonString = buf.readString(32767);
                     String dimension = buf.readString(32767);
 
-                    context.player().server.execute(() -> {
+                    context.server().execute(() -> {
                         handleShrinkAreaRequest(player, areaJsonString, dimension);
                     });
 

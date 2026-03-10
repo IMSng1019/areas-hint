@@ -33,7 +33,7 @@ public class DivideAreaServerNetworking {
                     String area2Json = buf.readString(32767);
                     String originalName = buf.readString(32767);
                     String dimension = buf.readString(32767);
-                    context.player().server.execute(() -> handleDivideRequest(player, area1Json, area2Json, originalName, dimension));
+                    context.server().execute(() -> handleDivideRequest(player, area1Json, area2Json, originalName, dimension));
                 } catch (Exception e) {
                     System.err.println("处理分割域名请求时发生错误: " + e.getMessage());
                     sendResponse(player, false, key("dividearea.error.internal"));

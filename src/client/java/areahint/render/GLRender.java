@@ -127,13 +127,13 @@ public class GLRender implements RenderManager.IRender {
         TextRenderer textRenderer = client.textRenderer;
         
         // 应用缩放来增大文本尺寸
-        MatrixStack matrixStack = drawContext.getMatrices();
-        matrixStack.push();
+        var matrixStack = drawContext.getMatrices();
+        matrixStack.pushMatrix();
         // 使用浮点数直接传递给矩阵变换，避免整数转换
-        matrixStack.translate(x, y + yOffset, 0);
+        matrixStack.translate(x, y + yOffset);
         // 根据配置获取字幕大小
         float textScale = getTextScale();
-        matrixStack.scale(textScale, textScale, 1.0f);
+        matrixStack.scale(textScale, textScale);
         
         // 获取未缩放的文本宽度
         int textWidth = textRenderer.getWidth(text);
@@ -169,7 +169,7 @@ public class GLRender implements RenderManager.IRender {
         }
 
         // 恢复矩阵状态
-        matrixStack.pop();
+        matrixStack.popMatrix();
         
         // 输出调试信息
         if (animationState == AnimationState.IN) {

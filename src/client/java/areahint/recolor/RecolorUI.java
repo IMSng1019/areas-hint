@@ -37,9 +37,9 @@ public class RecolorUI {
             MutableText areaButton = Text.literal(
                 String.format(I18nManager.translate("message.button.color.level"), displayName, area.getLevel(), currentColor)
             ).setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                .withClickEvent(new ClickEvent.RunCommand(
                     "/areahint recolor select \"" + area.getName() + "\""))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                .withHoverEvent(new HoverEvent.ShowText(
                     Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("message.message.color.modify"))))
                 .withColor(Formatting.GOLD));
 
@@ -49,8 +49,8 @@ public class RecolorUI {
         // 显示取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("command.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint recolor cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_2"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint recolor cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel_2"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(Text.of(""), false);
@@ -123,8 +123,8 @@ public class RecolorUI {
         // 取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("command.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint recolor cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_2"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint recolor cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel_2"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(row1, false);
@@ -156,14 +156,14 @@ public class RecolorUI {
         // 显示确认和取消按钮
         MutableText confirmButton = Text.literal(I18nManager.translate("gui.button.general_2"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint recolor confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.color.confirm.modify"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint recolor confirm"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.color.confirm.modify"))))
                 .withColor(Formatting.GREEN));
 
         MutableText cancelButton = Text.literal(I18nManager.translate("gui.error.general"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint recolor cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel.modify"))))
+                .withClickEvent(new ClickEvent.RunCommand( "/areahint recolor cancel"))
+                .withHoverEvent(new HoverEvent.ShowText( Text.of(I18nManager.translate("gui.message.cancel.modify"))))
                 .withColor(Formatting.RED));
 
         MutableText buttonRow = Text.empty()
@@ -181,9 +181,9 @@ public class RecolorUI {
     private static MutableText createColorButton(String colorName, String colorValue, String minecraftColor) {
         return Text.literal(minecraftColor + "[" + colorName + "]")
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                .withClickEvent(new ClickEvent.RunCommand(
                     "/areahint recolor color " + colorValue))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                .withHoverEvent(new HoverEvent.ShowText(
                     Text.of(I18nManager.translate("addhint.prompt.general") + colorName + I18nManager.translate("gui.message.color")))));
     }
 

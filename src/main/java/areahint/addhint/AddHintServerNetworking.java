@@ -35,7 +35,7 @@ public class AddHintServerNetworking {
                 try {
                     String jsonStr = buf.readString(32767);
                     String dimension = buf.readString(32767);
-                    context.player().server.execute(() -> handleRequest(player, jsonStr, dimension));
+                    context.server().execute(() -> handleRequest(player, jsonStr, dimension));
                 } catch (Exception e) {
                     sendResponse(player, false, key("addhint.error.general_2"), lit(e.getMessage()));
                 }
