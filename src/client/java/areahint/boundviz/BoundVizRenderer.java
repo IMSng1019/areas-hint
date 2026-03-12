@@ -419,7 +419,7 @@ public class BoundVizRenderer {
         World world = client.world;
         if (world == null) return null;
 
-        Vec3d playerPos = client.player.getPos();
+        Vec3d playerPos = new Vec3d(client.player.getX(), client.player.getY(), client.player.getZ());
         int renderDist = 64;
         int renderDistSq = renderDist * renderDist;
         int yMin = Math.max((int) Math.floor(ca.minY), (int) playerPos.y - renderDist);

@@ -250,7 +250,7 @@ public class DimensionalNameCommands {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) return 0;
 
-        String dimId = source.getPlayer().getWorld().getRegistryKey().getValue().toString();
+        String dimId = source.getPlayer().getEntityWorld().getRegistryKey().getValue().toString();
         String currentName = DimensionalNameManager.getDimensionalName(dimId);
 
         // 仅当维度名称等于维度ID时（未被命名）才允许
@@ -273,12 +273,12 @@ public class DimensionalNameCommands {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) return 0;
 
-        String dimId = source.getPlayer().getWorld().getRegistryKey().getValue().toString();
+        String dimId = source.getPlayer().getEntityWorld().getRegistryKey().getValue().toString();
         String currentName = DimensionalNameManager.getDimensionalName(dimId);
 
         if (currentName.equals(dimId)) {
             // 使用维度路径作为默认名称（如 overworld, the_nether）
-            String defaultName = source.getPlayer().getWorld().getRegistryKey().getValue().getPath();
+            String defaultName = source.getPlayer().getEntityWorld().getRegistryKey().getValue().getPath();
             handleDimNameChange(source, dimId, defaultName);
             source.sendMessage(Text.translatable("command.message.name").append(Text.literal(defaultName)));
         }

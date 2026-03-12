@@ -105,7 +105,7 @@ public class ShrinkAreaManager {
             return;
         }
         
-        playerName = player.getGameProfile().getName();
+        playerName = player.getName().getString();
         
         // 检查玩家权限（简单检查是否为OP，真实权限由服务端验证）
         isAdmin = client.player.hasPermissionLevel(2);
@@ -206,7 +206,7 @@ public class ShrinkAreaManager {
             return false;
         }
 
-        String playerName = client.player.getGameProfile().getName();
+        String playerName = client.player.getName().getString();
 
         // 检查是否为管理员（权限等级2）
         if (client.player.hasPermissionLevel(2)) {

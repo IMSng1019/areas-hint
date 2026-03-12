@@ -609,7 +609,7 @@ public class DivideAreaManager {
             selectedArea.getAltitude(),
             selectedArea.getLevel(),
             selectedArea.getBaseName(),
-            client.player != null ? client.player.getGameProfile().getName() : selectedArea.getSignature(),
+            client.player != null ? client.player.getName().getString() : selectedArea.getSignature(),
             selectedArea.getColor(),
             selectedArea.getSurfacename()
         );
@@ -674,7 +674,7 @@ public class DivideAreaManager {
     private List<AreaData> getModifiableAreas() {
         List<AreaData> result = new ArrayList<>();
         if (client.player == null) return result;
-        String playerName = client.player.getGameProfile().getName();
+        String playerName = client.player.getName().getString();
         boolean isAdmin = client.player.hasPermissionLevel(2);
         List<AreaData> all = loadAllAreas();
         for (AreaData area : all) {

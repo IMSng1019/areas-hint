@@ -47,7 +47,7 @@ public class RecolorCommand {
         boolean hasOp = source.hasPermissionLevel(2);
 
         // 获取玩家当前维度
-        String dimension = player.getWorld().getRegistryKey().getValue().toString();
+        String dimension = player.getEntityWorld().getRegistryKey().getValue().toString();
         String dimensionType = convertDimensionIdToType(dimension);
         String fileName = Packets.getFileNameForDimension(dimensionType);
 
@@ -99,7 +99,7 @@ public class RecolorCommand {
         }
         
         // 获取玩家当前维度
-        String dimension = player.getWorld().getRegistryKey().getValue().toString();
+        String dimension = player.getEntityWorld().getRegistryKey().getValue().toString();
         String dimensionType = convertDimensionIdToType(dimension);
         
         // 处理重新着色请求

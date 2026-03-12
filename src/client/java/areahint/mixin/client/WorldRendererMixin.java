@@ -23,7 +23,7 @@ public class WorldRendererMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline,
-                         Camera camera, Matrix4f positionMatrix, Matrix4f projectionMatrix,
+                         Camera camera, Matrix4f positionMatrix, Matrix4f projectionMatrix, Matrix4f frustumMatrix,
                          GpuBufferSlice fog, Vector4f clearColor, boolean renderEntityOutlines, CallbackInfo ci) {
         MatrixStack matrices = new MatrixStack();
         matrices.multiplyPositionMatrix(positionMatrix);

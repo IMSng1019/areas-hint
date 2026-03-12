@@ -135,7 +135,7 @@ public class RenameAreaCommand {
         try {
             String playerName = player.getName().getString();
             boolean isAdmin = player.hasPermissionLevel(2);
-            RegistryKey<World> dimensionType = player.getWorld().getRegistryKey();
+            RegistryKey<World> dimensionType = player.getEntityWorld().getRegistryKey();
             String dimensionId = dimensionType.getValue().toString();
 
             // 获取维度文件名

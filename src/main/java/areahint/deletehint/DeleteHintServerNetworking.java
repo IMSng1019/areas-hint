@@ -68,7 +68,7 @@ public class DeleteHintServerNetworking {
 
             // 验证权限
             String playerDimType = convertDimensionIdToType(
-                player.getWorld().getRegistryKey().getValue().toString());
+                player.getEntityWorld().getRegistryKey().getValue().toString());
             if (!validatePermission(player, updatedArea, playerDimType)) {
                 sendResponse(player, false, key("addhint.message.area.modify.permission"));
                 return;
@@ -109,7 +109,7 @@ public class DeleteHintServerNetworking {
     private static boolean validatePermission(ServerPlayerEntity player, AreaData area, String dimType) {
         if (player.hasPermissionLevel(2)) return true;
 
-        String playerName = player.getGameProfile().getName();
+        String playerName = player.getName().getString();
         if (playerName.equals(area.getSignature())) return true;
 
         if (area.getBaseName() != null && dimType != null) {

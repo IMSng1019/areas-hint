@@ -59,7 +59,7 @@ public class ExpandAreaServerNetworking {
             AreaData expandedArea = AreaDataConverter.fromJsonObject(areaJson);
 
             // 获取玩家所在维度
-            String playerDimension = player.getWorld().getRegistryKey().getValue().toString();
+            String playerDimension = player.getEntityWorld().getRegistryKey().getValue().toString();
             String playerDimensionType = Packets.convertDimensionPathToType(playerDimension);
 
             // 验证权限（只在玩家所在维度查找）
@@ -82,13 +82,13 @@ public class ExpandAreaServerNetworking {
             }
 
             // 重新分发给所有玩家
-            redistributeAreasToAllPlayers(player.getServer());
+            redistributeAreasToAllPlayers(player.getEntityWorld().getServer());
 
             // 发送成功响应
             sendResponse(player, true, key("addhint.message.area_2"), lit(expandedArea.getName()), key("expandarea.success.expand"));
 
             // 服务端日志
-            System.out.println("玩家 " + player.getGameProfile().getName() +
+            System.out.println("玩家 " + player.getName().getString() +
                              " 成功扩展域名: " + expandedArea.getName());
 
         } catch (Exception e) {
@@ -105,7 +105,7 @@ public class ExpandAreaServerNetworking {
      * @param dimensionType 玩家所在维度类型（用于查找basename）
      */
     private static boolean validatePermission(ServerPlayerEntity player, AreaData area, String dimensionType) {
-        String playerName = player.getGameProfile().getName();
+        String playerName = player.getName().getString();
         
         // 检查是否为管理员
         if (player.hasPermissionLevel(2)) {

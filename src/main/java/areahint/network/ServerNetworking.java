@@ -205,7 +205,7 @@ public class ServerNetworking {
             
             for (ServerPlayerEntity player : players) {
                 // 检查玩家是否在指定维度中
-                String playerDimension = player.getWorld().getRegistryKey().getValue().toString();
+                String playerDimension = player.getEntityWorld().getRegistryKey().getValue().toString();
                 String playerDimensionType = Packets.convertDimensionPathToType(playerDimension);
                 
                 if (playerDimensionType != null && playerDimensionType.equals(dimensionType)) {
@@ -230,7 +230,7 @@ public class ServerNetworking {
             (payload, context) -> {
                 PacketByteBuf buf = payload.buf();
                 ServerPlayerEntity player = context.player();
-                MinecraftServer server = player.getServer();
+                MinecraftServer server = player.getEntityWorld().getServer();
                 String lang = buf.readString();
                 server.execute(() -> ServerI18nManager.setPlayerLanguage(player.getUuid(), lang));
             });
@@ -245,7 +245,7 @@ public class ServerNetworking {
                     String color = buf.readString();
                     String dimension = buf.readString();
 
-                    player.getServer().execute(() -> {
+                    player.getEntityWorld().getServer().execute(() -> {
                         areahint.command.RecolorCommand.handleRecolorRequest(player, areaName, color, dimension);
                     });
                 } catch (Exception e) {
@@ -274,7 +274,7 @@ public class ServerNetworking {
                         minHeight = null;
                     }
 
-                    player.getServer().execute(() -> {
+                    player.getEntityWorld().getServer().execute(() -> {
                         areahint.command.SetHighCommand.handleHeightRequest(player, areaName, hasCustomHeight, maxHeight, minHeight);
                     });
                 } catch (Exception e) {
@@ -290,7 +290,7 @@ public class ServerNetworking {
                     ServerPlayerEntity player = context.player();
                     final String dimension = buf.readString();
 
-                    player.getServer().execute(() -> {
+                    player.getEntityWorld().getServer().execute(() -> {
                         sendDeletableAreasList(player, dimension);
                     });
                 } catch (Exception e) {
@@ -307,7 +307,7 @@ public class ServerNetworking {
                     final String areaName = buf.readString();
                     final String dimension = buf.readString();
 
-                    player.getServer().execute(() -> {
+                    player.getEntityWorld().getServer().execute(() -> {
                         handleDeleteRequest(player, areaName, dimension);
                     });
                 } catch (Exception e) {
@@ -323,7 +323,7 @@ public class ServerNetworking {
                     ServerPlayerEntity player = context.player();
                     final String dimensionId = buf.readString();
                     final String newName = buf.readString();
-                    player.getServer().execute(() -> {
+                    player.getEntityWorld().getServer().execute(() -> {
                         if (!player.hasPermissionLevel(2)) {
                             player.sendMessage(net.minecraft.text.Text.translatable("message.error.permission"), false);
                             return;
@@ -344,7 +344,7 @@ public class ServerNetworking {
                     ServerPlayerEntity player = context.player();
                     final String dimensionId = buf.readString();
                     final String newColor = buf.readString();
-                    player.getServer().execute(() -> {
+                    player.getEntityWorld().getServer().execute(() -> {
                         if (!player.hasPermissionLevel(2)) {
                             player.sendMessage(net.minecraft.text.Text.translatable("message.error.permission"), false);
                             return;
@@ -365,7 +365,7 @@ public class ServerNetworking {
                     ServerPlayerEntity player = context.player();
                     final String dimensionId = buf.readString();
                     final String newName = buf.readString();
-                    player.getServer().execute(() -> {
+                    player.getEntityWorld().getServer().execute(() -> {
                         String currentName = areahint.dimensional.DimensionalNameManager.getDimensionalName(dimensionId);
                         // 仅当维度名称等于维度ID时（未被命名）才允许
                         if (!currentName.equals(dimensionId)) {

@@ -66,7 +66,7 @@ public class DivideAreaServerNetworking {
 
     private static boolean validatePermission(ServerPlayerEntity player, String areaName, String dimType) {
         if (player.hasPermissionLevel(2)) return true;
-        String pName = player.getGameProfile().getName();
+        String pName = player.getName().getString();
         AreaData area = findArea(areaName, dimType);
         if (area == null) return false;
         if (pName.equals(area.getSignature())) return true;

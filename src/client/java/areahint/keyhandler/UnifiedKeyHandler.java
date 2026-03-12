@@ -1,48 +1,35 @@
 package areahint.keyhandler;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import org.lwjgl.glfw.GLFW;
-
+import areahint.config.ClientConfig;
 import areahint.easyadd.EasyAddManager;
 import areahint.expandarea.ExpandAreaManager;
 import areahint.shrinkarea.ShrinkAreaManager;
-import areahint.config.ClientConfig;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 
-/**
- * 统一的记录键处理器
- * 避免多个模块同时注册同一个键造成冲突
- * 根据当前激活的模块分发按键事件
- * 支持动态更改按键
- */
 public class UnifiedKeyHandler {
+    private static final KeyBinding.Category GENERAL_CATEGORY = new KeyBinding.Category(
+        Identifier.of("areas-hint", "general")
+    );
 
-    // 记录键绑定
     private static KeyBinding recordKeyBinding;
-
-    // 是否已注册tick事件
     private static boolean tickEventRegistered = false;
 
-    /**
-     * 注册统一的记录键处理器
-     */
     public static void register() {
-        // 获取配置的按键代码
         int keyCode = ClientConfig.getRecordKey();
 
-        // 注册记录键绑定
         recordKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "key.areahint.unified.record", // 翻译键
+            "key.areashint.unified.record",
             InputUtil.Type.KEYSYM,
-            keyCode, // 使用配置的按键
-            "category.areahint.general" // 通用类别
+            keyCode,
+            GENERAL_CATEGORY
         ));
 
-        // 只注册一次tick事件
         if (!tickEventRegistered) {
-            // 注册客户端tick事件监听器
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
                 if (recordKeyBinding != null && recordKeyBinding.wasPressed()) {
                     handleRecordKeyPress();
@@ -52,100 +39,73 @@ public class UnifiedKeyHandler {
         }
     }
 
-    /**
-     * 重新注册按键（当按键配置改变时调用）
-     */
     public static void reregisterKey() {
         if (recordKeyBinding == null) {
-            System.out.println("DEBUG: recordKeyBinding 为 null，无法重新注册");
+            System.out.println("DEBUG: recordKeyBinding is null, cannot reregister");
             return;
         }
 
-        // 获取新的按键代码
         int keyCode = ClientConfig.getRecordKey();
-
-        // 使用 setBoundKey 方法更新按键绑定
         recordKeyBinding.setBoundKey(InputUtil.Type.KEYSYM.createFromCode(keyCode));
 
-        // 刷新按键映射表（重要：让 Minecraft 重新索引按键）
-        net.minecraft.client.MinecraftClient client = net.minecraft.client.MinecraftClient.getInstance();
+        MinecraftClient client = MinecraftClient.getInstance();
         if (client != null && client.options != null) {
-            // 调用 KeyBinding 的静态方法来更新所有按键映射
             KeyBinding.updateKeysByCode();
-
-            // 保存按键绑定设置到 Minecraft 的配置文件
             client.options.write();
         }
 
-        System.out.println("DEBUG: 记录键已更新为键码 " + keyCode + "，按键名称：" + recordKeyBinding.getBoundKeyLocalizedText().getString());
+        System.out.println("DEBUG: record key updated to code " + keyCode + ", name=" + recordKeyBinding.getBoundKeyLocalizedText().getString());
     }
 
-    /**
-     * 处理记录键按下事件
-     * 根据当前激活的模块分发事件
-     */
     private static void handleRecordKeyPress() {
-        System.out.println("DEBUG: 记录键被按下");
+        System.out.println("DEBUG: record key pressed");
 
-        // 检查EasyAdd是否活跃且在记录状态
         EasyAddManager easyAddManager = EasyAddManager.getInstance();
         if (easyAddManager.getCurrentState() == EasyAddManager.EasyAddState.RECORDING_POINTS) {
-            System.out.println("DEBUG: EasyAdd 处理记录键");
+            System.out.println("DEBUG: EasyAdd handles record key");
             easyAddManager.recordCurrentPosition();
             return;
         }
 
-        // 检查ExpandArea是否活跃且在记录状态
         ExpandAreaManager expandAreaManager = ExpandAreaManager.getInstance();
         System.out.println("DEBUG: ExpandArea - isActive: " + expandAreaManager.isActive() + ", isRecording: " + expandAreaManager.isRecording());
         if (expandAreaManager.isActive() && expandAreaManager.isRecording()) {
-            System.out.println("DEBUG: ExpandArea 处理记录键");
+            System.out.println("DEBUG: ExpandArea handles record key");
             expandAreaManager.recordCurrentPosition();
             return;
         }
 
-        // 检查ShrinkArea是否活跃且在记录状态
         ShrinkAreaManager shrinkAreaManager = ShrinkAreaManager.getInstance();
         if (shrinkAreaManager.isActive() && shrinkAreaManager.isRecording()) {
-            System.out.println("DEBUG: ShrinkArea 处理记录键");
+            System.out.println("DEBUG: ShrinkArea handles record key");
             shrinkAreaManager.handleXKeyPress();
             return;
         }
 
-        // 检查DivideArea是否活跃且在记录状态
         areahint.dividearea.DivideAreaManager divideAreaManager = areahint.dividearea.DivideAreaManager.getInstance();
         if (divideAreaManager.isActive() && divideAreaManager.isRecording()) {
-            System.out.println("DEBUG: DivideArea 处理记录键");
+            System.out.println("DEBUG: DivideArea handles record key");
             divideAreaManager.recordCurrentPosition();
             return;
         }
 
-        // 检查AddHint是否活跃且在记录状态
         areahint.addhint.AddHintManager addHintManager = areahint.addhint.AddHintManager.getInstance();
         if (addHintManager.isActive() && addHintManager.isRecording()) {
             addHintManager.recordCurrentPosition();
             return;
         }
 
-        System.out.println("DEBUG: 没有模块处理记录键");
-        // 如果没有模块处于记录状态，则忽略按键
-        // （避免误操作）
+        System.out.println("DEBUG: no module handled record key");
     }
 
-    /**
-     * 获取记录键绑定
-     */
     public static KeyBinding getRecordKeyBinding() {
         return recordKeyBinding;
     }
 
-    /**
-     * 获取记录键显示名称
-     */
     public static String getRecordKeyDisplayName() {
         if (recordKeyBinding != null) {
             return recordKeyBinding.getBoundKeyLocalizedText().getString();
         }
         return "X";
     }
-} 
+}

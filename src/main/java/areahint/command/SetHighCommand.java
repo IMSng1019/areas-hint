@@ -49,7 +49,7 @@ public class SetHighCommand {
         boolean isAdmin = source.hasPermissionLevel(2);
 
         // 获取玩家当前维度
-        String dimension = player.getWorld().getRegistryKey().getValue().toString();
+        String dimension = player.getEntityWorld().getRegistryKey().getValue().toString();
         String dimensionType = convertDimensionIdToType(dimension);
         String fileName = Packets.getFileNameForDimension(dimensionType);
 
@@ -85,7 +85,7 @@ public class SetHighCommand {
                     .toList();
             
             // 获取维度类型
-            String dimension = source.getPlayer().getWorld().getRegistryKey().getValue().toString();
+            String dimension = source.getPlayer().getEntityWorld().getRegistryKey().getValue().toString();
             String dimensionType = convertDimensionIdToType(dimension);
             
             // 发送数据包到客户端，格式与客户端期望的一致
@@ -142,7 +142,7 @@ public class SetHighCommand {
         boolean isAdmin = source.hasPermissionLevel(2);
 
         // 获取玩家当前维度
-        String dimension = player.getWorld().getRegistryKey().getValue().toString();
+        String dimension = player.getEntityWorld().getRegistryKey().getValue().toString();
         String dimensionType = convertDimensionIdToType(dimension);
         String fileName = Packets.getFileNameForDimension(dimensionType);
 
@@ -355,7 +355,7 @@ public class SetHighCommand {
             boolean isAdmin = player.hasPermissionLevel(2);
             
             // 获取玩家当前维度
-            String dimension = player.getWorld().getRegistryKey().getValue().toString();
+            String dimension = player.getEntityWorld().getRegistryKey().getValue().toString();
             String dimensionType = convertDimensionIdToType(dimension);
             String fileName = Packets.getFileNameForDimension(dimensionType);
             
