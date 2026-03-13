@@ -132,134 +132,256 @@ areas-hint-mod/
 │   │   ├── java/
 │   │   │   └── areahint/
 │   │   │       ├── Areashint.java   # 服务端主类（模组入口）
+│   │   │       ├── addhint/         # AddHint服务端支持
+│   │   │       │   └── AddHintServerNetworking.java # 服务端网络处理器
 │   │   │       ├── command/         # 命令处理
-│   │   │       │   ├── ServerCommands.java # 统一命令处理器（服务端+客户端命令）
+│   │   │       │   ├── CheckCommand.java   # 联合域名查看指令处理器
 │   │   │       │   ├── DebugCommand.java   # 调试命令处理器
-│   │   │       │   ├── CheckCommand.java   # 联合域名查看指令处理器（新增）
-│   │   │       │   ├── RecolorCommand.java # 域名重新着色指令处理器（新增）
-│   │   │       │   ├── RenameAreaCommand.java # 域名重命名指令处理器（新增）
-│   │   │       │   └── DimensionalNameCommands.java # 维度域名命令处理器
+│   │   │       │   ├── DimensionalNameCommands.java # 维度域名命令处理器
+│   │   │       │   ├── RecolorCommand.java # 域名重新着色指令处理器
+│   │   │       │   ├── RenameAreaCommand.java # 域名重命名指令处理器
+│   │   │       │   ├── ServerCommands.java # 统一命令处理器（服务端+客户端命令）
+│   │   │       │   └── SetHighCommand.java # 域名高度设置指令处理器
 │   │   │       ├── data/            # 数据模型
 │   │   │       │   ├── AreaData.java       # 区域数据模型（含altitude高度字段和color颜色字段）
 │   │   │       │   ├── ConfigData.java     # 配置数据模型
 │   │   │       │   └── DimensionalNameData.java # 维度域名数据模型
 │   │   │       ├── debug/           # 调试功能
 │   │   │       │   └── DebugManager.java   # 服务端调试管理器
+│   │   │       ├── deletehint/      # DeleteHint服务端支持
+│   │   │       │   └── DeleteHintServerNetworking.java # 服务端网络处理器
 │   │   │       ├── dimensional/     # 维度域名管理
 │   │   │       │   └── DimensionalNameManager.java # 服务端维度域名管理器
+│   │   │       ├── dividearea/      # DivideArea域名分割支持
+│   │   │       │   └── DivideAreaServerNetworking.java # 服务端网络处理器
 │   │   │       ├── easyadd/         # EasyAdd服务端支持
 │   │   │       │   └── EasyAddServerNetworking.java # 服务端网络处理器
-│   │   │       ├── expandarea/      # ExpandArea域名扩展支持（新增）
-│   │   │       │   ├── ExpandAreaServerNetworking.java # 服务端网络处理器
-│   │   │       │   └── GeometryCalculator.java # 几何计算算法（边界点、交叉点、顶点排序）
-│   │   │       ├── shrinkarea/      # ShrinkArea域名收缩支持（新增）
-│   │   │       │   └── ShrinkAreaServerNetworking.java # 服务端网络处理器
-│   │   │       ├── render/          # 渲染工具（新增）
-│   │   │       │   └── DomainRenderer.java # 域名渲染工具类（处理颜色显示和层级关系）
-│   │   │       ├── util/            # 工具类（新增）
-│   │   │       │   ├── ColorUtil.java      # 颜色工具类（颜色验证、转换和预定义颜色）
-│   │   │       │   ├── SurfaceNameHandler.java # 联合域名处理器（显示逻辑和重复检查）
-│   │   │       │   └── AreaDataConverter.java # AreaData与JsonObject转换工具
-│   │   │       ├── world/           # 世界文件夹管理（新增）
-│   │   │       │   └── WorldFolderManager.java # 服务端世界文件夹管理器
+│   │   │       ├── expandarea/      # ExpandArea域名扩展支持
+│   │   │       │   └── ExpandAreaServerNetworking.java # 服务端网络处理器
 │   │   │       ├── file/            # 文件操作
 │   │   │       │   ├── FileManager.java    # 文件管理器（读写配置和区域数据）
 │   │   │       │   └── JsonHelper.java     # JSON序列化工具（支持altitude）
+│   │   │       ├── i18n/            # 国际化支持
+│   │   │       │   └── ServerI18nManager.java # 服务端国际化管理器
+│   │   │       ├── log/             # 日志系统
+│   │   │       │   ├── AsyncLogManager.java # 异步日志管理器
+│   │   │       │   ├── ServerLogManager.java # 服务端日志管理器
+│   │   │       │   └── ServerLogNetworking.java # 服务端日志网络处理
 │   │   │       ├── mixin/           # Mixin注入
 │   │   │       │   └── ExampleMixin.java   # 服务端Mixin示例
-│   │   │       └── network/         # 网络通信
-│   │   │           ├── Packets.java        # 网络包定义和通道标识符
-│   │   │           ├── ServerNetworking.java # 服务端网络处理
-│   │   │           ├── DimensionalNameNetworking.java # 维度域名网络传输
-│   │   │           └── ServerWorldNetworking.java # 服务端世界网络处理（新增）
+│   │   │       ├── network/         # 网络通信
+│   │   │       │   ├── DimensionalNameNetworking.java # 维度域名网络传输
+│   │   │       │   ├── Packets.java        # 网络包定义和通道标识符
+│   │   │       │   ├── ServerNetworking.java # 服务端网络处理
+│   │   │       │   ├── ServerWorldNetworking.java # 服务端世界网络处理
+│   │   │       │   └── TranslatableMessage.java # 可翻译消息类
+│   │   │       ├── render/          # 渲染工具
+│   │   │       │   └── DomainRenderer.java # 域名渲染工具类（处理颜色显示和层级关系）
+│   │   │       ├── shrinkarea/      # ShrinkArea域名收缩支持
+│   │   │       │   └── ShrinkAreaServerNetworking.java # 服务端网络处理器
+│   │   │       ├── util/            # 工具类
+│   │   │       │   ├── AreaDataConverter.java # AreaData与JsonObject转换工具
+│   │   │       │   ├── ColorUtil.java      # 颜色工具类（颜色验证、转换和预定义颜色）
+│   │   │       │   └── SurfaceNameHandler.java # 联合域名处理器（显示逻辑和重复检查）
+│   │   │       └── world/           # 世界文件夹管理
+│   │   │           └── WorldFolderManager.java # 服务端世界文件夹管理器
 │   │   └── resources/               # 服务端资源
-│   │       ├── fabric.mod.json      # Fabric模组配置文件
 │   │       ├── areas-hint.mixins.json # 服务端Mixin配置
-│   │       └── assets/
-│   │           └── areas-hint/
-│   │               └── icon.png     # 模组图标
+│   │       ├── assets/
+│   │       │   └── areas-hint/
+│   │       │       ├── icon.png     # 模组图标
+│   │       │       └── lang/        # 语言文件
+│   │       │           ├── de_de.json      # 德语翻译
+│   │       │           ├── en_pt.json      # 海盗英语翻译
+│   │       │           ├── en_us.json      # 英语翻译
+│   │       │           ├── es_es.json      # 西班牙语翻译
+│   │       │           ├── fr_fr.json      # 法语翻译
+│   │       │           ├── ja_jp.json      # 日语翻译
+│   │       │           ├── ko_kr.json      # 韩语翻译
+│   │       │           ├── ru_ru.json      # 俄语翻译
+│   │       │           ├── zh_cn.json      # 简体中文翻译
+│   │       │           ├── zh_cn_neko.json # 简体中文猫娘翻译
+│   │       │           └── zh_tw.json      # 繁体中文翻译
+│   │       └── fabric.mod.json      # Fabric模组配置文件
 │   └── client/                      # 客户端代码
 │       ├── java/
 │       │   └── areahint/
 │       │       ├── AreashintClient.java     # 客户端主类
 │       │       ├── AreashintDataGenerator.java # 数据生成器
+│       │       ├── addhint/         # AddHint客户端支持
+│       │       │   ├── AddHintClientNetworking.java # 客户端网络处理器
+│       │       │   └── AddHintManager.java # AddHint管理器
+│       │       ├── boundviz/        # 边界可视化系统
+│       │       │   ├── BoundVizManager.java # 边界可视化管理器
+│       │       │   └── BoundVizRenderer.java # 边界可视化渲染器
 │       │       ├── command/         # 客户端命令
 │       │       │   ├── ClientCommands.java # 客户端命令处理（已弃用）
-│       │       │   └── ModToggleCommand.java # 模组开关命令处理器（新增）
+│       │       │   ├── ModToggleCommand.java # 模组开关命令处理器
+│       │       │   └── SetHighClientCommand.java # 域名高度设置客户端命令
 │       │       ├── config/          # 配置管理
 │       │       │   └── ClientConfig.java   # 客户端配置处理
 │       │       ├── debug/           # 调试功能
 │       │       │   ├── ClientDebugManager.java # 客户端调试管理器
 │       │       │   └── DebugManager.java        # 调试管理器（空文件）
-│       │       ├── dimensional/     # 维度域名管理
-│       │       │   └── ClientDimensionalNameManager.java # 客户端维度域名管理器
+│       │       ├── delete/          # 域名删除系统
+│       │       │   ├── DeleteManager.java  # 删除管理器
+│       │       │   ├── DeleteNetworking.java # 删除网络处理
+│       │       │   └── DeleteUI.java       # 删除用户界面
+│       │       ├── deletehint/      # DeleteHint客户端支持
+│       │       │   ├── DeleteHintClientNetworking.java # 客户端网络处理器
+│       │       │   └── DeleteHintManager.java # DeleteHint管理器
 │       │       ├── detection/       # 区域检测（核心功能）
+│       │       │   ├── AltitudeFilter.java # 高度预筛选器
 │       │       │   ├── AreaDetector.java   # 区域检测器（集成高度预筛选）
-│       │       │   ├── AltitudeFilter.java # 高度预筛选器（新增功能）
+│       │       │   ├── AsyncAreaDetector.java # 异步区域检测器
 │       │       │   └── RayCasting.java     # 射线检测和AABB算法
-│       │       ├── easyadd/        # EasyAdd交互式域名添加系统
-│       │       │   ├── EasyAddManager.java    # EasyAdd核心管理器
-│       │       │   ├── EasyAddUI.java         # 用户界面系统
-│       │       │   ├── EasyAddGeometry.java   # 几何计算工具
+│       │       ├── dimensional/     # 维度域名管理
+│       │       │   ├── ClientDimensionalNameManager.java # 客户端维度域名管理器
+│       │       │   ├── DimensionalNameUI.java # 维度域名用户界面
+│       │       │   └── DimensionalNameUIManager.java # 维度域名UI管理器
+│       │       ├── dividearea/      # DivideArea域名分割系统
+│       │       │   ├── DivideAreaClientNetworking.java # 客户端网络处理
+│       │       │   ├── DivideAreaManager.java # 域名分割管理器
+│       │       │   └── DivideAreaUI.java   # 域名分割用户界面
+│       │       ├── easyadd/         # EasyAdd交互式域名添加系统
+│       │       │   ├── EasyAddAltitudeManager.java # 高度设置管理器
 │       │       │   ├── EasyAddConfig.java     # 配置管理器
+│       │       │   ├── EasyAddGeometry.java   # 几何计算工具
 │       │       │   ├── EasyAddKeyHandler.java # 按键监听处理器
-│       │       │   ├── EasyAddAltitudeManager.java # 高度设置管理器（新增）
-│       │       │   └── EasyAddNetworking.java # 客户端网络通信
-│       │       ├── expandarea/      # ExpandArea域名扩展系统（新增）
+│       │       │   ├── EasyAddManager.java    # EasyAdd核心管理器
+│       │       │   ├── EasyAddNetworking.java # 客户端网络通信
+│       │       │   └── EasyAddUI.java         # 用户界面系统
+│       │       ├── expandarea/      # ExpandArea域名扩展系统
+│       │       │   ├── ExpandAreaClientNetworking.java # 客户端网络通信
+│       │       │   ├── ExpandAreaKeyHandler.java # 按键监听处理器（X键记录、Enter确认）
 │       │       │   ├── ExpandAreaManager.java   # 域名扩展核心管理器
 │       │       │   ├── ExpandAreaUI.java        # 用户界面系统（域名选择、记录提示）
-│       │       │   ├── GeometryCalculator.java  # 复杂几何计算工具（边界点、交叉点算法）
-│       │       │   ├── ExpandAreaKeyHandler.java # 按键监听处理器（X键记录、Enter确认）
-│       │       │   └── ExpandAreaServerNetworking.java # 客户端网络通信
-│       │       ├── shrinkarea/      # ShrinkArea域名收缩系统（新增）
-│       │       │   ├── ShrinkAreaManager.java   # 域名收缩核心管理器
-│       │       │   ├── ShrinkAreaUI.java        # 用户界面系统（域名选择、记录提示）
-│       │       │   ├── ShrinkGeometryCalculator.java # 收缩几何计算工具（边界点、交叉点算法）
-│       │       │   ├── ShrinkAreaKeyHandler.java # 按键监听处理器（X键记录）
-│       │       │   └── ShrinkAreaServerNetworking.java # 客户端网络通信
+│       │       │   └── GeometryCalculator.java  # 复杂几何计算工具（边界点、交叉点算法）
+│       │       ├── i18n/            # 国际化支持
+│       │       │   └── I18nManager.java    # 国际化管理器
+│       │       ├── keyhandler/      # 按键处理
+│       │       │   └── UnifiedKeyHandler.java # 统一按键处理器
+│       │       ├── language/        # 语言管理
+│       │       │   ├── LanguageManager.java # 语言管理器
+│       │       │   └── LanguageUI.java      # 语言选择用户界面
+│       │       ├── log/             # 日志系统
+│       │       │   ├── AreaChangeTracker.java # 区域变更追踪器
+│       │       │   ├── ClientLogManager.java # 客户端日志管理器
+│       │       │   └── ClientLogNetworking.java # 客户端日志网络处理
 │       │       ├── mixin/           # 客户端Mixin
 │       │       │   └── client/
-│       │       │       └── ExampleClientMixin.java # 客户端Mixin示例
+│       │       │       ├── ExampleClientMixin.java # 客户端Mixin示例
+│       │       │       ├── TranslationStorageMixin.java # 翻译存储Mixin
+│       │       │       └── WorldRendererMixin.java # 世界渲染器Mixin
 │       │       ├── network/         # 网络通信
-│       │       │   ├── ClientNetworking.java # 客户端网络处理
 │       │       │   ├── ClientDimensionalNameNetworking.java # 客户端维度域名网络处理
-│       │       │   └── ClientWorldNetworking.java # 客户端世界网络处理（新增）
-│       │       ├── world/           # 世界文件夹管理（新增）
-│       │       │   └── ClientWorldFolderManager.java # 客户端世界文件夹管理器
-│       │       └── render/          # 渲染系统
-│       │           ├── RenderManager.java  # 渲染管理器
-│       │           ├── CPURender.java      # CPU渲染实现
-│       │           ├── GLRender.java       # OpenGL渲染实现
-│       │           └── VulkanRender.java   # Vulkan渲染实现（模拟）
+│       │       │   ├── ClientDimNameNetworking.java # 客户端维度名称网络处理
+│       │       │   ├── ClientNetworking.java # 客户端网络处理
+│       │       │   └── ClientWorldNetworking.java # 客户端世界网络处理
+│       │       ├── recolor/         # 域名重新着色系统
+│       │       │   ├── RecolorClientCommand.java # 重新着色客户端命令
+│       │       │   ├── RecolorManager.java # 重新着色管理器
+│       │       │   └── RecolorUI.java      # 重新着色用户界面
+│       │       ├── rename/          # 域名重命名系统
+│       │       │   ├── RenameManager.java  # 重命名管理器
+│       │       │   ├── RenameNetworking.java # 重命名网络处理
+│       │       │   └── RenameUI.java       # 重命名用户界面
+│       │       ├── render/          # 渲染系统
+│       │       │   ├── CPURender.java      # CPU渲染实现
+│       │       │   ├── FlashColorHelper.java # 闪烁颜色辅助类
+│       │       │   ├── GLRender.java       # OpenGL渲染实现
+│       │       │   ├── RenderManager.java  # 渲染管理器
+│       │       │   └── VulkanRender.java   # Vulkan渲染实现（模拟）
+│       │       ├── replacebutton/   # 替换按钮系统
+│       │       │   ├── ReplaceButtonKeyListener.java # 替换按钮按键监听器
+│       │       │   ├── ReplaceButtonManager.java # 替换按钮管理器
+│       │       │   ├── ReplaceButtonNetworking.java # 替换按钮网络处理
+│       │       │   └── ReplaceButtonUI.java # 替换按钮用户界面
+│       │       ├── shrinkarea/      # ShrinkArea域名收缩系统
+│       │       │   ├── ShrinkAreaClientNetworking.java # 客户端网络通信
+│       │       │   ├── ShrinkAreaKeyHandler.java # 按键监听处理器（X键记录）
+│       │       │   ├── ShrinkAreaManager.java   # 域名收缩核心管理器
+│       │       │   ├── ShrinkAreaUI.java        # 用户界面系统（域名选择、记录提示）
+│       │       │   └── ShrinkGeometryCalculator.java # 收缩几何计算工具（边界点、交叉点算法）
+│       │       ├── subtitlesize/    # 字幕大小系统
+│       │       │   ├── SubtitleSizeManager.java # 字幕大小管理器
+│       │       │   └── SubtitleSizeUI.java # 字幕大小用户界面
+│       │       ├── subtitlestyle/   # 字幕样式系统
+│       │       │   ├── SubtitleStyleManager.java # 字幕样式管理器
+│       │       │   └── SubtitleStyleUI.java # 字幕样式用户界面
+│       │       └── world/           # 世界文件夹管理
+│       │           └── ClientWorldFolderManager.java # 客户端世界文件夹管理器
 │       └── resources/               # 客户端资源
 │           └── areas-hint.client.mixins.json # 客户端Mixin配置
 ├── build.gradle                     # Gradle构建脚本
-├── gradle.properties               # Gradle配置属性
-├── gradlew                         # Unix/Linux Gradle包装器脚本
-├── gradlew.bat                     # Windows Gradle包装器脚本
-├── settings.gradle                 # Gradle设置文件
-├── LICENSE                         # MIT许可证文件
-├── README.md                       # 项目说明文档
-├── .gitignore                      # Git忽略文件配置
-├── .gitattributes                  # Git属性配置
-├── prompt.txt                      # 原始需求文档（包含模组基本功能需求）
-├── prompt_implementation.txt       # 实现方案文档（详细的功能实现说明）
-├── second-prompt.txt               # 第二阶段功能需求文档（高级功能需求，如高度系统、域名签名、EasyAdd交互系统、维度域名等）
-├── CLAUDE.md                       # Claude AI开发指导文档（项目架构、构建命令、开发工作流说明）
-├── overworld.json                  # 主世界区域数据示例
-├── areas-hint-template-1.20.4.zip # 模组压缩包模板
-├── modicon.psd                     # 模组图标源文件（Photoshop格式）
-├── .idea/                          # IntelliJ IDEA项目配置目录
-├── .vscode/                        # Visual Studio Code配置目录
-├── .github/                        # GitHub工作流和配置文件目录
-├── build/                          # 构建输出目录（自动生成）
+├── gradle.properties                # Gradle配置属性
+├── gradlew                          # Unix/Linux Gradle包装器脚本
+├── gradlew.bat                      # Windows Gradle包装器脚本
+├── settings.gradle                  # Gradle设置文件
+├── LICENSE                          # MIT许可证文件
+├── README.md                        # 项目说明文档
+├── .gitignore                       # Git忽略文件配置
+├── .gitattributes                   # Git属性配置
+├── .github/                         # GitHub工作流和配置文件目录
+│   └── workflows/
+│       └── build.yml                # GitHub Actions构建工作流
+├── prompt.txt                       # 原始需求文档（包含模组基本功能需求）
+├── prompt_implementation.txt        # 实现方案文档（详细的功能实现说明）
+├── second-prompt.txt                # 第二阶段功能需求文档（高级功能需求）
+├── thrid-promrt.txt                 # 第三阶段功能需求文档
+├── CLAUDE.md                        # Claude AI开发指导文档（项目架构、构建命令、开发工作流说明）
+├── COMMAND_USAGE.md                 # 命令使用文档
+├── LOG_FEATURE.md                   # 日志功能文档
+├── RECOLOR_REFACTOR_SUMMARY.md      # 重新着色重构总结
+├── REPLACEBUTTON_EXPANDAREA_SHRINKAREA_INTEGRATION.md # 替换按钮、扩展区域、收缩区域集成文档
+├── REPLACEBUTTON_FIX_SUMMARY.md     # 替换按钮修复总结
+├── REPLACEBUTTON_IMPLEMENTATION_SUMMARY.md # 替换按钮实现总结
+├── REPLACEBUTTON_TEST_GUIDE.md      # 替换按钮测试指南
+├── SHRINKAREA_CHANGES.md            # 收缩区域变更文档
+├── SHRINKAREA_REFACTOR.md           # 收缩区域重构文档
+├── SUBTITLESIZE_GUIDE.md            # 字幕大小指南
+├── SUBTITLESTYLE_INTERACTIVE_GUIDE.md # 字幕样式交互指南
+├── TRANSLATION_GUIDE.md             # 翻译指南
+├── TRANSLATION_REPORT.md            # 翻译报告
+├── extraction_record.md             # 提取记录
+├── 提取完成报告.md                  # 提取完成报告（中文）
+├── overworld.json                   # 主世界区域数据示例
+├── en_us.json                       # 英语翻译文件（根目录）
+├── zh_cn.json                       # 简体中文翻译文件（根目录）
+├── areas-hint-template-1.20.4.zip   # 模组压缩包模板
+├── modicon.psd                      # 模组图标源文件（Photoshop格式）
+├── extract_chinese.py               # 中文提取脚本
+├── extract_chinese_v2.py            # 中文提取脚本v2
+├── fix_spacing.py                   # 修复间距脚本
+├── fix_translation.py               # 修复翻译脚本
+├── generate_csv.py                  # 生成CSV脚本
+├── translate_complete.py            # 完整翻译脚本
+├── translate_full.py                # 完整翻译脚本
+├── translate_lolcat.py              # Lolcat翻译脚本
+├── translate_manual.py              # 手动翻译脚本
+├── translate_neko.py                # 猫娘翻译脚本
+├── translate_script.py              # 翻译脚本
+├── translate_zh_tw.py               # 繁体中文翻译脚本
+├── build_log.txt                    # 构建日志
+├── chinese_strings_raw.txt          # 原始中文字符串
+├── extraction_stats.txt             # 提取统计
+├── FINAL_REPORT.txt                 # 最终报告
+├── 提取记录.csv                     # 提取记录（CSV格式）
+├── .idea/                           # IntelliJ IDEA项目配置目录
+├── .vscode/                         # Visual Studio Code配置目录
+├── build/                           # 构建输出目录（自动生成）
 │   ├── libs/
 │   │   ├── areas-hint-1.0.0.jar       # 主模组JAR文件
 │   │   └── areas-hint-1.0.0-sources.jar # 源代码JAR文件
 │   └── ...                             # 其他构建文件
-├── bin/                            # 编译输出目录（自动生成）
-├── run/                            # 运行时目录（自动生成）
-└── .gradle/                        # Gradle缓存目录（自动生成）
+├── bin/                             # 编译输出目录（自动生成）
+├── run/                             # 运行时目录（自动生成）
+│   ├── config/                      # 运行时配置
+│   ├── logs/                        # 运行时日志
+│   ├── mods/                        # 运行时模组
+│   ├── options.txt                  # 游戏选项
+│   └── ...                          # 其他运行时文件
+└── .gradle/                         # Gradle缓存目录（自动生成)
 
 .minecraft/areas-hint/              # 运行时配置和数据目录
 ├── config.json                     # 模组配置文件
