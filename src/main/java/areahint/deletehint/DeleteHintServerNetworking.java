@@ -5,6 +5,7 @@ import areahint.file.FileManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
+import areahint.util.PermissionCompat;
 import areahint.network.TranslatableMessage.Part;
 import areahint.util.AreaDataConverter;
 import areahint.network.BufPayload;
@@ -107,7 +108,7 @@ public class DeleteHintServerNetworking {
     }
 
     private static boolean validatePermission(ServerPlayerEntity player, AreaData area, String dimType) {
-        if (player.hasPermissionLevel(2)) return true;
+        if (PermissionCompat.hasPermissionLevel(player, 2)) return true;
 
         String playerName = player.getName().getString();
         if (playerName.equals(area.getSignature())) return true;

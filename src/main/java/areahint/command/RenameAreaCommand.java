@@ -8,6 +8,7 @@ import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
 import areahint.network.TranslatableMessage.Part;
+import areahint.util.PermissionCompat;
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
 import com.mojang.brigadier.context.CommandContext;
@@ -134,7 +135,7 @@ public class RenameAreaCommand {
     private static void sendRenameableAreaList(ServerPlayerEntity player) {
         try {
             String playerName = player.getName().getString();
-            boolean isAdmin = player.hasPermissionLevel(2);
+            boolean isAdmin = PermissionCompat.hasPermissionLevel(player, 2);
             RegistryKey<World> dimensionType = player.getEntityWorld().getRegistryKey();
             String dimensionId = dimensionType.getValue().toString();
 
@@ -201,7 +202,7 @@ public class RenameAreaCommand {
                                           String newSurfaceName, String dimension) {
         try {
             String playerName = player.getName().getString();
-            boolean isAdmin = player.hasPermissionLevel(2);
+            boolean isAdmin = PermissionCompat.hasPermissionLevel(player, 2);
 
             // 验证新域名格式
             if (newName == null || newName.trim().isEmpty()) {

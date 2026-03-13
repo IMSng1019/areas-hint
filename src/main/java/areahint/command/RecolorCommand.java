@@ -10,6 +10,7 @@ import areahint.network.TranslatableMessage.Part;
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
 import areahint.util.ColorUtil;
+import areahint.util.PermissionCompat;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
@@ -44,7 +45,7 @@ public class RecolorCommand {
 
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
-        boolean hasOp = source.hasPermissionLevel(2);
+        boolean hasOp = PermissionCompat.hasPermissionLevel(source, 2);
 
         // 获取玩家当前维度
         String dimension = player.getEntityWorld().getRegistryKey().getValue().toString();
@@ -166,7 +167,7 @@ public class RecolorCommand {
     public static void handleRecolorRequest(ServerPlayerEntity player, String areaName, String newColor, String dimension) {
         try {
             String playerName = player.getName().getString();
-            boolean hasOp = player.hasPermissionLevel(2);
+            boolean hasOp = PermissionCompat.hasPermissionLevel(player, 2);
             
             // 验证颜色格式
             if (!ColorUtil.isValidColor(newColor)) {

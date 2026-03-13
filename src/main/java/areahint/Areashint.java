@@ -4,6 +4,7 @@ import areahint.command.ServerCommands;
 import areahint.i18n.ServerI18nManager;
 import areahint.network.ServerNetworking;
 import areahint.file.FileManager;
+import areahint.util.PermissionCompat;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -102,7 +103,7 @@ public class Areashint implements ModInitializer {
 		// 注册维度变更事件 - 首次进入未命名维度时提示OP命名
 		ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
 			String dimId = destination.getRegistryKey().getValue().toString();
-			if (player.hasPermissionLevel(2) && !areahint.dimensional.DimensionalNameManager.hasDimensionalName(dimId)) {
+			if (PermissionCompat.hasPermissionLevel(player, 2) && !areahint.dimensional.DimensionalNameManager.hasDimensionalName(dimId)) {
 				// 自动注册该维度（使用维度ID作为默认名称）
 				areahint.dimensional.DimensionalNameManager.setDimensionalName(dimId, dimId);
 				areahint.dimensional.DimensionalNameManager.saveDimensionalNames();

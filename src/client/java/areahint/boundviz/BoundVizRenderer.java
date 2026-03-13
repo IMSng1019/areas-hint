@@ -1,5 +1,6 @@
 package areahint.boundviz;
 
+import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.render.FlashColorHelper;
 import areahint.util.ColorUtil;
@@ -9,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -44,31 +46,35 @@ public class BoundVizRenderer {
     private static final Matrix4f vpMatrix = new Matrix4f();
     // 可见性缓存，避免两个pass重复视锥检测
     private static boolean[] visibleFlags = new boolean[0];
-    private static final RenderLayer.MultiPhase BOUNDVIZ_TRIANGLES_LAYER = RenderLayer.of(
-            "areas_hint_boundviz_triangles",
-            1536,
-            false,
-            true,
+    private static final RenderPipeline BOUNDVIZ_TRIANGLES_PIPELINE = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
-                    .withLocation("pipeline/areas_hint_boundviz_triangles")
+                    .withLocation(Identifier.of(Areashint.MOD_ID, "pipeline/boundviz_triangles"))
                     .withCull(false)
                     .withDepthWrite(false)
                     .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
-                    .build(),
-            RenderLayer.MultiPhaseParameters.builder().build(false)
+                    .build()
     );
-    private static final RenderLayer.MultiPhase BOUNDVIZ_LINES_LAYER = RenderLayer.of(
-            "areas_hint_boundviz_lines",
-            1536,
-            false,
-            true,
+    private static final RenderPipeline BOUNDVIZ_LINES_PIPELINE = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
-                    .withLocation("pipeline/areas_hint_boundviz_lines")
+                    .withLocation(Identifier.of(Areashint.MOD_ID, "pipeline/boundviz_lines"))
                     .withCull(false)
                     .withDepthWrite(false)
                     .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.DEBUG_LINES)
-                    .build(),
-            RenderLayer.MultiPhaseParameters.builder().build(false)
+                    .build()
+    );
+    private static final RenderLayer BOUNDVIZ_TRIANGLES_LAYER = RenderLayer.of(
+            "areas_hint_boundviz_triangles",
+            RenderSetup.builder(BOUNDVIZ_TRIANGLES_PIPELINE)
+                    .translucent()
+                    .expectedBufferSize(1536)
+                    .build()
+    );
+    private static final RenderLayer BOUNDVIZ_LINES_LAYER = RenderLayer.of(
+            "areas_hint_boundviz_lines",
+            RenderSetup.builder(BOUNDVIZ_LINES_PIPELINE)
+                    .translucent()
+                    .expectedBufferSize(1536)
+                    .build()
     );
 
     // ========== 主渲染方法 ==========
@@ -80,7 +86,8 @@ public class BoundVizRenderer {
         boolean hasTempVertices = manager.shouldShowTemporaryVertices();
         if (!manager.isEnabled() && !hasTempVertices) return;
 
-        Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
+        if (client.gameRenderer.getCamera().getFocusedEntity() == null) return;
+        Vec3d cameraPos = client.gameRenderer.getCamera().getFocusedEntity().getCameraPosVec(tickDelta);
 
         // 提取视锥平面（每帧动态更新，跟随玩家视角）
         extractFrustumPlanes(matrices.peek().getPositionMatrix(), client.gameRenderer.getBasicProjectionMatrix(client.options.getFov().getValue().floatValue()));
@@ -300,7 +307,7 @@ public class BoundVizRenderer {
         for (int i = 0; i < size; i++) {
             if (!visibleFlags[i]) continue;
             if (buffer == null) {
-                buffer = tessellator.begin(VertexFormat.DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+                buffer = tessellator.begin(BOUNDVIZ_TRIANGLES_LAYER.getDrawMode(), BOUNDVIZ_TRIANGLES_LAYER.getVertexFormat());
             }
             emitAreaTriangles(matrix, buffer, cachedAreas.get(i));
         }
@@ -312,7 +319,7 @@ public class BoundVizRenderer {
             if (!visibleFlags[i]) continue;
             CachedArea ca = cachedAreas.get(i);
             if (buffer == null) {
-                buffer = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+                buffer = tessellator.begin(BOUNDVIZ_LINES_LAYER.getDrawMode(), BOUNDVIZ_LINES_LAYER.getVertexFormat());
             }
             emitAreaLines(matrix, buffer, ca);
             updateBlockIntersectionsIfNeeded(ca, playerBX, playerBY, playerBZ, client);
@@ -585,7 +592,7 @@ public class BoundVizRenderer {
         Matrix4f matrix = matrices.peek().getPositionMatrix();
         float py = (float) client.player.getY();
 
-        BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+        BufferBuilder buffer = tessellator.begin(BOUNDVIZ_LINES_LAYER.getDrawMode(), BOUNDVIZ_LINES_LAYER.getVertexFormat());
         for (BlockPos pos : vertices) {
             float px = pos.getX() + 0.5f, pz = pos.getZ() + 0.5f;
             float size = 0.4f;

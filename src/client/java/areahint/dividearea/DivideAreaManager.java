@@ -3,6 +3,7 @@ package areahint.dividearea;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.i18n.I18nManager;
+import areahint.util.PermissionCompat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -675,7 +676,7 @@ public class DivideAreaManager {
         List<AreaData> result = new ArrayList<>();
         if (client.player == null) return result;
         String playerName = client.player.getName().getString();
-        boolean isAdmin = client.player.hasPermissionLevel(2);
+        boolean isAdmin = PermissionCompat.hasPermissionLevel(client.player, 2);
         List<AreaData> all = loadAllAreas();
         for (AreaData area : all) {
             if (isAdmin) { result.add(area); continue; }

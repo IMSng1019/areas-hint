@@ -4,6 +4,7 @@ import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.i18n.ServerI18nManager;
+import areahint.util.PermissionCompat;
 
 import areahint.network.Packets;
 import com.mojang.brigadier.Command;
@@ -46,7 +47,7 @@ public class SetHighCommand {
 
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
-        boolean isAdmin = source.hasPermissionLevel(2);
+        boolean isAdmin = PermissionCompat.hasPermissionLevel(source, 2);
 
         // 获取玩家当前维度
         String dimension = player.getEntityWorld().getRegistryKey().getValue().toString();
@@ -139,7 +140,7 @@ public class SetHighCommand {
 
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
-        boolean isAdmin = source.hasPermissionLevel(2);
+        boolean isAdmin = PermissionCompat.hasPermissionLevel(source, 2);
 
         // 获取玩家当前维度
         String dimension = player.getEntityWorld().getRegistryKey().getValue().toString();
@@ -352,7 +353,7 @@ public class SetHighCommand {
                                          boolean hasCustomHeight, Double maxHeight, Double minHeight) {
         try {
             String playerName = player.getName().getString();
-            boolean isAdmin = player.hasPermissionLevel(2);
+            boolean isAdmin = PermissionCompat.hasPermissionLevel(player, 2);
             
             // 获取玩家当前维度
             String dimension = player.getEntityWorld().getRegistryKey().getValue().toString();

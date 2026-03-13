@@ -7,6 +7,7 @@ import areahint.network.BufPayload;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.command.DefaultPermissions;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,6 +30,10 @@ public class ServerNetworking {
     /**
      * 初始化网络处理
      */
+    private static boolean hasGamemasterPermission(ServerPlayerEntity player) {
+        return player.getPermissions().hasPermission(DefaultPermissions.GAMEMASTERS);
+    }
+
     public static void init() {
         // 注册网络通道和处理器
         Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_67"));
@@ -324,7 +329,7 @@ public class ServerNetworking {
                     final String dimensionId = buf.readString();
                     final String newName = buf.readString();
                     player.getEntityWorld().getServer().execute(() -> {
-                        if (!player.hasPermissionLevel(2)) {
+                        if (!hasGamemasterPermission(player)) {
                             player.sendMessage(net.minecraft.text.Text.translatable("message.error.permission"), false);
                             return;
                         }
@@ -345,7 +350,7 @@ public class ServerNetworking {
                     final String dimensionId = buf.readString();
                     final String newColor = buf.readString();
                     player.getEntityWorld().getServer().execute(() -> {
-                        if (!player.hasPermissionLevel(2)) {
+                        if (!hasGamemasterPermission(player)) {
                             player.sendMessage(net.minecraft.text.Text.translatable("message.error.permission"), false);
                             return;
                         }
@@ -389,7 +394,7 @@ public class ServerNetworking {
     private static void sendDeletableAreasList(ServerPlayerEntity player, String dimension) {
         try {
             String playerName = player.getName().getString();
-            boolean hasOp = player.hasPermissionLevel(2);
+            boolean hasOp = hasGamemasterPermission(player);
 
             Areashint.LOGGER.info(ServerI18nManager.translate("message.prompt.area.delete.list") + playerName + ServerI18nManager.translate("message.message.dimension_2") + dimension + ServerI18nManager.translate("message.message.general_21") + hasOp);
 
@@ -484,7 +489,7 @@ public class ServerNetworking {
     private static void handleDeleteRequest(ServerPlayerEntity player, String areaName, String dimension) {
         try {
             String playerName = player.getName().getString();
-            boolean hasOp = player.hasPermissionLevel(2);
+            boolean hasOp = hasGamemasterPermission(player);
 
             Areashint.LOGGER.info(ServerI18nManager.translate("message.prompt.delete_3") + playerName + ServerI18nManager.translate("message.message.area_5") + areaName + ServerI18nManager.translate("message.message.dimension_2") + dimension);
 

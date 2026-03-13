@@ -7,6 +7,7 @@ import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
 import areahint.network.TranslatableMessage.Part;
 import areahint.util.AreaDataConverter;
+import areahint.util.PermissionCompat;
 import areahint.network.BufPayload;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -108,7 +109,7 @@ public class AddHintServerNetworking {
     }
 
     private static boolean validatePermission(ServerPlayerEntity player, AreaData area, String dimType) {
-        if (player.hasPermissionLevel(2)) return true;
+        if (PermissionCompat.hasPermissionLevel(player, 2)) return true;
 
         String playerName = player.getName().getString();
         if (playerName.equals(area.getSignature())) return true;

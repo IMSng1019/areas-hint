@@ -4,6 +4,7 @@ import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.i18n.I18nManager;
 import areahint.util.AreaDataConverter;
+import areahint.util.PermissionCompat;
 import areahint.shrinkarea.ShrinkAreaClientNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -108,7 +109,7 @@ public class ShrinkAreaManager {
         playerName = player.getName().getString();
         
         // 检查玩家权限（简单检查是否为OP，真实权限由服务端验证）
-        isAdmin = client.player.hasPermissionLevel(2);
+        isAdmin = PermissionCompat.hasPermissionLevel(client.player, 2);
         
         isActive = true;
         currentState = ShrinkState.SELECTING_AREA;
@@ -209,7 +210,7 @@ public class ShrinkAreaManager {
         String playerName = client.player.getName().getString();
 
         // 检查是否为管理员（权限等级2）
-        if (client.player.hasPermissionLevel(2)) {
+        if (PermissionCompat.hasPermissionLevel(client.player, 2)) {
             return true;
         }
 

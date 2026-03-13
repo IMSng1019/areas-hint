@@ -5,6 +5,7 @@ import areahint.file.FileManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
+import areahint.util.PermissionCompat;
 import areahint.network.TranslatableMessage.Part;
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
@@ -111,7 +112,7 @@ public class ShrinkAreaServerNetworking {
         String playerName = player.getName().getString();
 
         // 检查是否为管理员
-        if (player.hasPermissionLevel(2)) {
+        if (PermissionCompat.hasPermissionLevel(player, 2)) {
             return true;
         }
 

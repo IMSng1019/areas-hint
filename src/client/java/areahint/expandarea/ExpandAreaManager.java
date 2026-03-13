@@ -4,6 +4,7 @@ import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.i18n.I18nManager;
 import areahint.expandarea.ExpandAreaClientNetworking;
+import areahint.util.PermissionCompat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -82,7 +83,7 @@ public class ExpandAreaManager {
         String playerName = client.player.getName().getString();
         
         // 检查是否为管理员（权限等级2）
-        if (client.player.hasPermissionLevel(2)) {
+        if (PermissionCompat.hasPermissionLevel(client.player, 2)) {
             return true;
         }
         
@@ -159,7 +160,7 @@ public class ExpandAreaManager {
     private List<AreaData> getModifiableAreas() {
         List<AreaData> result = new ArrayList<>();
         String playerName = client.player.getName().getString();
-        boolean isAdmin = client.player.hasPermissionLevel(2);
+        boolean isAdmin = PermissionCompat.hasPermissionLevel(client.player, 2);
         
         System.out.println("DEBUG: 玩家名称: " + playerName + ", 是否管理员: " + isAdmin);
         

@@ -9,6 +9,7 @@ import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.dimensional.DimensionalNameManager;
+import areahint.util.PermissionCompat;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -72,7 +73,7 @@ public class ServerCommands {
             
             // dimensionalityname 命令 (交互式维度域名管理)
             .then(literal("dimensionalityname")
-                .requires(source -> source.hasPermissionLevel(2))
+                .requires(source -> PermissionCompat.hasPermissionLevel(source, 2))
                 .executes(DimensionalNameCommands::executeStart)
                 .then(literal("select")
                     .then(argument("dimension", StringArgumentType.greedyString())
@@ -89,7 +90,7 @@ public class ServerCommands {
 
             // dimensionalitycolor 命令 (交互式维度域名颜色管理)
             .then(literal("dimensionalitycolor")
-                .requires(source -> source.hasPermissionLevel(2))
+                .requires(source -> PermissionCompat.hasPermissionLevel(source, 2))
                 .executes(DimensionalNameCommands::executeColorStart)
                 .then(literal("select")
                     .then(argument("dimension", StringArgumentType.greedyString())
@@ -114,7 +115,7 @@ public class ServerCommands {
 
             // add 命令 (仅服务端)
             .then(literal("add")
-                .requires(source -> source.hasPermissionLevel(2)) // 需要管理员权限
+                .requires(source -> PermissionCompat.hasPermissionLevel(source, 2)) // 需要管理员权限
                 .then(argument("json", StringArgumentType.greedyString())
                     .executes(context -> executeAdd(context, StringArgumentType.getString(context, "json"))))
             )
@@ -362,7 +363,7 @@ public class ServerCommands {
 
             // serverlanguage 命令（服务端语言，权限等级4）
             .then(literal("serverlanguage")
-                .requires(source -> source.hasPermissionLevel(4))
+                .requires(source -> PermissionCompat.hasPermissionLevel(source, 4))
                 .then(argument("langCode", StringArgumentType.word())
                     .executes(context -> executeServerLanguage(context, StringArgumentType.getString(context, "langCode")))))
         );
@@ -870,7 +871,7 @@ public class ServerCommands {
             
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             String playerName = source.getName();
-            boolean hasOp = source.hasPermissionLevel(2);
+            boolean hasOp = PermissionCompat.hasPermissionLevel(source, 2);
             
             return areas.stream()
                 .filter(area -> {
@@ -1614,7 +1615,7 @@ public class ServerCommands {
             
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             String playerName = source.getName();
-            boolean hasOp = source.hasPermissionLevel(2);
+            boolean hasOp = PermissionCompat.hasPermissionLevel(source, 2);
             
             return areas.stream()
                 .filter(area -> {
@@ -1674,7 +1675,7 @@ public class ServerCommands {
             
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             String playerName = source.getName();
-            boolean hasOp = source.hasPermissionLevel(2);
+            boolean hasOp = PermissionCompat.hasPermissionLevel(source, 2);
             
             return areas.stream()
                 .filter(area -> {
@@ -1734,7 +1735,7 @@ public class ServerCommands {
             
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             String playerName = source.getName();
-            boolean hasOp = source.hasPermissionLevel(2);
+            boolean hasOp = PermissionCompat.hasPermissionLevel(source, 2);
             
             return areas.stream()
                 .filter(area -> {

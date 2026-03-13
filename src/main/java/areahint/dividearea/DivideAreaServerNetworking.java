@@ -6,6 +6,7 @@ import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
 import areahint.network.TranslatableMessage.Part;
+import areahint.util.PermissionCompat;
 import areahint.util.AreaDataConverter;
 import areahint.network.BufPayload;
 import io.netty.buffer.Unpooled;
@@ -65,7 +66,7 @@ public class DivideAreaServerNetworking {
     }
 
     private static boolean validatePermission(ServerPlayerEntity player, String areaName, String dimType) {
-        if (player.hasPermissionLevel(2)) return true;
+        if (PermissionCompat.hasPermissionLevel(player, 2)) return true;
         String pName = player.getName().getString();
         AreaData area = findArea(areaName, dimType);
         if (area == null) return false;
