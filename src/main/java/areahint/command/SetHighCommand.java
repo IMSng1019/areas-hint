@@ -40,7 +40,7 @@ public class SetHighCommand {
     public static int executeSetHigh(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.translatable("command.error.general_10"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -54,7 +54,7 @@ public class SetHighCommand {
         String fileName = Packets.getFileNameForDimension(dimensionType);
 
         if (fileName == null) {
-            source.sendMessage(Text.translatable("command.error.dimension_3"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.dimension_3"));
             return 0;
         }
 
@@ -62,7 +62,7 @@ public class SetHighCommand {
         List<AreaData> editableAreas = getHeightEditableAreas(fileName, playerName, isAdmin);
 
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.translatable("command.error.area.altitude.dimension"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.altitude.dimension"));
             return 0;
         }
 
@@ -116,11 +116,11 @@ public class SetHighCommand {
             
             ServerPlayNetworking.send(source.getPlayer(), Packets.S2C_SETHIGH_AREA_LIST, buf);
             
-            source.sendMessage(Text.translatable("command.prompt.area.altitude.modify"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.prompt.area.altitude.modify"));
 
         } catch (Exception e) {
             Areashint.LOGGER.error("启动交互式高度设置流程时发生错误", e);
-            source.sendMessage(Text.translatable("command.error.altitude.start"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.altitude.start"));
         }
     }
 
@@ -133,7 +133,7 @@ public class SetHighCommand {
     public static int executeSetHighWithArea(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.translatable("command.error.general_10"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -147,7 +147,7 @@ public class SetHighCommand {
         String fileName = Packets.getFileNameForDimension(dimensionType);
 
         if (fileName == null) {
-            source.sendMessage(Text.translatable("command.error.dimension_3"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.dimension_3"));
             return 0;
         }
 
@@ -155,7 +155,7 @@ public class SetHighCommand {
         List<AreaData> editableAreas = getHeightEditableAreas(fileName, playerName, isAdmin);
 
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.translatable("command.error.area.altitude.dimension"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.altitude.dimension"));
             return 0;
         }
 
@@ -166,7 +166,7 @@ public class SetHighCommand {
                 .orElse(null);
 
         if (targetArea == null) {
-            source.sendMessage(Text.translatable("addhint.error.area").append(Text.literal(areaName)).append(Text.translatable("command.message.altitude.modify.permission")));
+            CommandSourceCompat.sendMessage(source, Text.translatable("addhint.error.area").append(Text.literal(areaName)).append(Text.translatable("command.message.altitude.modify.permission")));
             // 启动交互式流程，让用户选择其他域名
             startInteractiveHeightSetting(source, editableAreas);
             return 0;
@@ -207,11 +207,11 @@ public class SetHighCommand {
             
             ServerPlayNetworking.send(source.getPlayer(), Packets.S2C_SETHIGH_AREA_SELECTION, buf);
             
-            source.sendMessage(Text.translatable("command.message.area.start").append(Text.literal(targetArea.getName())).append(Text.translatable("command.message.altitude_3")));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area.start").append(Text.literal(targetArea.getName())).append(Text.translatable("command.message.altitude_3")));
 
         } catch (Exception e) {
             Areashint.LOGGER.error("启动指定域名高度设置流程时发生错误", e);
-            source.sendMessage(Text.translatable("command.error.altitude.start"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.altitude.start"));
         }
     }
 
@@ -282,7 +282,7 @@ public class SetHighCommand {
      */
     private static void displayEditableAreasInChat(ServerCommandSource source, List<AreaData> editableAreas, boolean isAdmin) {
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.translatable("command.error.area.altitude.dimension"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.altitude.dimension"));
             return;
         }
 
@@ -291,7 +291,7 @@ public class SetHighCommand {
         for (AreaData area : editableAreas) {
             message.append(Text.literal("§7- §f" + area.getName() + "§7: ")).append(getHeightDisplayText(area.getAltitude(), playerUuid)).append(Text.literal("\n"));
         }
-        source.sendMessage(message);
+        CommandSourceCompat.sendMessage(source, message);
     }
     
     /**
@@ -444,7 +444,7 @@ public class SetHighCommand {
     public static int executeSetHighCustom(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.translatable("command.error.general_10"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -462,7 +462,7 @@ public class SetHighCommand {
     public static int executeSetHighUnlimited(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.translatable("command.error.general_10"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -479,11 +479,11 @@ public class SetHighCommand {
     public static int executeSetHighCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.translatable("command.error.general_10"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_10"));
             return 0;
         }
 
-        source.sendMessage(Text.translatable("command.error.altitude.cancel"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("command.error.altitude.cancel"));
         return Command.SINGLE_SUCCESS;
     }
     

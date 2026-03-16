@@ -37,7 +37,7 @@ public class RecolorCommand {
     public static int executeRecolor(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.translatable("command.error.general_10"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -51,7 +51,7 @@ public class RecolorCommand {
         String fileName = Packets.getFileNameForDimension(dimensionType);
 
         if (fileName == null) {
-            source.sendMessage(Text.translatable("command.error.dimension_3"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.dimension_3"));
             return 0;
         }
 
@@ -59,14 +59,14 @@ public class RecolorCommand {
         List<AreaData> editableAreas = getEditableAreas(fileName, playerName, hasOp);
 
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.translatable("command.error.area.dimension_3"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.dimension_3"));
             return 0;
         }
 
         // 发送域名列表到客户端，包含交互式颜色选择界面
         sendInteractiveRecolorToClient(player, editableAreas, dimensionType);
 
-        source.sendMessage(Text.translatable("command.prompt.area.list"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("command.prompt.area.list"));
         return 1;
     }
     
@@ -81,7 +81,7 @@ public class RecolorCommand {
         ServerCommandSource source = context.getSource();
         
         if (source.getPlayer() == null) {
-            source.sendMessage(Text.translatable("command.error.general_10"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_10"));
             return 0;
         }
 
@@ -91,9 +91,9 @@ public class RecolorCommand {
         // 标准化颜色输入
         String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
         if (!areahint.util.ColorUtil.isValidColor(normalizedColor)) {
-            source.sendMessage(Text.translatable("command.error.color").append(Text.literal(colorInput)));
-            source.sendMessage(Text.translatable("message.message.color"));
-            source.sendMessage(Text.translatable("message.message.general_45"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.color").append(Text.literal(colorInput)));
+            CommandSourceCompat.sendMessage(source, Text.translatable("message.message.color"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("message.message.general_45"));
             return 0;
         }
         

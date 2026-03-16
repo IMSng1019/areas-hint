@@ -4,7 +4,7 @@ import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -64,7 +64,7 @@ public class VulkanRender implements RenderManager.IRender {
      * @param drawContext 绘制上下文
      * @param tickDelta tick间隔时间
      */
-    private void onHudRender(DrawContext drawContext, float tickDelta) {
+    private void onHudRender(MatrixStack matrices, float tickDelta) {
         if (animationState == AnimationState.NONE || currentText == null || client.player == null) {
             return;
         }
@@ -128,13 +128,12 @@ public class VulkanRender implements RenderManager.IRender {
             TextRenderer textRenderer = client.textRenderer;
         
         // 应用缩放来增大文本尺寸
-        MatrixStack matrixStack = drawContext.getMatrices();
-        matrixStack.push();
+        matrices.push();
         // 使用浮点数直接传递给矩阵变换，避免整数转换
-        matrixStack.translate(x, y + yOffset, 0);
+        matrices.translate(x, y + yOffset, 0);
         // 根据配置获取字幕大小
         float textScale = getTextScale();
-        matrixStack.scale(textScale, textScale, 1.0f);
+        matrices.scale(textScale, textScale, 1.0f);
         
         // 获取未缩放的文本宽度
             int textWidth = textRenderer.getWidth(text);
@@ -148,7 +147,7 @@ public class VulkanRender implements RenderManager.IRender {
             
             // 绘制发光背景（简单模拟高级效果）
         int bgColor = getAlphaColor(0x2266FF, alpha * 0.3f);
-            drawContext.fill(finalX - 10, finalY - 5, finalX + textWidth + 10, finalY + 15, bgColor);
+            DrawableHelper.fill(matrices, finalX - 10, finalY - 5, finalX + textWidth + 10, finalY + 15, bgColor);
             
             // 绘制文本（支持闪烁颜色）
         long now = System.currentTimeMillis();
@@ -158,20 +157,20 @@ public class VulkanRender implements RenderManager.IRender {
                 for (int i = 0; i < currentText.length(); i++) {
                     String ch = String.valueOf(currentText.charAt(i));
                     int charRgb = FlashColorHelper.getCharColor(currentColor, now, i);
-                    drawContext.drawTextWithShadow(textRenderer, Text.of(ch), xOff, finalY, getAlphaColor(charRgb, alpha));
+                    textRenderer.drawWithShadow(matrices, Text.of(ch), xOff, finalY, getAlphaColor(charRgb, alpha));
                     xOff += textRenderer.getWidth(ch);
                 }
             } else {
                 int rgb = FlashColorHelper.getWholeColor(currentColor, now);
-                drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, getAlphaColor(rgb, alpha));
+                textRenderer.drawWithShadow(matrices, text, finalX, finalY, getAlphaColor(rgb, alpha));
             }
         } else {
             int rgb = parseHexColor(currentColor);
-            drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, getAlphaColor(rgb, alpha));
+            textRenderer.drawWithShadow(matrices, text, finalX, finalY, getAlphaColor(rgb, alpha));
         }
 
         // 恢复矩阵状态
-            matrixStack.pop();
+            matrices.pop();
         
         // 输出调试信息
         if (animationState == AnimationState.IN) {

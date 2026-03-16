@@ -17,7 +17,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.nio.file.Path;
@@ -43,11 +43,11 @@ public class RenameAreaCommand {
                 ServerPlayerEntity player = (ServerPlayerEntity) source.getEntity();
                 sendRenameableAreaList(player);
             } else {
-                source.sendMessage(Text.translatable("command.error.general_9"));
+                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             }
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_22") + e.getMessage());
-            source.sendMessage(Text.translatable("command.error.general_4"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_4"));
         }
 
         return 1;
@@ -63,7 +63,7 @@ public class RenameAreaCommand {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -73,7 +73,7 @@ public class RenameAreaCommand {
                 "areahint:rename_select:" + areaName);
             return 1;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area_3").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area_3").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -87,7 +87,7 @@ public class RenameAreaCommand {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -97,7 +97,7 @@ public class RenameAreaCommand {
                 "areahint:rename_confirm");
             return 1;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.confirm.rename").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.confirm.rename").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -111,7 +111,7 @@ public class RenameAreaCommand {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -121,7 +121,7 @@ public class RenameAreaCommand {
                 "areahint:rename_cancel");
             return 1;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel.rename").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel.rename").append(Text.literal(e.getMessage())));
             return 0;
         }
     }

@@ -1,12 +1,13 @@
 package areahint.dividearea;
 
 import areahint.data.AreaData;
+
+import areahint.chat.ClientChatCompat;
 import areahint.file.FileManager;
 import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +51,10 @@ public class DivideAreaManager {
 
     private void registerChatListener() {
         if (!chatListenerRegistered) {
-            ClientReceiveMessageEvents.CHAT.register((message, signedMessage, sender, params, receptionTimestamp) -> {
+            ClientChatCompat.register(input -> {
                 if (state == State.AREA1_NAME || state == State.AREA1_SURFACE_NAME
                     || state == State.AREA2_NAME || state == State.AREA2_SURFACE_NAME) {
-                    handleChatInput(message.getString());
+                    handleChatInput(input);
                 }
             });
             chatListenerRegistered = true;

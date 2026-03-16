@@ -1,12 +1,13 @@
 package areahint.rename;
 
 import areahint.data.AreaData;
+
+import areahint.chat.ClientChatCompat;
 import areahint.file.FileManager;
 import areahint.debug.ClientDebugManager;
 import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,9 +90,9 @@ public class RenameManager {
      */
     private void registerChatListener() {
         if (!chatListenerRegistered) {
-            ClientReceiveMessageEvents.CHAT.register((message, signedMessage, sender, params, receptionTimestamp) -> {
+            ClientChatCompat.register(input -> {
                 if (currentState != RenameState.IDLE) {
-                    handleChatInput(message.getString());
+                    handleChatInput(input);
                 }
             });
             chatListenerRegistered = true;

@@ -3,6 +3,7 @@
 	"package": "areahint.mixin.client",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
+		"ChatScreenMixin",
 		"ExampleClientMixin",
 		"WorldRendererMixin",
 		"TranslationStorageMixin"

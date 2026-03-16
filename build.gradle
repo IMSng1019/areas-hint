@@ -30,12 +30,6 @@ loom {
 
 }
 
-fabricApi {
-	configureDataGeneration {
-		client = true
-	}
-}
-
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -72,6 +66,9 @@ java {
 jar {
 	inputs.property "archivesName", project.base.archivesName
 
+	from sourceSets.main.output
+	from sourceSets.client.output
+
 	from("LICENSE") {
 		rename { "${it}_${inputs.properties.archivesName}"}
 	}
@@ -80,7 +77,19 @@ jar {
 }
 
 sourcesJar {
+	from sourceSets.main.allSource
+	from sourceSets.client.allSource
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+remapJar {
+	dependsOn jar
+	inputFile = jar.archiveFile
+}
+
+remapSourcesJar {
+	dependsOn sourcesJar
+	inputFile = sourcesJar.archiveFile
 }
 
 // configure the maven publication

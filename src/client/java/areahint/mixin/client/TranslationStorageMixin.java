@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class TranslationStorageMixin {
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
-    private void areasHintOverrideTranslation(String key, String fallback, CallbackInfoReturnable<String> cir) {
+    private void areasHintOverrideTranslation(String key, CallbackInfoReturnable<String> cir) {
         if (I18nManager.hasKey(key)) {
             cir.setReturnValue(I18nManager.translate(key));
         }

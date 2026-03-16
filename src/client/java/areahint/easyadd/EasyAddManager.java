@@ -1,6 +1,8 @@
 package areahint.easyadd;
 
 import areahint.data.AreaData;
+
+import areahint.chat.ClientChatCompat;
 import areahint.file.FileManager;
 import areahint.file.JsonHelper;
 import areahint.debug.ClientDebugManager;
@@ -9,7 +11,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.Identifier;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,9 +98,9 @@ public class EasyAddManager {
      */
     private void registerChatListener() {
         if (!chatListenerRegistered) {
-            ClientReceiveMessageEvents.CHAT.register((message, signedMessage, sender, params, receptionTimestamp) -> {
+            ClientChatCompat.register(input -> {
                 if (currentState != EasyAddState.IDLE) {
-                    handleChatInput(message.getString());
+                    handleChatInput(input);
                 }
             });
             chatListenerRegistered = true;

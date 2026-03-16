@@ -8,11 +8,12 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
+import java.nio.FloatBuffer;
 import java.util.List;
 
 public class BoundVizRenderer {
@@ -67,7 +68,7 @@ public class BoundVizRenderer {
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.disableCull();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
         matrices.push();
         matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
@@ -97,37 +98,39 @@ public class BoundVizRenderer {
      * 使用Gribb/Hartmann方法，JOML的m[col][row]命名
      */
     private static void extractFrustumPlanes(Matrix4f view, Matrix4f proj) {
-        Matrix4f vp = vpMatrix.set(proj).mul(view);
+        vpMatrix.load(proj);
+        vpMatrix.multiply(view);
+        float[] vp = getRowMajor(vpMatrix);
         // Left: row3 + row0
-        frustumPlanes[0][0] = vp.m03() + vp.m00();
-        frustumPlanes[0][1] = vp.m13() + vp.m10();
-        frustumPlanes[0][2] = vp.m23() + vp.m20();
-        frustumPlanes[0][3] = vp.m33() + vp.m30();
+        frustumPlanes[0][0] = vp[12] + vp[0];
+        frustumPlanes[0][1] = vp[13] + vp[1];
+        frustumPlanes[0][2] = vp[14] + vp[2];
+        frustumPlanes[0][3] = vp[15] + vp[3];
         // Right: row3 - row0
-        frustumPlanes[1][0] = vp.m03() - vp.m00();
-        frustumPlanes[1][1] = vp.m13() - vp.m10();
-        frustumPlanes[1][2] = vp.m23() - vp.m20();
-        frustumPlanes[1][3] = vp.m33() - vp.m30();
+        frustumPlanes[1][0] = vp[12] - vp[0];
+        frustumPlanes[1][1] = vp[13] - vp[1];
+        frustumPlanes[1][2] = vp[14] - vp[2];
+        frustumPlanes[1][3] = vp[15] - vp[3];
         // Bottom: row3 + row1
-        frustumPlanes[2][0] = vp.m03() + vp.m01();
-        frustumPlanes[2][1] = vp.m13() + vp.m11();
-        frustumPlanes[2][2] = vp.m23() + vp.m21();
-        frustumPlanes[2][3] = vp.m33() + vp.m31();
+        frustumPlanes[2][0] = vp[12] + vp[4];
+        frustumPlanes[2][1] = vp[13] + vp[5];
+        frustumPlanes[2][2] = vp[14] + vp[6];
+        frustumPlanes[2][3] = vp[15] + vp[7];
         // Top: row3 - row1
-        frustumPlanes[3][0] = vp.m03() - vp.m01();
-        frustumPlanes[3][1] = vp.m13() - vp.m11();
-        frustumPlanes[3][2] = vp.m23() - vp.m21();
-        frustumPlanes[3][3] = vp.m33() - vp.m31();
+        frustumPlanes[3][0] = vp[12] - vp[4];
+        frustumPlanes[3][1] = vp[13] - vp[5];
+        frustumPlanes[3][2] = vp[14] - vp[6];
+        frustumPlanes[3][3] = vp[15] - vp[7];
         // Near: row3 + row2
-        frustumPlanes[4][0] = vp.m03() + vp.m02();
-        frustumPlanes[4][1] = vp.m13() + vp.m12();
-        frustumPlanes[4][2] = vp.m23() + vp.m22();
-        frustumPlanes[4][3] = vp.m33() + vp.m32();
+        frustumPlanes[4][0] = vp[12] + vp[8];
+        frustumPlanes[4][1] = vp[13] + vp[9];
+        frustumPlanes[4][2] = vp[14] + vp[10];
+        frustumPlanes[4][3] = vp[15] + vp[11];
         // Far: row3 - row2
-        frustumPlanes[5][0] = vp.m03() - vp.m02();
-        frustumPlanes[5][1] = vp.m13() - vp.m12();
-        frustumPlanes[5][2] = vp.m23() - vp.m22();
-        frustumPlanes[5][3] = vp.m33() - vp.m32();
+        frustumPlanes[5][0] = vp[12] - vp[8];
+        frustumPlanes[5][1] = vp[13] - vp[9];
+        frustumPlanes[5][2] = vp[14] - vp[10];
+        frustumPlanes[5][3] = vp[15] - vp[11];
         // 归一化
         for (int i = 0; i < 6; i++) {
             float len = (float) Math.sqrt(
@@ -141,6 +144,12 @@ public class BoundVizRenderer {
                 frustumPlanes[i][3] /= len;
             }
         }
+    }
+
+    private static float[] getRowMajor(Matrix4f matrix) {
+        FloatBuffer buffer = FloatBuffer.allocate(16);
+        matrix.writeRowMajor(buffer);
+        return buffer.array();
     }
 
     /**
@@ -288,7 +297,7 @@ public class BoundVizRenderer {
             }
             emitAreaTriangles(matrix, buffer, cachedAreas.get(i));
         }
-        if (hasTriangles) BufferRenderer.drawWithGlobalProgram(buffer.end());
+        if (hasTriangles) BufferRenderer.drawWithShader(buffer.end());
 
         // === Pass 2: 批量线段 ===
         boolean hasLines = false;
@@ -308,7 +317,7 @@ public class BoundVizRenderer {
                 }
             }
         }
-        if (hasLines) BufferRenderer.drawWithGlobalProgram(buffer.end());
+        if (hasLines) BufferRenderer.drawWithShader(buffer.end());
     }
 
     /**
@@ -585,7 +594,7 @@ public class BoundVizRenderer {
             emitDashedLine(matrix, buffer, v1.getX() + 0.5f, v2.getX() + 0.5f,
                     v1.getZ() + 0.5f, v2.getZ() + 0.5f, py);
         }
-        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        BufferRenderer.drawWithShader(buffer.end());
     }
 
     private static void emitDashedLine(Matrix4f matrix, BufferBuilder buffer,

@@ -55,7 +55,7 @@ public class DebugCommand {
         ServerPlayerEntity player = source.getPlayer();
         
         if (player == null) {
-            source.sendFeedback(() -> Text.translatable("command.message.general_30").formatted(Formatting.RED), false);
+            source.sendFeedback(Text.translatable("command.message.general_30").formatted(Formatting.RED), false);
             return 0;
         }
 
@@ -76,7 +76,7 @@ public class DebugCommand {
         ServerPlayerEntity player = source.getPlayer();
         
         if (player == null) {
-            source.sendFeedback(() -> Text.translatable("command.message.general_30").formatted(Formatting.RED), false);
+            source.sendFeedback(Text.translatable("command.message.general_30").formatted(Formatting.RED), false);
             return 0;
         }
 
@@ -103,7 +103,7 @@ public class DebugCommand {
         ServerPlayerEntity player = source.getPlayer();
         
         if (player == null) {
-            source.sendFeedback(() -> Text.translatable("command.message.general_30").formatted(Formatting.RED), false);
+            source.sendFeedback(Text.translatable("command.message.general_30").formatted(Formatting.RED), false);
             return 0;
         }
 
@@ -125,7 +125,7 @@ public class DebugCommand {
         ServerPlayerEntity player = source.getPlayer();
         
         if (player == null) {
-            source.sendFeedback(() -> Text.translatable("command.message.general_30").formatted(Formatting.RED), false);
+            source.sendFeedback(Text.translatable("command.message.general_30").formatted(Formatting.RED), false);
             return 0;
         }
 
@@ -133,7 +133,7 @@ public class DebugCommand {
         String status = isEnabled ? ServerI18nManager.translateForPlayer(player.getUuid(), "message.message.general_18") : ServerI18nManager.translateForPlayer(player.getUuid(), "message.message.general_19");
         Formatting color = isEnabled ? Formatting.GREEN : Formatting.RED;
 
-        source.sendFeedback(() -> Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "command.hint.general"))
+        source.sendFeedback(Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "command.hint.general"))
                 .append(Text.literal(status).formatted(color)), false);
         
         return 1;

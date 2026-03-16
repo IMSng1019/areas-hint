@@ -24,7 +24,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.nio.file.Path;
@@ -376,34 +376,34 @@ public class ServerCommands {
     private static int executeHelp(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         
-        source.sendMessage(Text.translatable("command.title.general"));
-        source.sendMessage(Text.translatable("help.command.help"));
-        source.sendMessage(Text.translatable("help.command.reload"));
-        source.sendMessage(Text.translatable("help.command.delete"));
-        source.sendMessage(Text.translatable("help.command.frequency"));
-        source.sendMessage(Text.translatable("help.command.subtitlerender"));
-        source.sendMessage(Text.translatable("help.command.subtitlestyle"));
-        source.sendMessage(Text.translatable("help.command.subtitlesize"));
-        source.sendMessage(Text.translatable("help.command.add"));
-        source.sendMessage(Text.translatable("help.command.easyadd"));
-        source.sendMessage(Text.translatable("help.command.recolor"));
-        source.sendMessage(Text.translatable("help.command.rename"));
-        source.sendMessage(Text.translatable("help.command.sethigh"));
-        source.sendMessage(Text.translatable("help.command.replacebutton"));
-        source.sendMessage(Text.translatable("help.command.check"));
-        source.sendMessage(Text.translatable("help.command.dimensionalityname"));
-        source.sendMessage(Text.translatable("help.command.dimensionalitycolor"));
-        source.sendMessage(Text.translatable("help.command.expandarea"));
-        source.sendMessage(Text.translatable("help.command.shrinkarea"));
-        source.sendMessage(Text.translatable("help.command.dividearea"));
-        source.sendMessage(Text.translatable("help.command.addhint"));
-        source.sendMessage(Text.translatable("help.command.deletehint"));
-        source.sendMessage(Text.translatable("help.command.boundviz"));
-        source.sendMessage(Text.translatable("help.command.language"));
-        source.sendMessage(Text.translatable("help.command.firstdimname"));
-        source.sendMessage(Text.translatable("help.command.firstdimname_skip"));
-        source.sendMessage(Text.translatable("help.command.debug"));
-        source.sendMessage(Text.translatable("help.command.serverlanguage"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("command.title.general"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.help"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.reload"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.delete"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.frequency"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.subtitlerender"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.subtitlestyle"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.subtitlesize"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.add"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.easyadd"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.recolor"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.rename"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.sethigh"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.replacebutton"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.check"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.dimensionalityname"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.dimensionalitycolor"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.expandarea"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.shrinkarea"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.dividearea"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.addhint"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.deletehint"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.boundviz"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.language"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.firstdimname"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.firstdimname_skip"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.debug"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("help.command.serverlanguage"));
 
         return Command.SINGLE_SUCCESS;
     }
@@ -431,7 +431,7 @@ public class ServerCommands {
         // 通知客户端重载配置
         sendClientCommand(source, "areahint:reload");
         
-        source.sendMessage(Text.translatable("command.message.area.dimension"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area.dimension"));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -449,14 +449,14 @@ public class ServerCommands {
         AreaData areaData = JsonHelper.fromJsonSingle(json);
         
         if (areaData == null) {
-            source.sendMessage(Text.translatable("command.error.general_6"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_6"));
             return 0;
         }
         
         // 验证高度数据（如果存在）
         if (areaData.getAltitude() != null) {
             if (!areaData.getAltitude().isValid()) {
-                source.sendMessage(Text.translatable("command.error.altitude_8"));
+                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.altitude_8"));
                 return 0;
             }
             
@@ -465,31 +465,31 @@ public class ServerCommands {
             Double maxAlt = areaData.getAltitude().getMax();
             
             if (minAlt != null && (minAlt < -64 || minAlt > 320)) {
-                source.sendMessage(Text.translatable("command.error.altitude_2", minAlt));
+                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.altitude_2", minAlt));
                 return 0;
             }
             
             if (maxAlt != null && (maxAlt < -64 || maxAlt > 320)) {
-                source.sendMessage(Text.translatable("command.error.altitude", maxAlt));
+                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.altitude", maxAlt));
                 return 0;
             }
         }
         
         if (!areaData.isValid()) {
-            source.sendMessage(Text.translatable("command.error.area.level"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.level"));
             return 0;
         }
         
         // 根据维度决定写入哪个文件
         String dimensionId = getDimensionFromSource(source);
         if (dimensionId == null) {
-            source.sendMessage(Text.translatable("command.error.dimension"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.dimension"));
             return 0;
         }
         
         String fileName = Packets.getFileNameForDimension(dimensionId);
         if (fileName == null) {
-            source.sendMessage(Text.translatable("command.error.dimension_2").append(Text.literal(dimensionId)));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.dimension_2").append(Text.literal(dimensionId)));
             return 0;
         }
         
@@ -502,14 +502,14 @@ public class ServerCommands {
         
         // 添加区域数据
         if (FileManager.addAreaData(filePath, areaData)) {
-            source.sendMessage(Text.translatable("command.success.area.add").append(Text.literal(areaData.getName())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.success.area.add").append(Text.literal(areaData.getName())));
             
             // 通知所有客户端更新
             ServerNetworking.sendAreaDataToAll(dimensionId);
             
             return Command.SINGLE_SUCCESS;
         } else {
-            source.sendMessage(Text.translatable("command.error.area.add"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.add"));
             return 0;
         }
     }
@@ -556,7 +556,7 @@ public class ServerCommands {
         // 向客户端发送命令
         sendClientCommand(source, "areahint:frequency_info");
         
-        source.sendMessage(Text.translatable("command.message.general_15"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("command.message.general_15"));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -573,7 +573,7 @@ public class ServerCommands {
         // 向客户端发送命令
         sendClientCommand(source, "areahint:frequency " + value);
         
-        source.sendMessage(Text.translatable("command.message.general_16").append(Text.literal(value + "§a Hz")));
+        CommandSourceCompat.sendMessage(source, Text.translatable("command.message.general_16").append(Text.literal(value + "§a Hz")));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -589,7 +589,7 @@ public class ServerCommands {
         // 向客户端发送命令
         sendClientCommand(source, "areahint:subtitlerender_info");
         
-        source.sendMessage(Text.translatable("command.message.general_13"));
+        CommandSourceCompat.sendMessage(source, Text.translatable("command.message.general_13"));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -609,11 +609,11 @@ public class ServerCommands {
             // 向客户端发送命令
             sendClientCommand(source, "areahint:subtitlerender " + normalizedMode);
             
-            source.sendMessage(Text.translatable("command.message.general_14").append(Text.literal(normalizedMode)));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.message.general_14").append(Text.literal(normalizedMode)));
             
             return Command.SINGLE_SUCCESS;
         } else {
-            source.sendMessage(Text.translatable("command.error.general_7").append(Text.literal(mode)).append(Text.translatable("command.error.general")));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_7").append(Text.literal(mode)).append(Text.translatable("command.error.general")));
             return 0;
         }
     }
@@ -628,7 +628,7 @@ public class ServerCommands {
 
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -638,7 +638,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlestyle_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.start_4").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.start_4").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -653,7 +653,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -661,7 +661,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlestyle_select:" + style);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.general_14").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_14").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -675,7 +675,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -683,7 +683,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlestyle_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel_5").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel_5").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -698,7 +698,7 @@ public class ServerCommands {
 
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -708,7 +708,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlesize_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.start_3").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.start_3").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -723,7 +723,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -731,7 +731,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlesize_select:" + size);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.general_13").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_13").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -745,7 +745,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -753,7 +753,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:subtitlesize_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel_3").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel_3").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -768,7 +768,7 @@ public class ServerCommands {
 
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -778,7 +778,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:delete_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.start").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.start").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -793,7 +793,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -801,7 +801,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:delete_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area_3").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area_3").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -815,7 +815,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -823,7 +823,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:delete_confirm");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.confirm.delete").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.confirm.delete").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -837,7 +837,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -845,7 +845,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:delete_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel.delete").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel.delete").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -920,7 +920,7 @@ public class ServerCommands {
         
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -930,7 +930,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.start_2").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.start_2").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -942,7 +942,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -950,7 +950,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel_2").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel_2").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -962,7 +962,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -970,7 +970,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_level:" + level);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area.level_2").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.level_2").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -982,7 +982,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -990,7 +990,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_base:" + baseName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area.parent").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.parent").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1002,7 +1002,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1010,7 +1010,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_continue");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.record.continue").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.record.continue").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1022,7 +1022,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1030,7 +1030,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_finish");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.record.finish").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.record.finish").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1042,7 +1042,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1050,7 +1050,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_save");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("easyadd.error.area.save").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("easyadd.error.area.save").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1062,7 +1062,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1070,7 +1070,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_altitude_auto");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.altitude_4").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.altitude_4").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1082,7 +1082,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1090,7 +1090,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_altitude_custom");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.altitude_5").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.altitude_5").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1102,7 +1102,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1110,7 +1110,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_altitude_unlimited");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.altitude_3").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.altitude_3").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1122,7 +1122,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1130,7 +1130,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:easyadd_color:" + color);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.color_2").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.color_2").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1146,7 +1146,7 @@ public class ServerCommands {
         try {
             // 检查是否为玩家执行
             if (source.getPlayer() == null) {
-                source.sendMessage(Text.translatable("command.error.general_9"));
+                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
                 return 0;
             }
             
@@ -1156,7 +1156,7 @@ public class ServerCommands {
             return Command.SINGLE_SUCCESS;
             
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area.expand.start").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.expand.start").append(Text.literal(e.getMessage())));
             e.printStackTrace();
             return 0;
         }
@@ -1171,7 +1171,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1179,7 +1179,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:expandarea_continue");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area.continue.expand").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.continue.expand").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1193,7 +1193,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1201,7 +1201,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:expandarea_save");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area.save.expand").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.save.expand").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1217,7 +1217,7 @@ public class ServerCommands {
         try {
             // 检查是否为玩家执行
             if (source.getPlayer() == null) {
-                source.sendMessage(Text.translatable("command.error.general_9"));
+                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
                 return 0;
             }
             
@@ -1227,7 +1227,7 @@ public class ServerCommands {
             return Command.SINGLE_SUCCESS;
             
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area.shrink.start").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.shrink.start").append(Text.literal(e.getMessage())));
             e.printStackTrace();
             return 0;
         }
@@ -1242,7 +1242,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1250,7 +1250,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:shrinkarea_continue");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area.continue.shrink").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.continue.shrink").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1264,7 +1264,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1272,7 +1272,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:shrinkarea_save");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area.save.shrink").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.save.shrink").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1287,7 +1287,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1295,7 +1295,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:expandarea_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area_3").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area_3").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1309,7 +1309,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1317,7 +1317,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:expandarea_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel.expand").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel.expand").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1327,25 +1327,25 @@ public class ServerCommands {
     private static int executeDivideAreaStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         try {
-            if (source.getPlayer() == null) { source.sendMessage(Text.translatable("command.error.general_9")); return 0; }
+            if (source.getPlayer() == null) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9")); return 0; }
             sendClientCommand(source, "areahint:dividearea_start");
             return Command.SINGLE_SUCCESS;
-        } catch (Exception e) { source.sendMessage(Text.translatable("command.error.area.divide.start").append(Text.literal(e.getMessage()))); return 0; }
+        } catch (Exception e) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.divide.start").append(Text.literal(e.getMessage()))); return 0; }
     }
 
     private static int executeDivideAreaSelect(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.translatable("command.error.general_9")); return 0; }
+            if (!source.isExecutedByPlayer()) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9")); return 0; }
             sendClientCommand(source, "areahint:dividearea_select:" + areaName);
             return Command.SINGLE_SUCCESS;
-        } catch (Exception e) { source.sendMessage(Text.translatable("command.error.area_2").append(Text.literal(e.getMessage()))); return 0; }
+        } catch (Exception e) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area_2").append(Text.literal(e.getMessage()))); return 0; }
     }
 
     private static int executeDivideAreaContinue(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.translatable("command.error.general_9")); return 0; }
+            if (!source.isExecutedByPlayer()) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9")); return 0; }
             sendClientCommand(source, "areahint:dividearea_continue");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1354,7 +1354,7 @@ public class ServerCommands {
     private static int executeDivideAreaSave(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.translatable("command.error.general_9")); return 0; }
+            if (!source.isExecutedByPlayer()) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9")); return 0; }
             sendClientCommand(source, "areahint:dividearea_save");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1363,7 +1363,7 @@ public class ServerCommands {
     private static int executeDivideAreaName(CommandContext<ServerCommandSource> context, String name) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.translatable("command.error.general_9")); return 0; }
+            if (!source.isExecutedByPlayer()) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9")); return 0; }
             sendClientCommand(source, "areahint:dividearea_name:" + name);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1372,7 +1372,7 @@ public class ServerCommands {
     private static int executeDivideAreaLevel(CommandContext<ServerCommandSource> context, int level) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.translatable("command.error.general_9")); return 0; }
+            if (!source.isExecutedByPlayer()) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9")); return 0; }
             sendClientCommand(source, "areahint:dividearea_level:" + level);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1381,7 +1381,7 @@ public class ServerCommands {
     private static int executeDivideAreaBase(CommandContext<ServerCommandSource> context, String baseName) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.translatable("command.error.general_9")); return 0; }
+            if (!source.isExecutedByPlayer()) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9")); return 0; }
             sendClientCommand(source, "areahint:dividearea_base:" + baseName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1390,7 +1390,7 @@ public class ServerCommands {
     private static int executeDivideAreaColor(CommandContext<ServerCommandSource> context, String color) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.translatable("command.error.general_9")); return 0; }
+            if (!source.isExecutedByPlayer()) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9")); return 0; }
             sendClientCommand(source, "areahint:dividearea_color:" + color);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1399,7 +1399,7 @@ public class ServerCommands {
     private static int executeDivideAreaCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         try {
-            if (!source.isExecutedByPlayer()) { source.sendMessage(Text.translatable("command.error.general_9")); return 0; }
+            if (!source.isExecutedByPlayer()) { CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9")); return 0; }
             sendClientCommand(source, "areahint:dividearea_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) { return 0; }
@@ -1411,13 +1411,13 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         try {
             if (source.getPlayer() == null) {
-                source.sendMessage(Text.translatable("command.error.general_9"));
+                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
                 return 0;
             }
             sendClientCommand(source, "areahint:addhint_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.vertex.add.start").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.vertex.add.start").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1425,14 +1425,14 @@ public class ServerCommands {
     private static int executeAddHintSelect(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:addhint_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area_2").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area_2").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1445,14 +1445,14 @@ public class ServerCommands {
     private static int executeAddHintSubmit(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:addhint_submit");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.general_5").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_5").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1460,14 +1460,14 @@ public class ServerCommands {
     private static int executeAddHintCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:addhint_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel_4").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel_4").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1478,13 +1478,13 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         try {
             if (source.getPlayer() == null) {
-                source.sendMessage(Text.translatable("command.error.general_9"));
+                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
                 return 0;
             }
             sendClientCommand(source, "areahint:deletehint_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.vertex.delete.start").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.vertex.delete.start").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1492,14 +1492,14 @@ public class ServerCommands {
     private static int executeDeleteHintSelect(CommandContext<ServerCommandSource> context, String areaName) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:deletehint_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area_2").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area_2").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1507,14 +1507,14 @@ public class ServerCommands {
     private static int executeDeleteHintToggle(CommandContext<ServerCommandSource> context, int index) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:deletehint_toggle:" + index);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.vertex").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.vertex").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1522,14 +1522,14 @@ public class ServerCommands {
     private static int executeDeleteHintSubmit(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:deletehint_submit");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.general_5").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_5").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1537,14 +1537,14 @@ public class ServerCommands {
     private static int executeDeleteHintCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:deletehint_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel_4").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel_4").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1559,7 +1559,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1567,7 +1567,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:shrinkarea_select:" + areaName);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.area_3").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area_3").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1581,7 +1581,7 @@ public class ServerCommands {
         ServerCommandSource source = context.getSource();
         
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         
@@ -1589,7 +1589,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:shrinkarea_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel.shrink").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel.shrink").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1890,14 +1890,14 @@ public class ServerCommands {
     private static int executeLanguageStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:language_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.start.language").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.start.language").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1905,14 +1905,14 @@ public class ServerCommands {
     private static int executeLanguageSelect(CommandContext<ServerCommandSource> context, String langCode) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:language_select:" + langCode);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.language").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.language").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1920,14 +1920,14 @@ public class ServerCommands {
     private static int executeLanguageCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
         try {
             sendClientCommand(source, "areahint:language_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.cancel.language").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.cancel.language").append(Text.literal(e.getMessage())));
             return 0;
         }
     }
@@ -1935,7 +1935,7 @@ public class ServerCommands {
     private static int executeServerLanguage(CommandContext<ServerCommandSource> context, String langCode) {
         ServerCommandSource source = context.getSource();
         ServerI18nManager.loadLanguage(langCode);
-        source.sendMessage(Text.literal(ServerI18nManager.translate("command.success.serverlanguage", langCode)));
+        CommandSourceCompat.sendMessage(source, Text.literal(ServerI18nManager.translate("command.success.serverlanguage", langCode)));
         Areashint.LOGGER.info(ServerI18nManager.translate("command.success.serverlanguage", langCode));
         return Command.SINGLE_SUCCESS;
     }
@@ -1945,7 +1945,7 @@ public class ServerCommands {
 
         // 检查是否为客户端命令
         if (!source.isExecutedByPlayer()) {
-            source.sendMessage(Text.translatable("command.error.general_9"));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_9"));
             return 0;
         }
 
@@ -1954,7 +1954,7 @@ public class ServerCommands {
             sendClientCommand(source, "areahint:boundviz_toggle");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
-            source.sendMessage(Text.translatable("command.error.boundary.visualization").append(Text.literal(e.getMessage())));
+            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.boundary.visualization").append(Text.literal(e.getMessage())));
             return 0;
         }
     }

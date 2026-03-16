@@ -1,6 +1,8 @@
 package areahint.command;
 
 import areahint.i18n.I18nManager;
+
+import areahint.chat.ClientChatCompat;
 import areahint.network.ClientNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
@@ -9,7 +11,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +48,9 @@ public class SetHighClientCommand {
      */
     public static void init() {
         if (!chatListenerRegistered) {
-            ClientReceiveMessageEvents.CHAT.register((message, signedMessage, sender, params, receptionTimestamp) -> {
+            ClientChatCompat.register(input -> {
                 // 始终处理聊天输入，让 handleChatInput 来决定是否处理
-                handleChatInput(message.getString());
+                handleChatInput(input);
             });
             chatListenerRegistered = true;
         }

@@ -4,7 +4,6 @@ import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -62,7 +61,7 @@ public class GLRender implements RenderManager.IRender {
      * @param drawContext 绘制上下文
      * @param tickDelta tick间隔时间
      */
-    private void onHudRender(DrawContext drawContext, float tickDelta) {
+    private void onHudRender(MatrixStack matrices, float tickDelta) {
         if (animationState == AnimationState.NONE || currentText == null || client.player == null) {
             return;
         }
@@ -126,13 +125,12 @@ public class GLRender implements RenderManager.IRender {
         TextRenderer textRenderer = client.textRenderer;
         
         // 应用缩放来增大文本尺寸
-        MatrixStack matrixStack = drawContext.getMatrices();
-        matrixStack.push();
+        matrices.push();
         // 使用浮点数直接传递给矩阵变换，避免整数转换
-        matrixStack.translate(x, y + yOffset, 0);
+        matrices.translate(x, y + yOffset, 0);
         // 根据配置获取字幕大小
         float textScale = getTextScale();
-        matrixStack.scale(textScale, textScale, 1.0f);
+        matrices.scale(textScale, textScale, 1.0f);
         
         // 获取未缩放的文本宽度
         int textWidth = textRenderer.getWidth(text);
@@ -151,24 +149,24 @@ public class GLRender implements RenderManager.IRender {
                     String ch = String.valueOf(currentText.charAt(i));
                     int charRgb = FlashColorHelper.getCharColor(currentColor, now, i);
                     int charColor = getAlphaColor(charRgb, alpha);
-                    drawContext.drawTextWithShadow(textRenderer, Text.of(ch), xOff, finalY, charColor);
+                    textRenderer.drawWithShadow(matrices, Text.of(ch), xOff, finalY, charColor);
                     xOff += textRenderer.getWidth(ch);
                 }
             } else {
                 // 整体模式
                 int rgb = FlashColorHelper.getWholeColor(currentColor, now);
                 int color = getAlphaColor(rgb, alpha);
-                drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
+                textRenderer.drawWithShadow(matrices, text, finalX, finalY, color);
             }
         } else {
             // 普通静态颜色
             int rgb = parseHexColor(currentColor);
             int color = getAlphaColor(rgb, alpha);
-            drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
+            textRenderer.drawWithShadow(matrices, text, finalX, finalY, color);
         }
 
         // 恢复矩阵状态
-        matrixStack.pop();
+        matrices.pop();
         
         // 输出调试信息
         if (animationState == AnimationState.IN) {
