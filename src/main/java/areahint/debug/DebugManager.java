@@ -1,5 +1,7 @@
 package areahint.debug;
 
+import areahint.util.TextCompat;
+
 import areahint.Areashint;
 import areahint.i18n.ServerI18nManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -11,20 +13,20 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * 调试管理器
- * 用于管理调试功能和向玩家发送调试信息
+ * 鐠嬪啳鐦粻锛勬倞閸?
+ * 閻劋绨粻锛勬倞鐠嬪啳鐦崝鐔诲厴閸滃苯鎮滈悳鈺侇啀閸欐垿鈧浇鐨熺拠鏇氫繆閹?
  */
 public class DebugManager {
-    // 启用调试的玩家UUID集合
+    // 閸氼垳鏁ょ拫鍐槸閻ㄥ嫮甯虹€圭ΚUID闂嗗棗鎮?
     private static final Set<UUID> debugEnabledPlayers = new HashSet<>();
     
-    // 是否有任何玩家启用了调试
+    // 閺勵垰鎯侀張澶夋崲娴ｆ洜甯虹€硅泛鎯庨悽銊ょ啊鐠嬪啳鐦?
     private static boolean anyDebugEnabled = false;
     
     /**
-     * 为指定玩家启用调试模式
-     * @param player 玩家
-     * @return 是否成功启用
+     * 娑撶儤瀵氱€规氨甯虹€硅泛鎯庨悽銊ㄧ殶鐠囨洘膩瀵?
+     * @param player 閻溾晛顔?
+     * @return 閺勵垰鎯侀幋鎰閸氼垳鏁?
      */
     public static boolean enableDebug(ServerPlayerEntity player) {
         UUID playerUUID = player.getUuid();
@@ -43,15 +45,15 @@ public class DebugManager {
     }
     
     /**
-     * 为指定玩家禁用调试模式
-     * @param player 玩家
-     * @return 是否成功禁用
+     * 娑撶儤瀵氱€规氨甯虹€瑰墎顩﹂悽銊ㄧ殶鐠囨洘膩瀵?
+     * @param player 閻溾晛顔?
+     * @return 閺勵垰鎯侀幋鎰缁備胶鏁?
      */
     public static boolean disableDebug(ServerPlayerEntity player) {
         UUID playerUUID = player.getUuid();
         boolean wasEnabled = debugEnabledPlayers.remove(playerUUID);
         
-        // 更新全局调试状态
+        // 閺囧瓨鏌婇崗銊ョ湰鐠嬪啳鐦悩鑸碘偓?
         anyDebugEnabled = !debugEnabledPlayers.isEmpty();
         
         if (wasEnabled) {
@@ -65,36 +67,36 @@ public class DebugManager {
     }
     
     /**
-     * 检查是否有任何玩家启用了调试
-     * @return 是否有任何玩家启用了调试
+     * 濡偓閺屻儲妲搁崥锔芥箒娴犺缍嶉悳鈺侇啀閸氼垳鏁ゆ禍鍡氱殶鐠?
+     * @return 閺勵垰鎯侀張澶夋崲娴ｆ洜甯虹€硅泛鎯庨悽銊ょ啊鐠嬪啳鐦?
      */
     public static boolean isAnyDebugEnabled() {
         return anyDebugEnabled;
     }
     
     /**
-     * 检查指定玩家是否启用了调试
-     * @param playerUUID 玩家UUID
-     * @return 是否启用了调试
+     * 濡偓閺屻儲瀵氱€规氨甯虹€硅埖妲搁崥锕€鎯庨悽銊ょ啊鐠嬪啳鐦?
+     * @param playerUUID 閻溾晛顔峌UID
+     * @return 閺勵垰鎯侀崥顖滄暏娴滃棜鐨熺拠?
      */
     public static boolean isDebugEnabled(UUID playerUUID) {
         return debugEnabledPlayers.contains(playerUUID);
     }
     
     /**
-     * 向启用调试的玩家发送调试信息
-     * @param category 调试类别
-     * @param message 调试信息
+     * 閸氭垵鎯庨悽銊ㄧ殶鐠囨洜娈戦悳鈺侇啀閸欐垿鈧浇鐨熺拠鏇氫繆閹?
+     * @param category 鐠嬪啳鐦猾璇插焼
+     * @param message 鐠嬪啳鐦穱鈩冧紖
      */
     public static void sendDebugInfo(DebugCategory category, String message) {
         if (!anyDebugEnabled) {
-            return; // 如果没有玩家启用调试，直接返回，避免不必要的处理
+            return; // 婵″倹鐏夊▽鈩冩箒閻溾晛顔嶉崥顖滄暏鐠嬪啳鐦敍宀€娲块幒銉ㄧ箲閸ョ儑绱濋柆鍨帳娑撳秴绻€鐟曚胶娈戞径鍕倞
         }
         
-        // 记录到服务端日志
+        // 鐠佹澘缍嶉崚鐗堟箛閸旓紕顏弮銉ョ箶
         Areashint.LOGGER.debug("[{}] {}", category.name(), message);
         
-        // 遍历所有启用调试的玩家
+        // 闁秴宸婚幍鈧張澶婃儙閻劏鐨熺拠鏇犳畱閻溾晛顔?
         for (UUID playerUUID : debugEnabledPlayers) {
             ServerPlayerEntity player = Areashint.getServer().getPlayerManager().getPlayer(playerUUID);
             if (player != null && player.isAlive()) {
@@ -105,20 +107,20 @@ public class DebugManager {
     }
     
     /**
-     * 向玩家发送带格式的调试消息
-     * @param player 玩家
-     * @param message 消息
-     * @param formatting 格式
+     * 閸氭垹甯虹€硅泛褰傞柅浣哥敨閺嶇厧绱￠惃鍕殶鐠囨洘绉烽幁?
+     * @param player 閻溾晛顔?
+     * @param message 濞戝牊浼?
+     * @param formatting 閺嶇厧绱?
      */
     private static void sendDebugMessage(ServerPlayerEntity player, String message, Formatting formatting) {
-        Text text = Text.translatable("debug.button.general").formatted(Formatting.GOLD)
-                .append(Text.literal(message).formatted(formatting));
+        Text text = TextCompat.translatable("debug.button.general").formatted(Formatting.GOLD)
+                .append(TextCompat.literal(message).formatted(formatting));
         player.sendMessage(text, false);
     }
 
     private static void sendTranslatableDebugMessage(ServerPlayerEntity player, String key, Formatting formatting) {
-        Text text = Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "debug.button.general")).formatted(Formatting.GOLD)
-                .append(Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), key)).formatted(formatting));
+        Text text = TextCompat.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "debug.button.general")).formatted(Formatting.GOLD)
+                .append(TextCompat.literal(ServerI18nManager.translateForPlayer(player.getUuid(), key)).formatted(formatting));
         player.sendMessage(text, false);
     }
 
@@ -127,16 +129,16 @@ public class DebugManager {
         for (UUID playerUUID : debugEnabledPlayers) {
             ServerPlayerEntity player = Areashint.getServer().getPlayerManager().getPlayer(playerUUID);
             if (player != null && player.isAlive()) {
-                Text text = Text.literal(ServerI18nManager.translateForPlayer(playerUUID, "debug.button.general")).formatted(Formatting.GOLD)
-                        .append(Text.literal("[" + category.name() + "] ").formatted(category.getFormatting()))
-                        .append(Text.literal(ServerI18nManager.translateForPlayer(playerUUID, key)).formatted(category.getFormatting()));
+                Text text = TextCompat.literal(ServerI18nManager.translateForPlayer(playerUUID, "debug.button.general")).formatted(Formatting.GOLD)
+                        .append(TextCompat.literal("[" + category.name() + "] ").formatted(category.getFormatting()))
+                        .append(TextCompat.literal(ServerI18nManager.translateForPlayer(playerUUID, key)).formatted(category.getFormatting()));
                 player.sendMessage(text, false);
             }
         }
     }
     
     /**
-     * 调试类别枚举
+     * 鐠嬪啳鐦猾璇插焼閺嬫矮濡?
      */
     public enum DebugCategory {
         AREA_DETECTION(Formatting.AQUA),

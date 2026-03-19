@@ -13,39 +13,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Recolor功能管理器
- * 负责交互式域名重新着色的整个流程管理
+ * Recolor鍔熻兘绠＄悊鍣?
+ * 璐熻矗浜や簰寮忓煙鍚嶉噸鏂扮潃鑹茬殑鏁翠釜娴佺▼绠＄悊
  */
 public class RecolorManager {
 
     /**
-     * Recolor状态枚举
+     * Recolor鐘舵€佹灇涓?
      */
     public enum RecolorState {
-        IDLE,               // 空闲状态
-        AREA_SELECTION,     // 域名选择
-        COLOR_SELECTION,    // 颜色选择
-        CONFIRM_CHANGE      // 确认修改
+        IDLE,               // 绌洪棽鐘舵€?
+        AREA_SELECTION,     // 鍩熷悕閫夋嫨
+        COLOR_SELECTION,    // 棰滆壊閫夋嫨
+        CONFIRM_CHANGE      // 纭淇敼
     }
 
-    // 单例实例
+    // 鍗曚緥瀹炰緥
     private static RecolorManager instance;
 
-    // 当前状态
+    // 褰撳墠鐘舵€?
     private RecolorState currentState = RecolorState.IDLE;
 
-    // 数据收集
+    // 鏁版嵁鏀堕泦
     private List<AreaData> editableAreas = new ArrayList<>();
     private String selectedAreaName = null;
     private String selectedColor = null;
     private String currentDimension = null;
     private String originalColor = null;
 
-    // 私有构造函数（单例模式）
+    // 绉佹湁鏋勯€犲嚱鏁帮紙鍗曚緥妯″紡锛?
     private RecolorManager() {}
 
     /**
-     * 获取单例实例
+     * 鑾峰彇鍗曚緥瀹炰緥
      */
     public static RecolorManager getInstance() {
         if (instance == null) {
@@ -55,34 +55,34 @@ public class RecolorManager {
     }
 
     /**
-     * 启动Recolor流程
-     * @param areas 可编辑的域名列表
-     * @param dimension 当前维度
+     * 鍚姩Recolor娴佺▼
+     * @param areas 鍙紪杈戠殑鍩熷悕鍒楄〃
+     * @param dimension 褰撳墠缁村害
      */
     public void startRecolor(List<AreaData> areas, String dimension) {
         if (currentState != RecolorState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_3")), false);
+            MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.general_3")), false);
             return;
         }
 
         this.editableAreas = new ArrayList<>(areas);
         this.currentDimension = dimension;
 
-        // 设置状态并显示UI
+        // 璁剧疆鐘舵€佸苟鏄剧ずUI
         currentState = RecolorState.AREA_SELECTION;
         RecolorUI.showAreaSelectionScreen(editableAreas);
     }
 
     /**
-     * 处理域名选择
-     * @param areaName 选择的域名名称
+     * 澶勭悊鍩熷悕閫夋嫨
+     * @param areaName 閫夋嫨鐨勫煙鍚嶅悕绉?
      */
     public void handleAreaSelection(String areaName) {
         if (currentState != RecolorState.AREA_SELECTION) {
             return;
         }
 
-        // 查找选择的域名
+        // 鏌ユ壘閫夋嫨鐨勫煙鍚?
         AreaData selectedArea = null;
         for (AreaData area : editableAreas) {
             if (area.getName().equals(areaName)) {
@@ -92,7 +92,7 @@ public class RecolorManager {
         }
 
         if (selectedArea == null) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.area_2") + areaName), false);
+            MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.area_2") + areaName), false);
             return;
         }
 
@@ -101,18 +101,18 @@ public class RecolorManager {
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of(I18nManager.translate("message.prompt.area") + areaName), false);
-            client.player.sendMessage(Text.of(I18nManager.translate("message.message.color_3") + originalColor), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.prompt.area") + areaName), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.color_3") + originalColor), false);
         }
 
-        // 进入颜色选择状态
+        // 杩涘叆棰滆壊閫夋嫨鐘舵€?
         currentState = RecolorState.COLOR_SELECTION;
         RecolorUI.showColorSelectionScreen(areaName, originalColor);
     }
 
     /**
-     * 处理颜色选择
-     * @param colorInput 颜色输入
+     * 澶勭悊棰滆壊閫夋嫨
+     * @param colorInput 棰滆壊杈撳叆
      */
     public void handleColorSelection(String colorInput) {
         if (currentState != RecolorState.COLOR_SELECTION) {
@@ -122,22 +122,22 @@ public class RecolorManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        // 验证颜色格式
+        // 楠岃瘉棰滆壊鏍煎紡
         String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
         if (!areahint.util.ColorUtil.isValidColor(normalizedColor)) {
-            client.player.sendMessage(Text.of(I18nManager.translate("gui.error.color")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("gui.error.color")), false);
             return;
         }
 
         this.selectedColor = normalizedColor;
 
-        // 进入确认状态
+        // 杩涘叆纭鐘舵€?
         currentState = RecolorState.CONFIRM_CHANGE;
         RecolorUI.showConfirmScreen(selectedAreaName, originalColor, selectedColor);
     }
 
     /**
-     * 确认颜色修改
+     * 纭棰滆壊淇敼
      */
     public void confirmChange() {
         if (currentState != RecolorState.CONFIRM_CHANGE) {
@@ -148,33 +148,33 @@ public class RecolorManager {
         if (client.player == null) return;
 
         try {
-            // 发送重新着色请求到服务端
+            // 鍙戦€侀噸鏂扮潃鑹茶姹傚埌鏈嶅姟绔?
             sendRecolorRequest(selectedAreaName, selectedColor, currentDimension);
 
-            client.player.sendMessage(Text.of(I18nManager.translate("message.prompt.color.modify")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.prompt.color.modify")), false);
 
-            // 重置状态
+            // 閲嶇疆鐘舵€?
             resetState();
 
         } catch (Exception e) {
-            client.player.sendMessage(Text.of(I18nManager.translate("message.error.general") + e.getMessage()), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.general") + e.getMessage()), false);
             AreashintClient.LOGGER.error(I18nManager.translate("message.error.general_32"), e);
         }
     }
 
     /**
-     * 取消Recolor流程
+     * 鍙栨秷Recolor娴佺▼
      */
     public void cancelRecolor() {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_2")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.cancel_2")), false);
         }
         resetState();
     }
 
     /**
-     * 重置状态
+     * 閲嶇疆鐘舵€?
      */
     private void resetState() {
         currentState = RecolorState.IDLE;
@@ -186,10 +186,10 @@ public class RecolorManager {
     }
 
     /**
-     * 发送重新着色请求到服务端
-     * @param areaName 域名名称
-     * @param color 新颜色
-     * @param dimension 维度
+     * 鍙戦€侀噸鏂扮潃鑹茶姹傚埌鏈嶅姟绔?
+     * @param areaName 鍩熷悕鍚嶇О
+     * @param color 鏂伴鑹?
+     * @param dimension 缁村害
      */
     private void sendRecolorRequest(String areaName, String color, String dimension) {
         try {

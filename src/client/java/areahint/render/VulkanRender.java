@@ -10,59 +10,59 @@ import net.minecraft.text.Text;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 
 /**
- * Vulkan渲染实现类
- * 使用Vulkan进行渲染
- * 注意：由于Minecraft没有原生支持Vulkan API，
- * 这个类实际上仍然使用OpenGL进行渲染，但预留了未来集成Vulkan的可能性
+ * Vulkan娓叉煋瀹炵幇绫?
+ * 浣跨敤Vulkan杩涜娓叉煋
+ * 娉ㄦ剰锛氱敱浜嶮inecraft娌℃湁鍘熺敓鏀寔Vulkan API锛?
+ * 杩欎釜绫诲疄闄呬笂浠嶇劧浣跨敤OpenGL杩涜娓叉煋锛屼絾棰勭暀浜嗘湭鏉ラ泦鎴怴ulkan鐨勫彲鑳芥€?
  */
 public class VulkanRender implements RenderManager.IRender {
-    // Minecraft客户端实例
+    // Minecraft瀹㈡埛绔疄渚?
     private final MinecraftClient client;
 
-    // 当前动画状态
+    // 褰撳墠鍔ㄧ敾鐘舵€?
     private AnimationState animationState = AnimationState.NONE;
 
-    // 当前显示的文本
+    // 褰撳墠鏄剧ず鐨勬枃鏈?
     private String currentText = null;
 
-    // 当前颜色
+    // 褰撳墠棰滆壊
     private String currentColor = "#FFFFFF";
 
-    // 动画开始时间
+    // 鍔ㄧ敾寮€濮嬫椂闂?
     private long animationStartTime = 0;
 
-    // 动画持续时间（毫秒）
-    private static final long ANIMATION_IN_DURATION = 500; // 进入动画持续时间
-    private static final long ANIMATION_STAY_DURATION = 3000; // 显示持续时间
-    private static final long ANIMATION_OUT_DURATION = 300; // 退出动画持续时间
+    // 鍔ㄧ敾鎸佺画鏃堕棿锛堟绉掞級
+    private static final long ANIMATION_IN_DURATION = 500; // 杩涘叆鍔ㄧ敾鎸佺画鏃堕棿
+    private static final long ANIMATION_STAY_DURATION = 3000; // 鏄剧ず鎸佺画鏃堕棿
+    private static final long ANIMATION_OUT_DURATION = 300; // 閫€鍑哄姩鐢绘寔缁椂闂?
     
-    // 上一帧的Y偏移和透明度，用于平滑插值
+    // 涓婁竴甯х殑Y鍋忕Щ鍜岄€忔槑搴︼紝鐢ㄤ簬骞虫粦鎻掑€?
     private float lastYOffset = 0;
     private float lastAlpha = 0;
     
-    // 插值系数（0-1之间，越小越平滑，但延迟越大）
+    // 鎻掑€肩郴鏁帮紙0-1涔嬮棿锛岃秺灏忚秺骞虫粦锛屼絾寤惰繜瓒婂ぇ锛?
     private static final float INTERPOLATION_FACTOR = 0.15f;
     
     /**
-     * 构造方法
-     * @param client Minecraft客户端实例
+     * 鏋勯€犳柟娉?
+     * @param client Minecraft瀹㈡埛绔疄渚?
      */
     public VulkanRender(MinecraftClient client) {
         this.client = client;
         
-        // 注册Tick事件用于更新动画状态
+        // 娉ㄥ唽Tick浜嬩欢鐢ㄤ簬鏇存柊鍔ㄧ敾鐘舵€?
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
         
-        // 注册HUD渲染事件
+        // 娉ㄥ唽HUD娓叉煋浜嬩欢
         HudRenderCallback.EVENT.register(this::onHudRender);
         
-        AreashintClient.LOGGER.info("Vulkan渲染器初始化 (注：实际使用兼容模式)");
+        AreashintClient.LOGGER.info("Vulkan娓叉煋鍣ㄥ垵濮嬪寲 (娉細瀹為檯浣跨敤鍏煎妯″紡)");
     }
     
     /**
-     * HUD渲染事件处理
-     * @param drawContext 绘制上下文
-     * @param tickDelta tick间隔时间
+     * HUD娓叉煋浜嬩欢澶勭悊
+     * @param drawContext 缁樺埗涓婁笅鏂?
+     * @param tickDelta tick闂撮殧鏃堕棿
      */
     private void onHudRender(MatrixStack matrices, float tickDelta) {
         if (animationState == AnimationState.NONE || currentText == null || client.player == null) {
@@ -72,11 +72,11 @@ public class VulkanRender implements RenderManager.IRender {
         int screenWidth = client.getWindow().getScaledWidth();
         int screenHeight = client.getWindow().getScaledHeight();
         
-        // 计算文本在屏幕上的位置
+        // 璁＄畻鏂囨湰鍦ㄥ睆骞曚笂鐨勪綅缃?
         int x = screenWidth / 2;
-        int y = screenHeight / 4; // 屏幕1/4位置
+        int y = screenHeight / 4; // 灞忓箷1/4浣嶇疆
         
-        // 根据动画状态计算Y偏移和透明度
+        // 鏍规嵁鍔ㄧ敾鐘舵€佽绠梇鍋忕Щ鍜岄€忔槑搴?
         float alpha = 1.0f;
         float yOffset = 0.0f;
         
@@ -85,71 +85,71 @@ public class VulkanRender implements RenderManager.IRender {
         
         switch (animationState) {
             case IN:
-                // 确保渐入动画的进度计算更加平滑
+                // 纭繚娓愬叆鍔ㄧ敾鐨勮繘搴﹁绠楁洿鍔犲钩婊?
                 progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_IN_DURATION);
-                progress = easeOutCubic(progress); // 使用缓动函数
+                progress = easeOutCubic(progress); // 浣跨敤缂撳姩鍑芥暟
                 alpha = progress;
-                // 渐入动画时不使用Y偏移，保持固定位置
+                // 娓愬叆鍔ㄧ敾鏃朵笉浣跨敤Y鍋忕Щ锛屼繚鎸佸浐瀹氫綅缃?
                 yOffset = 0.0f;
                 break;
             case STAY:
-                // 保持原位，完全不透明
+                // 淇濇寔鍘熶綅锛屽畬鍏ㄤ笉閫忔槑
                 alpha = 1.0f;
                 yOffset = 0.0f;
                 break;
             case OUT:
                 progress = Math.min(1.0f, (float) elapsedTime / ANIMATION_OUT_DURATION);
-                progress = easeInCubic(progress); // 使用缓动函数
-                yOffset = -15.0f * progress; // 使用浮点数计算，避免整数截断导致的闪烁
+                progress = easeInCubic(progress); // 浣跨敤缂撳姩鍑芥暟
+                yOffset = -15.0f * progress; // 浣跨敤娴偣鏁拌绠楋紝閬垮厤鏁存暟鎴柇瀵艰嚧鐨勯棯鐑?
                 alpha = 1.0f - progress;
                 break;
             case NONE:
-                return; // 不渲染
+                return; // 涓嶆覆鏌?
         }
         
-        // 应用平滑插值，减少闪烁
-        // 对于渐入动画，直接使用计算值，不进行插值处理
+        // 搴旂敤骞虫粦鎻掑€硷紝鍑忓皯闂儊
+        // 瀵逛簬娓愬叆鍔ㄧ敾锛岀洿鎺ヤ娇鐢ㄨ绠楀€硷紝涓嶈繘琛屾彃鍊煎鐞?
         if (animationState == AnimationState.IN && elapsedTime < 100) {
-            // 渐入动画开始阶段，直接使用计算值
+            // 娓愬叆鍔ㄧ敾寮€濮嬮樁娈碉紝鐩存帴浣跨敤璁＄畻鍊?
             lastYOffset = yOffset;
             lastAlpha = alpha;
         } else {
-            // 其他情况使用插值
+            // 鍏朵粬鎯呭喌浣跨敤鎻掑€?
             yOffset = lastYOffset * (1.0f - INTERPOLATION_FACTOR) + yOffset * INTERPOLATION_FACTOR;
             alpha = lastAlpha * (1.0f - INTERPOLATION_FACTOR) + alpha * INTERPOLATION_FACTOR;
             
-            // 保存当前值用于下一帧插值
+            // 淇濆瓨褰撳墠鍊肩敤浜庝笅涓€甯ф彃鍊?
             lastYOffset = yOffset;
             lastAlpha = alpha;
         }
         
-        // 渲染文本
-            Text text = Text.of(currentText);
+        // 娓叉煋鏂囨湰
+            Text text = areahint.util.TextCompat.of(currentText);
             TextRenderer textRenderer = client.textRenderer;
         
-        // 应用缩放来增大文本尺寸
+        // 搴旂敤缂╂斁鏉ュ澶ф枃鏈昂瀵?
         matrices.push();
-        // 使用浮点数直接传递给矩阵变换，避免整数转换
+        // 浣跨敤娴偣鏁扮洿鎺ヤ紶閫掔粰鐭╅樀鍙樻崲锛岄伩鍏嶆暣鏁拌浆鎹?
         matrices.translate(x, y + yOffset, 0);
-        // 根据配置获取字幕大小
+        // 鏍规嵁閰嶇疆鑾峰彇瀛楀箷澶у皬
         float textScale = getTextScale();
         matrices.scale(textScale, textScale, 1.0f);
         
-        // 获取未缩放的文本宽度
+        // 鑾峰彇鏈缉鏀剧殑鏂囨湰瀹藉害
             int textWidth = textRenderer.getWidth(text);
             
-        // 计算最终位置 (正确计算居中位置)
+        // 璁＄畻鏈€缁堜綅缃?(姝ｇ‘璁＄畻灞呬腑浣嶇疆)
         int finalX = -textWidth / 2;
         int finalY = 0;
             
-            // 为Vulkan渲染添加额外效果
-            // 注意：这仅是模拟，实际上没有使用Vulkan API
+            // 涓篤ulkan娓叉煋娣诲姞棰濆鏁堟灉
+            // 娉ㄦ剰锛氳繖浠呮槸妯℃嫙锛屽疄闄呬笂娌℃湁浣跨敤Vulkan API
             
-            // 绘制发光背景（简单模拟高级效果）
+            // 缁樺埗鍙戝厜鑳屾櫙锛堢畝鍗曟ā鎷熼珮绾ф晥鏋滐級
         int bgColor = getAlphaColor(0x2266FF, alpha * 0.3f);
             DrawableHelper.fill(matrices, finalX - 10, finalY - 5, finalX + textWidth + 10, finalY + 15, bgColor);
             
-            // 绘制文本（支持闪烁颜色）
+            // 缁樺埗鏂囨湰锛堟敮鎸侀棯鐑侀鑹诧級
         long now = System.currentTimeMillis();
         if (FlashColorHelper.isFlashMode(currentColor)) {
             if (FlashColorHelper.isPerCharMode(currentColor)) {
@@ -157,7 +157,7 @@ public class VulkanRender implements RenderManager.IRender {
                 for (int i = 0; i < currentText.length(); i++) {
                     String ch = String.valueOf(currentText.charAt(i));
                     int charRgb = FlashColorHelper.getCharColor(currentColor, now, i);
-                    textRenderer.drawWithShadow(matrices, Text.of(ch), xOff, finalY, getAlphaColor(charRgb, alpha));
+                    textRenderer.drawWithShadow(matrices, areahint.util.TextCompat.of(ch), xOff, finalY, getAlphaColor(charRgb, alpha));
                     xOff += textRenderer.getWidth(ch);
                 }
             } else {
@@ -169,19 +169,19 @@ public class VulkanRender implements RenderManager.IRender {
             textRenderer.drawWithShadow(matrices, text, finalX, finalY, getAlphaColor(rgb, alpha));
         }
 
-        // 恢复矩阵状态
+        // 鎭㈠鐭╅樀鐘舵€?
             matrices.pop();
         
-        // 输出调试信息
+        // 杈撳嚭璋冭瘯淇℃伅
         if (animationState == AnimationState.IN) {
-            AreashintClient.LOGGER.debug("VulkanRender: 渐入动画 - 区域标题: {}, 进度: {}, 透明度: {}", 
+            AreashintClient.LOGGER.debug("VulkanRender: 娓愬叆鍔ㄧ敾 - 鍖哄煙鏍囬: {}, 杩涘害: {}, 閫忔槑搴? {}", 
                 currentText, progress, alpha);
         }
     }
     
     /**
-     * 客户端Tick事件处理，用于更新动画状态
-     * @param minecraftClient Minecraft客户端实例
+     * 瀹㈡埛绔疶ick浜嬩欢澶勭悊锛岀敤浜庢洿鏂板姩鐢荤姸鎬?
+     * @param minecraftClient Minecraft瀹㈡埛绔疄渚?
      */
     private void onClientTick(MinecraftClient minecraftClient) {
         if (animationState == AnimationState.NONE || currentText == null) {
@@ -191,28 +191,28 @@ public class VulkanRender implements RenderManager.IRender {
         long currentTime = System.currentTimeMillis();
         long elapsedTime = currentTime - animationStartTime;
         
-        // 更新动画状态
+        // 鏇存柊鍔ㄧ敾鐘舵€?
         if (animationState == AnimationState.IN && elapsedTime >= ANIMATION_IN_DURATION) {
             animationState = AnimationState.STAY;
             animationStartTime = currentTime;
-            AreashintClient.LOGGER.debug("VulkanRender: 动画状态更新 IN → STAY");
+            AreashintClient.LOGGER.debug("VulkanRender: 鍔ㄧ敾鐘舵€佹洿鏂?IN 鈫?STAY");
         } else if (animationState == AnimationState.STAY && elapsedTime >= ANIMATION_STAY_DURATION) {
             animationState = AnimationState.OUT;
             animationStartTime = currentTime;
-            // 重置插值变量以确保平滑过渡
+            // 閲嶇疆鎻掑€煎彉閲忎互纭繚骞虫粦杩囨浮
             lastYOffset = 0.0f;
             lastAlpha = 1.0f;
-            AreashintClient.LOGGER.debug("VulkanRender: 动画状态更新 STAY → OUT");
+            AreashintClient.LOGGER.debug("VulkanRender: 鍔ㄧ敾鐘舵€佹洿鏂?STAY 鈫?OUT");
         } else if (animationState == AnimationState.OUT && elapsedTime >= ANIMATION_OUT_DURATION) {
             animationState = AnimationState.NONE;
             currentText = null;
-            AreashintClient.LOGGER.debug("VulkanRender: 动画状态更新 OUT → NONE");
+            AreashintClient.LOGGER.debug("VulkanRender: 鍔ㄧ敾鐘舵€佹洿鏂?OUT 鈫?NONE");
         }
     }
     
     /**
-     * 根据配置获取文本缩放比例
-     * @return 文本缩放比例
+     * 鏍规嵁閰嶇疆鑾峰彇鏂囨湰缂╂斁姣斾緥
+     * @return 鏂囨湰缂╂斁姣斾緥
      */
     private float getTextScale() {
         String size = ClientConfig.getSubtitleSize();
@@ -232,15 +232,15 @@ public class VulkanRender implements RenderManager.IRender {
             case "extra_small":
                 return 0.8f;
             default:
-                return 1.5f; // 默认中等大小
+                return 1.5f; // 榛樿涓瓑澶у皬
         }
     }
 
     /**
-     * 将RGB颜色和透明度转换为ARGB颜色值
-     * @param rgb RGB颜色值
-     * @param alpha 透明度（0.0-1.0）
-     * @return ARGB颜色值
+     * 灏哛GB棰滆壊鍜岄€忔槑搴﹁浆鎹负ARGB棰滆壊鍊?
+     * @param rgb RGB棰滆壊鍊?
+     * @param alpha 閫忔槑搴︼紙0.0-1.0锛?
+     * @return ARGB棰滆壊鍊?
      */
     private int getAlphaColor(int rgb, float alpha) {
         int a = Math.min(255, Math.max(0, (int) (alpha * 255))) << 24;
@@ -264,7 +264,7 @@ public class VulkanRender implements RenderManager.IRender {
         lastYOffset = 0.0f;
         lastAlpha = 0.0f;
 
-        AreashintClient.LOGGER.info("VulkanRender: 开始显示区域标题: {}, 动画状态: {}", title, animationState);
+        AreashintClient.LOGGER.info("VulkanRender: 寮€濮嬫樉绀哄尯鍩熸爣棰? {}, 鍔ㄧ敾鐘舵€? {}", title, animationState);
     }
 
     private static int parseHexColor(String hex) {
@@ -277,28 +277,28 @@ public class VulkanRender implements RenderManager.IRender {
     }
     
     /**
-     * 动画状态枚举
+     * 鍔ㄧ敾鐘舵€佹灇涓?
      */
     private enum AnimationState {
-        NONE, // 无动画
-        IN,   // 进入动画
-        STAY, // 停留
-        OUT   // 退出动画
+        NONE, // 鏃犲姩鐢?
+        IN,   // 杩涘叆鍔ㄧ敾
+        STAY, // 鍋滅暀
+        OUT   // 閫€鍑哄姩鐢?
     }
     
     /**
-     * 缓入三次方缓动函数
-     * @param x 进度 (0.0 - 1.0)
-     * @return 缓动值
+     * 缂撳叆涓夋鏂圭紦鍔ㄥ嚱鏁?
+     * @param x 杩涘害 (0.0 - 1.0)
+     * @return 缂撳姩鍊?
      */
     private float easeInCubic(float x) {
         return x * x * x;
     }
     
     /**
-     * 缓出三次方缓动函数
-     * @param x 进度 (0.0 - 1.0)
-     * @return 缓动值
+     * 缂撳嚭涓夋鏂圭紦鍔ㄥ嚱鏁?
+     * @param x 杩涘害 (0.0 - 1.0)
+     * @return 缂撳姩鍊?
      */
     private float easeOutCubic(float x) {
         return 1 - (float) Math.pow(1 - x, 3);

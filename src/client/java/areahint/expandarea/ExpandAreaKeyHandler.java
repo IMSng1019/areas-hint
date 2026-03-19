@@ -14,11 +14,11 @@ public class ExpandAreaKeyHandler {
     private static boolean wasConfirmPressed = false;
     
     /**
-     * 注册按键处理器
-     * X键由UnifiedKeyHandler统一处理，这里只处理Enter键
+     * 娉ㄥ唽鎸夐敭澶勭悊鍣?
+     * X閿敱UnifiedKeyHandler缁熶竴澶勭悊锛岃繖閲屽彧澶勭悊Enter閿?
      */
     public static void register() {
-        // 注册确认按键 (Enter)
+        // 娉ㄥ唽纭鎸夐敭 (Enter)
         confirmKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
             "key.areashint.expandarea.confirm", 
             InputUtil.Type.KEYSYM, 
@@ -26,7 +26,7 @@ public class ExpandAreaKeyHandler {
             "category.areashint.expandarea"
         ));
         
-        // 注册客户端tick事件
+        // 娉ㄥ唽瀹㈡埛绔痶ick浜嬩欢
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) {
                 return;
@@ -34,19 +34,19 @@ public class ExpandAreaKeyHandler {
             
             ExpandAreaManager manager = ExpandAreaManager.getInstance();
             
-            // 只有在ExpandArea模式活动时才处理按键
+            // 鍙湁鍦‥xpandArea妯″紡娲诲姩鏃舵墠澶勭悊鎸夐敭
             if (!manager.isActive()) {
                 wasConfirmPressed = confirmKey.isPressed();
                 return;
             }
             
-            // 处理确认按键
+            // 澶勭悊纭鎸夐敭
             if (confirmKey.isPressed() && !wasConfirmPressed) {
                 if (manager.isRecording()) {
                     manager.finishRecording();
                 } else {
                     client.player.sendMessage(
-                        Text.literal(I18nManager.translate("expandarea.error.area.record.expand"))
+                        areahint.util.TextCompat.literal(I18nManager.translate("expandarea.error.area.record.expand"))
                             .formatted(Formatting.RED), 
                         false
                     );

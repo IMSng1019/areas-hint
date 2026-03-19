@@ -7,30 +7,30 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 /**
- * SubtitleSize交互式管理器
- * 负责字幕大小设置的交互流程
+ * SubtitleSize浜や簰寮忕鐞嗗櫒
+ * 璐熻矗瀛楀箷澶у皬璁剧疆鐨勪氦浜掓祦绋?
  */
 public class SubtitleSizeManager {
 
     /**
-     * SubtitleSize状态枚举
+     * SubtitleSize鐘舵€佹灇涓?
      */
     public enum SubtitleSizeState {
-        IDLE,           // 空闲状态
-        SELECTING_SIZE  // 选择大小状态
+        IDLE,           // 绌洪棽鐘舵€?
+        SELECTING_SIZE  // 閫夋嫨澶у皬鐘舵€?
     }
 
-    // 单例实例
+    // 鍗曚緥瀹炰緥
     private static SubtitleSizeManager instance;
 
-    // 当前状态
+    // 褰撳墠鐘舵€?
     private SubtitleSizeState currentState = SubtitleSizeState.IDLE;
 
-    // 私有构造函数（单例模式）
+    // 绉佹湁鏋勯€犲嚱鏁帮紙鍗曚緥妯″紡锛?
     private SubtitleSizeManager() {}
 
     /**
-     * 获取单例实例
+     * 鑾峰彇鍗曚緥瀹炰緥
      */
     public static SubtitleSizeManager getInstance() {
         if (instance == null) {
@@ -40,30 +40,30 @@ public class SubtitleSizeManager {
     }
 
     /**
-     * 启动SubtitleSize交互流程
+     * 鍚姩SubtitleSize浜や簰娴佺▼
      */
     public void startSubtitleSizeSelection() {
         if (currentState != SubtitleSizeState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_5")), false);
+            MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.general_5")), false);
             return;
         }
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            // 设置状态并显示UI
+            // 璁剧疆鐘舵€佸苟鏄剧ずUI
             currentState = SubtitleSizeState.SELECTING_SIZE;
 
-            // 获取当前大小
+            // 鑾峰彇褰撳墠澶у皬
             String currentSize = ClientConfig.getSubtitleSize();
 
-            // 显示选择界面
+            // 鏄剧ず閫夋嫨鐣岄潰
             SubtitleSizeUI.showSizeSelectionScreen(currentSize);
         }
     }
 
     /**
-     * 处理大小选择
-     * @param size 选择的大小
+     * 澶勭悊澶у皬閫夋嫨
+     * @param size 閫夋嫨鐨勫ぇ灏?
      */
     public void handleSizeSelection(String size) {
         if (currentState != SubtitleSizeState.SELECTING_SIZE) {
@@ -73,44 +73,44 @@ public class SubtitleSizeManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        // 验证大小有效性
+        // 楠岃瘉澶у皬鏈夋晥鎬?
         if (!isValidSize(size)) {
-            client.player.sendMessage(Text.of(I18nManager.translate("message.error.general_7") + size), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.general_7") + size), false);
             return;
         }
 
-        // 保存大小设置
+        // 淇濆瓨澶у皬璁剧疆
         ClientConfig.setSubtitleSize(size);
 
-        // 显示成功消息
+        // 鏄剧ず鎴愬姛娑堟伅
         String sizeDisplay = getSizeDisplayName(size);
-        client.player.sendMessage(Text.of(I18nManager.translate("message.message.general_46") + sizeDisplay), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.general_46") + sizeDisplay), false);
 
-        // 执行reload
+        // 鎵цreload
         AreashintClient.reload();
-        client.player.sendMessage(Text.of(I18nManager.translate("message.message.general_51")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.general_51")), false);
 
-        // 重置状态
+        // 閲嶇疆鐘舵€?
         resetState();
     }
 
     /**
-     * 取消SubtitleSize流程
+     * 鍙栨秷SubtitleSize娴佺▼
      */
     public void cancelSubtitleSize() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_4")), false);
+        MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.cancel_4")), false);
         resetState();
     }
 
     /**
-     * 重置状态
+     * 閲嶇疆鐘舵€?
      */
     private void resetState() {
         currentState = SubtitleSizeState.IDLE;
     }
 
     /**
-     * 验证大小是否有效
+     * 楠岃瘉澶у皬鏄惁鏈夋晥
      */
     private boolean isValidSize(String size) {
         return size.equals("extra_large") || size.equals("large") || size.equals("medium_large") ||
@@ -119,7 +119,7 @@ public class SubtitleSizeManager {
     }
 
     /**
-     * 获取大小的显示名称
+     * 鑾峰彇澶у皬鐨勬樉绀哄悕绉?
      */
     private String getSizeDisplayName(String size) {
         switch (size) {

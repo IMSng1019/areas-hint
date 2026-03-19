@@ -13,43 +13,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Rename功能管理器
- * 负责交互式域名重命名的整个流程管理
+ * Rename鍔熻兘绠＄悊鍣?
+ * 璐熻矗浜や簰寮忓煙鍚嶉噸鍛藉悕鐨勬暣涓祦绋嬬鐞?
  */
 public class RenameManager {
 
     /**
-     * Rename状态枚举
+     * Rename鐘舵€佹灇涓?
      */
     public enum RenameState {
-        IDLE,                   // 空闲状态
-        SELECT_AREA,            // 选择要重命名的域名
-        INPUT_NEW_NAME,         // 输入新域名名称
-        INPUT_NEW_SURFACE_NAME, // 输入新联合域名
-        CONFIRM_RENAME          // 确认重命名
+        IDLE,                   // 绌洪棽鐘舵€?
+        SELECT_AREA,            // 閫夋嫨瑕侀噸鍛藉悕鐨勫煙鍚?
+        INPUT_NEW_NAME,         // 杈撳叆鏂板煙鍚嶅悕绉?
+        INPUT_NEW_SURFACE_NAME, // 杈撳叆鏂拌仈鍚堝煙鍚?
+        CONFIRM_RENAME          // 纭閲嶅懡鍚?
     }
 
-    // 单例实例
+    // 鍗曚緥瀹炰緥
     private static RenameManager instance;
 
-    // 当前状态
+    // 褰撳墠鐘舵€?
     private RenameState currentState = RenameState.IDLE;
 
-    // 域名数据收集
-    private String selectedAreaName = null;      // 选中的域名名称
-    private String newAreaName = null;           // 新域名名称
-    private String newSurfaceName = null;        // 新联合域名
-    private String currentDimension = null;      // 当前维度
-    private List<AreaData> availableAreas = new ArrayList<>();  // 可重命名的域名列表
+    // 鍩熷悕鏁版嵁鏀堕泦
+    private String selectedAreaName = null;      // 閫変腑鐨勫煙鍚嶅悕绉?
+    private String newAreaName = null;           // 鏂板煙鍚嶅悕绉?
+    private String newSurfaceName = null;        // 鏂拌仈鍚堝煙鍚?
+    private String currentDimension = null;      // 褰撳墠缁村害
+    private List<AreaData> availableAreas = new ArrayList<>();  // 鍙噸鍛藉悕鐨勫煙鍚嶅垪琛?
 
-    // 聊天监听器注册状态
+    // 鑱婂ぉ鐩戝惉鍣ㄦ敞鍐岀姸鎬?
     private boolean chatListenerRegistered = false;
 
-    // 私有构造函数（单例模式）
+    // 绉佹湁鏋勯€犲嚱鏁帮紙鍗曚緥妯″紡锛?
     private RenameManager() {}
 
     /**
-     * 获取单例实例
+     * 鑾峰彇鍗曚緥瀹炰緥
      */
     public static RenameManager getInstance() {
         if (instance == null) {
@@ -59,13 +59,13 @@ public class RenameManager {
     }
 
     /**
-     * 启动Rename流程
-     * @param areas 可重命名的域名列表
-     * @param dimension 当前维度
+     * 鍚姩Rename娴佺▼
+     * @param areas 鍙噸鍛藉悕鐨勫煙鍚嶅垪琛?
+     * @param dimension 褰撳墠缁村害
      */
     public void startRename(List<AreaData> areas, String dimension) {
         if (currentState != RenameState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_4")), false);
+            MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.general_4")), false);
             return;
         }
 
@@ -73,20 +73,20 @@ public class RenameManager {
         this.currentDimension = dimension;
 
         if (areas.isEmpty()) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.area.dimension.rename_2")), false);
+            MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.area.dimension.rename_2")), false);
             return;
         }
 
-        // 注册聊天监听器
+        // 娉ㄥ唽鑱婂ぉ鐩戝惉鍣?
         registerChatListener();
 
-        // 设置状态并显示UI
+        // 璁剧疆鐘舵€佸苟鏄剧ずUI
         currentState = RenameState.SELECT_AREA;
         RenameUI.showAreaSelectScreen(availableAreas);
     }
 
     /**
-     * 注册聊天监听器来捕获用户输入
+     * 娉ㄥ唽鑱婂ぉ鐩戝惉鍣ㄦ潵鎹曡幏鐢ㄦ埛杈撳叆
      */
     private void registerChatListener() {
         if (!chatListenerRegistered) {
@@ -100,13 +100,13 @@ public class RenameManager {
     }
 
     /**
-     * 处理用户聊天输入
+     * 澶勭悊鐢ㄦ埛鑱婂ぉ杈撳叆
      */
     private void handleChatInput(String input) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        // 移除前缀符号（如果有的话）
+        // 绉婚櫎鍓嶇紑绗﹀彿锛堝鏋滄湁鐨勮瘽锛?
         if (input.startsWith("<") && input.contains(">")) {
             int endIndex = input.indexOf(">") + 1;
             if (endIndex < input.length()) {
@@ -119,38 +119,38 @@ public class RenameManager {
                 if (!input.trim().isEmpty()) {
                     newAreaName = input.trim();
 
-                    // 检查新域名名称是否已存在
+                    // 妫€鏌ユ柊鍩熷悕鍚嶇О鏄惁宸插瓨鍦?
                     if (checkAreaNameExists(newAreaName)) {
-                        client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area") + newAreaName + I18nManager.translate("easyadd.message.dimension")), false);
-                        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
+                        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.error.area") + newAreaName + I18nManager.translate("easyadd.message.dimension")), false);
+                        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("easyadd.prompt.area.name")), false);
                         return;
                     }
 
-                    // 检查新名称是否与原名称相同
+                    // 妫€鏌ユ柊鍚嶇О鏄惁涓庡師鍚嶇О鐩稿悓
                     if (newAreaName.equals(selectedAreaName)) {
-                        client.player.sendMessage(Text.of(I18nManager.translate("message.error.area.name")), false);
-                        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
+                        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.area.name")), false);
+                        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("easyadd.prompt.area.name")), false);
                         return;
                     }
 
-                    client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.name") + newAreaName), false);
+                    client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.area.name") + newAreaName), false);
 
-                    // 进入联合域名输入
+                    // 杩涘叆鑱斿悎鍩熷悕杈撳叆
                     currentState = RenameState.INPUT_NEW_SURFACE_NAME;
                     RenameUI.showSurfaceNameInputScreen();
                 }
                 break;
 
             case INPUT_NEW_SURFACE_NAME:
-                // 联合域名可以为空
+                // 鑱斿悎鍩熷悕鍙互涓虹┖
                 newSurfaceName = input.trim().isEmpty() ? null : input.trim();
                 if (newSurfaceName != null) {
-                    client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.surface") + newSurfaceName), false);
+                    client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.area.surface") + newSurfaceName), false);
                 } else {
-                    client.player.sendMessage(Text.of(I18nManager.translate("dividearea.message.area.surface")), false);
+                    client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("dividearea.message.area.surface")), false);
                 }
 
-                // 进入确认状态
+                // 杩涘叆纭鐘舵€?
                 currentState = RenameState.CONFIRM_RENAME;
                 RenameUI.showConfirmScreen(selectedAreaName, newAreaName, newSurfaceName);
                 break;
@@ -161,19 +161,19 @@ public class RenameManager {
     }
 
     /**
-     * 处理域名选择（从命令调用）
+     * 澶勭悊鍩熷悕閫夋嫨锛堜粠鍛戒护璋冪敤锛?
      */
     public void handleAreaSelection(String areaName) {
         if (currentState != RenameState.SELECT_AREA) {
             return;
         }
 
-        // 移除引号（如果存在）
+        // 绉婚櫎寮曞彿锛堝鏋滃瓨鍦級
         if (areaName.startsWith("\"") && areaName.endsWith("\"") && areaName.length() > 1) {
             areaName = areaName.substring(1, areaName.length() - 1);
         }
 
-        // 验证域名是否在可选列表中
+        // 楠岃瘉鍩熷悕鏄惁鍦ㄥ彲閫夊垪琛ㄤ腑
         boolean found = false;
         for (AreaData area : availableAreas) {
             if (area.getName().equals(areaName)) {
@@ -183,23 +183,23 @@ public class RenameManager {
         }
 
         if (!found) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.area_2") + areaName), false);
+            MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.area_2") + areaName), false);
             return;
         }
 
         selectedAreaName = areaName;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of(I18nManager.translate("message.prompt.area") + areaName), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.prompt.area") + areaName), false);
         }
 
-        // 进入新名称输入状态
+        // 杩涘叆鏂板悕绉拌緭鍏ョ姸鎬?
         currentState = RenameState.INPUT_NEW_NAME;
         RenameUI.showNewNameInputScreen();
     }
 
     /**
-     * 确认重命名
+     * 纭閲嶅懡鍚?
      */
     public void confirmRename() {
         if (currentState != RenameState.CONFIRM_RENAME) {
@@ -207,32 +207,32 @@ public class RenameManager {
         }
 
         try {
-            // 发送到服务端
+            // 鍙戦€佸埌鏈嶅姟绔?
             RenameNetworking.sendRenameRequest(selectedAreaName, newAreaName, newSurfaceName, currentDimension);
 
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of(I18nManager.translate("message.prompt.rename")), false);
+                areahint.util.TextCompat.of(I18nManager.translate("message.prompt.rename")), false);
 
             resetState();
 
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of(I18nManager.translate("message.error.area.rename") + e.getMessage()), false);
+                areahint.util.TextCompat.of(I18nManager.translate("message.error.area.rename") + e.getMessage()), false);
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.NETWORK,
-                "重命名失败: " + e.getMessage());
+                "閲嶅懡鍚嶅け璐? " + e.getMessage());
         }
     }
 
     /**
-     * 取消Rename流程
+     * 鍙栨秷Rename娴佺▼
      */
     public void cancelRename() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_3")), false);
+        MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.cancel_3")), false);
         resetState();
     }
 
     /**
-     * 重置状态
+     * 閲嶇疆鐘舵€?
      */
     private void resetState() {
         currentState = RenameState.IDLE;
@@ -244,45 +244,45 @@ public class RenameManager {
     }
 
     /**
-     * 检查域名名称是否已存在于当前维度
-     * @param areaName 要检查的域名名称
-     * @return 如果域名名称已存在返回true，否则返回false
+     * 妫€鏌ュ煙鍚嶅悕绉版槸鍚﹀凡瀛樺湪浜庡綋鍓嶇淮搴?
+     * @param areaName 瑕佹鏌ョ殑鍩熷悕鍚嶇О
+     * @return 濡傛灉鍩熷悕鍚嶇О宸插瓨鍦ㄨ繑鍥瀟rue锛屽惁鍒欒繑鍥瀎alse
      */
     private boolean checkAreaNameExists(String areaName) {
         try {
             String fileName = getFileNameForCurrentDimension();
             if (fileName == null) {
                 ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.NETWORK,
-                    "无法确定当前维度文件名，跳过查重");
+                    "鏃犳硶纭畾褰撳墠缁村害鏂囦欢鍚嶏紝璺宠繃鏌ラ噸");
                 return false;
             }
 
-            // 读取当前维度的所有域名数据
+            // 璇诲彇褰撳墠缁村害鐨勬墍鏈夊煙鍚嶆暟鎹?
             List<AreaData> existingAreas = FileManager.readAreaData(
                 areahint.world.ClientWorldFolderManager.getWorldDimensionFile(fileName));
 
-            // 检查是否存在相同的域名名称（name字段）
+            // 妫€鏌ユ槸鍚﹀瓨鍦ㄧ浉鍚岀殑鍩熷悕鍚嶇О锛坣ame瀛楁锛?
             for (AreaData area : existingAreas) {
                 if (area.getName().equals(areaName)) {
                     ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.NETWORK,
-                        "发现重复域名名称: " + areaName);
+                        "鍙戠幇閲嶅鍩熷悕鍚嶇О: " + areaName);
                     return true;
                 }
             }
 
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.NETWORK,
-                "域名名称 \"" + areaName + "\" 未重复，可以使用");
+                "鍩熷悕鍚嶇О \"" + areaName + "\" 鏈噸澶嶏紝鍙互浣跨敤");
             return false;
 
         } catch (Exception e) {
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.NETWORK,
-                "检查域名名称时发生错误: " + e.getMessage());
+                "妫€鏌ュ煙鍚嶅悕绉版椂鍙戠敓閿欒: " + e.getMessage());
             return false;
         }
     }
 
     /**
-     * 获取当前维度的文件名
+     * 鑾峰彇褰撳墠缁村害鐨勬枃浠跺悕
      */
     private String getFileNameForCurrentDimension() {
         if (currentDimension == null) return null;

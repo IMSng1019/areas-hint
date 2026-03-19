@@ -7,7 +7,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 /**
- * 语言选择交互式管理器
+ * 璇█閫夋嫨浜や簰寮忕鐞嗗櫒
  */
 public class LanguageManager {
     public enum State {
@@ -28,13 +28,13 @@ public class LanguageManager {
     }
 
     /**
-     * 启动语言选择流程
+     * 鍚姩璇█閫夋嫨娴佺▼
      */
     public void startLanguageSelection() {
         if (currentState != State.IDLE) {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of(I18nManager.translate("language.error.language")), false);
+                client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("language.error.language")), false);
             }
             return;
         }
@@ -44,8 +44,8 @@ public class LanguageManager {
     }
 
     /**
-     * 处理语言选择
-     * @param langCode 语言代码
+     * 澶勭悊璇█閫夋嫨
+     * @param langCode 璇█浠ｇ爜
      */
     public void handleLanguageSelection(String langCode) {
         if (currentState != State.SELECTING_LANGUAGE) {
@@ -55,28 +55,28 @@ public class LanguageManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        // 保存语言设置
+        // 淇濆瓨璇█璁剧疆
         ClientConfig.setLanguage(langCode);
 
-        // 重新加载语言
+        // 閲嶆柊鍔犺浇璇█
         I18nManager.loadLanguage(langCode);
 
-        // 同步语言给服务端
+        // 鍚屾璇█缁欐湇鍔＄
         areahint.network.ClientNetworking.sendLanguageToServer();
 
         String displayName = I18nManager.getLanguageDisplayName(langCode);
-        client.player.sendMessage(Text.of(I18nManager.translate("language.message.language") + displayName + " (" + langCode + ")"), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("language.message.language") + displayName + " (" + langCode + ")"), false);
 
         resetState();
     }
 
     /**
-     * 取消语言选择
+     * 鍙栨秷璇█閫夋嫨
      */
     public void cancelLanguageSelection() {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of(I18nManager.translate("language.prompt.cancel.language")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("language.prompt.cancel.language")), false);
         }
         resetState();
     }

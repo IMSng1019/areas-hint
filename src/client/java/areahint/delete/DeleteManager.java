@@ -11,41 +11,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Delete功能管理器
- * 负责交互式域名删除的整个流程管理
+ * Delete閸旂喕鍏樼粻锛勬倞閸?
+ * 鐠愮喕鐭楁禍銈勭鞍瀵繐鐓欓崥宥呭灩闂勩倗娈戦弫缈犻嚋濞翠胶鈻肩粻锛勬倞
  */
 public class DeleteManager {
 
     /**
-     * Delete状态枚举
+     * Delete閻樿埖鈧焦鐏囨稉?
      */
     public enum DeleteState {
-        IDLE,           // 空闲状态
-        SELECT_AREA,    // 选择要删除的域名
-        CONFIRM_DELETE  // 确认删除
+        IDLE,           // 缁屾椽妫介悩鑸碘偓?
+        SELECT_AREA,    // 闁瀚ㄧ憰浣稿灩闂勩倗娈戦崺鐔锋倳
+        CONFIRM_DELETE  // 绾喛顓婚崚鐘绘珟
     }
 
-    // 单例实例
+    // 閸楁洑绶ョ€圭偘绶?
     private static DeleteManager instance;
 
-    // 当前状态
+    // 瑜版挸澧犻悩鑸碘偓?
     private DeleteState currentState = DeleteState.IDLE;
 
-    // 选中的域名
+    // 闁鑵戦惃鍕厵閸?
     private String selectedAreaName = null;
     private AreaData selectedArea = null;
 
-    // 当前维度
+    // 瑜版挸澧犵紒鏉戝
     private String currentDimension = null;
 
-    // 可删除的域名列表
+    // 閸欘垰鍨归梽銈囨畱閸╃喎鎮曢崚妤勩€?
     private List<AreaData> deletableAreas = new ArrayList<>();
 
-    // 私有构造函数（单例模式）
+    // 缁変焦婀侀弸鍕偓鐘插毐閺佸府绱欓崡鏇氱伐濡€崇础閿?
     private DeleteManager() {}
 
     /**
-     * 获取单例实例
+     * 閼惧嘲褰囬崡鏇氱伐鐎圭偘绶?
      */
     public static DeleteManager getInstance() {
         if (instance == null) {
@@ -55,43 +55,43 @@ public class DeleteManager {
     }
 
     /**
-     * 启动Delete流程
+     * 閸氼垰濮〥elete濞翠胶鈻?
      */
     public void startDelete() {
         if (currentState != DeleteState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_2")), false);
+            MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.general_2")), false);
             return;
         }
 
-        // 获取当前维度信息
+        // 閼惧嘲褰囪ぐ鎾冲缂佹潙瀹虫穱鈩冧紖
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world != null && client.player != null) {
-            // 获取维度标识符并转换为维度类型
+            // 閼惧嘲褰囩紒鏉戝閺嶅洩鐦戠粭锕€鑻熸潪顒佸床娑撹櫣娣惔锔捐閸?
             String dimensionPath = client.world.getRegistryKey().getValue().getPath();
             currentDimension = areahint.network.Packets.convertDimensionPathToType(dimensionPath);
 
             if (currentDimension == null) {
-                client.player.sendMessage(Text.of(I18nManager.translate("message.error.dimension")), false);
+                client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.dimension")), false);
                 ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
-                    "无法转换维度路径: " + dimensionPath);
+                    "閺冪姵纭舵潪顒佸床缂佹潙瀹崇捄顖氱窞: " + dimensionPath);
                 return;
             }
 
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
-                "当前维度: " + currentDimension);
+                "瑜版挸澧犵紒鏉戝: " + currentDimension);
 
-            // 设置状态
+            // 鐠佸墽鐤嗛悩鑸碘偓?
             currentState = DeleteState.SELECT_AREA;
 
-            // 向服务端请求可删除的域名列表（服务端会根据权限判断）
-            client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.delete.list_2")), false);
+            // 閸氭垶婀囬崝锛勵伂鐠囬攱鐪伴崣顖氬灩闂勩倗娈戦崺鐔锋倳閸掓銆冮敍鍫熸箛閸旓紕顏导姘壌閹诡喗娼堥梽鎰灲閺傤叏绱?
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.area.delete.list_2")), false);
             DeleteNetworking.requestDeletableAreas(currentDimension);
         }
     }
 
     /**
-     * 接收服务端发送的可删除域名列表
-     * @param areas 可删除的域名列表
+     * 閹恒儲鏁归張宥呭缁旑垰褰傞柅浣烘畱閸欘垰鍨归梽銈呯厵閸氬秴鍨悰?
+     * @param areas 閸欘垰鍨归梽銈囨畱閸╃喎鎮曢崚妤勩€?
      */
     public void receiveDeletableAreas(List<AreaData> areas) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -101,30 +101,30 @@ public class DeleteManager {
         deletableAreas.addAll(areas);
 
         if (deletableAreas.isEmpty()) {
-            client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.dimension.delete")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.area.dimension.delete")), false);
             resetState();
             return;
         }
 
-        // 显示UI
+        // 閺勫墽銇歎I
         DeleteUI.showAreaSelectionScreen(deletableAreas);
     }
 
 
     /**
-     * 处理域名选择
+     * 婢跺嫮鎮婇崺鐔锋倳闁瀚?
      */
     public void handleAreaSelection(String areaName) {
         if (currentState != DeleteState.SELECT_AREA) {
             return;
         }
 
-        // 移除引号（如果存在）
+        // 缁夊娅庡鏇炲娇閿涘牆顩ч弸婊冪摠閸︻煉绱?
         if (areaName.startsWith("\"") && areaName.endsWith("\"") && areaName.length() > 1) {
             areaName = areaName.substring(1, areaName.length() - 1);
         }
 
-        // 查找选中的域名
+        // 閺屻儲澹橀柅澶夎厬閻ㄥ嫬鐓欓崥?
         selectedArea = null;
         for (AreaData area : deletableAreas) {
             if (area.getName().equals(areaName)) {
@@ -136,17 +136,17 @@ public class DeleteManager {
 
         if (selectedArea == null) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of(I18nManager.translate("message.error.area_3") + areaName), false);
+                areahint.util.TextCompat.of(I18nManager.translate("message.error.area_3") + areaName), false);
             return;
         }
 
-        // 进入确认删除状态
+        // 鏉╂稑鍙嗙涵顔款吇閸掔娀娅庨悩鑸碘偓?
         currentState = DeleteState.CONFIRM_DELETE;
         DeleteUI.showConfirmDeleteScreen(selectedArea);
     }
 
     /**
-     * 确认删除域名
+     * 绾喛顓婚崚鐘绘珟閸╃喎鎮?
      */
     public void confirmDelete() {
         if (currentState != DeleteState.CONFIRM_DELETE) {
@@ -155,38 +155,38 @@ public class DeleteManager {
 
         if (selectedArea == null || selectedAreaName == null) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of(I18nManager.translate("message.error.area.delete_2")), false);
+                areahint.util.TextCompat.of(I18nManager.translate("message.error.area.delete_2")), false);
             cancelDelete();
             return;
         }
 
         try {
-            // 发送删除请求到服务端
+            // 閸欐垿鈧礁鍨归梽銈堫嚞濮瑰倸鍩岄張宥呭缁?
             DeleteNetworking.sendDeleteRequestToServer(selectedAreaName, currentDimension);
 
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of(I18nManager.translate("message.prompt.delete")), false);
+                areahint.util.TextCompat.of(I18nManager.translate("message.prompt.delete")), false);
 
             resetState();
 
         } catch (Exception e) {
             MinecraftClient.getInstance().player.sendMessage(
-                Text.of(I18nManager.translate("message.error.area.delete") + e.getMessage()), false);
+                areahint.util.TextCompat.of(I18nManager.translate("message.error.area.delete") + e.getMessage()), false);
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
-                "删除失败: " + e.getMessage());
+                "閸掔娀娅庢径杈Е: " + e.getMessage());
         }
     }
 
     /**
-     * 取消Delete流程
+     * 閸欐牗绉稤elete濞翠胶鈻?
      */
     public void cancelDelete() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel")), false);
+        MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.cancel")), false);
         resetState();
     }
 
     /**
-     * 重置状态
+     * 闁插秶鐤嗛悩鑸碘偓?
      */
     private void resetState() {
         currentState = DeleteState.IDLE;
@@ -197,12 +197,12 @@ public class DeleteManager {
     }
 
     /**
-     * 获取当前维度的文件名
+     * 閼惧嘲褰囪ぐ鎾冲缂佹潙瀹抽惃鍕瀮娴犺泛鎮?
      */
     private String getFileNameForCurrentDimension() {
         if (currentDimension == null) {
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
-                "currentDimension 为 null");
+                "currentDimension 娑?null");
             return null;
         }
 
@@ -210,10 +210,10 @@ public class DeleteManager {
 
         if (fileName == null) {
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
-                "无法为维度 " + currentDimension + " 获取文件名");
+                "Could not resolve dimension file for " + currentDimension);
         } else {
             ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
-                "维度 " + currentDimension + " 对应文件: " + fileName);
+                "Dimension " + currentDimension + " uses file: " + fileName);
         }
 
         return fileName;

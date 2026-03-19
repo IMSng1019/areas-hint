@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 客户端维度域名交互管理器
- * 管理 dimensionalityname 和 dimensionalitycolor 的交互流程
+ * 瀹㈡埛绔淮搴﹀煙鍚嶄氦浜掔鐞嗗櫒
+ * 绠＄悊 dimensionalityname 鍜?dimensionalitycolor 鐨勪氦浜掓祦绋?
  */
 public class DimensionalNameUIManager {
 
@@ -42,7 +42,7 @@ public class DimensionalNameUIManager {
         return instance;
     }
 
-    // ===== dimensionalityname 流程 =====
+    // ===== dimensionalityname 娴佺▼ =====
 
     public void startDimName() {
         if (currentState != State.IDLE) {
@@ -70,13 +70,13 @@ public class DimensionalNameUIManager {
 
     public void confirmDimName() {
         if (currentState != State.DIMNAME_CONFIRM) return;
-        // 发送命令到服务端执行实际更改
+        // 鍙戦€佸懡浠ゅ埌鏈嶅姟绔墽琛屽疄闄呮洿鏀?
         sendServerCommand("dimname_apply:" + selectedDimensionId + ":" + newName);
         sendMsg(I18nManager.translate("gui.prompt.area.dimension.modify"));
         resetState();
     }
 
-    // ===== dimensionalitycolor 流程 =====
+    // ===== dimensionalitycolor 娴佺▼ =====
 
     public void startDimColor() {
         if (currentState != State.IDLE) {
@@ -117,7 +117,7 @@ public class DimensionalNameUIManager {
         resetState();
     }
 
-    // ===== 通用 =====
+    // ===== 閫氱敤 =====
 
     public void cancel() {
         sendMsg(I18nManager.translate("gui.message.cancel"));
@@ -136,17 +136,17 @@ public class DimensionalNameUIManager {
     private void sendMsg(String msg) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of(msg), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(msg), false);
         }
     }
 
     /**
-     * 通过聊天命令发送请求到服务端
+     * 閫氳繃鑱婂ぉ鍛戒护鍙戦€佽姹傚埌鏈嶅姟绔?
      */
     private void sendServerCommand(String action) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            // 通过网络发送到服务端处理
+            // 閫氳繃缃戠粶鍙戦€佸埌鏈嶅姟绔鐞?
             areahint.network.ClientDimNameNetworking.sendToServer(action);
         }
     }

@@ -10,70 +10,70 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 /**
- * SubtitleSize用户界面系统
- * 使用聊天消息和可点击组件实现交互
+ * SubtitleSize闁活潿鍔嶉崺娑㈡偩瀹€鍕〃缂侇垵宕电划?
+ * 濞达綀娉曢弫銈夋嚂婵犲倶浜繛鎴濈墛娴煎懘宕仦钘夎闁绘劗鎳撻崵顔剧磼閸曨亝顐介悗鍦仧楠炲洦绂嶉妶鍕瀺
  */
 public class SubtitleSizeUI {
 
     /**
-     * 显示大小选择界面
-     * @param currentSize 当前大小
+     * 闁哄嫬澧介妵姘緞瑜嶉惃顒勬焻婢跺顏ラ柣锝呯焸濞?
+     * @param currentSize 鐟滅増鎸告晶鐘冲緞瑜嶉惃?
      */
     public static void showSizeSelectionScreen(String currentSize) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        client.player.sendMessage(Text.of(I18nManager.translate("gui.title.general")), false);
-        client.player.sendMessage(Text.of(I18nManager.translate("gui.message.general_8") + getSizeDisplayName(currentSize)), false);
-        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.general_3")), false);
-        client.player.sendMessage(Text.of(""), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("gui.title.general")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("gui.message.general_8") + getSizeDisplayName(currentSize)), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("gui.prompt.general_3")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(""), false);
 
-        // 第一行按钮：极大、大、较大、中
-        MutableText row1 = Text.empty()
+        // 缂佹鍏涚粩瀵告偘鐏炴儳鐦婚梺绛嬪櫙缁变即寮告担鎼炰海闁靛棔绀侀妵鍥Υ娴ｇ晫绐涘鍫嗕讲鍋撴担鐤幀
+        MutableText row1 = areahint.util.TextCompat.empty()
             .append(createSizeButton(I18nManager.translate("message.message.general_193"), "extra_large", "§d"))
-            .append(Text.of("  "))
+            .append(areahint.util.TextCompat.of("  "))
             .append(createSizeButton(I18nManager.translate("message.message.general_104"), "large", "§b"))
-            .append(Text.of("  "))
+            .append(areahint.util.TextCompat.of("  "))
             .append(createSizeButton(I18nManager.translate("message.message.general_225"), "medium_large", "§a"))
-            .append(Text.of("  "))
+            .append(areahint.util.TextCompat.of("  "))
             .append(createSizeButton(I18nManager.translate("message.message.general_58"), "medium", "§e"));
 
-        // 第二行按钮：较小、小、极小
-        MutableText row2 = Text.empty()
+        // 缂佹鍏涚花鈺冩偘鐏炴儳鐦婚梺绛嬪櫙缁辩増娼忛崘銊ф瘓闁靛棔绀侀惃顒勫Υ娴ｅ湱鈧剛浜?
+        MutableText row2 = areahint.util.TextCompat.empty()
             .append(createSizeButton(I18nManager.translate("message.message.general_226"), "medium_small", "§6"))
-            .append(Text.of("  "))
+            .append(areahint.util.TextCompat.of("  "))
             .append(createSizeButton(I18nManager.translate("message.message.general_111"), "small", "§c"))
-            .append(Text.of("  "))
+            .append(areahint.util.TextCompat.of("  "))
             .append(createSizeButton(I18nManager.translate("message.message.general_194"), "extra_small", "§4"));
 
-        // 取消按钮
-        MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
+        // 闁告瑦鐗楃粔鐑藉箰婢舵劖灏?
+        MutableText cancelButton = areahint.util.TextCompat.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlesize cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_4"))))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("gui.message.cancel_4"))))
                 .withColor(Formatting.RED));
 
         client.player.sendMessage(row1, false);
         client.player.sendMessage(row2, false);
-        client.player.sendMessage(Text.of(""), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(""), false);
         client.player.sendMessage(cancelButton, false);
-        client.player.sendMessage(Text.of(I18nManager.translate("gui.prompt.general")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("gui.prompt.general")), false);
     }
 
     /**
-     * 创建大小选择按钮
+     * 闁告帗绋戠紓鎾村緞瑜嶉惃顒勬焻婢跺顏ラ柟绋款樀閹?
      */
     private static MutableText createSizeButton(String displayName, String sizeValue, String colorCode) {
-        return Text.literal(colorCode + "[" + displayName + "]")
+        return areahint.util.TextCompat.literal(colorCode + "[" + displayName + "]")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint subtitlesize select " + sizeValue))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("gui.message.general_2")))));
+                    areahint.util.TextCompat.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("gui.message.general_2")))));
     }
 
     /**
-     * 获取大小的显示名称
+     * 闁兼儳鍢茶ぐ鍥ㄥ緞瑜嶉惃顒勬儍閸曨剚鈻旂紒鈧崫鍕€崇紒?
      */
     private static String getSizeDisplayName(String size) {
         switch (size) {
@@ -97,32 +97,32 @@ public class SubtitleSizeUI {
     }
 
     /**
-     * 显示错误消息
+     * 闁哄嫬澧介妵姘舵煥濞嗘帩鍤栨繛鎴濈墛娴?
      */
     public static void showError(String message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.general_2") + message), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("easyadd.error.general_2") + message), false);
         }
     }
 
     /**
-     * 显示成功消息
+     * 闁哄嫬澧介妵姘跺箣閹邦剙顫犳繛鎴濈墛娴?
      */
     public static void showSuccess(String message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§a" + message), false);
+            client.player.sendMessage(areahint.util.TextCompat.of("閹间繘" + message), false);
         }
     }
 
     /**
-     * 显示信息消息
+     * 闁哄嫬澧介妵姘┍閳╁啩绱栨繛鎴濈墛娴?
      */
     public static void showInfo(String message) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            client.player.sendMessage(Text.of("§7" + message), false);
+            client.player.sendMessage(areahint.util.TextCompat.of("閹?" + message), false);
         }
     }
 }

@@ -31,11 +31,11 @@ public class DivideAreaManager {
     private boolean isRecording = false;
     private boolean chatListenerRegistered = false;
 
-    // 分割后的两组顶点
+    // 闂備礁鎲＄敮鎺懳涘Δ浣虹彾濠电姴娲ょ憴锕傚箹鏉堝墽绋婚柣锝呭船閳藉骞橀崡鐐╁亾濡ゅ啫鍨濈€广儱妫庢禍婊堟煕閹捐尙顦﹀ù?
     private List<Double[]> area1Vertices;
     private List<Double[]> area2Vertices;
 
-    // 两个新域名的配置
+    // 濠电偞鍨堕幐鍫曞磹閹剧粯鐓傛繝濠傜墕濡﹢鏌℃径搴㈢《闁告鏁婚弻娑橆潩椤掑倐銈嗙箾閸喎鐏撮柡灞斤工椤撳ジ宕堕埡鍌溾偓?
     private AreaData area1Config;
     private AreaData area2Config;
 
@@ -63,7 +63,7 @@ public class DivideAreaManager {
 
     private void handleChatInput(String input) {
         if (client.player == null) return;
-        // 去掉 <玩家名> 前缀
+        // 闂備礁鎲￠…鍥╁垝椤栨粍鏆滈柍?<闂備胶绮竟鏇㈠疾濞戙埄鏁婄€广儱顦憴? 闂備礁鎲￠幐鍝ョ矓閸撲焦顫?
         if (input.startsWith("<") && input.contains(">")) {
             int end = input.indexOf(">") + 1;
             if (end < input.length()) input = input.substring(end).trim();
@@ -134,7 +134,7 @@ public class DivideAreaManager {
     public boolean isRecording() { return isRecording; }
     public State getState() { return state; }
 
-    // ===== 第1阶段：启动和域名选择 =====
+    // ===== 缂?闂傚倸鍊搁崯鎶藉春閺嶎収鏁婄€光偓閸曨剚娅栧┑顔斤供閸撴岸宕曞▎鎾寸厱闁哄倽顕ф俊濂告煙閾氬倸宓嗙€规洘妞介幃銏ゆ煥鐎ｎ亖鍋撻幎鑺モ拺妞ゆ劑鍩勫Σ褰掓倵?=====
 
     public void start() {
         if (client.player == null) return;
@@ -189,7 +189,7 @@ public class DivideAreaManager {
         sendMsg(I18nManager.translate("dividearea.message.record.continue") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("dividearea.message.record"), Formatting.GREEN);
     }
 
-    // ===== 第2阶段：记录顶点 =====
+    // ===== 缂?闂傚倸鍊搁崯鎶藉春閺嶎収鏁婄€光偓閸曨剚娅栧┑顔缴戦崜姘跺船閸撲焦鍠愰柣妤€鐗婄粈瀣煏閸℃韬柟?=====
 
     public void recordCurrentPosition() {
         if (!isRecording || client.player == null) return;
@@ -206,7 +206,7 @@ public class DivideAreaManager {
         ui.showPointRecordedOptions(newVertices.size());
     }
 
-    // ===== 第3阶段：处理分割 =====
+    // ===== 缂?闂傚倸鍊搁崯鎶藉春閺嶎収鏁婄€光偓閸曨剚娅栧┑顔斤供閸擄箑危闁秵鐓熼柣鎰级椤ユ粓鏌涢妸銉╁弰鐎?=====
 
     public void finishAndSave() {
         if (!isRecording || client.player == null) return;
@@ -226,17 +226,17 @@ public class DivideAreaManager {
     }
 
     private void processDivision() {
-        // 1. 高度验证
+        // 1. 濠德板€曢崐褰掓晪闁诲海顢婂▍鏇€冮妷銉ф殕闁告劦浜濋～?
         if (!validateAltitude()) return;
 
-        // 2. 提取原域名顶点
+        // 2. 闂備礁婀辩划顖炲礉閺嚶颁汗闁搞儺鍓欓崒銊╂煟閺冨牜妫戦柛妯兼暬閺屾稑顫濋鍌傃囨煏閸℃韬柟?
         List<Double[]> origVerts = extractOriginalVertices();
         if (origVerts.size() < 3) {
             sendMsg(I18nManager.translate("dividearea.error.area.vertex"), Formatting.RED);
             reset(); return;
         }
 
-        // 3. 过滤外部顶点，计算边界点
+        // 3. 闂佸搫顦弲娑樏洪敃鍌氱闁靛牆妫楃欢鐐烘煛瀹ュ骸骞栭柛鏂诲劚椤啴濡堕崨顓ф殺闂佺顑戠紞渚€寮鍛殕闁告劖鍎抽幃浣虹磽娴ｅ搫校妞ゃ劌顦辩划鈺呮偄閸忕厧浠奸悗鍏夊亾闁逞屽墴瀹?
         List<Double[]> processedVerts = new ArrayList<>();
         List<Double[]> boundaryPoints = new ArrayList<>();
         processVerticesAndBoundary(origVerts, processedVerts, boundaryPoints);
@@ -246,15 +246,15 @@ public class DivideAreaManager {
             reset(); return;
         }
 
-        // 取前两个边界点
+        // 闂備礁鎲￠悷锕傛偋閺囩喐娅犻柣妯虹－閳绘棃鏌曢崼婵嗩伃闁搞倕顑夊鍫曞醇濠靛洩纭€闂佸搫鎷嬮崑濠囧箖?
         Double[] bp1 = boundaryPoints.get(0);
         Double[] bp2 = boundaryPoints.get(1);
 
-        // 4. 找到边界点在原域名边上的位置
+        // 4. 闂備胶鎳撻悘姘跺磿閹惰棄鏄ラ悘鐐靛亾缂嶅洭鏌涢敂璇插箺婵炲懏娲熼弻锝夊箛椤旇棄娈屽┑鐘亾妞ゅ繐鐗嗛崒銊╂煟閺冨牜妫戦柛妯兼暬閺屾稑顫濋鍌傘儳绱掗弮鍌氭瀾缂佸顦扮换婵嬪礋椤掑倹娈稿┑鐐舵彧缁茬晫绮旈崼鏇熷仾?
         int bp1Edge = findEdgeIndex(bp1, origVerts);
         int bp2Edge = findEdgeIndex(bp2, origVerts);
 
-        // 5. 将原域名顶点分成两组
+        // 5. 闂佽绻愮换鎰涘Δ鍐╂殰妞ゆ劧绠戦弰銉╂煟閺冨牊鏁遍柛濠傚暱椤啴濡堕崨顓ф殺闂佺顑戠紞浣哥暦濮樿泛骞㈡俊顖濇娴滐絾绻涢幋鐐村蔼闁稿﹥顨堥崚?
         splitOriginalVertices(origVerts, bp1, bp2, bp1Edge, bp2Edge, processedVerts);
 
         if (area1Vertices == null || area1Vertices.size() < 3 || area2Vertices == null || area2Vertices.size() < 3) {
@@ -264,15 +264,15 @@ public class DivideAreaManager {
 
         sendMsg(I18nManager.translate("dividearea.message.finish.divide") + area1Vertices.size() + I18nManager.translate("dividearea.message.vertex_2") + area2Vertices.size() + I18nManager.translate("dividearea.message.vertex"), Formatting.GREEN);
 
-        // 7. 初始化两个域名配置（继承原域名属性）
+        // 7. 闂備礁鎲＄敮妤冩崲閸岀儑缍栭柟鐗堟緲缁€宀勬煛瀹ュ繒鐣抽柍宄扮墕閳藉骞欓崘褏鐩庨梺缁樻尰閻熲晛鐣烽妷銉悑濠㈣泛锕ょ挧瀣磽閸屾艾鏋ら柛锝庡灣濡叉劕鈻庨幋鐘碉紲閻熸粌瀛╃粩鐔封枎閹惧啿鍋嶉梺缁樻椤ユ捇宕㈤悽鍛婄厱婵﹩鍓涘瓭闂佹椿鍋呴敃銏ょ嵁閳ь剛鎲稿┑鍫燁潟?
         area1Config = createBaseConfig(area1Vertices);
         area2Config = createBaseConfig(area2Vertices);
 
-        // 8. 开始配置区域1
+        // 8. 闁诲孩顔栭崰鎺楀磻閹炬枼鏀芥い鏃傗拡閸庢棃鏌涘Ο绋库偓妤冩閺冨牜鏁婇柣鎾抽叄濞堫剟姊?
         startArea1Config();
     }
 
-    // ===== 第4阶段：EasyAdd式配置流程 =====
+    // ===== 缂?闂傚倸鍊搁崯鎶藉春閺嶎収鏁婄€光偓閸曨剚娅栧┑鐐叉閵囨唶yAdd闁诲孩顔栭崰鏍崲濮椻偓瀹曘垽濡堕崶鈺冿紴濡炪倖姊婚弲顐﹀Χ閿斿墽纾?=====
 
     private void startArea1Config() {
         state = State.AREA1_NAME;
@@ -292,9 +292,9 @@ public class DivideAreaManager {
 
     private void showCancelButton() {
         if (client.player == null) return;
-        net.minecraft.text.MutableText cancel = Text.literal(I18nManager.translate("addhint.error.cancel")).setStyle(net.minecraft.text.Style.EMPTY
+        net.minecraft.text.MutableText cancel = areahint.util.TextCompat.literal(I18nManager.translate("addhint.error.cancel")).setStyle(net.minecraft.text.Style.EMPTY
             .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
-            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("dividearea.message.cancel.divide"))))
             .withColor(Formatting.RED));
         client.player.sendMessage(cancel, false);
     }
@@ -357,12 +357,12 @@ public class DivideAreaManager {
         if (state == State.AREA1_COLOR) {
             area1Config.setColor(color);
             sendMsg(I18nManager.translate("dividearea.message.color") + color, Formatting.GREEN);
-            // 区域1配置完成，开始配置区域2
+            // 闂備礁鎲￠悧鏇㈠箹椤愶附鍋?闂傚倷鐒﹀妯肩矓閸洘鍋柛鈩冪憿閸嬫捇鎮烽悧鍫熸嫳闂佹悶鍔嶅畝鎼佸极瀹ュ洣娌柣锝呯灱閿涙稒绻濆▓鍨灈妞ゆ垵顦靛畷銏ゅΧ閸モ晝锛炲銈嗘⒒閸樠囨⒕濮椻偓閺?
             startArea2Config();
         } else if (state == State.AREA2_COLOR) {
             area2Config.setColor(color);
             sendMsg(I18nManager.translate("dividearea.message.color_2") + color, Formatting.GREEN);
-            // 两个区域都配置完成，发送到服务端
+            // 濠电偞鍨堕幐鍫曞磹閹剧粯鐓傛繝濠傜墕缁€宀勬煕濠靛棗顏柛妯兼暬濮婃椽顢欓懡銈囩厯闂佸憡菧閸婃妲愰弮鍫晩闁兼祴鏅滃▓顕€姊洪悷鎵憼闁告枮鍛潟婵犻潧顑呴惌妤呮煙鏉堟崘鍚傞柛瀣尰閹峰懐绮欑捄銊ュ笓闂備礁鎼悧鍡欑矓鐎涙ɑ鍙忛柣鏃囨閸?
             sendToServer();
         }
     }
@@ -381,31 +381,31 @@ public class DivideAreaManager {
         reset();
     }
 
-    // ===== UI辅助方法 =====
+    // ===== UI闂佸搫顦悧鍡涘箠鎼淬垺鍙忔い蹇撶墕濡﹢鎮峰▎蹇擃伀闁?=====
 
     private void showLevelSelection(int areaNum) {
         if (client.player == null) return;
         sendMsg(I18nManager.translate("dividearea.prompt.general_2") + areaNum + I18nManager.translate("dividearea.message.level_3"), Formatting.GREEN);
 
-        net.minecraft.text.MutableText l1 = Text.literal(I18nManager.translate("dividearea.button.area")).setStyle(net.minecraft.text.Style.EMPTY
+        net.minecraft.text.MutableText l1 = areahint.util.TextCompat.literal(I18nManager.translate("dividearea.button.area")).setStyle(net.minecraft.text.Style.EMPTY
             .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea level 1"))
-            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.prompt.area_2"))))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("dividearea.prompt.area_2"))))
             .withColor(Formatting.AQUA));
-        net.minecraft.text.MutableText l2 = Text.literal(I18nManager.translate("dividearea.button.area_3")).setStyle(net.minecraft.text.Style.EMPTY
+        net.minecraft.text.MutableText l2 = areahint.util.TextCompat.literal(I18nManager.translate("dividearea.button.area_3")).setStyle(net.minecraft.text.Style.EMPTY
             .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea level 2"))
-            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.prompt.area_3"))))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("dividearea.prompt.area_3"))))
             .withColor(Formatting.YELLOW));
-        net.minecraft.text.MutableText l3 = Text.literal(I18nManager.translate("dividearea.button.area_2")).setStyle(net.minecraft.text.Style.EMPTY
+        net.minecraft.text.MutableText l3 = areahint.util.TextCompat.literal(I18nManager.translate("dividearea.button.area_2")).setStyle(net.minecraft.text.Style.EMPTY
             .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea level 3"))
-            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.prompt.area_4"))))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("dividearea.prompt.area_4"))))
             .withColor(Formatting.LIGHT_PURPLE));
-        net.minecraft.text.MutableText cancel = Text.literal(I18nManager.translate("addhint.error.cancel")).setStyle(net.minecraft.text.Style.EMPTY
+        net.minecraft.text.MutableText cancel = areahint.util.TextCompat.literal(I18nManager.translate("addhint.error.cancel")).setStyle(net.minecraft.text.Style.EMPTY
             .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
-            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("dividearea.message.cancel.divide"))))
             .withColor(Formatting.RED));
 
-        client.player.sendMessage(Text.empty().append(l1).append(Text.of("  ")).append(l2).append(Text.of("  ")).append(l3).append(Text.of("  ")).append(cancel), false);
-        sendMsg("§7等级说明：1=顶级域名，2/3=次级域名", Formatting.GRAY);
+        client.player.sendMessage(areahint.util.TextCompat.empty().append(l1).append(areahint.util.TextCompat.of("  ")).append(l2).append(areahint.util.TextCompat.of("  ")).append(l3).append(areahint.util.TextCompat.of("  ")).append(cancel), false);
+        sendMsg("Level guide: 1 = top-level area, 2/3 = child area", Formatting.GRAY);
     }
 
     private void showBaseSelection(int areaNum) {
@@ -417,19 +417,19 @@ public class DivideAreaManager {
         for (AreaData a : allAreas) {
             if (a.getLevel() == targetLevel) {
                 String dn = areahint.util.AreaDataConverter.getDisplayName(a);
-                net.minecraft.text.MutableText btn = Text.literal("§6[" + dn + "]").setStyle(net.minecraft.text.Style.EMPTY
+                net.minecraft.text.MutableText btn = areahint.util.TextCompat.literal("§6[" + dn + "]").setStyle(net.minecraft.text.Style.EMPTY
                     .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND,
                         "/areahint dividearea base \"" + a.getName() + "\""))
                     .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT,
-                        Text.of(I18nManager.translate("addhint.prompt.general") + dn + I18nManager.translate("dividearea.message.area.parent"))))
+                        areahint.util.TextCompat.of(I18nManager.translate("addhint.prompt.general") + dn + I18nManager.translate("dividearea.message.area.parent"))))
                     .withColor(Formatting.GOLD));
                 client.player.sendMessage(btn, false);
             }
         }
 
-        net.minecraft.text.MutableText cancel = Text.literal(I18nManager.translate("addhint.error.cancel")).setStyle(net.minecraft.text.Style.EMPTY
+        net.minecraft.text.MutableText cancel = areahint.util.TextCompat.literal(I18nManager.translate("addhint.error.cancel")).setStyle(net.minecraft.text.Style.EMPTY
             .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
-            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("dividearea.message.cancel.divide"))))
             .withColor(Formatting.RED));
         client.player.sendMessage(cancel, false);
     }
@@ -439,55 +439,55 @@ public class DivideAreaManager {
         sendMsg(I18nManager.translate("dividearea.title.general") + areaNum + I18nManager.translate("dividearea.title.color"), Formatting.GOLD);
         sendMsg(I18nManager.translate("dividearea.prompt.area.color"), Formatting.GREEN);
 
-        net.minecraft.text.MutableText row1 = Text.empty()
-            .append(colorBtn(I18nManager.translate("gui.message.general_24"), "#FFFFFF", "§f")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_23"), "#808080", "§7")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_18"), "#555555", "§8")).append(Text.of("  "))
+        net.minecraft.text.MutableText row1 = areahint.util.TextCompat.empty()
+            .append(colorBtn(I18nManager.translate("gui.message.general_24"), "#FFFFFF", "§f")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_23"), "#808080", "§7")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_18"), "#555555", "§8")).append(areahint.util.TextCompat.of("  "))
             .append(colorBtn(I18nManager.translate("gui.message.general_31"), "#000000", "§0"));
-        net.minecraft.text.MutableText row2 = Text.empty()
-            .append(colorBtn(I18nManager.translate("gui.message.general_19"), "#AA0000", "§4")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_27"), "#FF0000", "§c")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_25"), "#FF55FF", "§d")).append(Text.of("  "))
+        net.minecraft.text.MutableText row2 = areahint.util.TextCompat.empty()
+            .append(colorBtn(I18nManager.translate("gui.message.general_19"), "#AA0000", "§4")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_27"), "#FF0000", "§c")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_25"), "#FF55FF", "§d")).append(areahint.util.TextCompat.of("  "))
             .append(colorBtn(I18nManager.translate("gui.message.general_17"), "#FFAA00", "§6"));
-        net.minecraft.text.MutableText row3 = Text.empty()
-            .append(colorBtn(I18nManager.translate("gui.message.general_30"), "#FFFF55", "§e")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_28"), "#55FF55", "§a")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_20"), "#00AA00", "§2")).append(Text.of("  "))
+        net.minecraft.text.MutableText row3 = areahint.util.TextCompat.empty()
+            .append(colorBtn(I18nManager.translate("gui.message.general_30"), "#FFFF55", "§e")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_28"), "#55FF55", "§a")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_20"), "#00AA00", "§2")).append(areahint.util.TextCompat.of("  "))
             .append(colorBtn(I18nManager.translate("gui.message.general_13"), "#55FFFF", "§b"));
-        net.minecraft.text.MutableText row4 = Text.empty()
-            .append(colorBtn(I18nManager.translate("gui.message.general_22"), "#00AAAA", "§3")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_29"), "#5555FF", "§9")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_21"), "#0000AA", "§1")).append(Text.of("  "))
+        net.minecraft.text.MutableText row4 = areahint.util.TextCompat.empty()
+            .append(colorBtn(I18nManager.translate("gui.message.general_22"), "#00AAAA", "§3")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_29"), "#5555FF", "§9")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_21"), "#0000AA", "§1")).append(areahint.util.TextCompat.of("  "))
             .append(colorBtn(I18nManager.translate("gui.message.general_26"), "#AA00AA", "§5"));
-        net.minecraft.text.MutableText row5 = Text.empty()
-            .append(colorBtn(I18nManager.translate("gui.message.general_15"), "FLASH_BW_ALL", "§7")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_14"), "FLASH_RAINBOW_ALL", "§b")).append(Text.of("  "))
-            .append(colorBtn(I18nManager.translate("gui.message.general_12"), "FLASH_BW_CHAR", "§8")).append(Text.of("  "))
+        net.minecraft.text.MutableText row5 = areahint.util.TextCompat.empty()
+            .append(colorBtn(I18nManager.translate("gui.message.general_15"), "FLASH_BW_ALL", "§7")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_14"), "FLASH_RAINBOW_ALL", "§b")).append(areahint.util.TextCompat.of("  "))
+            .append(colorBtn(I18nManager.translate("gui.message.general_12"), "FLASH_BW_CHAR", "§8")).append(areahint.util.TextCompat.of("  "))
             .append(colorBtn(I18nManager.translate("gui.message.general_11"), "FLASH_RAINBOW_CHAR", "§d"));
 
         client.player.sendMessage(row1, false);
         client.player.sendMessage(row2, false);
         client.player.sendMessage(row3, false);
         client.player.sendMessage(row4, false);
-        client.player.sendMessage(Text.of(""), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(""), false);
         sendMsg(I18nManager.translate("gui.message.general_4"), Formatting.GOLD);
         client.player.sendMessage(row5, false);
-        client.player.sendMessage(Text.of(""), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(""), false);
 
-        net.minecraft.text.MutableText cancel = Text.literal(I18nManager.translate("addhint.error.cancel")).setStyle(net.minecraft.text.Style.EMPTY
+        net.minecraft.text.MutableText cancel = areahint.util.TextCompat.literal(I18nManager.translate("addhint.error.cancel")).setStyle(net.minecraft.text.Style.EMPTY
             .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea cancel"))
-            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("dividearea.message.cancel.divide"))))
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("dividearea.message.cancel.divide"))))
             .withColor(Formatting.RED));
         client.player.sendMessage(cancel, false);
     }
 
     private net.minecraft.text.MutableText colorBtn(String name, String value, String mc) {
-        return Text.literal(mc + "[" + name + "]").setStyle(net.minecraft.text.Style.EMPTY
+        return areahint.util.TextCompat.literal(mc + "[" + name + "]").setStyle(net.minecraft.text.Style.EMPTY
             .withClickEvent(new net.minecraft.text.ClickEvent(net.minecraft.text.ClickEvent.Action.RUN_COMMAND, "/areahint dividearea color " + value))
-            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.prompt.general") + name + I18nManager.translate("dividearea.message.area.color")))));
+            .withHoverEvent(new net.minecraft.text.HoverEvent(net.minecraft.text.HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("addhint.prompt.general") + name + I18nManager.translate("dividearea.message.area.color")))));
     }
 
-    // ===== 几何算法 =====
+    // ===== 闂備礁鎲￠崹瑙勬叏瀹曞洨绀婄€广儱娲ㄦ稉宥嗕繆閵堝嫯鍏岄柕?=====
 
     private boolean validateAltitude() {
         if (client.player == null || selectedArea.getAltitude() == null) return true;
@@ -517,7 +517,7 @@ public class DivideAreaManager {
     }
 
     private void processVerticesAndBoundary(List<Double[]> origVerts, List<Double[]> processedVerts, List<Double[]> boundaryPoints) {
-        // 计算分割线与原域名边界的所有交点
+        // 闂佽崵濮崇欢銈囨閺囥垺鍋╁┑鐘宠壘缁€鍡涙煕閳╁喚娈旀い銉ョ箳缁辨帡骞嗚娴犳帞绱掑Δ鈧惌鍌氱暦閵忋倖鍋勫瀣楠炲秹姊洪崨濠呭缂佸顥撶划鈺呮偄閸忕厧浠奸悗鍏夊亾闁逞屽墮閳绘捇骞嬮敃鈧粻銉╂煃瑜滈崜鐔奉嚕閸偄绶炲璺侯儏閺€顓㈡⒑?
         for (int i = 0; i < newVertices.size() - 1; i++) {
             Double[] p1 = newVertices.get(i);
             Double[] p2 = newVertices.get(i + 1);
@@ -528,12 +528,12 @@ public class DivideAreaManager {
             }
         }
 
-        // 保留在原域名内部的顶点
+        // 濠电儑绲藉ú锔炬崲閸曨垰姹查柍褜鍓熼弻娑㈡晜閸濆嫬顬堥柣銏╁灱閸嬪﹤鐣峰ú顏呭亜闂佸灝顑呴埀顒佸▕閺屾盯骞囬浣告畻闂佺瀛╅幐鎶藉箚閸愵喖绀嬫い鏍ㄇ氶崑鎾寸節閸ャ劌鈧?
         for (Double[] v : newVertices) {
             if (isPointInPolygon(v, origVerts)) processedVerts.add(v);
         }
 
-        // 如果边界点不足2个，从首尾点找最近边上的最近点作为边界点
+        // 濠电姷顣介埀顒€鍟块埀顒€缍婇幃妯诲緞鐎ｎ偆绉堕梺闈╁瘜閸樿棄鈻嶉弴銏＄厽闁圭増澹嬮崑鎾斥槈濮樿鲸鍠掗梺?濠电偞鍨堕幖鈺傜妞嬪孩顫曟繝闈涙川椤╃兘骞栭幖顓犲帥婵炲瓨娲熼幃妯跨疀閹炬枼鎸冮梺绋款儜缂嶄線鐛澶嬪€锋い鎺嶆缁垶鏌℃径鍡樻珕闁搞劏鍋愮划鈺呮偄閸濄儮鏋栨繝鐢靛Т鐎氼參鎮鹃柆宥嗙厸闁割偅鑹炬禍楣冩煛婢跺棙娅嗛柛銊ョ秺瀹曟垿鏁愰崱妯侯€撳┑鐘才堥崑鎾绘偣閹邦喖鏋戞繛鐓庣箻瀹曠兘顢橀悢鍝ュ涧闂?
         if (boundaryPoints.size() < 2) {
             Double[] first = newVertices.get(0);
             Double[] last = newVertices.get(newVertices.size() - 1);
@@ -562,7 +562,7 @@ public class DivideAreaManager {
                                         int bp1Edge, int bp2Edge, List<Double[]> innerVerts) {
         int n = origVerts.size();
 
-        // 区域1: bp1 → 内部分割点 → bp2 → 原域名顶点(bp2Edge+1..bp1Edge) → 回到bp1
+        // 闂備礁鎲￠悧鏇㈠箹椤愶附鍋?: bp1 闂?闂備礁鎲￠崝鏇㈠箠濮椻偓瀹曟洟骞橀鑲╊槴闂佺硶鍓濋〃鍛此夎箛娑欑厽?闂?bp2 闂?闂備礁鎲￠…鍥窗鎼淬劍鍋傛繛鍡樻尭鐟欙妇鈧箍鍎遍ˇ顓㈠焵椤掆偓閿曨亪骞?bp2Edge+1..bp1Edge) 闂?闂備焦鎮堕崕鎶藉磻濞戙垹鏄ラ悗瑙勪粻1
         area1Vertices = new ArrayList<>();
         area1Vertices.add(bp1);
         area1Vertices.addAll(innerVerts);
@@ -573,7 +573,7 @@ public class DivideAreaManager {
             idx = (idx + 1) % n;
         }
 
-        // 区域2: bp2 → 内部分割点(反转) → bp1 → 原域名顶点(bp1Edge+1..bp2Edge) → 回到bp2
+        // 闂備礁鎲￠悧鏇㈠箹椤愶附鍋?: bp2 闂?闂備礁鎲￠崝鏇㈠箠濮椻偓瀹曟洟骞橀鑲╊槴闂佺硶鍓濋〃鍛此夎箛娑欑厽?闂備礁鎲￠悷銉х矓瀹勬噴? 闂?bp1 闂?闂備礁鎲￠…鍥窗鎼淬劍鍋傛繛鍡樻尭鐟欙妇鈧箍鍎遍ˇ顓㈠焵椤掆偓閿曨亪骞?bp1Edge+1..bp2Edge) 闂?闂備焦鎮堕崕鎶藉磻濞戙垹鏄ラ悗瑙勪粻2
         area2Vertices = new ArrayList<>();
         area2Vertices.add(bp2);
         List<Double[]> reversedInner = new ArrayList<>(innerVerts);
@@ -632,7 +632,7 @@ public class DivideAreaManager {
         return sv;
     }
 
-    // ===== 几何工具方法 =====
+    // ===== 闂備礁鎲￠崹瑙勬叏瀹曞洨绀婄€广儱鎷嬮崯鍛存煏婢跺牆鍔氱€电増妫冮弻锟犲磼濠垫劖缍堢紒?=====
 
     private boolean isPointInPolygon(Double[] point, List<Double[]> polygon) {
         if (polygon.size() < 3) return false;
@@ -670,7 +670,7 @@ public class DivideAreaManager {
         return Math.sqrt(dx*dx+dy*dy);
     }
 
-    // ===== 权限和数据加载 =====
+    // ===== 闂備礁鎼ˇ顖炲疮閺夋埈鐎舵繛宸簻濡炰粙鎮橀悙闈涗壕婵炲牆鐖奸弻鐔烘嫚閳ヨ櫕鐏堟繝娈垮枤閸嬬偛顭?=====
 
     private List<AreaData> getModifiableAreas() {
         List<AreaData> result = new ArrayList<>();
@@ -717,7 +717,7 @@ public class DivideAreaManager {
 
     private void sendMsg(String msg, Formatting fmt) {
         if (client.player != null)
-            client.player.sendMessage(Text.literal(msg).formatted(fmt), false);
+            client.player.sendMessage(areahint.util.TextCompat.literal(msg).formatted(fmt), false);
     }
 
     public void reset() {

@@ -18,33 +18,33 @@ import java.util.List;
 
 public class BoundVizRenderer {
 
-    // ========== 缓存数据结构 ==========
+    // ========== 缂撳瓨鏁版嵁缁撴瀯 ==========
     private static class CachedArea {
-        List<int[]> triangles;          // 预计算的三角剖分
-        List<AreaData.Vertex> vertices; // 顶点引用（方块交接线计算用）
-        float[] vx, vz;                // 预计算的float顶点坐标
+        List<int[]> triangles;          // 棰勮绠楃殑涓夎鍓栧垎
+        List<AreaData.Vertex> vertices; // 椤剁偣寮曠敤锛堟柟鍧椾氦鎺ョ嚎璁＄畻鐢級
+        float[] vx, vz;                // 棰勮绠楃殑float椤剁偣鍧愭爣
         float minY, maxY;
         float r, g, b;
-        String colorMode; // 闪烁颜色模式（null表示静态颜色）
-        float[] vr, vg, vb; // 单字模式逐顶点颜色
-        // AABB（用于视锥剔除）
+        String colorMode; // 闂儊棰滆壊妯″紡锛坣ull琛ㄧず闈欐€侀鑹诧級
+        float[] vr, vg, vb; // 鍗曞瓧妯″紡閫愰《鐐归鑹?
+        // AABB锛堢敤浜庤閿ュ墧闄わ級
         double aabbMinX, aabbMaxX, aabbMinZ, aabbMaxZ;
-        // 方块交接线缓存
+        // 鏂瑰潡浜ゆ帴绾跨紦瀛?
         List<float[]> blockIntersections;
         int lastPlayerBX, lastPlayerBY, lastPlayerBZ;
     }
 
-    // ========== 静态缓存 ==========
+    // ========== 闈欐€佺紦瀛?==========
     private static final List<CachedArea> cachedAreas = new ArrayList<>();
     private static int cachedVersion = -1;
-    // 视锥平面 [6个平面][a,b,c,d]
+    // 瑙嗛敟骞抽潰 [6涓钩闈[a,b,c,d]
     private static final float[][] frustumPlanes = new float[6][4];
-    // 复用矩阵，避免每帧分配
+    // 澶嶇敤鐭╅樀锛岄伩鍏嶆瘡甯у垎閰?
     private static final Matrix4f vpMatrix = new Matrix4f();
-    // 可见性缓存，避免两个pass重复视锥检测
+    // 鍙鎬х紦瀛橈紝閬垮厤涓や釜pass閲嶅瑙嗛敟妫€娴?
     private static boolean[] visibleFlags = new boolean[0];
 
-    // ========== 主渲染方法 ==========
+    // ========== 涓绘覆鏌撴柟娉?==========
     public static void render(MatrixStack matrices, float tickDelta) {
         BoundVizManager manager = BoundVizManager.getInstance();
         MinecraftClient client = MinecraftClient.getInstance();
@@ -55,10 +55,10 @@ public class BoundVizRenderer {
 
         Vec3d cameraPos = client.gameRenderer.getCamera().getPos();
 
-        // 提取视锥平面（每帧动态更新，跟随玩家视角）
+        // 鎻愬彇瑙嗛敟骞抽潰锛堟瘡甯у姩鎬佹洿鏂帮紝璺熼殢鐜╁瑙嗚锛?
         extractFrustumPlanes(matrices.peek().getPositionMatrix(), RenderSystem.getProjectionMatrix());
 
-        // 更新几何缓存（仅在数据变化时重建）
+        // 鏇存柊鍑犱綍缂撳瓨锛堜粎鍦ㄦ暟鎹彉鍖栨椂閲嶅缓锛?
         if (manager.isEnabled()) {
             updateCache(manager, client);
         }
@@ -91,11 +91,11 @@ public class BoundVizRenderer {
         RenderSystem.disableBlend();
     }
 
-    // ========== 视锥剔除 ==========
+    // ========== 瑙嗛敟鍓旈櫎 ==========
 
     /**
-     * 从VP矩阵提取6个视锥平面（每帧动态更新）
-     * 使用Gribb/Hartmann方法，JOML的m[col][row]命名
+     * 浠嶸P鐭╅樀鎻愬彇6涓閿ュ钩闈紙姣忓抚鍔ㄦ€佹洿鏂帮級
+     * 浣跨敤Gribb/Hartmann鏂规硶锛孞OML鐨刴[col][row]鍛藉悕
      */
     private static void extractFrustumPlanes(Matrix4f view, Matrix4f proj) {
         vpMatrix.load(proj);
@@ -131,7 +131,7 @@ public class BoundVizRenderer {
         frustumPlanes[5][1] = vp[13] - vp[9];
         frustumPlanes[5][2] = vp[14] - vp[10];
         frustumPlanes[5][3] = vp[15] - vp[11];
-        // 归一化
+        // 褰掍竴鍖?
         for (int i = 0; i < 6; i++) {
             float len = (float) Math.sqrt(
                 frustumPlanes[i][0] * frustumPlanes[i][0] +
@@ -153,8 +153,8 @@ public class BoundVizRenderer {
     }
 
     /**
-     * AABB视锥测试（相机相对坐标系）
-     * 对每个平面找P-vertex，若在平面外侧则整个AABB不可见
+     * AABB瑙嗛敟娴嬭瘯锛堢浉鏈虹浉瀵瑰潗鏍囩郴锛?
+     * 瀵规瘡涓钩闈㈡壘P-vertex锛岃嫢鍦ㄥ钩闈㈠渚у垯鏁翠釜AABB涓嶅彲瑙?
      */
     private static boolean isAABBInFrustum(double minX, double minY, double minZ,
                                             double maxX, double maxY, double maxZ,
@@ -173,10 +173,10 @@ public class BoundVizRenderer {
         return true;
     }
 
-    // ========== 缓存管理 ==========
+    // ========== 缂撳瓨绠＄悊 ==========
 
     /**
-     * 更新缓存：仅在版本变化时重建几何数据
+     * 鏇存柊缂撳瓨锛氫粎鍦ㄧ増鏈彉鍖栨椂閲嶅缓鍑犱綍鏁版嵁
      */
     private static void updateCache(BoundVizManager manager, MinecraftClient client) {
         int ver = manager.getVersion();
@@ -192,7 +192,7 @@ public class BoundVizRenderer {
     }
 
     /**
-     * 为单个域名构建缓存：三角剖分、AABB、颜色
+     * 涓哄崟涓煙鍚嶆瀯寤虹紦瀛橈細涓夎鍓栧垎銆丄ABB銆侀鑹?
      */
     private static CachedArea buildAreaCache(AreaData area) {
         List<AreaData.Vertex> verts = area.getVertices();
@@ -202,7 +202,7 @@ public class BoundVizRenderer {
         ca.vertices = verts;
         ca.triangles = earClipTriangulate(verts);
 
-        // 预计算float顶点坐标，避免每帧double→float转换
+        // 棰勮绠梖loat椤剁偣鍧愭爣锛岄伩鍏嶆瘡甯ouble鈫抐loat杞崲
         int n = verts.size();
         ca.vx = new float[n];
         ca.vz = new float[n];
@@ -239,17 +239,17 @@ public class BoundVizRenderer {
             ca.b = rgb[2] / 255.0f;
         }
 
-        // 方块交接线初始化为空，延迟计算
+        // 鏂瑰潡浜ゆ帴绾垮垵濮嬪寲涓虹┖锛屽欢杩熻绠?
         ca.blockIntersections = null;
         ca.lastPlayerBX = Integer.MIN_VALUE;
         return ca;
     }
 
-    // ========== 批量渲染（2次draw call替代数百次） ==========
+    // ========== 鎵归噺娓叉煋锛?娆raw call鏇夸唬鏁扮櫨娆★級 ==========
 
     /**
-     * 渲染所有可见域名：视锥剔除 + 批量提交
-     * 所有三角形合并为1次draw call，所有线段合并为1次draw call
+     * 娓叉煋鎵€鏈夊彲瑙佸煙鍚嶏細瑙嗛敟鍓旈櫎 + 鎵归噺鎻愪氦
+     * 鎵€鏈変笁瑙掑舰鍚堝苟涓?娆raw call锛屾墍鏈夌嚎娈靛悎骞朵负1娆raw call
      */
     private static void renderCachedAreas(Matrix4f matrix, BufferBuilder buffer, Vec3d cam) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -258,27 +258,27 @@ public class BoundVizRenderer {
         int playerBZ = (int) Math.floor(cam.z);
         int size = cachedAreas.size();
 
-        // 一次性计算可见性，两个pass复用
+        // 涓€娆℃€ц绠楀彲瑙佹€э紝涓や釜pass澶嶇敤
         if (visibleFlags.length < size) visibleFlags = new boolean[size];
         long now = System.currentTimeMillis();
         for (int i = 0; i < size; i++) {
             CachedArea ca = cachedAreas.get(i);
             visibleFlags[i] = isAABBInFrustum(ca.aabbMinX, ca.minY, ca.aabbMinZ,
                                                ca.aabbMaxX, ca.maxY, ca.aabbMaxZ, cam);
-            // 动态更新闪烁颜色
+            // 鍔ㄦ€佹洿鏂伴棯鐑侀鑹?
             if (ca.colorMode != null && visibleFlags[i]) {
                 if (ca.vr != null) {
-                    // 单字模式：逐顶点不同相位
+                    // 鍗曞瓧妯″紡锛氶€愰《鐐逛笉鍚岀浉浣?
                     for (int vi = 0; vi < ca.vr.length; vi++) {
                         int rgb = FlashColorHelper.getCharColor(ca.colorMode, now, vi);
                         ca.vr[vi] = ((rgb >> 16) & 0xFF) / 255.0f;
                         ca.vg[vi] = ((rgb >> 8) & 0xFF) / 255.0f;
                         ca.vb[vi] = (rgb & 0xFF) / 255.0f;
                     }
-                    // r,g,b用于方块交接线（取顶点0的颜色）
+                    // r,g,b鐢ㄤ簬鏂瑰潡浜ゆ帴绾匡紙鍙栭《鐐?鐨勯鑹诧級
                     ca.r = ca.vr[0]; ca.g = ca.vg[0]; ca.b = ca.vb[0];
                 } else {
-                    // 整体模式
+                    // 鏁翠綋妯″紡
                     int rgb = FlashColorHelper.getWholeColor(ca.colorMode, now);
                     ca.r = ((rgb >> 16) & 0xFF) / 255.0f;
                     ca.g = ((rgb >> 8) & 0xFF) / 255.0f;
@@ -287,7 +287,7 @@ public class BoundVizRenderer {
             }
         }
 
-        // === Pass 1: 批量三角形 ===
+        // === Pass 1: 鎵归噺涓夎褰?===
         boolean hasTriangles = false;
         for (int i = 0; i < size; i++) {
             if (!visibleFlags[i]) continue;
@@ -297,9 +297,12 @@ public class BoundVizRenderer {
             }
             emitAreaTriangles(matrix, buffer, cachedAreas.get(i));
         }
-        if (hasTriangles) BufferRenderer.drawWithShader(buffer.end());
+        if (hasTriangles) {
+            buffer.end();
+            BufferRenderer.draw(buffer);
+        }
 
-        // === Pass 2: 批量线段 ===
+        // === Pass 2: 鎵归噺绾挎 ===
         boolean hasLines = false;
         for (int i = 0; i < size; i++) {
             if (!visibleFlags[i]) continue;
@@ -317,12 +320,15 @@ public class BoundVizRenderer {
                 }
             }
         }
-        if (hasLines) BufferRenderer.drawWithShader(buffer.end());
+        if (hasLines) {
+            buffer.end();
+            BufferRenderer.draw(buffer);
+        }
     }
 
     /**
-     * 将单个域名的三角形数据写入批量buffer
-     * 包含底面、顶面、侧面（TRIANGLE_STRIP转为TRIANGLES以支持批量）
+     * 灏嗗崟涓煙鍚嶇殑涓夎褰㈡暟鎹啓鍏ユ壒閲廱uffer
+     * 鍖呭惈搴曢潰銆侀《闈€佷晶闈紙TRIANGLE_STRIP杞负TRIANGLES浠ユ敮鎸佹壒閲忥級
      */
     private static void emitAreaTriangles(Matrix4f matrix, BufferBuilder buffer, CachedArea ca) {
         float[] vx = ca.vx, vz = ca.vz;
@@ -331,7 +337,7 @@ public class BoundVizRenderer {
         boolean perVertex = vr != null;
         float minY = ca.minY, maxY = ca.maxY;
 
-        // 底面 + 顶面
+        // 搴曢潰 + 椤堕潰
         for (int[] tri : ca.triangles) {
             for (int idx : tri) {
                 float cr = perVertex ? vr[idx] : r, cg = perVertex ? vg[idx] : g, cb = perVertex ? vb[idx] : b;
@@ -343,7 +349,7 @@ public class BoundVizRenderer {
             }
         }
 
-        // 侧面：每个边的quad拆为2个三角形
+        // 渚ч潰锛氭瘡涓竟鐨剄uad鎷嗕负2涓笁瑙掑舰
         int n = vx.length;
         for (int i = 0; i < n; i++) {
             int j = (i + 1) % n;
@@ -359,8 +365,8 @@ public class BoundVizRenderer {
     }
 
     /**
-     * 将单个域名的边界线数据写入批量buffer（DEBUG_LINES模式）
-     * 底部线、顶部线、垂直线全部转为独立线段对
+     * 灏嗗崟涓煙鍚嶇殑杈圭晫绾挎暟鎹啓鍏ユ壒閲廱uffer锛圖EBUG_LINES妯″紡锛?
+     * 搴曢儴绾裤€侀《閮ㄧ嚎銆佸瀭鐩寸嚎鍏ㄩ儴杞负鐙珛绾挎瀵?
      */
     private static void emitAreaLines(Matrix4f matrix, BufferBuilder buffer, CachedArea ca) {
         float[] vx = ca.vx, vz = ca.vz;
@@ -387,12 +393,12 @@ public class BoundVizRenderer {
         }
     }
 
-    // ========== 方块交接线（带位置缓存） ==========
+    // ========== 鏂瑰潡浜ゆ帴绾匡紙甯︿綅缃紦瀛橈級 ==========
 
-    private static final int BLOCK_REBUILD_DIST_SQ = 16; // 玩家移动4格才重算
+    private static final int BLOCK_REBUILD_DIST_SQ = 16; // 鐜╁绉诲姩4鏍兼墠閲嶇畻
 
     /**
-     * 仅当玩家移动超过阈值时重新计算方块交接线
+     * 浠呭綋鐜╁绉诲姩瓒呰繃闃堝€兼椂閲嶆柊璁＄畻鏂瑰潡浜ゆ帴绾?
      */
     private static void updateBlockIntersectionsIfNeeded(CachedArea ca, int pbx, int pby, int pbz, MinecraftClient client) {
         int dx = pbx - ca.lastPlayerBX, dy = pby - ca.lastPlayerBY, dz = pbz - ca.lastPlayerBZ;
@@ -407,7 +413,7 @@ public class BoundVizRenderer {
     private static final float FACE_OFFSET = 0.002f;
 
     /**
-     * 计算域名侧面与方块的交接线段
+     * 璁＄畻鍩熷悕渚ч潰涓庢柟鍧楃殑浜ゆ帴绾挎
      */
     private static List<float[]> computeBlockIntersections(CachedArea ca, MinecraftClient client) {
         World world = client.world;
@@ -429,13 +435,13 @@ public class BoundVizRenderer {
             double edx = v2.getX() - ex1, edz = v2.getZ() - ez1;
             if (Math.abs(edx) < 0.001 && Math.abs(edz) < 0.001) continue;
 
-            // DDA光栅化：精确遍历边线经过的每个方块格子
+            // DDA鍏夋爡鍖栵細绮剧‘閬嶅巻杈圭嚎缁忚繃鐨勬瘡涓柟鍧楁牸瀛?
             int bx = (int) Math.floor(ex1), bz = (int) Math.floor(ez1);
             int endBx = (int) Math.floor(v2.getX()), endBz = (int) Math.floor(v2.getZ());
             int stepX = edx > 0 ? 1 : edx < 0 ? -1 : 0;
             int stepZ = edz > 0 ? 1 : edz < 0 ? -1 : 0;
 
-            // tMaxX/Z: 到达下一个X/Z格线的t值; tDeltaX/Z: 跨越一个格子的t增量
+            // tMaxX/Z: 鍒拌揪涓嬩竴涓猉/Z鏍肩嚎鐨則鍊? tDeltaX/Z: 璺ㄨ秺涓€涓牸瀛愮殑t澧為噺
             double tMaxX = Math.abs(edx) > 0.001 ? ((stepX > 0 ? bx + 1 : bx) - ex1) / edx : Double.MAX_VALUE;
             double tMaxZ = Math.abs(edz) > 0.001 ? ((stepZ > 0 ? bz + 1 : bz) - ez1) / edz : Double.MAX_VALUE;
             double tDeltaX = Math.abs(edx) > 0.001 ? Math.abs(1.0 / edx) : Double.MAX_VALUE;
@@ -459,7 +465,7 @@ public class BoundVizRenderer {
     }
 
     /**
-     * 收集边线与方块面的交点线段（北/南/东/西面）
+     * 鏀堕泦杈圭嚎涓庢柟鍧楅潰鐨勪氦鐐圭嚎娈碉紙鍖?鍗?涓?瑗块潰锛?
      */
     private static void collectFaceIntersections(List<float[]> segments, World world,
             double ex1, double ez1, double edx, double edz,
@@ -505,7 +511,7 @@ public class BoundVizRenderer {
     }
 
     /**
-     * 收集方块顶面/底面与边界墙交接处的水平线段
+     * 鏀堕泦鏂瑰潡椤堕潰/搴曢潰涓庤竟鐣屽浜ゆ帴澶勭殑姘村钩绾挎
      */
     private static void collectHorizontalLines(List<float[]> segments, World world,
             double ex1, double ez1, double edx, double edz,
@@ -552,7 +558,7 @@ public class BoundVizRenderer {
     }
 
     /**
-     * 收集方块面上的垂直线段（仅对实心方块）
+     * 鏀堕泦鏂瑰潡闈笂鐨勫瀭鐩寸嚎娈碉紙浠呭瀹炲績鏂瑰潡锛?
      */
     private static void collectVerticalLines(List<float[]> segments, World world,
             float fx, float fz, int bx, int bz,
@@ -571,7 +577,7 @@ public class BoundVizRenderer {
         }
     }
 
-    // ========== 临时顶点渲染 ==========
+    // ========== 涓存椂椤剁偣娓叉煋 ==========
 
     private static void renderTemporaryVertices(MatrixStack matrices, BufferBuilder buffer, List<BlockPos> vertices, MinecraftClient client) {
         if (vertices.isEmpty()) return;
@@ -588,13 +594,14 @@ public class BoundVizRenderer {
             buffer.vertex(matrix, px, py, pz - size).color(1f, 1f, 1f, 1f).next();
             buffer.vertex(matrix, px, py, pz + size).color(1f, 1f, 1f, 1f).next();
         }
-        // 虚线连接（批量）
+        // 铏氱嚎杩炴帴锛堟壒閲忥級
         for (int i = 0; i < vertices.size() - 1; i++) {
             BlockPos v1 = vertices.get(i), v2 = vertices.get(i + 1);
             emitDashedLine(matrix, buffer, v1.getX() + 0.5f, v2.getX() + 0.5f,
                     v1.getZ() + 0.5f, v2.getZ() + 0.5f, py);
         }
-        BufferRenderer.drawWithShader(buffer.end());
+        buffer.end();
+        BufferRenderer.draw(buffer);
     }
 
     private static void emitDashedLine(Matrix4f matrix, BufferBuilder buffer,
@@ -612,7 +619,7 @@ public class BoundVizRenderer {
         }
     }
 
-    // ========== 耳切法三角剖分 ==========
+    // ========== 鑰冲垏娉曚笁瑙掑墫鍒?==========
 
     private static List<int[]> earClipTriangulate(List<AreaData.Vertex> polygon) {
         int n = polygon.size();

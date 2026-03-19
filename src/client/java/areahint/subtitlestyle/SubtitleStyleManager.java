@@ -7,30 +7,30 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 /**
- * SubtitleStyle交互式管理器
- * 负责字幕样式设置的交互流程
+ * SubtitleStyle浜や簰寮忕鐞嗗櫒
+ * 璐熻矗瀛楀箷鏍峰紡璁剧疆鐨勪氦浜掓祦绋?
  */
 public class SubtitleStyleManager {
 
     /**
-     * SubtitleStyle状态枚举
+     * SubtitleStyle鐘舵€佹灇涓?
      */
     public enum SubtitleStyleState {
-        IDLE,           // 空闲状态
-        SELECTING_STYLE // 选择样式状态
+        IDLE,           // 绌洪棽鐘舵€?
+        SELECTING_STYLE // 閫夋嫨鏍峰紡鐘舵€?
     }
 
-    // 单例实例
+    // 鍗曚緥瀹炰緥
     private static SubtitleStyleManager instance;
 
-    // 当前状态
+    // 褰撳墠鐘舵€?
     private SubtitleStyleState currentState = SubtitleStyleState.IDLE;
 
-    // 私有构造函数（单例模式）
+    // 绉佹湁鏋勯€犲嚱鏁帮紙鍗曚緥妯″紡锛?
     private SubtitleStyleManager() {}
 
     /**
-     * 获取单例实例
+     * 鑾峰彇鍗曚緥瀹炰緥
      */
     public static SubtitleStyleManager getInstance() {
         if (instance == null) {
@@ -40,30 +40,30 @@ public class SubtitleStyleManager {
     }
 
     /**
-     * 启动SubtitleStyle交互流程
+     * 鍚姩SubtitleStyle浜や簰娴佺▼
      */
     public void startSubtitleStyleSelection() {
         if (currentState != SubtitleStyleState.IDLE) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_6")), false);
+            MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.general_6")), false);
             return;
         }
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
-            // 设置状态并显示UI
+            // 璁剧疆鐘舵€佸苟鏄剧ずUI
             currentState = SubtitleStyleState.SELECTING_STYLE;
 
-            // 获取当前样式
+            // 鑾峰彇褰撳墠鏍峰紡
             String currentStyle = ClientConfig.getSubtitleStyle();
 
-            // 显示选择界面
+            // 鏄剧ず閫夋嫨鐣岄潰
             SubtitleStyleUI.showStyleSelectionScreen(currentStyle);
         }
     }
 
     /**
-     * 处理样式选择
-     * @param style 选择的样式
+     * 澶勭悊鏍峰紡閫夋嫨
+     * @param style 閫夋嫨鐨勬牱寮?
      */
     public void handleStyleSelection(String style) {
         if (currentState != SubtitleStyleState.SELECTING_STYLE) {
@@ -73,51 +73,51 @@ public class SubtitleStyleManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        // 验证样式有效性
+        // 楠岃瘉鏍峰紡鏈夋晥鎬?
         if (!isValidStyle(style)) {
-            client.player.sendMessage(Text.of(I18nManager.translate("message.error.general_8") + style), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.error.general_8") + style), false);
             return;
         }
 
-        // 保存样式设置
+        // 淇濆瓨鏍峰紡璁剧疆
         ClientConfig.setSubtitleStyle(style);
 
-        // 显示成功消息
+        // 鏄剧ず鎴愬姛娑堟伅
         String styleDisplay = getStyleDisplayName(style);
-        client.player.sendMessage(Text.of(I18nManager.translate("message.message.general_47") + styleDisplay), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.general_47") + styleDisplay), false);
 
-        // 执行reload
+        // 鎵цreload
         AreashintClient.reload();
-        client.player.sendMessage(Text.of(I18nManager.translate("message.message.general_51")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.general_51")), false);
 
-        // 重置状态
+        // 閲嶇疆鐘舵€?
         resetState();
     }
 
     /**
-     * 取消SubtitleStyle流程
+     * 鍙栨秷SubtitleStyle娴佺▼
      */
     public void cancelSubtitleStyle() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_5")), false);
+        MinecraftClient.getInstance().player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("message.message.cancel_5")), false);
         resetState();
     }
 
     /**
-     * 重置状态
+     * 閲嶇疆鐘舵€?
      */
     private void resetState() {
         currentState = SubtitleStyleState.IDLE;
     }
 
     /**
-     * 验证样式是否有效
+     * 楠岃瘉鏍峰紡鏄惁鏈夋晥
      */
     private boolean isValidStyle(String style) {
         return style.equals("full") || style.equals("simple") || style.equals("mixed");
     }
 
     /**
-     * 获取样式的显示名称
+     * 鑾峰彇鏍峰紡鐨勬樉绀哄悕绉?
      */
     private String getStyleDisplayName(String style) {
         switch (style) {

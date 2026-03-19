@@ -1,5 +1,7 @@
 package areahint.command;
 
+import areahint.util.TextCompat;
+
 import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
@@ -12,7 +14,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -31,25 +32,23 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
- * Check命令处理器
- * 处理 /areahint check 命令，显示联合域名和域名详细信息
+ * Check闂佸憡绋掗崹婵嬪箮閵堝棗绶為柛鏇ㄥ幗閸婄偤鏌?
+ * 婵犮垼娉涚€氼噣骞?/areahint check 闂佸憡绋掗崹婵嬪箮閵堝鏅悘鐐靛亾閳绘梻绱掗埀顒併偊婢跺摜鐭掗梺鍛婅壘閻楀棝鎮″▎鎾宠Е鐎广儱鎳忕€氭煡鏌涢埡鍐ㄦ瀻闁诡喗娲滈幏鐘绘晜閸撗呯厔婵烇絽娲犻崜婵囧?
  */
 public class CheckCommand {
     
     /**
-     * 注册check命令
-     * @param dispatcher 命令分发器
-     * @param registryAccess 注册表访问
-     * @param environment 环境
+     * 濠电偛顦崝宀勫船缁叉eck闂佸憡绋掗崹婵嬪箮?
+     * @param dispatcher 闂佸憡绋掗崹婵嬪箮閵堝绀嗛柛鈩冾殔缁叉椽鏌?
+     * @param registryAccess 濠电偛顦崝宀勫船閻ｅ本鍋橀柕濠庣厛閸熷繘姊?
+     * @param environment 闂佺粯绮犻崹浼淬€?
      */
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, 
-                               CommandRegistryAccess registryAccess, 
-                               CommandManager.RegistrationEnvironment environment) {
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated) {
         
         dispatcher.register(
             CommandManager.literal("areahint")
                 .then(CommandManager.literal("check")
-                    .requires(source -> source.hasPermissionLevel(0)) // 权限等级0，不需要管理员
+                    .requires(source -> source.hasPermissionLevel(0)) // 闂佸搫顦崯鏉戭瀶閾忓湱椹冲璺虹焸閻?闂佹寧绋戞總鏃傜箔婢舵劖顥嗛柍褜鍓涢幉鐗堟媴娓氼垰鎮侀梺鑽ゅ仜濡骞?
                     .executes(CheckCommand::executeCheckAll)
                     .then(CommandManager.argument("unionName", StringArgumentType.string())
                         .suggests(createUnionNameSuggestionProvider())
@@ -60,69 +59,69 @@ public class CheckCommand {
     }
     
     /**
-     * 执行 /areahint check 命令 - 显示所有联合域名
-     * @param context 命令上下文
-     * @return 命令结果
+     * 闂佸湱鐟抽崱鈺傛杸 /areahint check 闂佸憡绋掗崹婵嬪箮?- 闂佸搫瀚晶浠嬪Φ濮樿泛绠ラ柍褜鍓熷鍨緞鎼存繄鐭掗梺鍛婅壘閻楀棝鎮″▎鎾宠Е?
+     * @param context 闂佸憡绋掗崹婵嬪箮閵堝棛鈻斿┑鐘辫兌閻熸捇鏌?
+     * @return 闂佸憡绋掗崹婵嬪箮閵堝洨纾奸柟鎯ь嚟娴?
      */
     private static int executeCheckAll(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         
         try {
-            ServerPlayerEntity player = source.getPlayerOrThrow();
+            ServerPlayerEntity player = CommandSourceCompat.getPlayerOrThrow(source);
             RegistryKey<World> dimensionType = player.getWorld().getRegistryKey();
             String dimensionId = dimensionType.getValue().toString();
             
-            // 获取当前维度的域名文件
+            // 闂佸吋鍎抽崲鑼躲亹閸ヮ亗浜归柟鎯у暱椤ゅ懐绱撴担瑙勭稇閻庤濞婇幆鍐礋椤愩倕骞嶉梺鍛婅壘缁夌敻寮搁崘鈺冾浄?
             String fileName = getDimensionFileName(dimensionId);
             Path areaFile = WorldFolderManager.getWorldDimensionFile(fileName);
             
             if (areaFile == null || !areaFile.toFile().exists()) {
-                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.dimension_2").formatted(Formatting.RED));
+                CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.error.area.dimension_2").formatted(Formatting.RED));
                 return 1;
             }
 
-            // 读取域名数据
+            // 闁荤姴娲╅褑銇愰崶顒€鏄ラ柣鏃堟敱閸婃娊鏌℃担鍝勵暭鐎?
             List<AreaData> areas = FileManager.readAreaData(areaFile);
 
             if (areas.isEmpty()) {
-                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.dimension").formatted(Formatting.RED));
+                CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.error.area.dimension").formatted(Formatting.RED));
                 return 1;
             }
             
-            // 收集所有联合域名
+            // 闂佽　鍋撻柛顐ｆ礃閼茬娀鏌熺喊妯轰壕闂佸搫鐗嗛ˇ铏閸儱瑙﹂柛顐ｇ箘閸樼敻鏌?
             Map<String, List<AreaData>> unionNameGroups = new LinkedHashMap<>();
             
             for (AreaData area : areas) {
                 String unionName = area.getSurfacename();
                 if (unionName == null || unionName.trim().isEmpty()) {
-                    unionName = area.getName(); // 如果没有联合域名，使用实际域名
+                    unionName = area.getName(); // 婵犵鈧啿鈧綊鎮樻径濞炬煢闁斥晛鍟粻鎺楁煠鏉堛劍鐓ラ柟顔奸叄瀹曟椽鎮㈤柨瀣偓鎶芥煥濞戞ê顨欏┑鐐叉喘閹粙濡搁妷褎婢栭梻鍌氬閹冲酣鎮″▎鎾宠Е?
                 }
                 
                 unionNameGroups.computeIfAbsent(unionName, k -> new ArrayList<>()).add(area);
             }
             
-            // 发送标题
-            CommandSourceCompat.sendMessage(source, Text.literal(""));
-            CommandSourceCompat.sendMessage(source, Text.translatable("command.title.area.surface.list").formatted(Formatting.GOLD));
-            CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area.surface_5").formatted(Formatting.GRAY));
-            CommandSourceCompat.sendMessage(source, Text.literal(""));
+            // 闂佸憡鐟﹂崹鍧楀焵椤戣法鍔嶉柣鏍电稻閿?
+            CommandSourceCompat.sendMessage(source, TextCompat.literal(""));
+            CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.title.area.surface.list").formatted(Formatting.GOLD));
+            CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.area.surface_5").formatted(Formatting.GRAY));
+            CommandSourceCompat.sendMessage(source, TextCompat.literal(""));
             
-            // 显示每个联合域名
+            // 闂佸搫瀚晶浠嬪Φ濮橆儷鎺曠疀鎼淬劌娈濋梺鑹伴哺閺屻劑骞冩惔銊ユ槬闁绘棃鏀遍崐?
             for (Map.Entry<String, List<AreaData>> entry : unionNameGroups.entrySet()) {
                 String unionName = entry.getKey();
                 List<AreaData> areasInUnion = entry.getValue();
                 
-                MutableText unionText = Text.literal("§a▶ " + unionName).formatted(Formatting.GREEN);
+                MutableText unionText = TextCompat.literal("闁归棿绻橀梺?" + unionName).formatted(Formatting.GREEN);
                 
-                // 添加悬停提示
-                MutableText hoverContent = Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "command.message.area.surface_4") + unionName + "\n");
-                hoverContent.append(Text.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "command.message.general_8") + areasInUnion.size() + ServerI18nManager.translateForPlayer(player.getUuid(), "command.message.area_3")));
+                // 濠电儑缍€椤曆勬叏閻愬搫绠栨い鎺嗗亾濞寸姷濞€楠炴捇骞囬杞扮驳
+                MutableText hoverContent = TextCompat.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "command.message.area.surface_4") + unionName + "\n");
+                hoverContent.append(TextCompat.literal(ServerI18nManager.translateForPlayer(player.getUuid(), "command.message.general_8") + areasInUnion.size() + ServerI18nManager.translateForPlayer(player.getUuid(), "command.message.area_3")));
 
                 for (int i = 0; i < areasInUnion.size(); i++) {
                     AreaData area = areasInUnion.get(i);
-                    hoverContent.append(Text.literal("§f- " + area.getName()));
+                    hoverContent.append(TextCompat.literal("闁归棿鍜? " + area.getName()));
                     if (i < areasInUnion.size() - 1) {
-                        hoverContent.append(Text.literal("\n"));
+                        hoverContent.append(TextCompat.literal("\n"));
                     }
                 }
 
@@ -134,44 +133,44 @@ public class CheckCommand {
                 CommandSourceCompat.sendMessage(source, unionText);
             }
             
-            CommandSourceCompat.sendMessage(source, Text.literal(""));
-            CommandSourceCompat.sendMessage(source, Text.translatable("command.message.general_9").append(Text.literal(String.valueOf(unionNameGroups.size()))).append(Text.translatable("command.message.area.surface_2")).append(Text.literal(String.valueOf(areas.size()))).append(Text.translatable("command.message.area_2")).formatted(Formatting.GRAY));
+            CommandSourceCompat.sendMessage(source, TextCompat.literal(""));
+            CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.general_9").append(TextCompat.literal(String.valueOf(unionNameGroups.size()))).append(TextCompat.translatable("command.message.area.surface_2")).append(TextCompat.literal(String.valueOf(areas.size()))).append(TextCompat.translatable("command.message.area_2")).formatted(Formatting.GRAY));
             
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_21"), e);
-            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_2").append(Text.literal(e.getMessage())).formatted(Formatting.RED));
+            CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.error.general_2").append(TextCompat.literal(e.getMessage())).formatted(Formatting.RED));
         }
 
         return 1;
     }
 
     /**
-     * 执行 /areahint check <联合域名> 命令 - 显示指定联合域名的详细信息
-     * @param context 命令上下文
-     * @return 命令结果
+     * 闂佸湱鐟抽崱鈺傛杸 /areahint check <闂佽壈椴搁弻銊╁箖鎼淬劌鏄ラ柣鏃堟敱閸? 闂佸憡绋掗崹婵嬪箮?- 闂佸搫瀚晶浠嬪Φ濮樿泛绠伴柛銉戝懏姣庨梺鑹伴哺閺屻劑骞冩惔銊ユ槬闁绘棃鏀遍崐鎶芥煟閵娿儱顏い鏇熺〒缁辨帡宕遍弴姘辩畾闂?
+     * @param context 闂佸憡绋掗崹婵嬪箮閵堝棛鈻斿┑鐘辫兌閻熸捇鏌?
+     * @return 闂佸憡绋掗崹婵嬪箮閵堝洨纾奸柟鎯ь嚟娴?
      */
     private static int executeCheckUnion(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         String unionName = StringArgumentType.getString(context, "unionName");
         
         try {
-            ServerPlayerEntity player = source.getPlayerOrThrow();
+            ServerPlayerEntity player = CommandSourceCompat.getPlayerOrThrow(source);
             RegistryKey<World> dimensionType = player.getWorld().getRegistryKey();
             String dimensionId = dimensionType.getValue().toString();
             
-            // 获取当前维度的域名文件
+            // 闂佸吋鍎抽崲鑼躲亹閸ヮ亗浜归柟鎯у暱椤ゅ懐绱撴担瑙勭稇閻庤濞婇幆鍐礋椤愩倕骞嶉梺鍛婅壘缁夌敻寮搁崘鈺冾浄?
             String fileName = getDimensionFileName(dimensionId);
             Path areaFile = WorldFolderManager.getWorldDimensionFile(fileName);
             
             if (areaFile == null || !areaFile.toFile().exists()) {
-                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.dimension_2").formatted(Formatting.RED));
+                CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.error.area.dimension_2").formatted(Formatting.RED));
                 return 1;
             }
 
-            // 读取域名数据
+            // 闁荤姴娲╅褑銇愰崶顒€鏄ラ柣鏃堟敱閸婃娊鏌℃担鍝勵暭鐎?
             List<AreaData> areas = FileManager.readAreaData(areaFile);
 
-            // 查找匹配的域名
+            // 闂佸搫琚崕鍙夌珶濮椻偓瀹曠姾銇愰幒鎴濊祴闂佹眹鍔岀€氼剟鎮″▎鎾宠Е?
             List<AreaData> matchedAreas = new ArrayList<>();
 
             for (AreaData area : areas) {
@@ -186,104 +185,104 @@ public class CheckCommand {
             }
 
             if (matchedAreas.isEmpty()) {
-                CommandSourceCompat.sendMessage(source, Text.translatable("command.error.area.surface").append(Text.literal(unionName)).formatted(Formatting.RED));
+                CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.error.area.surface").append(TextCompat.literal(unionName)).formatted(Formatting.RED));
                 return 1;
             }
             
-            // 发送详细信息
-            CommandSourceCompat.sendMessage(source, Text.literal(""));
-            CommandSourceCompat.sendMessage(source, Text.translatable("command.title.area.surface").formatted(Formatting.GOLD));
-            CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area.surface_4").append(Text.literal(unionName)).formatted(Formatting.GOLD));
-            CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area_6").append(Text.literal(String.valueOf(matchedAreas.size()))).formatted(Formatting.GRAY));
-            CommandSourceCompat.sendMessage(source, Text.literal(""));
+            // 闂佸憡鐟﹂崹鍧楀焵椤戞寧绁版い鏇熺〒缁辨帡宕遍弴姘辩畾闂?
+            CommandSourceCompat.sendMessage(source, TextCompat.literal(""));
+            CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.title.area.surface").formatted(Formatting.GOLD));
+            CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.area.surface_4").append(TextCompat.literal(unionName)).formatted(Formatting.GOLD));
+            CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.area_6").append(TextCompat.literal(String.valueOf(matchedAreas.size()))).formatted(Formatting.GRAY));
+            CommandSourceCompat.sendMessage(source, TextCompat.literal(""));
             
-            // 显示每个域名的详细信息
+            // 闂佸搫瀚晶浠嬪Φ濮橆儷鎺曠疀鎼淬劌娈濋梺绯曟櫇閸犲酣骞冮弴銏″剭闁告洦鍣崵濠勭磽娴ｅ憡顥欏ǎ鍥э躬楠?
             for (int i = 0; i < matchedAreas.size(); i++) {
                 AreaData area = matchedAreas.get(i);
                 
-                CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area_9").append(Text.literal((i + 1) + ":")).formatted(Formatting.GREEN));
-                CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area").append(Text.literal(area.getName())));
+                CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.area_9").append(TextCompat.literal((i + 1) + ":")).formatted(Formatting.GREEN));
+                CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.area").append(TextCompat.literal(area.getName())));
                 
                 if (area.getSurfacename() != null && !area.getSurfacename().trim().isEmpty()) {
-                    CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area.surface").append(Text.literal(area.getSurfacename())));
+                    CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.area.surface").append(TextCompat.literal(area.getSurfacename())));
                 }
                 
-                CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area.level").append(Text.literal(String.valueOf(area.getLevel()))).append(Text.translatable("command.message.general_29")).formatted(Formatting.YELLOW));
+                CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.area.level").append(TextCompat.literal(String.valueOf(area.getLevel()))).append(TextCompat.translatable("command.message.general_29")).formatted(Formatting.YELLOW));
                 
                 if (area.getBaseName() != null) {
-                    CommandSourceCompat.sendMessage(source, Text.translatable("command.message.area.parent").append(Text.literal(area.getBaseName())));
+                    CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.area.parent").append(TextCompat.literal(area.getBaseName())));
                 }
                 
                 if (area.getSignature() != null) {
-                    CommandSourceCompat.sendMessage(source, Text.translatable("command.message.general").append(Text.literal(area.getSignature())));
+                    CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.general").append(TextCompat.literal(area.getSignature())));
                 }
                 
                 if (area.getColor() != null) {
-                    CommandSourceCompat.sendMessage(source, Text.translatable("command.message.color").append(Text.literal(area.getColor())));
+                    CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.color").append(TextCompat.literal(area.getColor())));
                 }
                 
-                // 显示高度信息
+                // 闂佸搫瀚晶浠嬪Φ濮橆収娈楁俊顖氭惈椤斿﹤菐閸ワ絽澧插ù?
                 if (area.getAltitude() != null) {
-                    MutableText altitudeText = Text.translatable("command.message.altitude");
+                    MutableText altitudeText = TextCompat.translatable("command.message.altitude");
                     if (area.getAltitude().getMin() != null && area.getAltitude().getMax() != null) {
-                        altitudeText.append(Text.literal(String.valueOf(area.getAltitude().getMin()))).append(Text.translatable("command.message.general_4")).append(Text.literal(String.valueOf(area.getAltitude().getMax())));
+                        altitudeText.append(TextCompat.literal(String.valueOf(area.getAltitude().getMin()))).append(TextCompat.translatable("command.message.general_4")).append(TextCompat.literal(String.valueOf(area.getAltitude().getMax())));
                     } else if (area.getAltitude().getMin() != null) {
-                        altitudeText.append(Text.literal(String.valueOf(area.getAltitude().getMin()))).append(Text.translatable("command.message.general_2"));
+                        altitudeText.append(TextCompat.literal(String.valueOf(area.getAltitude().getMin()))).append(TextCompat.translatable("command.message.general_2"));
                     } else if (area.getAltitude().getMax() != null) {
-                        altitudeText.append(Text.literal(String.valueOf(area.getAltitude().getMax()))).append(Text.translatable("command.message.general_3"));
+                        altitudeText.append(TextCompat.literal(String.valueOf(area.getAltitude().getMax()))).append(TextCompat.translatable("command.message.general_3"));
                     } else {
-                        altitudeText.append(Text.translatable("command.message.general_25"));
+                        altitudeText.append(TextCompat.translatable("command.message.general_25"));
                     }
                     CommandSourceCompat.sendMessage(source, altitudeText);
                 } else {
-                    CommandSourceCompat.sendMessage(source, Text.translatable("command.message.altitude_2"));
+                    CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.altitude_2"));
                 }
                 
-                // 显示顶点信息
+                // 闂佸搫瀚晶浠嬪Φ濮橆厹浜滈柛鎾茬娴狀垰菐閸ワ絽澧插ù?
                 if (area.getVertices() != null && !area.getVertices().isEmpty()) {
-                    CommandSourceCompat.sendMessage(source, Text.translatable("command.message.vertex").append(Text.literal(String.valueOf(area.getVertices().size()))));
+                    CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.message.vertex").append(TextCompat.literal(String.valueOf(area.getVertices().size()))));
                     
-                    // 显示前几个顶点作为示例
-                    MutableText verticesText = Text.translatable("command.message.vertex.coordinate");
+                    // 闂佸搫瀚晶浠嬪Φ濮樿泛绀堢€广儱鎳庡▓銈呪槈閹垮啩閭柕鍡楋躬閹瑩鏌呭☉姘扁枙婵炴垶鎹佸▍锝夊Φ濮橆厾鐟?
+                    MutableText verticesText = TextCompat.translatable("command.message.vertex.coordinate");
                     int maxShow = Math.min(3, area.getVertices().size());
                     for (int j = 0; j < maxShow; j++) {
                         AreaData.Vertex vertex = area.getVertices().get(j);
-                        verticesText.append(Text.literal("(" + vertex.getX() + ", " + vertex.getZ() + ")"));
+                        verticesText.append(TextCompat.literal("(" + vertex.getX() + ", " + vertex.getZ() + ")"));
                         if (j < maxShow - 1) {
-                            verticesText.append(Text.literal(", "));
+                            verticesText.append(TextCompat.literal(", "));
                         }
                     }
                     if (area.getVertices().size() > 3) {
-                        verticesText.append(Text.literal("..."));
+                        verticesText.append(TextCompat.literal("..."));
                     }
                     CommandSourceCompat.sendMessage(source, verticesText);
                 }
                 
                 if (i < matchedAreas.size() - 1) {
-                    CommandSourceCompat.sendMessage(source, Text.literal(""));
+                    CommandSourceCompat.sendMessage(source, TextCompat.literal(""));
                 }
             }
             
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.general_21"), e);
-            CommandSourceCompat.sendMessage(source, Text.translatable("command.error.general_2").append(Text.literal(e.getMessage())).formatted(Formatting.RED));
+            CommandSourceCompat.sendMessage(source, TextCompat.translatable("command.error.general_2").append(TextCompat.literal(e.getMessage())).formatted(Formatting.RED));
         }
 
         return 1;
     }
 
     /**
-     * 创建联合域名建议提供器
-     * @return 建议提供器
+     * 闂佸憡甯楃粙鎴犵磽閹剧粯鍤傞柡鍌涘閸娿倝鏌涢埡鍐ㄦ瀻闁诡喗娲栭娆愩偊濞嗘儳鏁堕梺鍦帛閸旀帞娆㈤悽绋块棷?
+     * @return 閻庣偣鍊濈紓姘额敊閸涙潙绠甸柟閭︿簽鏉╂棃鏌?
      */
     public static SuggestionProvider<ServerCommandSource> createUnionNameSuggestionProvider() {
         return (context, builder) -> {
             try {
-                ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+                ServerPlayerEntity player = CommandSourceCompat.getPlayerOrThrow(context.getSource());
                 RegistryKey<World> dimensionType = player.getWorld().getRegistryKey();
                 String dimensionId = dimensionType.getValue().toString();
                 
-                // 获取当前维度的域名文件
+                // 闂佸吋鍎抽崲鑼躲亹閸ヮ亗浜归柟鎯у暱椤ゅ懐绱撴担瑙勭稇閻庤濞婇幆鍐礋椤愩倕骞嶉梺鍛婅壘缁夌敻寮搁崘鈺冾浄?
                 String fileName = getDimensionFileName(dimensionId);
                 Path areaFile = WorldFolderManager.getWorldDimensionFile(fileName);
                 
@@ -291,10 +290,10 @@ public class CheckCommand {
                     return Suggestions.empty();
                 }
                 
-                // 读取域名数据
+                // 闁荤姴娲╅褑銇愰崶顒€鏄ラ柣鏃堟敱閸婃娊鏌℃担鍝勵暭鐎?
                 List<AreaData> areas = FileManager.readAreaData(areaFile);
                 
-                // 收集所有联合域名
+                // 闂佽　鍋撻柛顐ｆ礃閼茬娀鏌熺喊妯轰壕闂佸搫鐗嗛ˇ铏閸儱瑙﹂柛顐ｇ箘閸樼敻鏌?
                 Set<String> unionNames = new LinkedHashSet<>();
                 
                 for (AreaData area : areas) {
@@ -305,7 +304,7 @@ public class CheckCommand {
                     unionNames.add(unionName);
                 }
                 
-                // 过滤并添加建议
+                // 闁哄鏅涘ú锕傚箮閵堝宓侀柤鎼佹涧濞兼垿鏌涢弮鍌毿㈢紓鍌涙尵閹?
                 String input = builder.getRemaining().toLowerCase();
                 for (String unionName : unionNames) {
                     if (unionName.toLowerCase().contains(input)) {
@@ -314,7 +313,7 @@ public class CheckCommand {
                 }
                 
             } catch (Exception e) {
-                // 静默处理错误，返回空建议
+                // 闂傚倸鐗婇悷鈺冨垝椤栨稑绶為柛鏇ㄥ幗閸婄偤姊洪幐搴ｆ噯妞ゆ洏鍊濋弫宥呯暆閸愵亞顔夐梺鎼炲劤閸嬬喖鍩為弽褜鍤堝Δ锔筋儥閸?
             }
             
             return builder.buildFuture();
@@ -322,9 +321,9 @@ public class CheckCommand {
     }
     
     /**
-     * 根据维度ID获取文件名
-     * @param dimensionId 维度ID
-     * @return 文件名
+     * 闂佸搫绉烽～澶婄暤娴ｈ櫣纾奸柡澶嬪灥椤斿D闂佸吋鍎抽崲鑼躲亹閸ヮ剙妫橀柛銉檮椤愪粙鏌?
+     * @param dimensionId 缂傚倷鐒﹀娆戔偓鍦吋D
+     * @return 闂佸搫鍊稿ú锝呪枎閵忋倕瑙?
      */
     private static String getDimensionFileName(String dimensionId) {
         switch (dimensionId) {
@@ -339,3 +338,5 @@ public class CheckCommand {
         }
     }
 } 
+
+

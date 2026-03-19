@@ -5,27 +5,27 @@ import areahint.i18n.I18nManager;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 /**
- * Recolor客户端命令处理器
+ * Recolor鐎广垺鍩涚粩顖氭嚒娴犮倕顦╅悶鍡楁珤
  */
 public class RecolorClientCommand {
 
     /**
-     * 注册客户端命令
+     * 濞夈劌鍞界€广垺鍩涚粩顖氭嚒娴?
      */
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(ClientCommandManager.literal("areahint")
             .then(ClientCommandManager.literal("recolor")
-                // /areahint recolor select <域名>
+                // /areahint recolor select <閸╃喎鎮?
                 .then(ClientCommandManager.literal("select")
                     .then(ClientCommandManager.argument("areaName", StringArgumentType.greedyString())
                         .executes(context -> executeSelect(context, StringArgumentType.getString(context, "areaName")))))
-                // /areahint recolor color <颜色>
+                // /areahint recolor color <妫版粏澹?
                 .then(ClientCommandManager.literal("color")
                     .then(ClientCommandManager.argument("colorValue", StringArgumentType.greedyString())
                         .executes(context -> executeColor(context, StringArgumentType.getString(context, "colorValue")))))
@@ -38,11 +38,11 @@ public class RecolorClientCommand {
     }
 
     /**
-     * 执行域名选择
+     * 閹笛嗩攽閸╃喎鎮曢柅澶嬪
      */
     private static int executeSelect(CommandContext<FabricClientCommandSource> context, String areaName) {
         try {
-            // 移除引号（如果存在）
+            // 缁夊娅庡鏇炲娇閿涘牆顩ч弸婊冪摠閸︻煉绱?
             if (areaName.startsWith("\"") && areaName.endsWith("\"") && areaName.length() > 1) {
                 areaName = areaName.substring(1, areaName.length() - 1);
             }
@@ -53,14 +53,14 @@ public class RecolorClientCommand {
             AreashintClient.LOGGER.error(I18nManager.translate("command.message.general_24"), e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
+                client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
             }
             return 0;
         }
     }
 
     /**
-     * 执行颜色选择
+     * 閹笛嗩攽妫版粏澹婇柅澶嬪
      */
     private static int executeColor(CommandContext<FabricClientCommandSource> context, String colorValue) {
         try {
@@ -70,14 +70,14 @@ public class RecolorClientCommand {
             AreashintClient.LOGGER.error(I18nManager.translate("command.message.general_22"), e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
+                client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
             }
             return 0;
         }
     }
 
     /**
-     * 执行确认
+     * 閹笛嗩攽绾喛顓?
      */
     private static int executeConfirm(CommandContext<FabricClientCommandSource> context) {
         try {
@@ -87,14 +87,14 @@ public class RecolorClientCommand {
             AreashintClient.LOGGER.error(I18nManager.translate("command.message.general_23"), e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
+                client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
             }
             return 0;
         }
     }
 
     /**
-     * 执行取消
+     * 閹笛嗩攽閸欐牗绉?
      */
     private static int executeCancel(CommandContext<FabricClientCommandSource> context) {
         try {
@@ -104,7 +104,7 @@ public class RecolorClientCommand {
             AreashintClient.LOGGER.error(I18nManager.translate("command.message.general_21"), e);
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
+                client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("command.error.general_3") + e.getMessage()), false);
             }
             return 0;
         }

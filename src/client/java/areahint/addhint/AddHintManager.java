@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * AddHint功能管理器
- * 交互式向已有域名添加顶点
+ * AddHint閸旂喕鍏樼粻锛勬倞閸?
+ * 娴溿倓绨板蹇撴倻瀹稿弶婀侀崺鐔锋倳濞ｈ濮炴い鍓佸仯
  */
 public class AddHintManager {
     private static AddHintManager instance;
@@ -38,7 +38,7 @@ public class AddHintManager {
     }
 
     /**
-     * 启动AddHint流程
+     * 閸氼垰濮〢ddHint濞翠胶鈻?
      */
     public void start() {
         if (client.player == null) return;
@@ -47,7 +47,7 @@ public class AddHintManager {
         List<AreaData> modifiableAreas = getModifiableAreas();
 
         if (modifiableAreas.isEmpty()) {
-            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area.modify")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.error.area.modify")), false);
             isActive = false;
             return;
         }
@@ -56,7 +56,7 @@ public class AddHintManager {
     }
 
     /**
-     * 选择域名
+     * 闁瀚ㄩ崺鐔锋倳
      */
     public void selectArea(String areaName) {
         if (!isActive || client.player == null) return;
@@ -76,7 +76,7 @@ public class AddHintManager {
         }
 
         if (area == null) {
-            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area") + cleanedName + I18nManager.translate("addhint.message.permission")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.error.area") + cleanedName + I18nManager.translate("addhint.message.permission")), false);
             return;
         }
 
@@ -84,13 +84,13 @@ public class AddHintManager {
         isRecording = true;
         newVertices.clear();
 
-        client.player.sendMessage(Text.of(I18nManager.translate("addhint.prompt.area") + AreaDataConverter.getDisplayName(area)), false);
-        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.general_2") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("addhint.message.vertex.record")), false);
-        client.player.sendMessage(Text.of(I18nManager.translate("addhint.button.record.finish")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.prompt.area") + AreaDataConverter.getDisplayName(area)), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.message.general_2") + areahint.keyhandler.UnifiedKeyHandler.getRecordKeyDisplayName() + I18nManager.translate("addhint.message.vertex.record")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.button.record.finish")), false);
     }
 
     /**
-     * 记录当前位置
+     * 鐠佹澘缍嶈ぐ鎾冲娴ｅ秶鐤?
      */
     public void recordCurrentPosition() {
         if (!isRecording || client.player == null) return;
@@ -99,9 +99,9 @@ public class AddHintManager {
         int z = (int) Math.round(client.player.getZ());
         newVertices.add(new Double[]{(double) x, (double) z});
 
-        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.vertex.record_2") + newVertices.size() + ": §6(" + x + ", " + z + ")"), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.message.vertex.record_2") + newVertices.size() + ": 鎼?(" + x + ", " + z + ")"), false);
 
-        // 更新边界可视化
+        // 閺囧瓨鏌婃潏鍦櫕閸欘垵顫嬮崠?
         List<BlockPos> blockPosList = new ArrayList<>();
         for (Double[] v : newVertices) {
             blockPosList.add(new BlockPos(v[0].intValue(), (int) client.player.getY(), v[1].intValue()));
@@ -112,20 +112,20 @@ public class AddHintManager {
     }
 
     /**
-     * 提交添加的顶点
+     * 閹绘劒姘﹀ǎ璇插閻ㄥ嫰銆婇悙?
      */
     public void submit() {
         if (!isActive || selectedArea == null || client.player == null) return;
 
         if (newVertices.isEmpty()) {
-            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.vertex.record")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.error.vertex.record")), false);
             return;
         }
 
         isRecording = false;
 
         try {
-            // 合并原有顶点和新顶点
+            // 閸氬牆鑻熼崢鐔告箒妞ゅ墎鍋ｉ崪灞炬煀妞ゅ墎鍋?
             List<Double[]> allVertices = new ArrayList<>();
             if (selectedArea.getVertices() != null) {
                 for (AreaData.Vertex v : selectedArea.getVertices()) {
@@ -134,45 +134,45 @@ public class AddHintManager {
             }
             allVertices.addAll(newVertices);
 
-            // 按角度排序防止交叉
+            // 閹稿顫楁惔锔藉笓鎼村繘妲诲顫唉閸?
             List<Double[]> sorted = sortVerticesByAngle(allVertices);
 
-            // 转换为Vertex列表
+            // 鏉烆剚宕叉稉绡rtex閸掓銆?
             List<AreaData.Vertex> vertices = new ArrayList<>();
             for (Double[] v : sorted) {
                 vertices.add(new AreaData.Vertex(v[0], v[1]));
             }
 
-            // 重新计算二级顶点(AABB)
+            // 闁插秵鏌婄拋锛勭暬娴滃瞼楠囨い鍓佸仯(AABB)
             List<AreaData.Vertex> secondVertices = calculateBoundingBox(sorted);
 
-            // 更新域名数据
+            // 閺囧瓨鏌婇崺鐔锋倳閺佺増宓?
             selectedArea.setVertices(vertices);
             selectedArea.setSecondVertices(secondVertices);
 
-            // 获取当前维度
+            // 閼惧嘲褰囪ぐ鎾冲缂佹潙瀹?
             String dimension = client.world.getRegistryKey().getValue().toString();
 
-            // 发送到服务端
+            // 閸欐垿鈧礁鍩岄張宥呭缁?
             AddHintClientNetworking.sendToServer(selectedArea, dimension);
 
-            client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.area") + selectedArea.getName() + I18nManager.translate("addhint.message.vertex_2")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.message.area") + selectedArea.getName() + I18nManager.translate("addhint.message.vertex_2")), false);
 
         } catch (Exception e) {
-            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.vertex") + e.getMessage()), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.error.vertex") + e.getMessage()), false);
         } finally {
             reset();
         }
     }
 
     /**
-     * 取消流程
+     * 閸欐牗绉峰ù浣衡柤
      */
     public void cancel() {
         if (!isActive) return;
         areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
         if (client.player != null) {
-            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.vertex.cancel.add")), false);
+            client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.error.vertex.cancel.add")), false);
         }
         reset();
     }
@@ -186,10 +186,10 @@ public class AddHintManager {
     }
 
     /**
-     * 按角度排序顶点，防止多边形线段交叉
+     * 閹稿顫楁惔锔藉笓鎼村繘銆婇悙鐧哥礉闂冨弶顒涙径姘崇珶瑜般垻鍤庡▓鍏告唉閸?
      */
     private List<Double[]> sortVerticesByAngle(List<Double[]> vertices) {
-        // 计算质心
+        // 鐠侊紕鐣荤拹銊ョ妇
         double cx = 0, cz = 0;
         for (Double[] v : vertices) {
             cx += v[0];
@@ -209,7 +209,7 @@ public class AddHintManager {
     }
 
     /**
-     * 计算AABB包围盒作为二级顶点
+     * 鐠侊紕鐣籄ABB閸栧懎娲块惄鎺嶇稊娑撹桨绨╃痪褔銆婇悙?
      */
     private List<AreaData.Vertex> calculateBoundingBox(List<Double[]> vertices) {
         double minX = vertices.get(0)[0], maxX = vertices.get(0)[0];
@@ -229,7 +229,7 @@ public class AddHintManager {
     }
 
     /**
-     * 获取可修改的域名列表
+     * 閼惧嘲褰囬崣顖欐叏閺€鍦畱閸╃喎鎮曢崚妤勩€?
      */
     private List<AreaData> getModifiableAreas() {
         List<AreaData> result = new ArrayList<>();
@@ -284,57 +284,57 @@ public class AddHintManager {
         return null;
     }
 
-    // UI方法
+    // UI閺傝纭?
 
     private void showAreaSelection(List<AreaData> areas) {
-        client.player.sendMessage(Text.of(I18nManager.translate("addhint.title.area.vertex.add")), false);
-        client.player.sendMessage(Text.of(I18nManager.translate("addhint.prompt.area.vertex.add")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.title.area.vertex.add")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.prompt.area.vertex.add")), false);
 
         for (AreaData area : areas) {
             String displayName = AreaDataConverter.getDisplayName(area);
-            MutableText btn = Text.literal("§6[" + displayName + "]")
+            MutableText btn = areahint.util.TextCompat.literal("鎼?[" + displayName + "]")
                 .setStyle(Style.EMPTY
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/areahint addhint select \"" + area.getName() + "\""))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("addhint.message.general") + area.getSignature())))
+                        areahint.util.TextCompat.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("addhint.message.general") + area.getSignature())))
                     .withColor(Formatting.GOLD));
             client.player.sendMessage(btn, false);
         }
 
-        MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
+        MutableText cancelBtn = areahint.util.TextCompat.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint addhint cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.cancel"))))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("addhint.message.cancel"))))
                 .withColor(Formatting.RED));
         client.player.sendMessage(cancelBtn, false);
     }
 
     private void showPointRecordedOptions() {
         int count = newVertices.size();
-        client.player.sendMessage(Text.of(I18nManager.translate("addhint.message.record") + count + I18nManager.translate("addhint.message.vertex")), false);
+        client.player.sendMessage(areahint.util.TextCompat.of(I18nManager.translate("addhint.message.record") + count + I18nManager.translate("addhint.message.vertex")), false);
 
-        MutableText continueBtn = Text.literal(I18nManager.translate("addhint.button.record.continue"))
+        MutableText continueBtn = areahint.util.TextCompat.literal(I18nManager.translate("addhint.button.record.continue"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint addhint continue"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.record.continue"))))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("addhint.message.record.continue"))))
                 .withColor(Formatting.GREEN));
 
-        MutableText submitBtn = Text.literal(I18nManager.translate("addhint.button.general"))
+        MutableText submitBtn = areahint.util.TextCompat.literal(I18nManager.translate("addhint.button.general"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint addhint submit"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.vertex_3"))))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("addhint.message.vertex_3"))))
                 .withColor(Formatting.AQUA));
 
-        MutableText cancelBtn = Text.literal(I18nManager.translate("addhint.error.cancel"))
+        MutableText cancelBtn = areahint.util.TextCompat.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint addhint cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("addhint.message.cancel"))))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, areahint.util.TextCompat.of(I18nManager.translate("addhint.message.cancel"))))
                 .withColor(Formatting.RED));
 
-        MutableText row = Text.empty()
-            .append(continueBtn).append(Text.of("  "))
-            .append(submitBtn).append(Text.of("  "))
+        MutableText row = areahint.util.TextCompat.empty()
+            .append(continueBtn).append(areahint.util.TextCompat.of("  "))
+            .append(submitBtn).append(areahint.util.TextCompat.of("  "))
             .append(cancelBtn);
         client.player.sendMessage(row, false);
     }
