@@ -40,6 +40,7 @@
 	},
 	"suggests": {
 		"sodium": "*",
-		"luckperms": "*"
+		"luckperms": "*",
+		"bluemap": "*"
 	}
 }

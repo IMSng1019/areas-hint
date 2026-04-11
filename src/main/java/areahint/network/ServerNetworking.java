@@ -2,6 +2,7 @@ package areahint.network;
 
 import areahint.Areashint;
 import areahint.file.FileManager;
+import areahint.map.BlueMapCompat;
 import areahint.i18n.ServerI18nManager;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
@@ -124,6 +125,8 @@ public class ServerNetworking {
         for (ServerPlayerEntity player : players) {
             sendAreaDataToClient(player, dimensionName);
         }
+
+        BlueMapCompat.requestDimensionSync(dimensionName);
     }
     
     /**
@@ -134,6 +137,7 @@ public class ServerNetworking {
         sendAreaDataToAll(Packets.DIMENSION_OVERWORLD);
         sendAreaDataToAll(Packets.DIMENSION_NETHER);
         sendAreaDataToAll(Packets.DIMENSION_END);
+        BlueMapCompat.requestFullSync();
         Areashint.LOGGER.info(ServerI18nManager.translate("message.button.dimension.finish"));
     }
     

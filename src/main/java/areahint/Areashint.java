@@ -3,6 +3,7 @@ package areahint;
 import areahint.command.ServerCommands;
 import areahint.file.FileManager;
 import areahint.i18n.ServerI18nManager;
+import areahint.map.BlueMapCompat;
 import areahint.network.ServerNetworking;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
@@ -54,6 +55,9 @@ public class Areashint implements ModInitializer {
 
 		// 初始化权限兼容层
 		LuckPermsCompat.initialize();
+
+		// 初始化 BlueMap 兼容层
+		BlueMapCompat.init();
 
 		// 初始化文件管理
 		initConfigDir();
@@ -160,6 +164,9 @@ public class Areashint implements ModInitializer {
 
 		// 世界文件夹就绪后重新加载维度域名（init时世界路径尚未初始化）
 		areahint.dimensional.DimensionalNameManager.loadDimensionalNames();
+
+		// 初始化 BlueMap 服务端同步
+		BlueMapCompat.onServerStarted(minecraftServer);
 	}
 	
 	/**
@@ -167,6 +174,7 @@ public class Areashint implements ModInitializer {
 	 * @param minecraftServer 服务器实例
 	 */
 	private void onServerStopped(MinecraftServer minecraftServer) {
+		BlueMapCompat.onServerStopped();
 		server = null;
 		LOGGER.info("区域提示模组: 服务器已停止");
 

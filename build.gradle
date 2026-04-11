@@ -12,6 +12,7 @@ base {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://repo.bluecolored.de/releases' }
 }
 
 loom {
@@ -41,6 +42,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	compileOnly "net.luckperms:api:5.4"
+	compileOnly "de.bluecolored.bluemap:BlueMapAPI:2.7.2"
 
 }
 
