@@ -5,6 +5,8 @@ import areahint.debug.DebugManager;
 import areahint.debug.DebugManager.DebugCategory;
 import areahint.i18n.ServerI18nManager;
 import areahint.network.ServerNetworking;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandRegistryAccess;
@@ -33,7 +35,7 @@ public class DebugCommand {
         dispatcher.register(
             CommandManager.literal("areahint")
                 .then(CommandManager.literal("debug")
-                    .requires(source -> source.hasPermissionLevel(2)) // 需要权限等级2
+                    .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DEBUG, 2))
                     .executes(DebugCommand::toggleDebug)
                     .then(CommandManager.literal("on")
                         .executes(DebugCommand::enableDebug))

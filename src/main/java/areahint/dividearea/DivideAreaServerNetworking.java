@@ -6,18 +6,20 @@ import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
 import areahint.network.TranslatableMessage.Part;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import areahint.util.AreaDataConverter;
+import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import com.google.gson.JsonParser;
+
+import java.nio.file.Path;
+import java.util.List;
 
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
-
-import java.util.List;
-import java.nio.file.Path;
 
 public class DivideAreaServerNetworking {
 
@@ -54,7 +56,11 @@ public class DivideAreaServerNetworking {
                 return;
             }
             ServerNetworking.sendAllAreaDataToAll();
-            sendResponse(player, true, key("dividearea.success.divide_prefix"), lit(origName), key("dividearea.success.divide_mid1"), lit(area1.getName()), key("dividearea.success.divide_mid2"), lit(area2.getName()), key("dividearea.success.divide_suffix"));
+            sendResponse(player, true,
+                key("dividearea.success.divide_prefix"), lit(origName),
+                key("dividearea.success.divide_mid1"), lit(area1.getName()),
+                key("dividearea.success.divide_mid2"), lit(area2.getName()),
+                key("dividearea.success.divide_suffix"));
         } catch (Exception e) {
             System.err.println("处理分割域名请求失败: " + e.getMessage());
             sendResponse(player, false, key("dividearea.error.process"), lit(e.getMessage()));
@@ -62,27 +68,35 @@ public class DivideAreaServerNetworking {
     }
 
     private static boolean validatePermission(ServerPlayerEntity player, String areaName, String dimType) {
-        if (player.hasPermissionLevel(2)) return true;
-        String pName = player.getGameProfile().getName();
-        AreaData area = findArea(areaName, dimType);
-        if (area == null) return false;
-        if (pName.equals(area.getSignature())) return true;
-        if (area.getBaseName() != null) {
-            AreaData base = findArea(area.getBaseName(), dimType);
-            if (base != null && pName.equals(base.getSignature())) return true;
-        }
-        return false;
+        return PermissionService.hasNodeOr(player, PermissionNodes.DIVIDEAREA, () -> {
+            if (player.hasPermissionLevel(2)) {
+                return true;
+            }
+            String playerName = player.getGameProfile().getName();
+            AreaData area = findArea(areaName, dimType);
+            if (area == null) {
+                return false;
+            }
+            if (playerName.equals(area.getSignature())) {
+                return true;
+            }
+            if (area.getBaseName() != null) {
+                AreaData base = findArea(area.getBaseName(), dimType);
+                return base != null && playerName.equals(base.getSignature());
+            }
+            return false;
+        });
     }
 
-    private static boolean saveDividedAreas(AreaData a1, AreaData a2, String origName, String dimension) {
+    private static boolean saveDividedAreas(AreaData area1, AreaData area2, String origName, String dimension) {
         try {
             String fileName = Packets.getFileNameForDimension(convertDimId(dimension));
             if (fileName == null) return false;
             Path path = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             List<AreaData> existing = FileManager.readAreaData(path);
-            existing.removeIf(a -> a.getName().equals(origName));
-            existing.add(a1);
-            existing.add(a2);
+            existing.removeIf(area -> area.getName().equals(origName));
+            existing.add(area1);
+            existing.add(area2);
             return FileManager.writeAreaData(path, existing);
         } catch (Exception e) {
             System.err.println("保存分割域名失败: " + e.getMessage());
@@ -92,12 +106,17 @@ public class DivideAreaServerNetworking {
 
     private static AreaData findArea(String name, String dimType) {
         try {
-            String fn = Packets.getFileNameForDimension(dimType);
-            if (fn == null) return null;
-            Path p = areahint.world.WorldFolderManager.getWorldDimensionFile(fn);
-            for (AreaData a : FileManager.readAreaData(p))
-                if (a.getName().equals(name)) return a;
-        } catch (Exception e) { e.printStackTrace(); }
+            String fileName = Packets.getFileNameForDimension(dimType);
+            if (fileName == null) return null;
+            Path path = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+            for (AreaData area : FileManager.readAreaData(path)) {
+                if (area.getName().equals(name)) {
+                    return area;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -115,6 +134,8 @@ public class DivideAreaServerNetworking {
             buf.writeBoolean(success);
             TranslatableMessage.write(buf, parts);
             ServerPlayNetworking.send(player, Packets.DIVIDE_AREA_RESPONSE_CHANNEL, buf);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

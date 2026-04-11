@@ -3,6 +3,8 @@ package areahint.network;
 import areahint.Areashint;
 import areahint.file.FileManager;
 import areahint.i18n.ServerI18nManager;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -311,7 +313,7 @@ public class ServerNetworking {
                     final String dimensionId = buf.readString();
                     final String newName = buf.readString();
                     server.execute(() -> {
-                        if (!player.hasPermissionLevel(2)) {
+                        if (!PermissionService.hasCommandPermission(player, PermissionNodes.DIMENSIONALITY_NAME, 2)) {
                             player.sendMessage(net.minecraft.text.Text.translatable("message.error.permission"), false);
                             return;
                         }
@@ -330,7 +332,7 @@ public class ServerNetworking {
                     final String dimensionId = buf.readString();
                     final String newColor = buf.readString();
                     server.execute(() -> {
-                        if (!player.hasPermissionLevel(2)) {
+                        if (!PermissionService.hasCommandPermission(player, PermissionNodes.DIMENSIONALITY_COLOR, 2)) {
                             player.sendMessage(net.minecraft.text.Text.translatable("message.error.permission"), false);
                             return;
                         }
@@ -372,9 +374,9 @@ public class ServerNetworking {
     private static void sendDeletableAreasList(ServerPlayerEntity player, String dimension) {
         try {
             String playerName = player.getName().getString();
-            boolean hasOp = player.hasPermissionLevel(2);
+            boolean hasNode = PermissionService.hasCommandPermission(player, PermissionNodes.DELETE, 2);
 
-            Areashint.LOGGER.info(ServerI18nManager.translate("message.prompt.area.delete.list") + playerName + ServerI18nManager.translate("message.message.dimension_2") + dimension + ServerI18nManager.translate("message.message.general_21") + hasOp);
+            Areashint.LOGGER.info(ServerI18nManager.translate("message.prompt.area.delete.list") + playerName + ServerI18nManager.translate("message.message.dimension_2") + dimension + ServerI18nManager.translate("message.message.general_21") + hasNode);
 
             // 获取文件名
             String fileName = Packets.getFileNameForDimension(dimension);
@@ -396,14 +398,12 @@ public class ServerNetworking {
                 String signature = area.getSignature();
 
                 // 检查权限
-                boolean canDelete = false;
-                if (signature == null) {
-                    // 没有签名的旧域名只有管理员可以删除
-                    canDelete = hasOp;
-                } else {
-                    // 有签名的新域名：创建者或管理员可以删除
-                    canDelete = signature.equals(playerName) || hasOp;
-                }
+                boolean canDelete = PermissionService.hasNodeOr(player, PermissionNodes.DELETE, () -> {
+                    if (signature == null) {
+                        return player.hasPermissionLevel(2);
+                    }
+                    return signature.equals(playerName) || player.hasPermissionLevel(2);
+                });
 
                 if (canDelete) {
                     // 检查是否有次级域名引用此域名
@@ -467,7 +467,6 @@ public class ServerNetworking {
     private static void handleDeleteRequest(ServerPlayerEntity player, String areaName, String dimension) {
         try {
             String playerName = player.getName().getString();
-            boolean hasOp = player.hasPermissionLevel(2);
 
             Areashint.LOGGER.info(ServerI18nManager.translate("message.prompt.delete_3") + playerName + ServerI18nManager.translate("message.message.area_5") + areaName + ServerI18nManager.translate("message.message.dimension_2") + dimension);
 
@@ -507,22 +506,24 @@ public class ServerNetworking {
 
             // 检查签名权限
             String signature = targetArea.getSignature();
-            if (signature == null) {
-                // 没有签名的旧域名：只有管理员可以删除
-                if (!hasOp) {
+            boolean canDelete = PermissionService.hasNodeOr(player, PermissionNodes.DELETE, () -> {
+                if (signature == null) {
+                    return player.hasPermissionLevel(2);
+                }
+                return signature.equals(playerName) || player.hasPermissionLevel(2);
+            });
+            if (!canDelete) {
+                if (signature == null) {
                     Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.general_28") + playerName + ServerI18nManager.translate("message.message.area.delete") + ServerI18nManager.translate("message.message.area.delete_4"));
                     sendDeleteResponse(player, false, key("message.message.area.delete_7"));
-                    return;
-                }
-                // 管理员可以继续删除
-                Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_216") + playerName + ServerI18nManager.translate("message.message.area.delete_4"));
-            } else {
-                // 有签名的新域名：创建者或管理员可以删除
-                if (!signature.equals(playerName) && !hasOp) {
+                } else {
                     Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.general_28") + playerName + ServerI18nManager.translate("message.message.area_2") + signature);
                     sendDeleteResponse(player, false, key("message.message.area.delete_6"));
-                    return;
                 }
+                return;
+            }
+            if (signature == null) {
+                Areashint.LOGGER.info(ServerI18nManager.translate("message.message.general_216") + playerName + ServerI18nManager.translate("message.message.area.delete_4"));
             }
 
             // 检查是否有次级域名引用此域名

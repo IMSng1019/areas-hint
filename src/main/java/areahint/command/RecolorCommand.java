@@ -6,6 +6,8 @@ import areahint.file.FileManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import areahint.network.TranslatableMessage.Part;
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
@@ -43,7 +45,6 @@ public class RecolorCommand {
 
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
-        boolean hasOp = source.hasPermissionLevel(2);
 
         // 获取玩家当前维度
         String dimension = player.getWorld().getRegistryKey().getValue().toString();
@@ -56,7 +57,7 @@ public class RecolorCommand {
         }
 
         // 获取可编辑的域名列表
-        List<AreaData> editableAreas = getEditableAreas(fileName, playerName, hasOp);
+        List<AreaData> editableAreas = getEditableAreas(player, fileName, playerName);
 
         if (editableAreas.isEmpty()) {
             source.sendMessage(Text.translatable("command.error.area.dimension_3"));
@@ -110,28 +111,27 @@ public class RecolorCommand {
     /**
      * 获取玩家可编辑的域名列表
      */
-    private static List<AreaData> getEditableAreas(String fileName, String playerName, boolean hasOp) {
+    private static List<AreaData> getEditableAreas(ServerPlayerEntity player, String fileName, String playerName) {
         List<AreaData> editableAreas = new ArrayList<>();
-        
+
         try {
             Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             if (areaFile == null || !areaFile.toFile().exists()) {
                 return editableAreas;
             }
-            
+
             List<AreaData> allAreas = FileManager.readAreaData(areaFile);
-            
+
             for (AreaData area : allAreas) {
-                // 管理员可以编辑所有域名，玩家只能编辑自己创建的域名
-                if (hasOp || playerName.equals(area.getSignature())) {
+                if (canEditArea(player, playerName, area)) {
                     editableAreas.add(area);
                 }
             }
-            
+
         } catch (Exception e) {
             Areashint.LOGGER.error(ServerI18nManager.translate("command.error.area.list_2"), e);
         }
-        
+
         return editableAreas;
     }
     
@@ -165,8 +165,7 @@ public class RecolorCommand {
     public static void handleRecolorRequest(ServerPlayerEntity player, String areaName, String newColor, String dimension) {
         try {
             String playerName = player.getName().getString();
-            boolean hasOp = player.hasPermissionLevel(2);
-            
+
             // 验证颜色格式
             if (!ColorUtil.isValidColor(newColor)) {
                 sendRecolorResponse(player, false, key("command.error.color_3"), lit(newColor));
@@ -193,8 +192,7 @@ public class RecolorCommand {
             
             for (AreaData area : areas) {
                 if (area.getName().equals(areaName)) {
-                    // 检查权限
-                    if (!hasOp && !playerName.equals(area.getSignature())) {
+                    if (!canEditArea(player, playerName, area)) {
                         sendRecolorResponse(player, false, key("command.message.area.modify.permission"), lit(areaName + "\""));
                         return;
                     }
@@ -230,6 +228,11 @@ public class RecolorCommand {
         }
     }
     
+    private static boolean canEditArea(ServerPlayerEntity player, String playerName, AreaData area) {
+        return PermissionService.hasNodeOr(player, PermissionNodes.RECOLOR,
+            () -> player.hasPermissionLevel(2) || playerName.equals(area.getSignature()));
+    }
+
     /**
      * 发送重新着色响应
      */

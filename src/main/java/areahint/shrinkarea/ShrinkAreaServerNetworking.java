@@ -6,24 +6,27 @@ import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
 import areahint.network.TranslatableMessage.Part;
-import static areahint.network.TranslatableMessage.key;
-import static areahint.network.TranslatableMessage.lit;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import areahint.util.AreaDataConverter;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.util.List;
+
+import static areahint.network.TranslatableMessage.key;
+import static areahint.network.TranslatableMessage.lit;
 
 /**
  * 收缩域名服务端网络处理
  * 处理客户端发送的收缩域名请求
  */
 public class ShrinkAreaServerNetworking {
-    
+
     /**
      * 注册服务端网络处理器
      */
@@ -35,11 +38,7 @@ public class ShrinkAreaServerNetworking {
                 try {
                     String areaJsonString = buf.readString(32767);
                     String dimension = buf.readString(32767);  // 接收维度信息
-
-                    server.execute(() -> {
-                        handleShrinkAreaRequest(player, areaJsonString, dimension);
-                    });
-
+                    server.execute(() -> handleShrinkAreaRequest(player, areaJsonString, dimension));
                 } catch (Exception e) {
                     System.err.println("处理收缩域名请求时发生错误: " + e.getMessage());
                     e.printStackTrace();
@@ -75,8 +74,7 @@ public class ShrinkAreaServerNetworking {
             }
 
             // 保存收缩后的域名
-            boolean success = saveShrunkArea(shrunkArea, dimension);
-            if (!success) {
+            if (!saveShrunkArea(shrunkArea, dimension)) {
                 sendResponse(player, false, key("shrinkarea.server.error.save"));
                 return;
             }
@@ -89,7 +87,7 @@ public class ShrinkAreaServerNetworking {
 
             // 服务端日志
             System.out.println("玩家 " + player.getGameProfile().getName() +
-                             " 成功收缩域名: " + shrunkArea.getName() + " (维度: " + dimension + ")");
+                " 成功收缩域名: " + shrunkArea.getName() + " (维度: " + dimension + ")");
 
         } catch (Exception e) {
             System.err.println("处理收缩域名请求失败: " + e.getMessage());
@@ -105,28 +103,28 @@ public class ShrinkAreaServerNetworking {
      * @param dimensionType 玩家所在维度类型（用于查找basename）
      */
     private static boolean validatePermission(ServerPlayerEntity player, AreaData area, String dimensionType) {
-        String playerName = player.getGameProfile().getName();
+        return PermissionService.hasNodeOr(player, PermissionNodes.SHRINKAREA, () -> {
+            String playerName = player.getGameProfile().getName();
 
-        // 检查是否为管理员
-        if (player.hasPermissionLevel(2)) {
-            return true;
-        }
-
-        // 检查是否为basename引用的域名的创建者（只在玩家所在维度查找）
-        if (area.getBaseName() != null) {
-            try {
-                AreaData baseArea = findAreaByName(area.getBaseName(), dimensionType);
-                if (baseArea != null && playerName.equals(baseArea.getSignature())) {
-                    return true;
-                }
-            } catch (Exception e) {
-                System.err.println("检查basename权限时发生错误: " + e.getMessage());
+            // 检查是否为管理员
+            if (player.hasPermissionLevel(2)) {
+                return true;
             }
-        }
 
-        return false;
+            // 检查是否为basename引用的域名的创建者（只在玩家所在维度查找）
+            if (area.getBaseName() != null) {
+                try {
+                    AreaData baseArea = findAreaByName(area.getBaseName(), dimensionType);
+                    return baseArea != null && playerName.equals(baseArea.getSignature());
+                } catch (Exception e) {
+                    System.err.println("检查basename权限时发生错误: " + e.getMessage());
+                }
+            }
+
+            return false;
+        });
     }
-    
+
     /**
      * 验证域名数据
      */
@@ -146,7 +144,7 @@ public class ShrinkAreaServerNetworking {
 
         return true;
     }
-    
+
     /**
      * 保存收缩后的域名
      */
@@ -200,7 +198,6 @@ public class ShrinkAreaServerNetworking {
      */
     private static String convertDimensionIdToType(String dimension) {
         if (dimension == null) return null;
-
         if (dimension.contains("overworld")) {
             return Packets.DIMENSION_OVERWORLD;
         } else if (dimension.contains("nether")) {
@@ -219,7 +216,6 @@ public class ShrinkAreaServerNetworking {
         try {
             // 使用ServerNetworking的方法发送所有维度的数据（相当于reload）
             ServerNetworking.sendAllAreaDataToAll();
-
         } catch (Exception e) {
             System.err.println("重新分发域名失败: " + e.getMessage());
             e.printStackTrace();
@@ -262,7 +258,7 @@ public class ShrinkAreaServerNetworking {
 
         return null;
     }
-    
+
     private static void sendResponse(ServerPlayerEntity player, boolean success, Part... parts) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
@@ -273,4 +269,4 @@ public class ShrinkAreaServerNetworking {
             e.printStackTrace();
         }
     }
-} 
+}

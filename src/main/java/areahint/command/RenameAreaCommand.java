@@ -7,6 +7,8 @@ import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import areahint.network.TranslatableMessage.Part;
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
@@ -133,7 +135,6 @@ public class RenameAreaCommand {
     private static void sendRenameableAreaList(ServerPlayerEntity player) {
         try {
             String playerName = player.getName().getString();
-            boolean isAdmin = player.hasPermissionLevel(2);
             RegistryKey<World> dimensionType = player.getWorld().getRegistryKey();
             String dimensionId = dimensionType.getValue().toString();
 
@@ -164,7 +165,7 @@ public class RenameAreaCommand {
 
             // 筛选可编辑的域名
             for (AreaData area : areas) {
-                if (canRenameArea(area, playerName, isAdmin)) {
+                if (canRenameArea(player, area, playerName)) {
                     editableAreas.add(area);
                 }
             }
@@ -200,7 +201,6 @@ public class RenameAreaCommand {
                                           String newSurfaceName, String dimension) {
         try {
             String playerName = player.getName().getString();
-            boolean isAdmin = player.hasPermissionLevel(2);
 
             // 验证新域名格式
             if (newName == null || newName.trim().isEmpty()) {
@@ -258,7 +258,7 @@ public class RenameAreaCommand {
                 return;
             }
 
-            if (!canRenameArea(targetArea, playerName, isAdmin)) {
+            if (!canRenameArea(player, targetArea, playerName)) {
                 sendRenameResponse(player, false, key("command.message.area.rename.permission"), lit(oldName + "\""));
                 return;
             }
@@ -309,14 +309,9 @@ public class RenameAreaCommand {
      * @param isAdmin 是否为管理员
      * @return 是否可以重命名
      */
-    private static boolean canRenameArea(AreaData area, String playerName, boolean isAdmin) {
-        // 管理员可以重命名所有域名
-        if (isAdmin) {
-            return true;
-        }
-
-        // 普通玩家只能重命名自己创建的域名（signature匹配）
-        return area.getSignature() != null && area.getSignature().equals(playerName);
+    private static boolean canRenameArea(ServerPlayerEntity player, AreaData area, String playerName) {
+        return PermissionService.hasNodeOr(player, PermissionNodes.RENAME,
+            () -> player.hasPermissionLevel(2) || (area.getSignature() != null && area.getSignature().equals(playerName)));
     }
 
     /**

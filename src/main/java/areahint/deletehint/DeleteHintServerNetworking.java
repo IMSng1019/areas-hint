@@ -6,19 +6,21 @@ import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
 import areahint.network.TranslatableMessage.Part;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import areahint.util.AreaDataConverter;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import static areahint.network.TranslatableMessage.key;
-import static areahint.network.TranslatableMessage.lit;
 
 import java.nio.file.Path;
 import java.util.List;
+
+import static areahint.network.TranslatableMessage.key;
+import static areahint.network.TranslatableMessage.lit;
 
 /**
  * DeleteHint服务端网络处理器
@@ -104,26 +106,31 @@ public class DeleteHintServerNetworking {
     }
 
     private static boolean validatePermission(ServerPlayerEntity player, AreaData area, String dimType) {
-        if (player.hasPermissionLevel(2)) return true;
-
-        String playerName = player.getGameProfile().getName();
-        if (playerName.equals(area.getSignature())) return true;
-
-        if (area.getBaseName() != null && dimType != null) {
-            try {
-                String fileName = Packets.getFileNameForDimension(dimType);
-                if (fileName != null) {
-                    Path path = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-                    List<AreaData> areas = FileManager.readAreaData(path);
-                    for (AreaData a : areas) {
-                        if (a.getName().equals(area.getBaseName())) {
-                            return playerName.equals(a.getSignature());
+        return PermissionService.hasNodeOr(player, PermissionNodes.DELETEHINT, () -> {
+            String playerName = player.getGameProfile().getName();
+            if (player.hasPermissionLevel(2)) {
+                return true;
+            }
+            if (playerName.equals(area.getSignature())) {
+                return true;
+            }
+            if (area.getBaseName() != null && dimType != null) {
+                try {
+                    String fileName = Packets.getFileNameForDimension(dimType);
+                    if (fileName != null) {
+                        Path path = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+                        List<AreaData> areas = FileManager.readAreaData(path);
+                        for (AreaData existing : areas) {
+                            if (existing.getName().equals(area.getBaseName())) {
+                                return playerName.equals(existing.getSignature());
+                            }
                         }
                     }
+                } catch (Exception ignored) {
                 }
-            } catch (Exception e) { /* ignore */ }
-        }
-        return false;
+            }
+            return false;
+        });
     }
 
     private static String convertDimensionIdToType(String dim) {

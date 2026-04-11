@@ -39,6 +39,7 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
-		"sodium": "*"
+		"sodium": "*",
+		"luckperms": "*"
 	}
 }

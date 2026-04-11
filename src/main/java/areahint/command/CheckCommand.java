@@ -4,6 +4,8 @@ import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.i18n.ServerI18nManager;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import areahint.util.SurfaceNameHandler;
 import areahint.world.WorldFolderManager;
 import com.mojang.brigadier.CommandDispatcher;
@@ -49,7 +51,7 @@ public class CheckCommand {
         dispatcher.register(
             CommandManager.literal("areahint")
                 .then(CommandManager.literal("check")
-                    .requires(source -> source.hasPermissionLevel(0)) // 权限等级0，不需要管理员
+                    .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.CHECK, 0))
                     .executes(CheckCommand::executeCheckAll)
                     .then(CommandManager.argument("unionName", StringArgumentType.string())
                         .suggests(createUnionNameSuggestionProvider())

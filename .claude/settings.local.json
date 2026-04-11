@@ -12,7 +12,12 @@
       "WebFetch(domain:maven.fabricmc.net)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebSearch",
-      "WebFetch(domain:meta.fabricmc.net)"
+      "WebFetch(domain:meta.fabricmc.net)",
+      "Skill(planning-with-files:planning-with-files)",
+      "Skill(planning-with-files)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(git diff:*)"
     ],
     "deny": [],
     "ask": []

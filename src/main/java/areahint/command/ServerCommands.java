@@ -4,11 +4,13 @@ import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.data.ConfigData;
 import areahint.file.FileManager;
+import areahint.dimensional.DimensionalNameManager;
 import areahint.file.JsonHelper;
 import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
-import areahint.dimensional.DimensionalNameManager;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -22,6 +24,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.registry.RegistryKey;
@@ -64,15 +67,17 @@ public class ServerCommands {
         dispatcher.register(literal("areahint")
             // help 命令
             .then(literal("help")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.HELP, 0))
                 .executes(ServerCommands::executeHelp))
-            
+
             // reload 命令
             .then(literal("reload")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.RELOAD, 0))
                 .executes(ServerCommands::executeReload))
             
             // dimensionalityname 命令 (交互式维度域名管理)
             .then(literal("dimensionalityname")
-                .requires(source -> source.hasPermissionLevel(2))
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DIMENSIONALITY_NAME, 2))
                 .executes(DimensionalNameCommands::executeStart)
                 .then(literal("select")
                     .then(argument("dimension", StringArgumentType.greedyString())
@@ -89,7 +94,7 @@ public class ServerCommands {
 
             // dimensionalitycolor 命令 (交互式维度域名颜色管理)
             .then(literal("dimensionalitycolor")
-                .requires(source -> source.hasPermissionLevel(2))
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DIMENSIONALITY_COLOR, 2))
                 .executes(DimensionalNameCommands::executeColorStart)
                 .then(literal("select")
                     .then(argument("dimension", StringArgumentType.greedyString())
@@ -114,13 +119,14 @@ public class ServerCommands {
 
             // add 命令 (仅服务端)
             .then(literal("add")
-                .requires(source -> source.hasPermissionLevel(2)) // 需要管理员权限
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD, 2))
                 .then(argument("json", StringArgumentType.greedyString())
                     .executes(context -> executeAdd(context, StringArgumentType.getString(context, "json"))))
             )
             
             // delete 命令 (交互式删除)
             .then(literal("delete")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DELETE, 0))
                 .executes(ServerCommands::executeDeleteStart)
                 .then(literal("select")
                     .then(argument("areaName", StringArgumentType.greedyString())
@@ -134,18 +140,21 @@ public class ServerCommands {
             
             // frequency 命令
             .then(literal("frequency")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.FREQUENCY, 0))
                 .then(argument("value", IntegerArgumentType.integer(1, 60))
                     .executes(context -> executeFrequency(context, IntegerArgumentType.getInteger(context, "value"))))
                 .executes(ServerCommands::executeFrequencyInfo))
             
             // subtitlerender 命令
             .then(literal("subtitlerender")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SUBTITLE_RENDER, 0))
                 .then(argument("mode", StringArgumentType.word())
                     .executes(context -> executeSubtitleRender(context, StringArgumentType.getString(context, "mode"))))
                 .executes(ServerCommands::executeSubtitleRenderInfo))
             
             // subtitlestyle 命令（交互式）
             .then(literal("subtitlestyle")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SUBTITLE_STYLE, 0))
                 .executes(ServerCommands::executeSubtitleStyleStart)
                 .then(literal("select")
                     .then(argument("style", StringArgumentType.word())
@@ -155,6 +164,7 @@ public class ServerCommands {
 
             // subtitlesize 命令（交互式）
             .then(literal("subtitlesize")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SUBTITLE_SIZE, 0))
                 .executes(ServerCommands::executeSubtitleSizeStart)
                 .then(literal("select")
                     .then(argument("size", StringArgumentType.word())
@@ -164,6 +174,7 @@ public class ServerCommands {
                 
             // easyadd 命令（带多个子命令）
             .then(literal("easyadd")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.EASYADD, 0))
                 .executes(ServerCommands::executeEasyAddStart)
                 .then(literal("cancel")
                     .executes(ServerCommands::executeEasyAddCancel))
@@ -192,6 +203,7 @@ public class ServerCommands {
                             
             // expandarea 命令 (域名扩展)
             .then(literal("expandarea")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.EXPANDAREA, 0))
                 .executes(ServerCommands::executeExpandAreaStart)
                 // 直接指定域名：/areahint expandarea "域名"
                 .then(argument("areaName", StringArgumentType.greedyString())
@@ -213,6 +225,7 @@ public class ServerCommands {
             
             // shrinkarea 命令 (域名收缩)
             .then(literal("shrinkarea")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SHRINKAREA, 0))
                 .executes(ServerCommands::executeShrinkAreaStart)
                 // 直接指定域名：/areahint shrinkarea "域名"
                 .then(argument("areaName", StringArgumentType.greedyString())
@@ -234,6 +247,7 @@ public class ServerCommands {
 
             // dividearea 命令 (域名分割)
             .then(literal("dividearea")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DIVIDEAREA, 0))
                 .executes(ServerCommands::executeDivideAreaStart)
                 .then(literal("select")
                     .then(argument("selectAreaName", StringArgumentType.greedyString())
@@ -264,6 +278,7 @@ public class ServerCommands {
 
             // recolor 命令
             .then(literal("recolor")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.RECOLOR, 0))
                 .executes(RecolorCommand::executeRecolor)
                 // /areahint recolor select <域名>
                 .then(literal("select")
@@ -284,6 +299,7 @@ public class ServerCommands {
             
             // rename 命令（交互式流程）
             .then(literal("rename")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.RENAME, 0))
                 .executes(RenameAreaCommand::executeRename)
                 .then(literal("select")
                     .then(argument("areaName", StringArgumentType.greedyString())
@@ -296,6 +312,7 @@ public class ServerCommands {
                             
             // sethigh 命令
             .then(literal("sethigh")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SETHIGH, 0))
                 .then(literal("custom")
                     .then(argument("areaName", StringArgumentType.greedyString())
                         .executes(context -> SetHighCommand.executeSetHighCustom(context, StringArgumentType.getString(context, "areaName")))))
@@ -311,6 +328,7 @@ public class ServerCommands {
 
             // addhint 命令 (向已有域名添加顶点)
             .then(literal("addhint")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADDHINT, 0))
                 .executes(ServerCommands::executeAddHintStart)
                 .then(literal("select")
                     .then(argument("areaName", StringArgumentType.greedyString())
@@ -325,6 +343,7 @@ public class ServerCommands {
 
             // deletehint 命令 (从已有域名删除顶点)
             .then(literal("deletehint")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DELETEHINT, 0))
                 .executes(ServerCommands::executeDeleteHintStart)
                 .then(literal("select")
                     .then(argument("areaName", StringArgumentType.greedyString())
@@ -362,7 +381,7 @@ public class ServerCommands {
 
             // serverlanguage 命令（服务端语言，权限等级4）
             .then(literal("serverlanguage")
-                .requires(source -> source.hasPermissionLevel(4))
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SERVER_LANGUAGE, 4))
                 .then(argument("langCode", StringArgumentType.word())
                     .executes(context -> executeServerLanguage(context, StringArgumentType.getString(context, "langCode")))))
         );
@@ -850,6 +869,71 @@ public class ServerCommands {
         }
     }
     
+    private static boolean canDeleteArea(ServerPlayerEntity player, String playerName, AreaData area) {
+        return PermissionService.hasNodeOr(player, PermissionNodes.DELETE, () -> {
+            String signature = area.getSignature();
+            if (signature == null) {
+                return player.hasPermissionLevel(2);
+            }
+            return signature.equals(playerName) || player.hasPermissionLevel(2);
+        });
+    }
+
+    private static boolean canSetHighArea(ServerPlayerEntity player, String playerName, AreaData area, List<AreaData> areas) {
+        return PermissionService.hasNodeOr(player, PermissionNodes.SETHIGH, () -> {
+            if (player.hasPermissionLevel(2)) {
+                return true;
+            }
+            if (area.getSignature() != null && area.getSignature().equals(playerName)) {
+                return true;
+            }
+            for (AreaData otherArea : areas) {
+                if (area.getName().equals(otherArea.getBaseName())
+                    && otherArea.getSignature() != null
+                    && otherArea.getSignature().equals(playerName)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    private static boolean canExpandArea(ServerPlayerEntity player, String playerName, AreaData area, List<AreaData> areas) {
+        return PermissionService.hasNodeOr(player, PermissionNodes.EXPANDAREA, () -> {
+            if (player.hasPermissionLevel(2)) {
+                return true;
+            }
+            if (playerName.equals(area.getSignature())) {
+                return true;
+            }
+            if (area.getBaseName() != null) {
+                AreaData baseArea = areas.stream()
+                    .filter(other -> area.getBaseName().equals(other.getName()))
+                    .findFirst()
+                    .orElse(null);
+                return baseArea != null && playerName.equals(baseArea.getSignature());
+            }
+            return false;
+        });
+    }
+
+    private static boolean canShrinkArea(ServerPlayerEntity player, String playerName, AreaData area, List<AreaData> areas) {
+        return PermissionService.hasNodeOr(player, PermissionNodes.SHRINKAREA, () -> {
+            if (player.hasPermissionLevel(2)) {
+                return true;
+            }
+            String baseName = area.getBaseName();
+            if (baseName == null) {
+                return false;
+            }
+            AreaData baseArea = areas.stream()
+                .filter(other -> baseName.equals(other.getName()))
+                .findFirst()
+                .orElse(null);
+            return baseArea != null && playerName.equals(baseArea.getSignature());
+        });
+    }
+
     /**
      * 获取当前玩家可以删除的域名列表
      * @param source 命令源
@@ -868,21 +952,17 @@ public class ServerCommands {
                 return List.of();
             }
             
+            ServerPlayerEntity player = source.getPlayer();
+            if (player == null) {
+                return List.of();
+            }
+
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             String playerName = source.getName();
-            boolean hasOp = source.hasPermissionLevel(2);
-            
+
             return areas.stream()
-                .filter(area -> {
-                    String signature = area.getSignature();
-                    if (signature == null) {
-                        // 旧域名只有管理员可以删除
-                        return hasOp;
-                    } else {
-                        // 新域名创建者或管理员可以删除
-                        return signature.equals(playerName) || hasOp;
-                    }
-                })
+                .filter(area -> canDeleteArea(player, playerName, area))
+                .filter(area -> areas.stream().noneMatch(child -> area.getName().equals(child.getBaseName())))
                 .map(AreaData::getName)
                 .toList();
         } catch (Exception e) {
@@ -1612,21 +1692,16 @@ public class ServerCommands {
                 return List.of();
             }
             
+            ServerPlayerEntity player = source.getPlayer();
+            if (player == null) {
+                return List.of();
+            }
+
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             String playerName = source.getName();
-            boolean hasOp = source.hasPermissionLevel(2);
-            
+
             return areas.stream()
-                .filter(area -> {
-                    String signature = area.getSignature();
-                    if (signature == null) {
-                        // 旧域名只有管理员可以设置高度
-                        return hasOp;
-                    } else {
-                        // 新域名创建者或管理员可以设置高度
-                        return signature.equals(playerName) || hasOp;
-                    }
-                })
+                .filter(area -> canSetHighArea(player, playerName, area, areas))
                 .map(AreaData::getName)
                 .toList();
         } catch (Exception e) {
@@ -1672,21 +1747,16 @@ public class ServerCommands {
                 return List.of();
             }
             
+            ServerPlayerEntity player = source.getPlayer();
+            if (player == null) {
+                return List.of();
+            }
+
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             String playerName = source.getName();
-            boolean hasOp = source.hasPermissionLevel(2);
-            
+
             return areas.stream()
-                .filter(area -> {
-                    String signature = area.getSignature();
-                    if (signature == null) {
-                        // 旧域名只有管理员可以扩展
-                        return hasOp;
-                    } else {
-                        // 新域名创建者或管理员可以扩展
-                        return signature.equals(playerName) || hasOp;
-                    }
-                })
+                .filter(area -> canExpandArea(player, playerName, area, areas))
                 .map(AreaData::getName)
                 .toList();
         } catch (Exception e) {
@@ -1732,21 +1802,16 @@ public class ServerCommands {
                 return List.of();
             }
             
+            ServerPlayerEntity player = source.getPlayer();
+            if (player == null) {
+                return List.of();
+            }
+
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             String playerName = source.getName();
-            boolean hasOp = source.hasPermissionLevel(2);
-            
+
             return areas.stream()
-                .filter(area -> {
-                    if (hasOp) return true;
-                    // 检查basename引用域名的signature
-                    String baseName = area.getBaseName();
-                    if (baseName == null) return false;
-                    AreaData baseArea = areas.stream()
-                        .filter(a -> a.getName().equals(baseName))
-                        .findFirst().orElse(null);
-                    return baseArea != null && playerName.equals(baseArea.getSignature());
-                })
+                .filter(area -> canShrinkArea(player, playerName, area, areas))
                 .map(AreaData::getName)
                 .toList();
         } catch (Exception e) {

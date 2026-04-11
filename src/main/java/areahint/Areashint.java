@@ -1,9 +1,12 @@
 package areahint;
 
 import areahint.command.ServerCommands;
+import areahint.file.FileManager;
 import areahint.i18n.ServerI18nManager;
 import areahint.network.ServerNetworking;
-import areahint.file.FileManager;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
+import areahint.permission.LuckPermsCompat;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -48,6 +51,9 @@ public class Areashint implements ModInitializer {
 
 		// 初始化服务端国际化
 		ServerI18nManager.init();
+
+		// 初始化权限兼容层
+		LuckPermsCompat.initialize();
 
 		// 初始化文件管理
 		initConfigDir();
@@ -99,7 +105,8 @@ public class Areashint implements ModInitializer {
 		// 注册维度变更事件 - 首次进入未命名维度时提示OP命名
 		ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
 			String dimId = destination.getRegistryKey().getValue().toString();
-			if (player.hasPermissionLevel(2) && !areahint.dimensional.DimensionalNameManager.hasDimensionalName(dimId)) {
+			if (PermissionService.hasCommandPermission(player, PermissionNodes.DIMENSIONALITY_NAME, 2)
+				&& !areahint.dimensional.DimensionalNameManager.hasDimensionalName(dimId)) {
 				// 自动注册该维度（使用维度ID作为默认名称）
 				areahint.dimensional.DimensionalNameManager.setDimensionalName(dimId, dimId);
 				areahint.dimensional.DimensionalNameManager.saveDimensionalNames();

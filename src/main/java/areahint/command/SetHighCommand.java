@@ -6,6 +6,8 @@ import areahint.file.FileManager;
 import areahint.i18n.ServerI18nManager;
 
 import areahint.network.Packets;
+import areahint.permission.PermissionNodes;
+import areahint.permission.PermissionService;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.ServerCommandSource;
@@ -46,7 +48,6 @@ public class SetHighCommand {
 
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
-        boolean isAdmin = source.hasPermissionLevel(2);
 
         // 获取玩家当前维度
         String dimension = player.getWorld().getRegistryKey().getValue().toString();
@@ -59,7 +60,7 @@ public class SetHighCommand {
         }
 
         // 获取可修改高度的域名列表
-        List<AreaData> editableAreas = getHeightEditableAreas(fileName, playerName, isAdmin);
+        List<AreaData> editableAreas = getHeightEditableAreas(player, fileName, playerName);
 
         if (editableAreas.isEmpty()) {
             source.sendMessage(Text.translatable("command.error.area.altitude.dimension"));
@@ -139,7 +140,6 @@ public class SetHighCommand {
 
         ServerPlayerEntity player = source.getPlayer();
         String playerName = player.getName().getString();
-        boolean isAdmin = source.hasPermissionLevel(2);
 
         // 获取玩家当前维度
         String dimension = player.getWorld().getRegistryKey().getValue().toString();
@@ -152,7 +152,7 @@ public class SetHighCommand {
         }
 
         // 获取可修改高度的域名列表
-        List<AreaData> editableAreas = getHeightEditableAreas(fileName, playerName, isAdmin);
+        List<AreaData> editableAreas = getHeightEditableAreas(player, fileName, playerName);
 
         if (editableAreas.isEmpty()) {
             source.sendMessage(Text.translatable("command.error.area.altitude.dimension"));
@@ -217,12 +217,12 @@ public class SetHighCommand {
 
     /**
      * 获取可编辑高度的域名列表
+     * @param player 玩家
      * @param fileName 文件名
      * @param playerName 玩家名称
-     * @param isAdmin 是否为管理员
      * @return 可编辑的域名列表
      */
-    private static List<AreaData> getHeightEditableAreas(String fileName, String playerName, boolean isAdmin) {
+    private static List<AreaData> getHeightEditableAreas(ServerPlayerEntity player, String fileName, String playerName) {
         try {
             Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
             if (!areaFile.toFile().exists()) {
@@ -232,7 +232,7 @@ public class SetHighCommand {
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             
             return areas.stream()
-                    .filter(area -> canEditAreaHeight(area, playerName, isAdmin, areas))
+                    .filter(area -> canEditAreaHeight(player, area, playerName, areas))
                     .collect(Collectors.toList());
                     
         } catch (Exception e) {
@@ -243,35 +243,32 @@ public class SetHighCommand {
     
     /**
      * 检查是否可以编辑域名高度
+     * @param player 玩家
      * @param area 域名数据
      * @param playerName 玩家名称
-     * @param isAdmin 是否为管理员
      * @param allAreas 所有域名数据（用于检查basename引用）
      * @return 是否可以编辑
      */
-    private static boolean canEditAreaHeight(AreaData area, String playerName, boolean isAdmin, List<AreaData> allAreas) {
-        // 管理员可以编辑所有域名的高度
-        if (isAdmin) {
-            return true;
-        }
-        
-        // 普通玩家可以编辑自己创建的域名（signature匹配）
-        if (area.getSignature() != null && area.getSignature().equals(playerName)) {
-            return true;
-        }
-        
-        // 普通玩家可以编辑被自己basename引用的域名
-        // 即检查是否有其他域名的baseName指向当前玩家创建的域名
-        for (AreaData otherArea : allAreas) {
-            // 如果其他域名的baseName指向当前检查的域名，并且其他域名是玩家创建的
-            if (area.getName().equals(otherArea.getBaseName()) && 
-                otherArea.getSignature() != null && 
-                otherArea.getSignature().equals(playerName)) {
+    private static boolean canEditAreaHeight(ServerPlayerEntity player, AreaData area, String playerName, List<AreaData> allAreas) {
+        return PermissionService.hasNodeOr(player, PermissionNodes.SETHIGH, () -> {
+            if (player.hasPermissionLevel(2)) {
                 return true;
             }
-        }
-        
-        return false;
+
+            if (area.getSignature() != null && area.getSignature().equals(playerName)) {
+                return true;
+            }
+
+            for (AreaData otherArea : allAreas) {
+                if (area.getName().equals(otherArea.getBaseName())
+                    && otherArea.getSignature() != null
+                    && otherArea.getSignature().equals(playerName)) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
     }
     
     /**
@@ -352,8 +349,7 @@ public class SetHighCommand {
                                          boolean hasCustomHeight, Double maxHeight, Double minHeight) {
         try {
             String playerName = player.getName().getString();
-            boolean isAdmin = player.hasPermissionLevel(2);
-            
+                
             // 获取玩家当前维度
             String dimension = player.getWorld().getRegistryKey().getValue().toString();
             String dimensionType = convertDimensionIdToType(dimension);
@@ -365,7 +361,7 @@ public class SetHighCommand {
             }
             
             // 获取可修改高度的域名列表
-            List<AreaData> editableAreas = getHeightEditableAreas(fileName, playerName, isAdmin);
+            List<AreaData> editableAreas = getHeightEditableAreas(player, fileName, playerName);
             
             // 查找指定的域名
             AreaData targetArea = editableAreas.stream()
