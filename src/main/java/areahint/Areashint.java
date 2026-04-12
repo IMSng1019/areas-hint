@@ -11,6 +11,7 @@ import areahint.permission.LuckPermsCompat;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
@@ -81,7 +82,8 @@ public class Areashint implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStarting);
 		// 注册服务器停止事件监听器
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onServerStopped);
-		
+		ServerTickEvents.END_SERVER_TICK.register(server -> BlueMapCompat.onServerTick(System.currentTimeMillis()));
+
 		// 初始化服务端网络处理
 		ServerNetworking.init();
 		

@@ -20,7 +20,6 @@ import java.util.Objects;
  * AreaData 到 BlueMap Marker 的转换工厂。
  */
 public final class BlueMapMarkerFactory {
-    private static final String FLASH_FALLBACK_COLOR = "#FFFFFF";
     private static final String DEFAULT_DIMENSION_BADGE_COLOR = "#5C7CFA";
     private static final String MUTED_TEXT_COLOR = "#A9B4C2";
     private static final String PANEL_BACKGROUND = "rgba(15, 23, 42, 0.35)";
@@ -47,6 +46,10 @@ public final class BlueMapMarkerFactory {
     }
 
     public static ExtrudeMarker createMarker(AreaData area, ServerWorld world, String dimensionType) {
+        return createMarkerDefinition(area, world, dimensionType, System.currentTimeMillis()).marker();
+    }
+
+    public static MarkerBuildResult createMarkerDefinition(AreaData area, ServerWorld world, String dimensionType, long timeMs) {
         if (area == null) {
             throw new IllegalArgumentException("area 不能为空");
         }
@@ -61,14 +64,16 @@ public final class BlueMapMarkerFactory {
                 area.getName(), area.getSecondVertices() == null ? 0 : area.getSecondVertices().size());
         }
 
+        String markerId = createMarkerId(area, dimensionType);
         HeightRange heightRange = resolveHeightRange(area, world);
         PolygonData polygonData = createPolygonData(area.getVertices());
-        MarkerStyle markerStyle = resolveMarkerStyle(area.getColor(), area.getLevel());
         String dimensionId = world.getRegistryKey().getValue().toString();
         String displayName = resolveDisplayName(area);
+        String stablePhaseKey = area.getName() != null && !area.getName().isBlank() ? area.getName() : displayName;
+        MarkerStyle markerStyle = resolveMarkerStyle(area.getColor(), area.getLevel(), stablePhaseKey, timeMs);
         String detail = buildDetail(area, displayName, dimensionId, dimensionType, heightRange, markerStyle);
 
-        return ExtrudeMarker.builder()
+        ExtrudeMarker marker = ExtrudeMarker.builder()
             .label(displayName)
             .position(new Vector3d(polygonData.centerX(), heightRange.minY(), polygonData.centerZ()))
             .shape(polygonData.shape(), (float) heightRange.minY(), (float) heightRange.maxY())
@@ -78,6 +83,22 @@ public final class BlueMapMarkerFactory {
             .detail(detail)
             .depthTestEnabled(true)
             .build();
+
+        BlueMapDynamicMarkerState dynamicState = null;
+        if (markerStyle.originalFlashMode() != null) {
+            dynamicState = new BlueMapDynamicMarkerState(
+                markerId,
+                marker,
+                markerStyle.originalFlashMode(),
+                markerStyle.phaseOffsetMs(),
+                markerStyle.lineWidth(),
+                markerStyle.fillAlpha(),
+                markerStyle.phaseBucket(),
+                markerStyle.effectiveRgb()
+            );
+        }
+
+        return new MarkerBuildResult(markerId, marker, dynamicState);
     }
 
     private static String resolveDisplayName(AreaData area) {
@@ -181,21 +202,52 @@ public final class BlueMapMarkerFactory {
         return Math.max(min, Math.min(max, value));
     }
 
-    private static MarkerStyle resolveMarkerStyle(String rawColor, int level) {
+    private static MarkerStyle resolveMarkerStyle(String rawColor, int level, String stablePhaseKey, long timeMs) {
         String normalizedColor = ColorUtil.normalizeColor(rawColor);
         boolean flashMode = ColorUtil.isFlashColor(normalizedColor);
-        String effectiveHexColor = flashMode ? FLASH_FALLBACK_COLOR : normalizedColor;
-        int[] rgb = ColorUtil.parseColor(effectiveHexColor);
         float fillAlpha = resolveFillAlpha(level);
-        int lineWidth = resolveLineWidth(level);
+        int lineWidth = resolveLineWidth(level, flashMode);
+
+        if (!flashMode) {
+            int[] rgb = ColorUtil.parseColor(normalizedColor);
+            int effectiveRgb = packRgb(rgb[0], rgb[1], rgb[2]);
+            Color lineColor = new Color(rgb[0], rgb[1], rgb[2]);
+            return new MarkerStyle(
+                normalizedColor,
+                null,
+                normalizedColor,
+                effectiveRgb,
+                lineColor,
+                new Color(rgb[0], rgb[1], rgb[2], fillAlpha),
+                lineWidth,
+                fillAlpha,
+                0L,
+                -1L
+            );
+        }
+
+        long phaseOffsetMs = BlueMapFlashColorEngine.resolveStablePhaseOffset(normalizedColor, stablePhaseKey);
+        int effectiveRgb = BlueMapFlashColorEngine.resolveShiftedRgb(normalizedColor, timeMs, phaseOffsetMs);
+        long phaseBucket = BlueMapFlashColorEngine.resolvePhaseBucket(
+            normalizedColor,
+            timeMs,
+            phaseOffsetMs,
+            BlueMapFlashColorEngine.getBucketMs(normalizedColor)
+        );
+        String effectiveHexColor = formatHexColor(effectiveRgb);
+        Color lineColor = resolveFlashOutlineColor(effectiveRgb);
 
         return new MarkerStyle(
             normalizedColor,
-            flashMode ? normalizedColor : null,
+            normalizedColor,
             effectiveHexColor,
-            new Color(rgb[0], rgb[1], rgb[2]),
-            new Color(rgb[0], rgb[1], rgb[2], fillAlpha),
-            lineWidth
+            effectiveRgb,
+            lineColor,
+            BlueMapFlashColorEngine.toColor(effectiveRgb, fillAlpha),
+            lineWidth,
+            fillAlpha,
+            phaseOffsetMs,
+            phaseBucket
         );
     }
 
@@ -209,8 +261,29 @@ public final class BlueMapMarkerFactory {
         return 0.20f;
     }
 
-    private static int resolveLineWidth(int level) {
+    private static int resolveLineWidth(int level, boolean flashMode) {
         return level <= 1 ? 3 : 2;
+    }
+
+    private static Color resolveFlashOutlineColor(int fillRgb) {
+        int red = (fillRgb >> 16) & 0xFF;
+        int green = (fillRgb >> 8) & 0xFF;
+        int blue = fillRgb & 0xFF;
+        double luminance = (0.299 * red + 0.587 * green + 0.114 * blue) / 255.0;
+
+        if (luminance > 0.6) {
+            return new Color(
+                (int) (red * 0.35),
+                (int) (green * 0.35),
+                (int) (blue * 0.35)
+            );
+        }
+
+        return new Color(
+            Math.min(255, (int) (red * 0.45 + 255 * 0.55)),
+            Math.min(255, (int) (green * 0.45 + 255 * 0.55)),
+            Math.min(255, (int) (blue * 0.45 + 255 * 0.55))
+        );
     }
 
     private static String buildDetail(AreaData area, String displayName, String dimensionId, String dimensionType,
@@ -263,8 +336,9 @@ public final class BlueMapMarkerFactory {
             detail.append("<div style=\"margin-top:8px;padding-top:8px;border-top:1px dashed ")
                 .append(PANEL_BORDER).append(";font-size:0.92em;color:").append(MUTED_TEXT_COLOR).append(";\">");
             if (markerStyle.originalFlashMode() != null) {
-                detail.append("<div>动态颜色模式 <strong>").append(escapeHtml(markerStyle.originalFlashMode()))
-                    .append("</strong> 已降级为静态显示。</div>");
+                detail.append("<div>")
+                    .append(buildFlashModeDetail(markerStyle.originalFlashMode()))
+                    .append("</div>");
             }
             if (heightRange.clamped()) {
                 detail.append("<div>高度超出当前维度合法范围，已自动裁剪到世界高度内。</div>");
@@ -304,13 +378,25 @@ public final class BlueMapMarkerFactory {
 
         if (markerStyle.originalFlashMode() != null) {
             swatch.append(code(markerStyle.originalFlashMode()))
-                .append(" <span style=\"color:").append(MUTED_TEXT_COLOR).append(";\">→</span> ")
-                .append(code(markerStyle.effectiveHexColor()));
+                .append(" <span style=\"color:").append(MUTED_TEXT_COLOR)
+                .append(";\">（填充为当前周期样本 ")
+                .append(escapeHtml(markerStyle.effectiveHexColor()))
+                .append("，边框为独立描边）</span>");
         } else {
             swatch.append(code(markerStyle.normalizedColor()));
         }
 
         return swatch.toString();
+    }
+
+    private static String buildFlashModeDetail(String flashMode) {
+        String escapedMode = escapeHtml(flashMode);
+        if (BlueMapFlashColorEngine.isPerCharMode(flashMode)) {
+            return "动态颜色模式 <strong>" + escapedMode +
+                "</strong> 已映射为按区域名稳定相位偏移的整体周期颜色，用于近似原始逐字效果。";
+        }
+        return "动态颜色模式 <strong>" + escapedMode +
+            "</strong> 通过周期更新 marker 颜色保持整体动态效果。";
     }
 
     private static String resolveDimensionBadgeColor(String dimensionId) {
@@ -345,6 +431,14 @@ public final class BlueMapMarkerFactory {
         return Double.toString(value);
     }
 
+    private static int packRgb(int red, int green, int blue) {
+        return (red << 16) | (green << 8) | blue;
+    }
+
+    private static String formatHexColor(int rgb) {
+        return String.format("#%06X", rgb & 0xFFFFFF);
+    }
+
     private static String sanitizeName(String value) {
         if (value == null || value.isBlank()) {
             return "unknown";
@@ -373,6 +467,9 @@ public final class BlueMapMarkerFactory {
             .replace("'", "&#39;");
     }
 
+    public record MarkerBuildResult(String markerId, ExtrudeMarker marker, BlueMapDynamicMarkerState dynamicState) {
+    }
+
     private record PolygonData(Shape shape, double centerX, double centerZ) {
     }
 
@@ -383,9 +480,13 @@ public final class BlueMapMarkerFactory {
         String normalizedColor,
         String originalFlashMode,
         String effectiveHexColor,
+        int effectiveRgb,
         Color lineColor,
         Color fillColor,
-        int lineWidth
+        int lineWidth,
+        float fillAlpha,
+        long phaseOffsetMs,
+        long phaseBucket
     ) {
     }
 }

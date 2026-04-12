@@ -494,11 +494,14 @@ public class ServerCommands {
             }
         }
         
+        // 规范化颜色，确保 /add JSON 与 EasyAdd/Recolor 一致写入静态色或 FLASH_* 语义
+        areaData.setColor(areahint.util.ColorUtil.normalizeColor(areaData.getColor()));
+
         if (!areaData.isValid()) {
             source.sendMessage(Text.translatable("command.error.area.level"));
             return 0;
         }
-        
+
         // 根据维度决定写入哪个文件
         String dimensionId = getDimensionFromSource(source);
         if (dimensionId == null) {

@@ -20,7 +20,9 @@
       "Bash(git diff:*)",
       "Bash(./gradlew:*)",
       "WebFetch(domain:repo.bluecolored.de)",
-      "Bash(javap:*)"
+      "Bash(javap:*)",
+      "Bash(git:*)",
+      "Bash(jar tf:*)"
     ],
     "deny": [],
     "ask": []

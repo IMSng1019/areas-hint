@@ -81,6 +81,18 @@ public final class BlueMapCompat {
         }
     }
 
+    public static void onServerTick(long timeMs) {
+        if (!isAvailable()) {
+            return;
+        }
+
+        try {
+            bridge.onServerTick(timeMs);
+        } catch (Throwable t) {
+            Areashint.LOGGER.warn("BlueMap tick 联动失败。", t);
+        }
+    }
+
     public static void requestDimensionSync(String dimensionType) {
         if (!isAvailable()) {
             return;

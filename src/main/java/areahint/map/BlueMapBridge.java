@@ -12,6 +12,8 @@ public interface BlueMapBridge {
 
     void onServerStopped();
 
+    void onServerTick(long timeMs);
+
     void requestDimensionSync(String dimensionType);
 
     void requestFullSync();
