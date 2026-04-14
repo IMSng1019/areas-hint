@@ -1,494 +1,543 @@
-# Area Hints 域名模组
+# Areas Hint 域名模组
 
-这是一个Minecraft Fabric 1.20.4版本的区域提示模组。模组可以在玩家进入特定区域时显示由玩家自定义的区域名称。它通过智能区域检测和优雅的视觉提示，让玩家沉浸在精心构建的游戏世界中，提供类RPG的区域提示体验。
+为你的 Minecraft 世界增添沉浸式区域名称提示。
 
-## 功能概述
+当玩家进入你定义的区域时，屏幕上方会优雅显示该区域的名称，让建筑、地图、RPG 场景与多层级世界观拥有更强的代入感与仪式感。
 
-- 通过多边形区域定义不同的区域（称为"域名"）
-- 支持多层级域名体系（顶级域名、二级域名、三级域名等）
-- 使用射线法检测玩家是否在特定区域内
-- 动态显示区域名称，带有平滑的动画效果
-- 支持多种渲染方式（CPU、OpenGL、Vulkan）
-- 提供多种字幕样式选项
-- 可通过命令进行配置和区域管理
-- 智能命令补全系统，支持自动补全可删除的域名
-- 交互式域名添加系统（EasyAdd），普通玩家也能轻松创建域名
+---
 
-## 架构设计
+## 概述
 
-模组分为客户端和服务端两部分：
+Areas Hint 是一个适用于 **Minecraft Fabric 1.20.4** 的区域提示模组。
+它允许玩家使用多边形定义区域（项目内通常称为“域名”），并在进入区域时显示自定义名称。
 
-### 客户端部分
+模组支持：
 
-- 负责读取配置文件和区域数据文件
-- 使用射线法计算玩家是否在区域内
-- 根据配置文件显示不同样式的区域提示
-- 处理命令和配置更新
+- 多边形区域定义
+- 多层级域名体系
+- 高度过滤
+- 维度域名显示
+- 交互式区域创建与编辑
+- 多种字幕渲染与样式设置
+- 多世界 / 多服务器独立数据管理
+- 权限系统与地图系统兼容扩展
 
-### 服务端部分
+在设计上，模组采用**客户端检测 + 服务端同步**的思路：
+客户端负责主要的区域检测与显示，服务端负责数据存储、权限处理与同步，从而在保证体验的同时尽量降低服务器负担。
 
-- 负责存储区域数据
-- 将区域数据发送给客户端
-- 处理管理员添加区域的命令
+---
 
-## 模块划分
+## 特点
 
-### 1. 核心模块 (Core)
+- **玩家自定义**：自由命名区域，设定范围、颜色、层级与高度。
+- **性能友好**：结合高度预筛选、AABB 预检查与射线法检测，减少无效计算。
+- **自动区域提示**：进入区域时自动显示名称，适合 RPG、建筑展示与剧情地图。
+- **多级区域支持**：区域可嵌套，例如“王国 → 主城 → 王座厅”。
+- **维度名称支持**：离开所有普通区域时显示当前维度名称。
+- **交互式创建**：支持 `/areahint easyadd` 等命令进行交互式编辑。
+- **可编辑性强**：支持扩展、收缩、分割、重命名、重新着色、修改高度。
+- **显示方式丰富**：支持 CPU / OpenGL / Vulkan（实验性）以及多种字幕样式与大小设置。
+- **兼容性扩展**：可与 LuckPerms、BlueMap 等系统协同使用。
 
-- 模组初始化和生命周期管理
-- 注册命令和事件监听器
+---
 
-### 2. 数据模型模块 (Data Model)
+## 为什么选择它？
 
-- 区域（域名）数据结构
-- 配置文件数据结构
-- 数据验证和转换
+### 对玩家友好
+普通玩家也可以通过交互式流程参与区域创建与修改，而不必依赖手写 JSON。
 
-### 3. 文件管理模块 (File Management)
+### 对服主友好
+适合服务器主城、村落、副本、野区、建筑区、剧情区域、活动区域等管理场景。
 
-- 检查和创建配置目录
-- 读取和写入配置文件
-- 读取和写入域名文件
-- 生成默认配置文件
+### 对地图作者友好
+可通过域名层级、维度域名与联合域名构建更完整的世界观提示系统。
 
-### 4. 区域检测模块 (Area Detection)
+### 对性能友好
+模组在区域检测上采用分层优化思路，先快速排除，再进行精确判断。
 
-- 使用射线法检测点是否在多边形内
-- 动态调整检测频率
-- 区域层级和优先级计算
+---
 
-### 5. 渲染模块 (Rendering)
+## 适合场景
 
-- 实现不同的渲染模式（CPU、OpenGL、Vulkan）
-- 显示区域提示动画
-- 管理显示样式
+- **RPG 服务器**：为主城、王国、村庄、副本、野区、地下城等区域添加名称提示。
+- **冒险地图**：在关键剧情点、机关房间、隐藏区域、章节地点中展示自定义名称。
+- **建筑服务器**：为大型建筑、展馆、社区区域、作者作品集提供空间标签。
+- **单人生存世界**：记录家园、矿区、农场、港口、遗迹、维度据点等重要地点。
 
-### 6. 网络模块 (Networking)
+---
 
-- 服务端向客户端发送区域数据
-- 处理网络数据包和同步
+## 适用版本与依赖
 
-### 7. 世界文件夹管理 (World Folder Management)
+### 基础环境
 
-每个世界（服务器）都有独立的文件夹来存储域名和维度域名配置，实现多世界支持。
+- **Minecraft**：`1.20.4`
+- **Fabric Loader**：`0.16.14`
+- **Yarn Mappings**：`1.20.4+build.3`
+- **Fabric API**：`0.97.2+1.20.4`
+- **Java**：`17`
+- **当前模组版本**：`4.1.0`
 
-#### 特性
-- **独立世界文件夹**：每个世界使用 `IP地址_世界名称` 格式的文件夹
-- **自动创建**：连接世界时自动检测并创建对应文件夹
-- **智能路径管理**：服务端和客户端自动使用正确的世界文件夹
-- **配置分离**：全局配置在根目录，世界特定数据在世界文件夹
+### 可选兼容 / 集成
 
-#### 文件夹结构示例
+- **LuckPerms**：权限节点兼容
+- **BlueMap**：地图标记相关扩展
+- **Sodium**：已在 `fabric.mod.json` 中作为建议兼容项列出
 
+---
+
+## 安装说明
+
+### 客户端安装
+1. 安装 **Fabric Loader**
+2. 安装 **Fabric API**
+3. 将本模组的 `.jar` 文件放入 `mods` 文件夹
+4. 启动游戏
+
+### 服务端安装
+1. 安装 **Fabric Loader**
+2. 安装 **Fabric API**
+3. 将本模组的 `.jar` 文件放入服务端 `mods` 文件夹
+4. 启动服务端
+
+### 推荐安装方式
+为了获得完整功能，建议**客户端与服务端同时安装**。
+在单人世界中，客户端与集成服务端会共同工作。
+
+---
+
+## 快速开始
+
+第一次使用时，建议按下面流程体验：
+
+1. 安装模组并进入世界
+2. 执行 `/areahint easyadd`
+3. 按交互流程依次设置：
+   - 域名名称
+   - 域名等级
+   - 上级域名（如果有）
+   - 顶点记录
+   - 高度范围
+   - 颜色设置
+4. 完成后进入该区域，查看顶部提示效果
+5. 可使用 `/areahint check` 查看当前联合域名
+6. 若手动修改了配置文件或区域文件，可使用 `/areahint reload` 重新加载
+
+---
+
+## 核心概念
+
+### 1. 域名
+本项目中的“域名”不是网络域名，而是**你为某个游戏区域定义的名称单位**。
+例如：
+
+- 王国
+- 主城
+- 商业区
+- 王座厅
+- 地下矿井
+
+### 2. 一级顶点 `vertices`
+域名多边形本体的顶点集合，用于真正的区域形状判断。
+
+### 3. 二级顶点 `second-vertices`
+二级顶点是对区域边界的辅助描述，常用于包围盒（AABB）预筛选等快速判断。
+你也可以理解为用于加速检测的边界矩形信息。
+
+### 4. 域名等级 `level`
+- `1`：顶级域名
+- `2`：二级域名
+- `3`：三级域名
+- 以此类推，**数字越大，层级越低**
+- 普通域名等级应为整数
+- 维度域名在概念上属于 `0.5` 级，低于所有普通区域，但通常单独存放在维度域名配置中
+
+### 5. 上级域名 `base-name`
+指向该域名所属的上一级域名。
+例如：
+
+- `王座厅` 的 `base-name` 可以是 `主城`
+- `主城` 的 `base-name` 可以是 `王国`
+
+### 6. 联合域名 / 表面域名 `surfacename`
+用于显示组合后的名称，或用于构造更适合展示的表面名称。
+
+### 7. 创建者 `signature`
+记录该域名由谁创建。
+可用于权限判断、管理与追踪。
+
+---
+
+## 命令系统
+
+> 更细的操作说明可参考 [`COMMAND_USAGE.md`](./COMMAND_USAGE.md)。
+> 命令的实际权限表现可能受权限系统、服务器配置与版本实现影响，下面按常见使用场景整理。
+
+### 基础命令
+
+| 命令 | 说明 | 常见权限 |
+|---|---|---|
+| `/areahint help` | 显示所有命令及用法 | 所有人 |
+| `/areahint reload` | 重新加载配置与域名文件 | 管理员 |
+
+### 域名查看与管理
+
+| 命令 | 说明 | 常见权限 |
+|---|---|---|
+| `/areahint check` | 显示所有联合域名列表 | 所有人 |
+| `/areahint check <联合域名>` | 查看指定联合域名详情 | 所有人 |
+| `/areahint delete` | 启动交互式域名删除 | 所有人（通常仅限可操作域名） |
+
+### 域名创建与编辑
+
+| 命令 | 说明 | 常见权限 |
+|---|---|---|
+| `/areahint add <JSON>` | 通过 JSON 添加域名 | 管理员 |
+| `/areahint easyadd` | 启动交互式域名添加 | 所有人 |
+| `/areahint rename` | 启动交互式域名重命名 | 所有人 |
+
+### 域名几何编辑
+
+| 命令 | 说明 | 常见权限 |
+|---|---|---|
+| `/areahint expandarea` | 从列表中选择域名扩展 | 所有人 |
+| `/areahint expandarea <域名>` | 直接指定域名进行扩展（推荐） | 所有人 |
+| `/areahint shrinkarea` | 从列表中选择域名收缩 | 所有人 |
+| `/areahint shrinkarea <域名>` | 直接指定域名进行收缩（推荐） | 所有人 |
+| `/areahint dividearea` | 启动交互式域名分割 | 所有人 |
+
+### 单个顶点编辑
+
+| 命令 | 说明 | 常见权限 |
+|---|---|---|
+| `/areahint addhint` | 启动交互式顶点添加 | 所有人 |
+| `/areahint deletehint` | 启动交互式顶点删除 | 所有人 |
+
+### 样式与显示设置
+
+| 命令 | 说明 | 常见权限 |
+|---|---|---|
+| `/areahint recolor` | 启动交互式域名重新着色 | 所有人 |
+| `/areahint sethigh` | 启动交互式域名高度设置 | 所有人 |
+| `/areahint subtitlerender` | 查看当前渲染模式 | 所有人 |
+| `/areahint subtitlerender <cpu\|opengl\|vulkan>` | 设置渲染模式 | 所有人 |
+| `/areahint subtitlestyle` | 启动交互式字幕样式选择 | 所有人 |
+| `/areahint subtitlesize` | 启动交互式字幕大小选择 | 所有人 |
+| `/areahint frequency` | 显示当前检测频率 | 所有人 |
+| `/areahint frequency <1-60>` | 设置检测频率 | 所有人 |
+
+### 维度域名管理
+
+| 命令 | 说明 | 常见权限 |
+|---|---|---|
+| `/areahint dimensionalityname` | 启动交互式维度域名管理 | 视服务器配置而定 |
+| `/areahint dimensionalitycolor` | 启动交互式维度域名颜色管理 | 视服务器配置而定 |
+| `/areahint firstdimname <名称>` | 首次进入无名新维度时设置维度域名 | 所有人 |
+| `/areahint firstdimname_skip` | 跳过首次维度域名设置 | 所有人 |
+
+### 其他功能
+
+| 命令 | 说明 | 常见权限 |
+|---|---|---|
+| `/areahint replacebutton` | 启动交互式按键替换 | 所有人 |
+| `/areahint boundviz` | 切换边界可视化显示 | 所有人 |
+| `/areahint language` | 启动交互式语言选择 | 所有人 |
+| `/areahint debug` | 切换调试模式 | 管理员 |
+| `/areahint debug on` | 启用调试模式 | 管理员 |
+| `/areahint debug off` | 关闭调试模式 | 管理员 |
+| `/areahint debug status` | 查看调试状态 | 管理员 |
+| `/areahint serverlanguage <语言代码>` | 设置服务端日志语言 | 控制台 / 高权限 |
+
+---
+
+## 完整子命令速查
+
+这一节用于完整列出当前 README 中涉及的命令结构，便于查阅与补全。
+
+### 1. `help`
+
+- `/areahint help`
+
+### 2. `reload`
+
+- `/areahint reload`
+
+### 3. `check`
+
+- `/areahint check`
+- `/areahint check <联合域名>`
+
+### 4. `dimensionalityname`
+
+- `/areahint dimensionalityname`
+- `/areahint dimensionalityname select <维度>`
+- `/areahint dimensionalityname name <新名称>`
+- `/areahint dimensionalityname confirm`
+- `/areahint dimensionalityname cancel`
+
+### 5. `dimensionalitycolor`
+
+- `/areahint dimensionalitycolor`
+- `/areahint dimensionalitycolor select <维度>`
+- `/areahint dimensionalitycolor color <颜色>`
+- `/areahint dimensionalitycolor confirm`
+- `/areahint dimensionalitycolor cancel`
+
+### 6. `firstdimname`
+
+- `/areahint firstdimname <名称>`
+- `/areahint firstdimname_skip`
+
+### 7. `add`
+
+- `/areahint add <JSON>`
+
+### 8. `delete`
+
+- `/areahint delete`
+- `/areahint delete select <域名>`
+- `/areahint delete confirm`
+- `/areahint delete cancel`
+
+### 9. `frequency`
+
+- `/areahint frequency`
+- `/areahint frequency <1-60>`
+
+### 10. `subtitlerender`
+
+- `/areahint subtitlerender`
+- `/areahint subtitlerender <cpu|opengl|vulkan>`
+
+### 11. `subtitlestyle`
+
+- `/areahint subtitlestyle`
+- `/areahint subtitlestyle select <style>`
+- `/areahint subtitlestyle cancel`
+
+### 12. `subtitlesize`
+
+- `/areahint subtitlesize`
+- `/areahint subtitlesize select <size>`
+- `/areahint subtitlesize cancel`
+
+### 13. `easyadd`
+
+- `/areahint easyadd`
+- `/areahint easyadd cancel`
+- `/areahint easyadd level <1-3>`
+- `/areahint easyadd base <上级域名>`
+- `/areahint easyadd continue`
+- `/areahint easyadd finish`
+- `/areahint easyadd altitude auto`
+- `/areahint easyadd altitude custom`
+- `/areahint easyadd altitude unlimited`
+- `/areahint easyadd color <颜色>`
+- `/areahint easyadd save`
+
+### 14. `expandarea`
+
+- `/areahint expandarea`
+- `/areahint expandarea <域名>`
+- `/areahint expandarea select <域名>`
+- `/areahint expandarea continue`
+- `/areahint expandarea save`
+- `/areahint expandarea cancel`
+
+### 15. `shrinkarea`
+
+- `/areahint shrinkarea`
+- `/areahint shrinkarea <域名>`
+- `/areahint shrinkarea select <域名>`
+- `/areahint shrinkarea continue`
+- `/areahint shrinkarea save`
+- `/areahint shrinkarea cancel`
+
+### 16. `dividearea`
+
+- `/areahint dividearea`
+- `/areahint dividearea select <域名>`
+- `/areahint dividearea continue`
+- `/areahint dividearea save`
+- `/areahint dividearea name <新域名名称>`
+- `/areahint dividearea level <1-3>`
+- `/areahint dividearea base <上级域名>`
+- `/areahint dividearea color <颜色>`
+- `/areahint dividearea cancel`
+
+### 17. `recolor`
+
+- `/areahint recolor`
+- `/areahint recolor select <域名>`
+- `/areahint recolor color <颜色>`
+- `/areahint recolor confirm`
+- `/areahint recolor cancel`
+
+### 18. `rename`
+
+- `/areahint rename`
+- `/areahint rename select <域名>`
+- `/areahint rename confirm`
+- `/areahint rename cancel`
+
+### 19. `sethigh`
+
+- `/areahint sethigh`
+- `/areahint sethigh <域名>`
+- `/areahint sethigh custom <域名>`
+- `/areahint sethigh unlimited <域名>`
+- `/areahint sethigh cancel`
+
+### 20. `addhint`
+
+- `/areahint addhint`
+- `/areahint addhint select <域名>`
+- `/areahint addhint continue`
+- `/areahint addhint submit`
+- `/areahint addhint cancel`
+
+### 21. `deletehint`
+
+- `/areahint deletehint`
+- `/areahint deletehint select <域名>`
+- `/areahint deletehint toggle <顶点索引>`
+- `/areahint deletehint submit`
+- `/areahint deletehint cancel`
+
+### 22. `replacebutton`
+
+- `/areahint replacebutton`
+- `/areahint replacebutton confirm`
+- `/areahint replacebutton cancel`
+
+### 23. `language`
+
+- `/areahint language`
+- `/areahint language select <语言代码>`
+- `/areahint language cancel`
+
+### 24. `boundviz`
+
+- `/areahint boundviz`
+
+### 25. `debug`
+
+- `/areahint debug`
+- `/areahint debug on`
+- `/areahint debug off`
+- `/areahint debug status`
+
+### 26. `serverlanguage`
+
+- `/areahint serverlanguage <语言代码>`
+
+---
+
+## ExpandArea 与 ShrinkArea 补充说明
+
+### ExpandArea（域名扩展）
+
+#### 方式一：直接指定域名（推荐）
+```text
+/areahint expandarea <域名>
 ```
-.minecraft/areas-hint/
-├── config.json                    # 全局配置文件
-├── 192.168.1.100_MyServer/        # 世界文件夹（多人游戏）
-│   ├── overworld.json             # 主世界域名文件
-│   ├── nether.json                # 地狱域名文件
-│   ├── end.json                   # 末地域名文件
-│   └── dimensional_names.json     # 维度域名文件
-├── localhost_SinglePlayer/        # 单人游戏世界
-│   ├── overworld.json
-│   └── dimensional_names.json
-└── localhost_Server/               # 本地服务器
-    ├── overworld.json
-    ├── nether.json
-    ├── end.json
-    └── dimensional_names.json
+- 支持 Tab 补全
+- 只显示你有权限扩展的域名
+- 直接进入记录顶点流程
+
+#### 方式二：从列表选择
+```text
+/areahint expandarea
 ```
+- 显示可点击的域名列表
+- 点击对应按钮选择域名
 
-#### 工作原理
-1. **连接检测**：每次加入世界时检测IP地址和世界名称
-2. **文件夹创建**：如果对应文件夹不存在则自动创建
-3. **文件初始化**：在新文件夹中创建默认的配置文件
-4. **路径重定向**：所有域名文件操作重定向到当前世界文件夹
-5. **网络同步**：服务端向客户端发送世界信息以确保一致性
+### ShrinkArea（域名收缩）
 
-### 8. 维度域名模块 (Dimensional Names)
-
-- 管理维度（世界）的自定义名称
-- 维度域名等级为0.5，介于普通区域之外
-- 离开所有区域时显示维度域名
-- 进入世界时如果不在任何区域内显示维度域名
-- 支持动态配置和同步
-
-### 9. 命令模块 (Commands)
-
-- 实现各种命令功能
-- 命令参数处理和验证
-- 维度域名管理命令
-
-## 文件结构
-
+#### 方式一：直接指定域名（推荐）
+```text
+/areahint shrinkarea <域名>
 ```
-areas-hint-mod/
-├── gradle/                          # Gradle构建工具
-│   └── wrapper/
-│       ├── gradle-wrapper.jar       # Gradle包装器JAR文件
-│       └── gradle-wrapper.properties # Gradle包装器配置
-├── src/                             # 源代码目录
-│   ├── main/                        # 服务端代码
-│   │   ├── java/
-│   │   │   └── areahint/
-│   │   │       ├── Areashint.java   # 服务端主类（模组入口）
-│   │   │       ├── addhint/         # AddHint服务端支持
-│   │   │       │   └── AddHintServerNetworking.java # 服务端网络处理器
-│   │   │       ├── command/         # 命令处理
-│   │   │       │   ├── CheckCommand.java   # 联合域名查看指令处理器
-│   │   │       │   ├── DebugCommand.java   # 调试命令处理器
-│   │   │       │   ├── DimensionalNameCommands.java # 维度域名命令处理器
-│   │   │       │   ├── RecolorCommand.java # 域名重新着色指令处理器
-│   │   │       │   ├── RenameAreaCommand.java # 域名重命名指令处理器
-│   │   │       │   ├── ServerCommands.java # 统一命令处理器（服务端+客户端命令）
-│   │   │       │   └── SetHighCommand.java # 域名高度设置指令处理器
-│   │   │       ├── data/            # 数据模型
-│   │   │       │   ├── AreaData.java       # 区域数据模型（含altitude高度字段和color颜色字段）
-│   │   │       │   ├── ConfigData.java     # 配置数据模型
-│   │   │       │   └── DimensionalNameData.java # 维度域名数据模型
-│   │   │       ├── debug/           # 调试功能
-│   │   │       │   └── DebugManager.java   # 服务端调试管理器
-│   │   │       ├── deletehint/      # DeleteHint服务端支持
-│   │   │       │   └── DeleteHintServerNetworking.java # 服务端网络处理器
-│   │   │       ├── dimensional/     # 维度域名管理
-│   │   │       │   └── DimensionalNameManager.java # 服务端维度域名管理器
-│   │   │       ├── dividearea/      # DivideArea域名分割支持
-│   │   │       │   └── DivideAreaServerNetworking.java # 服务端网络处理器
-│   │   │       ├── easyadd/         # EasyAdd服务端支持
-│   │   │       │   └── EasyAddServerNetworking.java # 服务端网络处理器
-│   │   │       ├── expandarea/      # ExpandArea域名扩展支持
-│   │   │       │   └── ExpandAreaServerNetworking.java # 服务端网络处理器
-│   │   │       ├── file/            # 文件操作
-│   │   │       │   ├── FileManager.java    # 文件管理器（读写配置和区域数据）
-│   │   │       │   └── JsonHelper.java     # JSON序列化工具（支持altitude）
-│   │   │       ├── i18n/            # 国际化支持
-│   │   │       │   └── ServerI18nManager.java # 服务端国际化管理器
-│   │   │       ├── log/             # 日志系统
-│   │   │       │   ├── AsyncLogManager.java # 异步日志管理器
-│   │   │       │   ├── ServerLogManager.java # 服务端日志管理器
-│   │   │       │   └── ServerLogNetworking.java # 服务端日志网络处理
-│   │   │       ├── mixin/           # Mixin注入
-│   │   │       │   └── ExampleMixin.java   # 服务端Mixin示例
-│   │   │       ├── network/         # 网络通信
-│   │   │       │   ├── DimensionalNameNetworking.java # 维度域名网络传输
-│   │   │       │   ├── Packets.java        # 网络包定义和通道标识符
-│   │   │       │   ├── ServerNetworking.java # 服务端网络处理
-│   │   │       │   ├── ServerWorldNetworking.java # 服务端世界网络处理
-│   │   │       │   └── TranslatableMessage.java # 可翻译消息类
-│   │   │       ├── render/          # 渲染工具
-│   │   │       │   └── DomainRenderer.java # 域名渲染工具类（处理颜色显示和层级关系）
-│   │   │       ├── shrinkarea/      # ShrinkArea域名收缩支持
-│   │   │       │   └── ShrinkAreaServerNetworking.java # 服务端网络处理器
-│   │   │       ├── util/            # 工具类
-│   │   │       │   ├── AreaDataConverter.java # AreaData与JsonObject转换工具
-│   │   │       │   ├── ColorUtil.java      # 颜色工具类（颜色验证、转换和预定义颜色）
-│   │   │       │   └── SurfaceNameHandler.java # 联合域名处理器（显示逻辑和重复检查）
-│   │   │       └── world/           # 世界文件夹管理
-│   │   │           └── WorldFolderManager.java # 服务端世界文件夹管理器
-│   │   └── resources/               # 服务端资源
-│   │       ├── areas-hint.mixins.json # 服务端Mixin配置
-│   │       ├── assets/
-│   │       │   └── areas-hint/
-│   │       │       ├── icon.png     # 模组图标
-│   │       │       └── lang/        # 语言文件
-│   │       │           ├── de_de.json      # 德语翻译
-│   │       │           ├── en_pt.json      # 海盗英语翻译
-│   │       │           ├── en_us.json      # 英语翻译
-│   │       │           ├── es_es.json      # 西班牙语翻译
-│   │       │           ├── fr_fr.json      # 法语翻译
-│   │       │           ├── ja_jp.json      # 日语翻译
-│   │       │           ├── ko_kr.json      # 韩语翻译
-│   │       │           ├── ru_ru.json      # 俄语翻译
-│   │       │           ├── zh_cn.json      # 简体中文翻译
-│   │       │           ├── zh_cn_neko.json # 简体中文猫娘翻译
-│   │       │           └── zh_tw.json      # 繁体中文翻译
-│   │       └── fabric.mod.json      # Fabric模组配置文件
-│   └── client/                      # 客户端代码
-│       ├── java/
-│       │   └── areahint/
-│       │       ├── AreashintClient.java     # 客户端主类
-│       │       ├── AreashintDataGenerator.java # 数据生成器
-│       │       ├── addhint/         # AddHint客户端支持
-│       │       │   ├── AddHintClientNetworking.java # 客户端网络处理器
-│       │       │   └── AddHintManager.java # AddHint管理器
-│       │       ├── boundviz/        # 边界可视化系统
-│       │       │   ├── BoundVizManager.java # 边界可视化管理器
-│       │       │   └── BoundVizRenderer.java # 边界可视化渲染器
-│       │       ├── command/         # 客户端命令
-│       │       │   ├── ClientCommands.java # 客户端命令处理（已弃用）
-│       │       │   ├── ModToggleCommand.java # 模组开关命令处理器
-│       │       │   └── SetHighClientCommand.java # 域名高度设置客户端命令
-│       │       ├── config/          # 配置管理
-│       │       │   └── ClientConfig.java   # 客户端配置处理
-│       │       ├── debug/           # 调试功能
-│       │       │   ├── ClientDebugManager.java # 客户端调试管理器
-│       │       │   └── DebugManager.java        # 调试管理器（空文件）
-│       │       ├── delete/          # 域名删除系统
-│       │       │   ├── DeleteManager.java  # 删除管理器
-│       │       │   ├── DeleteNetworking.java # 删除网络处理
-│       │       │   └── DeleteUI.java       # 删除用户界面
-│       │       ├── deletehint/      # DeleteHint客户端支持
-│       │       │   ├── DeleteHintClientNetworking.java # 客户端网络处理器
-│       │       │   └── DeleteHintManager.java # DeleteHint管理器
-│       │       ├── detection/       # 区域检测（核心功能）
-│       │       │   ├── AltitudeFilter.java # 高度预筛选器
-│       │       │   ├── AreaDetector.java   # 区域检测器（集成高度预筛选）
-│       │       │   ├── AsyncAreaDetector.java # 异步区域检测器
-│       │       │   └── RayCasting.java     # 射线检测和AABB算法
-│       │       ├── dimensional/     # 维度域名管理
-│       │       │   ├── ClientDimensionalNameManager.java # 客户端维度域名管理器
-│       │       │   ├── DimensionalNameUI.java # 维度域名用户界面
-│       │       │   └── DimensionalNameUIManager.java # 维度域名UI管理器
-│       │       ├── dividearea/      # DivideArea域名分割系统
-│       │       │   ├── DivideAreaClientNetworking.java # 客户端网络处理
-│       │       │   ├── DivideAreaManager.java # 域名分割管理器
-│       │       │   └── DivideAreaUI.java   # 域名分割用户界面
-│       │       ├── easyadd/         # EasyAdd交互式域名添加系统
-│       │       │   ├── EasyAddAltitudeManager.java # 高度设置管理器
-│       │       │   ├── EasyAddConfig.java     # 配置管理器
-│       │       │   ├── EasyAddGeometry.java   # 几何计算工具
-│       │       │   ├── EasyAddKeyHandler.java # 按键监听处理器
-│       │       │   ├── EasyAddManager.java    # EasyAdd核心管理器
-│       │       │   ├── EasyAddNetworking.java # 客户端网络通信
-│       │       │   └── EasyAddUI.java         # 用户界面系统
-│       │       ├── expandarea/      # ExpandArea域名扩展系统
-│       │       │   ├── ExpandAreaClientNetworking.java # 客户端网络通信
-│       │       │   ├── ExpandAreaKeyHandler.java # 按键监听处理器（X键记录、Enter确认）
-│       │       │   ├── ExpandAreaManager.java   # 域名扩展核心管理器
-│       │       │   ├── ExpandAreaUI.java        # 用户界面系统（域名选择、记录提示）
-│       │       │   └── GeometryCalculator.java  # 复杂几何计算工具（边界点、交叉点算法）
-│       │       ├── i18n/            # 国际化支持
-│       │       │   └── I18nManager.java    # 国际化管理器
-│       │       ├── keyhandler/      # 按键处理
-│       │       │   └── UnifiedKeyHandler.java # 统一按键处理器
-│       │       ├── language/        # 语言管理
-│       │       │   ├── LanguageManager.java # 语言管理器
-│       │       │   └── LanguageUI.java      # 语言选择用户界面
-│       │       ├── log/             # 日志系统
-│       │       │   ├── AreaChangeTracker.java # 区域变更追踪器
-│       │       │   ├── ClientLogManager.java # 客户端日志管理器
-│       │       │   └── ClientLogNetworking.java # 客户端日志网络处理
-│       │       ├── mixin/           # 客户端Mixin
-│       │       │   └── client/
-│       │       │       ├── ExampleClientMixin.java # 客户端Mixin示例
-│       │       │       ├── TranslationStorageMixin.java # 翻译存储Mixin
-│       │       │       └── WorldRendererMixin.java # 世界渲染器Mixin
-│       │       ├── network/         # 网络通信
-│       │       │   ├── ClientDimensionalNameNetworking.java # 客户端维度域名网络处理
-│       │       │   ├── ClientDimNameNetworking.java # 客户端维度名称网络处理
-│       │       │   ├── ClientNetworking.java # 客户端网络处理
-│       │       │   └── ClientWorldNetworking.java # 客户端世界网络处理
-│       │       ├── recolor/         # 域名重新着色系统
-│       │       │   ├── RecolorClientCommand.java # 重新着色客户端命令
-│       │       │   ├── RecolorManager.java # 重新着色管理器
-│       │       │   └── RecolorUI.java      # 重新着色用户界面
-│       │       ├── rename/          # 域名重命名系统
-│       │       │   ├── RenameManager.java  # 重命名管理器
-│       │       │   ├── RenameNetworking.java # 重命名网络处理
-│       │       │   └── RenameUI.java       # 重命名用户界面
-│       │       ├── render/          # 渲染系统
-│       │       │   ├── CPURender.java      # CPU渲染实现
-│       │       │   ├── FlashColorHelper.java # 闪烁颜色辅助类
-│       │       │   ├── GLRender.java       # OpenGL渲染实现
-│       │       │   ├── RenderManager.java  # 渲染管理器
-│       │       │   └── VulkanRender.java   # Vulkan渲染实现（模拟）
-│       │       ├── replacebutton/   # 替换按钮系统
-│       │       │   ├── ReplaceButtonKeyListener.java # 替换按钮按键监听器
-│       │       │   ├── ReplaceButtonManager.java # 替换按钮管理器
-│       │       │   ├── ReplaceButtonNetworking.java # 替换按钮网络处理
-│       │       │   └── ReplaceButtonUI.java # 替换按钮用户界面
-│       │       ├── shrinkarea/      # ShrinkArea域名收缩系统
-│       │       │   ├── ShrinkAreaClientNetworking.java # 客户端网络通信
-│       │       │   ├── ShrinkAreaKeyHandler.java # 按键监听处理器（X键记录）
-│       │       │   ├── ShrinkAreaManager.java   # 域名收缩核心管理器
-│       │       │   ├── ShrinkAreaUI.java        # 用户界面系统（域名选择、记录提示）
-│       │       │   └── ShrinkGeometryCalculator.java # 收缩几何计算工具（边界点、交叉点算法）
-│       │       ├── subtitlesize/    # 字幕大小系统
-│       │       │   ├── SubtitleSizeManager.java # 字幕大小管理器
-│       │       │   └── SubtitleSizeUI.java # 字幕大小用户界面
-│       │       ├── subtitlestyle/   # 字幕样式系统
-│       │       │   ├── SubtitleStyleManager.java # 字幕样式管理器
-│       │       │   └── SubtitleStyleUI.java # 字幕样式用户界面
-│       │       └── world/           # 世界文件夹管理
-│       │           └── ClientWorldFolderManager.java # 客户端世界文件夹管理器
-│       └── resources/               # 客户端资源
-│           └── areas-hint.client.mixins.json # 客户端Mixin配置
-├── build.gradle                     # Gradle构建脚本
-├── gradle.properties                # Gradle配置属性
-├── gradlew                          # Unix/Linux Gradle包装器脚本
-├── gradlew.bat                      # Windows Gradle包装器脚本
-├── settings.gradle                  # Gradle设置文件
-├── LICENSE                          # MIT许可证文件
-├── README.md                        # 项目说明文档
-├── .gitignore                       # Git忽略文件配置
-├── .gitattributes                   # Git属性配置
-├── .github/                         # GitHub工作流和配置文件目录
-│   └── workflows/
-│       └── build.yml                # GitHub Actions构建工作流
-├── prompt.txt                       # 原始需求文档（包含模组基本功能需求）
-├── prompt_implementation.txt        # 实现方案文档（详细的功能实现说明）
-├── second-prompt.txt                # 第二阶段功能需求文档（高级功能需求）
-├── thrid-promrt.txt                 # 第三阶段功能需求文档
-├── CLAUDE.md                        # Claude AI开发指导文档（项目架构、构建命令、开发工作流说明）
-├── COMMAND_USAGE.md                 # 命令使用文档
-├── LOG_FEATURE.md                   # 日志功能文档
-├── RECOLOR_REFACTOR_SUMMARY.md      # 重新着色重构总结
-├── REPLACEBUTTON_EXPANDAREA_SHRINKAREA_INTEGRATION.md # 替换按钮、扩展区域、收缩区域集成文档
-├── REPLACEBUTTON_FIX_SUMMARY.md     # 替换按钮修复总结
-├── REPLACEBUTTON_IMPLEMENTATION_SUMMARY.md # 替换按钮实现总结
-├── REPLACEBUTTON_TEST_GUIDE.md      # 替换按钮测试指南
-├── SHRINKAREA_CHANGES.md            # 收缩区域变更文档
-├── SHRINKAREA_REFACTOR.md           # 收缩区域重构文档
-├── SUBTITLESIZE_GUIDE.md            # 字幕大小指南
-├── SUBTITLESTYLE_INTERACTIVE_GUIDE.md # 字幕样式交互指南
-├── TRANSLATION_GUIDE.md             # 翻译指南
-├── TRANSLATION_REPORT.md            # 翻译报告
-├── extraction_record.md             # 提取记录
-├── 提取完成报告.md                  # 提取完成报告（中文）
-├── overworld.json                   # 主世界区域数据示例
-├── en_us.json                       # 英语翻译文件（根目录）
-├── zh_cn.json                       # 简体中文翻译文件（根目录）
-├── areas-hint-template-1.20.4.zip   # 模组压缩包模板
-├── modicon.psd                      # 模组图标源文件（Photoshop格式）
-├── extract_chinese.py               # 中文提取脚本
-├── extract_chinese_v2.py            # 中文提取脚本v2
-├── fix_spacing.py                   # 修复间距脚本
-├── fix_translation.py               # 修复翻译脚本
-├── generate_csv.py                  # 生成CSV脚本
-├── translate_complete.py            # 完整翻译脚本
-├── translate_full.py                # 完整翻译脚本
-├── translate_lolcat.py              # Lolcat翻译脚本
-├── translate_manual.py              # 手动翻译脚本
-├── translate_neko.py                # 猫娘翻译脚本
-├── translate_script.py              # 翻译脚本
-├── translate_zh_tw.py               # 繁体中文翻译脚本
-├── build_log.txt                    # 构建日志
-├── chinese_strings_raw.txt          # 原始中文字符串
-├── extraction_stats.txt             # 提取统计
-├── FINAL_REPORT.txt                 # 最终报告
-├── 提取记录.csv                     # 提取记录（CSV格式）
-├── .idea/                           # IntelliJ IDEA项目配置目录
-├── .vscode/                         # Visual Studio Code配置目录
-├── build/                           # 构建输出目录（自动生成）
-│   ├── libs/
-│   │   ├── areas-hint-1.0.0.jar       # 主模组JAR文件
-│   │   └── areas-hint-1.0.0-sources.jar # 源代码JAR文件
-│   └── ...                             # 其他构建文件
-├── bin/                             # 编译输出目录（自动生成）
-├── run/                             # 运行时目录（自动生成）
-│   ├── config/                      # 运行时配置
-│   ├── logs/                        # 运行时日志
-│   ├── mods/                        # 运行时模组
-│   ├── options.txt                  # 游戏选项
-│   └── ...                          # 其他运行时文件
-└── .gradle/                         # Gradle缓存目录（自动生成)
+- 支持 Tab 补全
+- 只显示你有权限收缩的域名
+- 直接进入记录顶点流程
 
-.minecraft/areas-hint/              # 运行时配置和数据目录
-├── config.json                     # 模组配置文件
-├── dimensional_names.json          # 维度域名配置文件
-├── overworld.json                  # 主世界区域数据
-├── the_nether.json                 # 地狱区域数据
-└── the_end.json                    # 末地区域数据
+#### 方式二：从列表选择
+```text
+/areahint shrinkarea
 ```
+- 显示可点击的域名列表
+- 显示权限提示
+- 点击对应按钮选择域名
 
-## 新增文件功能说明
+### 常见流程子命令
 
-### 开发指导文档
+#### ExpandArea 子命令
+- `/areahint expandarea continue`
+- `/areahint expandarea save`
+- `/areahint expandarea cancel`
 
-#### `CLAUDE.md`
-- **功能**：为Claude AI提供项目开发指导
-- **内容**：包含项目概述、构建系统命令、架构说明、关键系统介绍、开发工作流等
-- **用途**：帮助开发者快速理解项目结构和实现细节
+#### ShrinkArea 子命令
+- `/areahint shrinkarea continue`
+- `/areahint shrinkarea save`
+- `/areahint shrinkarea cancel`
 
-#### `prompt.txt`
-- **功能**：原始需求文档
-- **内容**：包含模组基本功能需求，如区域检测、渲染系统、命令系统等
-- **用途**：记录项目初始需求，作为开发基础
+---
 
-#### `prompt_implementation.txt`
-- **功能**：实现方案文档
-- **内容**：详细的功能实现说明，包括代码结构、文件用途、实现原理等
-- **用途**：指导具体代码实现，确保功能完整性
+## 数据格式与配置说明
 
-#### `second-prompt.txt`
-- **功能**：第二阶段功能需求文档
-- **内容**：包含高级功能需求，如高度系统、域名签名、EasyAdd交互系统、维度域名等
-- **用途**：指导后续功能开发和扩展
-
-### 项目配置文件
-
-#### `modicon.psd`
-- **功能**：模组图标源文件
-- **格式**：Photoshop PSD格式
-- **用途**：模组图标的原始设计文件，可导出为不同格式
-
-#### `.idea/` 和 `.vscode/`
-- **功能**：IDE配置文件目录
-- **内容**：IntelliJ IDEA和Visual Studio Code的项目配置
-- **用途**：确保开发环境的一致性和项目配置的完整性
-
-#### `.github/`
-- **功能**：GitHub工作流和配置文件目录
-- **内容**：CI/CD配置、Issue模板、Pull Request模板等
-- **用途**：自动化构建、测试和部署流程
-
-### 构建和运行时目录
-
-#### `build/`
-- **功能**：Gradle构建输出目录
-- **内容**：编译后的JAR文件、类文件、资源文件等
-- **用途**：存放最终的可执行模组文件
-
-#### `bin/`
-- **功能**：编译输出目录
-- **内容**：Java编译后的.class文件
-- **用途**：开发过程中的临时编译结果
-
-#### `run/`
-- **功能**：运行时目录
-- **内容**：Minecraft运行时的临时文件和配置
-- **用途**：开发和测试时的运行环境
-
-#### `.gradle/`
-- **功能**：Gradle缓存目录
-- **内容**：依赖下载、构建缓存等
-- **用途**：加速构建过程，避免重复下载依赖
-
-## 实现细节
-
-### 域名数据格式 (JSON) (新的)
+### 域名数据格式（JSON）
 
 ```json
 {
-  "name": "区域名称",
+  "name": "精灵森林",
   "vertices": [
-    {"x": 0, "z": 10},
-    {"x": 10, "z": 0},
-    {"x": 0, "z": -10},
-    {"x": -10, "z": 0}
+    { "x": 0, "z": 10 },
+    { "x": 10, "z": 0 },
+    { "x": 0, "z": -10 },
+    { "x": -10, "z": 0 }
   ],
   "second-vertices": [
-    {"x": -10, "z": 10},
-    {"x": 10, "z": 10},
-    {"x": 10, "z": -10},
-    {"x": -10, "z": -10}
+    { "x": -10, "z": 10 },
+    { "x": 10, "z": 10 },
+    { "x": 10, "z": -10 },
+    { "x": -10, "z": -10 }
   ],
   "altitude": {
     "max": 100,
     "min": 0
   },
-  "level": 1,
-  "base-name": null
+  "level": 2,
+  "base-name": "蛮荒大陆",
+  "signature": "player_name",
+  "color": "#55FFAA",
+  "surfacename": "精灵森林"
 }
 ```
 
-**新增字段说明：**
-- `altitude`: 高度范围设置（可选）
-  - `max`: 最大高度，null表示无上限
-  - `min`: 最小高度，null表示无下限
-  - 玩家只有在指定高度范围内才会检测到该区域
+### 字段说明
 
-### 配置文件格式 (JSON)
+| 字段 | 含义 | 说明 |
+|---|---|---|
+| `name` | 域名名称 | 玩家进入区域时看到的名称基础 |
+| `vertices` | 一级顶点 | 多边形本体顶点，决定真实区域形状 |
+| `second-vertices` | 二级顶点 | 辅助边界顶点，通常用于快速预筛选 |
+| `altitude.min` | 最低高度 | 玩家高度低于此值时不触发 |
+| `altitude.max` | 最高高度 | 玩家高度高于此值时不触发 |
+| `level` | 域名等级 | 普通域名使用整数；数值越大层级越低 |
+| `base-name` | 上级域名 | 指向上一级域名；顶级域名可为 `null` |
+| `signature` | 创建者 | 可为玩家名或 `null` |
+| `color` | 域名颜色 | 推荐使用十六进制颜色值 |
+| `surfacename` | 联合 / 表面域名 | 用于显示层面的联合名称，可为 `null` |
+
+### 关于 `level`
+- `1` 表示顶级域名
+- `2` 表示二级域名
+- `3` 表示三级域名
+- 依此类推
+- **数字越大，层级越低**
+- 维度域名在概念上属于 `0.5` 级，但通常单独存储，不直接与普通区域 JSON 混写
+
+### 配置文件格式（`config.json`）
 
 ```json
 {
@@ -498,25 +547,31 @@ areas-hint-mod/
 }
 ```
 
-### 核心算法： 射线法判断点是否在多边形内
+### 配置项说明
 
-射线法(Ray Casting)通过从一个点向右发射一条射线，计算与多边形边界的交点数：
-- 奇数个交点：点在多边形内
-- 偶数个交点：点在多边形外
+| 字段 | 含义 | 说明 |
+|---|---|---|
+| `Frequency` | 检测频率 | 数值越高，检测间隔越大；需在实时性与性能之间平衡 |
+| `SubtitleRender` | 渲染模式 | 可选 `CPU`、`OpenGL`、`Vulkan`（实验性） |
+| `SubtitleStyle` | 字幕样式 | 可选 `full`、`simple`、`mixed` |
 
-### 渲染模式
+### 字幕样式说明
 
-1. CPU渲染：所有渲染操作使用软件渲染，不使用GPU
-2. OpenGL渲染：使用OpenGL API进行渲染（默认）
-3. Vulkan渲染：使用Vulkan API进行渲染（并没有实现）
+| 样式 | 说明 |
+|---|---|
+| `full` | 显示完整域名路径 |
+| `simple` | 仅显示当前所在层级的域名 |
+| `mixed` | 根据层级与场景组合显示，适合作为默认选项 |
 
-### 字幕样式
+### 渲染模式说明
 
-1. full：显示完整域名路径（如"顶级域名·二级域名·三级域名"）
-2. simple：仅显示当前所在级别的域名
-3. mixed：根据层级显示适当的域名组合（默认）
+| 模式 | 说明 |
+|---|---|
+| `CPU` | 兼容性较高的软件渲染方案 |
+| `OpenGL` | 默认推荐模式 |
+| `Vulkan` | 当前为实验性 / 占位实现，请以实际版本表现为准 |
 
-### 维度域名配置格式 (dimensional_names.json)
+### 维度域名配置格式（`dimensional_names.json`）
 
 ```json
 [
@@ -525,7 +580,7 @@ areas-hint-mod/
     "displayName": "蛮荒大陆"
   },
   {
-    "dimensionId": "minecraft:the_nether", 
+    "dimensionId": "minecraft:the_nether",
     "displayName": "恶堕之域"
   },
   {
@@ -535,130 +590,550 @@ areas-hint-mod/
 ]
 ```
 
-**字段说明**：
-- `dimensionId`: 维度标识符（如 minecraft:overworld）
-- `displayName`: 显示名称（玩家看到的维度域名）
+### 维度域名说明
 
-**特殊说明**：
-- 维度域名等级为0.5，优先级低于所有普通区域
-- 离开所有区域时自动显示维度域名
-- 进入世界时如果不在任何区域内显示维度域名
+- 维度域名用于在玩家**不处于任何普通区域**时显示当前维度名称
+- 在概念上，维度域名的优先级低于普通区域
+- 玩家刚进入世界、或离开所有普通区域时，可显示维度域名
 
-## 命令系统
+---
 
-### 基础命令
+## 多世界 / 多服务器文件夹机制
 
-- `/areahint help` - 显示所有命令及其用法
-- `/areahint reload` - 重新加载配置和域名文件
+本模组支持为不同世界、不同服务器自动创建独立文件夹。
+这样做的好处是：**不同存档、不同服务器之间的域名与维度域名配置互不干扰。**
 
-### 域名查看与管理
+### 示例目录结构
 
-- `/areahint check` - 显示所有联合域名列表（权限等级：0，普通玩家可用）
-- `/areahint delete` - 交互式域名删除（列出可删除的域名）
+```text
+.minecraft/areas-hint/
+├── config.json
+├── 192.168.1.100_MyServer/
+│   ├── overworld.json
+│   ├── the_nether.json
+│   ├── the_end.json
+│   └── dimensional_names.json
+├── localhost_SinglePlayer/
+│   ├── overworld.json
+│   └── dimensional_names.json
+└── localhost_Server/
+    ├── overworld.json
+    ├── the_nether.json
+    ├── the_end.json
+    └── dimensional_names.json
+```
 
-### 域名创建与编辑
+### 工作原理
 
-- `/areahint add <JSON>` - 添加新的域名（需要管理员权限，已经被easyadd指令代替）
-- `/areahint easyadd` - 启动交互式域名添加（普通玩家可用）
-- `/areahint rename` - 启动交互式域名重命名
+1. **连接检测**：加入世界或服务器时，检测当前连接信息
+2. **文件夹创建**：若不存在对应文件夹，则自动创建
+3. **文件初始化**：在对应文件夹中生成必要数据文件
+4. **路径重定向**：后续域名与维度域名操作都使用当前世界 / 当前服务器的数据路径
+5. **同步一致性**：服务端与客户端通过网络同步保证当前世界上下文一致
 
-### 域名几何编辑
+---
 
-- `/areahint expandarea` - 启动交互式域名扩展
-- `/areahint shrinkarea` - 启动交互式域名收缩
-- `/areahint dividearea` - 启动交互式域名分割
+## 架构设计
 
-### 域名顶点编辑
+模组采用**客户端 - 服务端分离架构**。
 
-- `/areahint addhint` - 启动交互式顶点添加
-- `/areahint deletehint` - 启动交互式顶点删除
+### 客户端部分
+- 负责读取配置与同步后的区域数据
+- 执行区域检测逻辑
+- 负责字幕渲染与动画显示
+- 提供交互式 UI、语言切换、边界可视化等功能
 
-### 域名样式与显示
+### 服务端部分
+- 负责区域数据与维度数据管理
+- 处理命令、权限与数据同步
+- 为客户端提供当前世界上下文与区域数据
 
-- `/areahint recolor` - 重新为域名着色
-- `/areahint sethigh` - 重新为域名设置高度 
+---
 
-### 配置与显示设置
+## 模块划分
 
-- `/areahint frequency` - 显示当前检测频率
-- `/areahint frequency <值>` - 设置检测频率（1-60）
-- `/areahint subtitlerender` - 显示当前渲染模式
-- `/areahint subtitlerender <cpu|opengl|vulkan>` - 设置渲染模式
-- `/areahint subtitlestyle` - 启动交互式字幕样式选
-- `/areahint subtitlesize` - 启动交互式字幕大小选择
+### 1. 核心模块（Core）
+- 模组初始化
+- 生命周期管理
+- 注册命令与事件监听
 
-### 维度域名管理
+### 2. 数据模型模块（Data Model）
+- 域名数据结构
+- 配置数据结构
+- 维度域名数据结构
 
-- `/areahint dimensionalityname` - 启动交互式维度域名管理
-- `/areahint dimensionalitycolor` - 启动交互式维度域名颜色管理
-- `/areahint firstdimname <名称>` - 首次进入维度时设置维度域名
-- `/areahint firstdimname_skip` - 跳过首次维度域名设置
+### 3. 文件管理模块（File Management）
+- 配置目录创建
+- JSON 读取与写入
+- 默认配置生成
 
-### 其他功能
+### 4. 区域检测模块（Area Detection）
+- AABB 预筛选
+- 高度过滤
+- 射线法区域判断
+- 区域层级与优先级计算
 
-- `/areahint replacebutton` - 启动交互式按键替换
-- `/areahint replacebutton confirm` - 确认按键替换
-- `/areahint replacebutton cancel` - 取消按键替换6
-- `/areahint boundviz` - 切换边界可视化显示
-- `/areahint language` - 启动交互式语言选择
-- `/areahint debug` - 切换调试模式（需要管理员权限）
-- `/areahint debug on|off|status` - 启用/禁用/查看调试模式状态（需要管理员权限）
-- `/areahint serverlanguage <语言代码>` - 设置服务端日志语言（权限等级4，仅控制台可用）
+### 5. 渲染模块（Rendering）
+- CPU / OpenGL / Vulkan 渲染实现
+- 区域提示动画
+- 样式与大小控制
 
-## 模组兼容度
+### 6. 网络模块（Networking）
+- 服务端向客户端同步区域与维度数据
+- 处理各种交互式功能的数据包
 
-| 模组名称 | 兼容性 |
-|---------|--------|
-| Starlight | ✓ |
-| Stutterfix | ✓ |
-| Syncmatica | ✓ |
-| ThreadTweak | ✓ |
-| Travelers Titles | ✓ |
-| TweakMore | ✓ |
-| Tweakeroo | ✓ |
-| ViaFabricPlus | ✓ |
-| Xaeros Minimap | ✓ |
-| Xaeros World Map | ✓ |
-| Yungs Api | ✓ |
-| Gugle的Carpet附加包 | ✓ |
-| Fabric Carpet | ✓ |
-| Replay Mod | ✓ |
-| MiniHUD | ✓ |
-| MagicLib | ✓ |
-| Sodium | ✓ |
-| AppleSkin | ✓ |
-| Litematica | ✓ |
-| Jade | ✓ |
-| AutoModpack | ✓ |
-| Baritone | ✓ |
-| Bobby | ✓ |
-| Cloth Config | ✓ |
-| Continuity | ✓ |
-| Cull Leaves | ✓ |
-| Enhanced Block Entities | ✓ |
-| Entity Model Features | ✓ |
-| Entity Texture Features | ✓ |
-| Entity Culling | ✓ |
-| Exordium | ✓ |
-| Fabric API | ✓ |
-| Fast Chest | ✓ |
-| FPS Reducer | ✓ |
-| ImmediatelyFast | ✓ |
-| Indium | ✓ |
-| Iris | ✓ |
-| JEI | ✓ |
-| Krypton | ✓ |
-| LAN Server Properties | ✓ |
-| LazyDFU | ✓ |
-| MaliLib | ✓ |
-| Masa Gadget | ✓ |
-| ModernFix | ✓ |
-| Mod Menu | ✓ |
-| More Culling | ✓ |
-| Noisium | ✓ |
-| Nvidium | ✓ |
-| Sodium Extra | ✓ |
+### 7. 世界文件夹管理模块（World Folder Management）
+- 不同世界 / 服务器的数据路径隔离
+- 自动创建与切换世界文件夹
 
-##尾言
+### 8. 维度域名模块（Dimensional Names）
+- 维度名称管理
+- 离开普通区域时的名称显示
+- 维度相关同步与 UI
 
-#### area hints 重新定义了Minecraft区域提示体验，将技术性能与视觉美学完美融合，为玩家和服务器主提供前所未有的区域管理解决方案。无论是大型RPG服务器还是单人冒险世界，都能通过这款模组提升沉浸感和游戏体验。
+### 9. 命令模块（Commands）
+- 域名创建、删除、重命名
+- 几何编辑
+- 显示设置
+- 调试功能
+
+### 10. 权限模块（Permission）
+- 权限节点定义
+- 权限服务封装
+- LuckPerms 兼容
+
+### 11. 地图集成模块（Map Integration）
+- BlueMap 兼容桥接
+- 动态标记状态与颜色支持
+
+---
+
+## 核心算法说明
+
+### 射线法（Ray Casting）
+模组使用射线法判断玩家当前位置是否位于多边形内部：
+
+- 向一侧发射一条射线
+- 计算它与多边形边界的交点数
+- **奇数次相交**：点在多边形内
+- **偶数次相交**：点在多边形外
+
+### 优化机制
+在进行精确判断前，通常会先执行：
+
+1. **高度预筛选**
+2. **AABB 包围盒快速排除**
+3. **再进入射线法精确判断**
+
+这样可以减少不必要的计算开销。
+
+---
+
+## 文件结构（完整保留）
+
+> 这一节保留完整项目结构，便于开发、维护与快速定位源码。
+
+```text
+areas-hint-mod/
+├── .claude/
+│   └── settings.local.json
+├── .cursor/
+│   └── rules/
+│       ├── introduction.mdc
+│       └── rule.mdc
+├── .github/
+│   └── workflows/
+│       └── build.yml
+├── .gradle/
+├── .gradle-user/
+├── .idea/
+├── .settings/
+├── .vscode/
+├── build/
+│   ├── libs/
+│   │   ├── areas-hint-4.1.0.jar
+│   │   └── areas-hint-4.1.0-sources.jar
+│   └── ...
+├── bin/
+├── docs/
+│   └── superpowers/
+│       ├── plans/
+│       │   └── 2026-04-12-minecart-train-link.md
+│       └── specs/
+│           └── 2026-04-12-minecart-train-link-design.md
+├── gradle/
+│   └── wrapper/
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── run/
+│   ├── config/
+│   ├── logs/
+│   ├── mods/
+│   ├── options.txt
+│   └── ...
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── areahint/
+│   │   │       ├── Areashint.java
+│   │   │       ├── addhint/
+│   │   │       │   └── AddHintServerNetworking.java
+│   │   │       ├── command/
+│   │   │       │   ├── CheckCommand.java
+│   │   │       │   ├── DebugCommand.java
+│   │   │       │   ├── DimensionalNameCommands.java
+│   │   │       │   ├── RecolorCommand.java
+│   │   │       │   ├── RenameAreaCommand.java
+│   │   │       │   ├── ServerCommands.java
+│   │   │       │   └── SetHighCommand.java
+│   │   │       ├── data/
+│   │   │       │   ├── AreaData.java
+│   │   │       │   ├── ConfigData.java
+│   │   │       │   └── DimensionalNameData.java
+│   │   │       ├── debug/
+│   │   │       │   └── DebugManager.java
+│   │   │       ├── deletehint/
+│   │   │       │   └── DeleteHintServerNetworking.java
+│   │   │       ├── dimensional/
+│   │   │       │   └── DimensionalNameManager.java
+│   │   │       ├── dividearea/
+│   │   │       │   └── DivideAreaServerNetworking.java
+│   │   │       ├── easyadd/
+│   │   │       │   └── EasyAddServerNetworking.java
+│   │   │       ├── expandarea/
+│   │   │       │   └── ExpandAreaServerNetworking.java
+│   │   │       ├── file/
+│   │   │       │   ├── FileManager.java
+│   │   │       │   └── JsonHelper.java
+│   │   │       ├── i18n/
+│   │   │       │   └── ServerI18nManager.java
+│   │   │       ├── log/
+│   │   │       │   ├── AsyncLogManager.java
+│   │   │       │   ├── ServerLogManager.java
+│   │   │       │   └── ServerLogNetworking.java
+│   │   │       ├── map/
+│   │   │       │   ├── BlueMapBridge.java
+│   │   │       │   ├── BlueMapCompat.java
+│   │   │       │   ├── BlueMapDynamicMarkerState.java
+│   │   │       │   ├── BlueMapFlashColorEngine.java
+│   │   │       │   ├── BlueMapIntegration.java
+│   │   │       │   └── BlueMapMarkerFactory.java
+│   │   │       ├── mixin/
+│   │   │       │   └── ExampleMixin.java
+│   │   │       ├── network/
+│   │   │       │   ├── DimensionalNameNetworking.java
+│   │   │       │   ├── Packets.java
+│   │   │       │   ├── ServerNetworking.java
+│   │   │       │   ├── ServerWorldNetworking.java
+│   │   │       │   └── TranslatableMessage.java
+│   │   │       ├── permission/
+│   │   │       │   ├── LuckPermsCompat.java
+│   │   │       │   ├── PermissionNodes.java
+│   │   │       │   └── PermissionService.java
+│   │   │       ├── render/
+│   │   │       │   └── DomainRenderer.java
+│   │   │       ├── shrinkarea/
+│   │   │       │   └── ShrinkAreaServerNetworking.java
+│   │   │       ├── util/
+│   │   │       │   ├── AreaDataConverter.java
+│   │   │       │   ├── ColorUtil.java
+│   │   │       │   └── SurfaceNameHandler.java
+│   │   │       └── world/
+│   │   │           └── WorldFolderManager.java
+│   │   └── resources/
+│   │       ├── areas-hint.mixins.json
+│   │       ├── assets/
+│   │       │   └── areas-hint/
+│   │       │       ├── icon.png
+│   │       │       └── lang/
+│   │       │           ├── de_de.json
+│   │       │           ├── en_pt.json
+│   │       │           ├── en_us.json
+│   │       │           ├── es_es.json
+│   │       │           ├── fr_fr.json
+│   │       │           ├── ja_jp.json
+│   │       │           ├── ko_kr.json
+│   │       │           ├── ru_ru.json
+│   │       │           ├── zh_cn.json
+│   │       │           ├── zh_cn_neko.json
+│   │       │           └── zh_tw.json
+│   │       └── fabric.mod.json
+│   └── client/
+│       ├── java/
+│       │   └── areahint/
+│       │       ├── AreashintClient.java
+│       │       ├── AreashintDataGenerator.java
+│       │       ├── addhint/
+│       │       │   ├── AddHintClientNetworking.java
+│       │       │   └── AddHintManager.java
+│       │       ├── boundviz/
+│       │       │   ├── BoundVizManager.java
+│       │       │   └── BoundVizRenderer.java
+│       │       ├── command/
+│       │       │   ├── ClientCommands.java
+│       │       │   ├── ModToggleCommand.java
+│       │       │   └── SetHighClientCommand.java
+│       │       ├── config/
+│       │       │   └── ClientConfig.java
+│       │       ├── debug/
+│       │       │   ├── ClientDebugManager.java
+│       │       │   └── DebugManager.java
+│       │       ├── delete/
+│       │       │   ├── DeleteManager.java
+│       │       │   ├── DeleteNetworking.java
+│       │       │   └── DeleteUI.java
+│       │       ├── deletehint/
+│       │       │   ├── DeleteHintClientNetworking.java
+│       │       │   └── DeleteHintManager.java
+│       │       ├── detection/
+│       │       │   ├── AltitudeFilter.java
+│       │       │   ├── AreaDetector.java
+│       │       │   ├── AsyncAreaDetector.java
+│       │       │   └── RayCasting.java
+│       │       ├── dimensional/
+│       │       │   ├── ClientDimensionalNameManager.java
+│       │       │   ├── DimensionalNameUI.java
+│       │       │   └── DimensionalNameUIManager.java
+│       │       ├── dividearea/
+│       │       │   ├── DivideAreaClientNetworking.java
+│       │       │   ├── DivideAreaManager.java
+│       │       │   └── DivideAreaUI.java
+│       │       ├── easyadd/
+│       │       │   ├── EasyAddAltitudeManager.java
+│       │       │   ├── EasyAddConfig.java
+│       │       │   ├── EasyAddGeometry.java
+│       │       │   ├── EasyAddKeyHandler.java
+│       │       │   ├── EasyAddManager.java
+│       │       │   ├── EasyAddNetworking.java
+│       │       │   └── EasyAddUI.java
+│       │       ├── expandarea/
+│       │       │   ├── ExpandAreaClientNetworking.java
+│       │       │   ├── ExpandAreaKeyHandler.java
+│       │       │   ├── ExpandAreaManager.java
+│       │       │   ├── ExpandAreaUI.java
+│       │       │   └── GeometryCalculator.java
+│       │       ├── i18n/
+│       │       │   └── I18nManager.java
+│       │       ├── keyhandler/
+│       │       │   └── UnifiedKeyHandler.java
+│       │       ├── language/
+│       │       │   ├── LanguageManager.java
+│       │       │   └── LanguageUI.java
+│       │       ├── log/
+│       │       │   ├── AreaChangeTracker.java
+│       │       │   ├── ClientLogManager.java
+│       │       │   └── ClientLogNetworking.java
+│       │       ├── mixin/
+│       │       │   └── client/
+│       │       │       ├── ExampleClientMixin.java
+│       │       │       ├── TranslationStorageMixin.java
+│       │       │       └── WorldRendererMixin.java
+│       │       ├── network/
+│       │       │   ├── ClientDimNameNetworking.java
+│       │       │   ├── ClientDimensionalNameNetworking.java
+│       │       │   ├── ClientNetworking.java
+│       │       │   └── ClientWorldNetworking.java
+│       │       ├── recolor/
+│       │       │   ├── RecolorClientCommand.java
+│       │       │   ├── RecolorManager.java
+│       │       │   └── RecolorUI.java
+│       │       ├── rename/
+│       │       │   ├── RenameManager.java
+│       │       │   ├── RenameNetworking.java
+│       │       │   └── RenameUI.java
+│       │       ├── render/
+│       │       │   ├── CPURender.java
+│       │       │   ├── FlashColorHelper.java
+│       │       │   ├── GLRender.java
+│       │       │   ├── RenderManager.java
+│       │       │   └── VulkanRender.java
+│       │       ├── replacebutton/
+│       │       │   ├── ReplaceButtonKeyListener.java
+│       │       │   ├── ReplaceButtonManager.java
+│       │       │   ├── ReplaceButtonNetworking.java
+│       │       │   └── ReplaceButtonUI.java
+│       │       ├── shrinkarea/
+│       │       │   ├── ShrinkAreaClientNetworking.java
+│       │       │   ├── ShrinkAreaKeyHandler.java
+│       │       │   ├── ShrinkAreaManager.java
+│       │       │   ├── ShrinkAreaUI.java
+│       │       │   └── ShrinkGeometryCalculator.java
+│       │       ├── subtitlesize/
+│       │       │   ├── SubtitleSizeManager.java
+│       │       │   └── SubtitleSizeUI.java
+│       │       ├── subtitlestyle/
+│       │       │   ├── SubtitleStyleManager.java
+│       │       │   └── SubtitleStyleUI.java
+│       │       └── world/
+│       │           └── ClientWorldFolderManager.java
+│       └── resources/
+│           └── areas-hint.client.mixins.json
+├── .gitattributes
+├── .gitignore
+├── areas-hint-template-1.20.4.zip
+├── build.gradle
+├── build_log.txt
+├── chinese_strings_raw.txt
+├── CLAUDE.md
+├── COMMAND_USAGE.md
+├── extraction_record.md
+├── extraction_stats.txt
+├── findings.md
+├── FINAL_REPORT.txt
+├── fix_spacing.py
+├── fix_translation.py
+├── generate_csv.py
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── LICENSE
+├── LOG_FEATURE.md
+├── modicon.psd
+├── overworld.json
+├── progress.md
+├── prompt.txt
+├── prompt_implementation.txt
+├── README.md
+├── RECOLOR_REFACTOR_SUMMARY.md
+├── REPLACEBUTTON_EXPANDAREA_SHRINKAREA_INTEGRATION.md
+├── REPLACEBUTTON_FIX_SUMMARY.md
+├── REPLACEBUTTON_IMPLEMENTATION_SUMMARY.md
+├── REPLACEBUTTON_TEST_GUIDE.md
+├── second-prompt.txt
+├── settings.gradle
+├── SHRINKAREA_CHANGES.md
+├── SHRINKAREA_REFACTOR.md
+├── SUBTITLESIZE_GUIDE.md
+├── SUBTITLESTYLE_INTERACTIVE_GUIDE.md
+├── task_plan.md
+├── thrid-promrt.txt
+├── TRANSLATION_GUIDE.md
+├── TRANSLATION_REPORT.md
+├── translate_complete.py
+├── translate_full.py
+├── translate_lolcat.py
+├── translate_manual.py
+├── translate_neko.py
+├── translate_script.py
+├── translate_zh_tw.py
+├── en_us.json
+├── zh_cn.json
+├── 提取完成报告.md
+└── 提取记录.csv
+
+.minecraft/areas-hint/
+├── config.json
+├── dimensional_names.json
+├── overworld.json
+├── the_nether.json
+└── the_end.json
+```
+
+---
+
+## 相关文档
+
+如果你想查看更细的使用或开发信息，可以继续阅读以下文档：
+
+- [`COMMAND_USAGE.md`](./COMMAND_USAGE.md) —— 命令使用说明
+- [`LOG_FEATURE.md`](./LOG_FEATURE.md) —— 日志功能说明
+- [`SUBTITLESIZE_GUIDE.md`](./SUBTITLESIZE_GUIDE.md) —— 字幕大小说明
+- [`SUBTITLESTYLE_INTERACTIVE_GUIDE.md`](./SUBTITLESTYLE_INTERACTIVE_GUIDE.md) —— 字幕样式交互说明
+- [`TRANSLATION_GUIDE.md`](./TRANSLATION_GUIDE.md) —— 翻译指南
+- [`TRANSLATION_REPORT.md`](./TRANSLATION_REPORT.md) —— 翻译报告
+- [`CLAUDE.md`](./CLAUDE.md) —— 项目开发与结构说明
+
+---
+
+## 模组兼容性
+
+以下为**已测试或已知可共存**的部分模组列表（实际表现仍建议结合整合包环境测试）：
+
+- Starlight
+- Stutterfix
+- Syncmatica
+- ThreadTweak
+- Travelers Titles
+- TweakMore
+- Tweakeroo
+- ViaFabricPlus
+- Xaeros Minimap
+- Xaeros World Map
+- Yungs Api
+- Gugle 的 Carpet 附加包
+- Fabric Carpet
+- Replay Mod
+- MiniHUD
+- MagicLib
+- Sodium
+- AppleSkin
+- Litematica
+- Jade
+- AutoModpack
+- Baritone
+- Bobby
+- Cloth Config
+- Continuity
+- Cull Leaves
+- Enhanced Block Entities
+- Entity Model Features
+- Entity Texture Features
+- Entity Culling
+- Exordium
+- Fabric API
+- Fast Chest
+- FPS Reducer
+- ImmediatelyFast
+- Indium
+- Iris
+- JEI
+- Krypton
+- LAN Server Properties
+- LazyDFU
+- MaliLib
+- Masa Gadget
+- ModernFix
+- Mod Menu
+- More Culling
+- Noisium
+- Nvidium
+- Sodium Extra
+- Better Furnace Minecart
+
+---
+
+## 构建与开发
+
+### 常用开发命令
+
+```bash
+./gradlew build
+./gradlew clean
+./gradlew publishToMavenLocal
+./gradlew runDatagen
+./gradlew runClient
+./gradlew runServer
+```
+
+### 开发建议
+- 调试区域检测时可使用 `/areahint debug on`
+- 测试区域边界时可配合 `/areahint boundviz`
+- 修改配置文件或区域 JSON 后可执行 `/areahint reload`
+- 对区域层级、包围盒与高度条件进行联调时，建议同时查看客户端与服务端日志
+
+---
+
+## 已知限制与说明
+
+- **Vulkan 渲染目前为实验性 / 占位实现**，不建议作为默认选项依赖
+- 兼容性列表会随着整合包环境、Fabric 生态版本、显卡驱动和其他模组更新而变化
+- 某些命令的可用性与权限表现可能受服务器权限配置影响
+- 若你手动编辑 JSON，请确保字段命名与层级关系正确，否则可能导致域名不显示或层级异常
+
+---
+
+## 总结
+
+Areas Hint 旨在为 Minecraft 世界提供更具沉浸感、更易编辑、同时兼顾性能与层级表达能力的区域提示体验。
+
+无论你是在制作 RPG 服务器、剧情地图、建筑展示区，还是只想给自己的单人世界加上更有仪式感的地点名称，它都能成为一个实用而有表现力的工具。
