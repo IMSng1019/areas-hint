@@ -63,7 +63,8 @@ public class AreashintClient implements ClientModInitializer {
 
 		// 初始化配置
 		ClientConfig.init();
-		
+		ClientConfig.correctSubtitleRenderForEnvironment();
+
 		// 初始化区域检测器
 		areaDetector = new AreaDetector();
 		asyncAreaDetector = new AsyncAreaDetector(areaDetector);
@@ -605,6 +606,7 @@ public class AreashintClient implements ClientModInitializer {
 	public static void reload() {
 		LOGGER.info("重新加载区域提示模组配置和区域数据...");
 		ClientConfig.load();
+		ClientConfig.correctSubtitleRenderForEnvironment();
 
 		// 更新渲染管理器的渲染模式（这会重新读取字幕大小配置）
 		if (renderManager != null) {

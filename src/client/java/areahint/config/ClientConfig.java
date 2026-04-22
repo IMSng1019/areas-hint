@@ -3,6 +3,7 @@ package areahint.config;
 import areahint.AreashintClient;
 import areahint.data.ConfigData;
 import areahint.file.FileManager;
+import areahint.render.VulkanModCompat;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -42,6 +43,36 @@ public class ClientConfig {
         loaded = true;
         AreashintClient.LOGGER.info("已加载配置: 频率={}, 渲染方式={}, 字幕样式={}, 字幕大小={}",
                 config.getFrequency(), config.getSubtitleRender(), config.getSubtitleStyle(), config.getSubtitleSize());
+    }
+
+    /**
+     * 按当前运行环境修正字幕渲染方式配置。
+     * 规则：
+     * - 已加载 VulkanMod -> 强制使用 Vulkan
+     * - 未加载 VulkanMod 且当前为 Vulkan -> 改回 OpenGL
+     * - 未加载 VulkanMod 且当前为 OpenGL/CPU -> 保持不变
+     */
+    public static void correctSubtitleRenderForEnvironment() {
+        if (!loaded) {
+            return;
+        }
+
+        String currentMode = ConfigData.normalizeRenderMode(config.getSubtitleRender());
+        String targetMode = currentMode;
+
+        if (VulkanModCompat.isLoaded()) {
+            targetMode = "Vulkan";
+        } else if ("Vulkan".equals(currentMode)) {
+            targetMode = "OpenGL";
+        }
+
+        if (targetMode.equals(currentMode)) {
+            return;
+        }
+
+        config.setSubtitleRender(targetMode);
+        save();
+        AreashintClient.LOGGER.info("已按运行环境修正字幕渲染方式: {} -> {}", currentMode, targetMode);
     }
     
     /**

@@ -630,9 +630,9 @@ public class ServerCommands {
         if (ConfigData.isValidRenderMode(normalizedMode)) {
             // 向客户端发送命令
             sendClientCommand(source, "areahint:subtitlerender " + normalizedMode);
-            
-            source.sendMessage(Text.translatable("command.message.general_14").append(Text.literal(normalizedMode)));
-            
+
+            source.sendMessage(Text.literal("§a已将字幕渲染方式请求发送到客户端，最终结果以客户端提示为准"));
+
             return Command.SINGLE_SUCCESS;
         } else {
             source.sendMessage(Text.translatable("command.error.general_7").append(Text.literal(mode)).append(Text.translatable("command.error.general")));

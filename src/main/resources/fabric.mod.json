@@ -41,6 +41,7 @@
 	"suggests": {
 		"sodium": "*",
 		"luckperms": "*",
-		"bluemap": "*"
+		"bluemap": "*",
+		"vulkanmod": "*"
 	}
 }

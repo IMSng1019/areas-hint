@@ -48,8 +48,13 @@ public class RenderManager {
                 AreashintClient.LOGGER.info("使用OpenGL渲染模式");
                 break;
             case "Vulkan":
-                currentRender = vulkanRender;
-                AreashintClient.LOGGER.info("使用Vulkan渲染模式");
+                if (VulkanModCompat.isUsable()) {
+                    currentRender = vulkanRender;
+                    AreashintClient.LOGGER.info("使用Vulkan渲染模式");
+                } else {
+                    currentRender = glRender;
+                    AreashintClient.LOGGER.warn("Vulkan 渲染模式当前不可用，已回退到 OpenGL。配置值: {}", mode);
+                }
                 break;
             default:
                 currentRender = glRender;

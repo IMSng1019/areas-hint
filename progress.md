@@ -13,3 +13,13 @@
 - 已确认需要继续优化长章节展示：完整子命令、文件结构、兼容性列表适合折叠处理。
 - 已完成长章节收纳：完整子命令、文件结构、兼容性列表均改为折叠展示，首页滚动压力明显下降。
 - 已通过 Markdown 诊断检查，README 当前无语法诊断问题。
+- 已完成 Vulkan 相关代码探索：定位到 `GLRender`、`VulkanRender`、`RenderManager`、`ClientConfig`、`ClientNetworking`、`ServerCommands`、`FileManager`。
+- 已确认当前 `VulkanRender` 仍是 OpenGL 兼容写法且视觉效果与 `GLRender` 不一致。
+- 已确认启动阶段自动修正配置的最合适切入点在 `AreashintClient.onInitializeClient()` 中 `ClientConfig.init()` 与 `new RenderManager()` 之间。
+- 已确认命令切换的真正落点在客户端 `ClientNetworking.java:210-219`，而不是服务端 `ServerCommands` 本身。
+- 已确认项目已有 `BlueMapCompat` / `LuckPermsCompat` 可作为 Vulkan 可选依赖兼容模板。
+- 已向用户确认目标模组为 `VulkanMod`，且判定标准采用“已加载即视为使用”。
+- 通过 Context7 补充确认：VulkanMod 客户端会注册自身 renderer；兼容接入应优先采用可选依赖/兼容层模式。
+- 已给出 3 个设计方向，当前用户进一步要求 `VulkanRender` 的实现结构尽量与现有 `GLRender` 相同。
+- 设计将据此调整为“保留同构类结构，单独放置 VulkanMod 兼容层”，而不是优先抽公共基类。
+- 下一步：按渲染器结构、启动配置修正、命令限制三个部分分段展示设计并确认。

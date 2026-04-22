@@ -3,8 +3,10 @@ package areahint.network;
 import areahint.Areashint;
 import areahint.AreashintClient;
 import areahint.config.ClientConfig;
+import areahint.data.ConfigData;
 import areahint.file.FileManager;
 import areahint.i18n.I18nManager;
+import areahint.render.VulkanModCompat;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -212,11 +214,7 @@ public class ClientNetworking {
                         if (action.equals("subtitlerender_info")) {
                             displaySubtitleRenderInfo(client);
                         } else {
-                            String[] renderParts = action.split(" ");
-                            if (renderParts.length >= 2) {
-                                ClientConfig.setSubtitleRender(renderParts[1]);
-                                AreashintClient.reload();
-                            }
+                            handleSubtitleRenderCommand(client, action);
                         }
                     }
                     // 处理subtitlestyle命令
@@ -736,6 +734,47 @@ public class ClientNetworking {
         }
     }
     
+    /**
+     * 处理字幕渲染方式切换命令。
+     */
+    private static void handleSubtitleRenderCommand(MinecraftClient client, String action) {
+        String[] renderParts = action.split(" ");
+        if (renderParts.length < 2) {
+            return;
+        }
+
+        String targetMode = ConfigData.normalizeRenderMode(renderParts[1]);
+        String currentMode = ClientConfig.getSubtitleRender();
+
+        if (currentMode.equals(targetMode)) {
+            sendSubtitleRenderMessage(client, "§a当前字幕渲染方式为: §6" + currentMode + "§a，无需重复设置");
+            return;
+        }
+
+        boolean currentIsVulkan = "Vulkan".equals(currentMode);
+        boolean targetIsVulkan = "Vulkan".equals(targetMode);
+
+        if (targetIsVulkan && !VulkanModCompat.isLoaded()) {
+            sendSubtitleRenderMessage(client, "§c未检测到 VulkanMod，无法切换到 §6Vulkan§c 渲染");
+            return;
+        }
+
+        if ((currentIsVulkan && !targetIsVulkan) || (!currentIsVulkan && targetIsVulkan)) {
+            sendSubtitleRenderMessage(client, "§cVulkan 与 OpenGL/CPU 之间禁止直接切换");
+            return;
+        }
+
+        ClientConfig.setSubtitleRender(targetMode);
+        AreashintClient.reload();
+        sendSubtitleRenderMessage(client, "§a字幕渲染方式已设置为: §6" + targetMode);
+    }
+
+    private static void sendSubtitleRenderMessage(MinecraftClient client, String message) {
+        if (client.player != null) {
+            client.player.sendMessage(net.minecraft.text.Text.of(message), false);
+        }
+    }
+
     /**
      * 显示当前渲染方式信息
      * @param client Minecraft客户端实例
