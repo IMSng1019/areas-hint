@@ -216,6 +216,23 @@ public class ClientConfig {
     }
 
     /**
+     * 获取语言锁定状态
+     * @return 语言是否已锁定
+     */
+    public static boolean isLanguageLocked() {
+        return config.isLanguageLocked();
+    }
+
+    /**
+     * 设置语言锁定状态
+     * @param locked 是否锁定语言
+     */
+    public static void setLanguageLocked(boolean locked) {
+        config.setLanguageLocked(locked);
+        save();
+    }
+
+    /**
      * 获取边界可视化开关状态
      * @return 边界可视化是否启用
      */

@@ -29,6 +29,9 @@ public class ConfigData {
     // 语言设置
     private String language;
 
+    // 语言锁定状态：true 为已锁定，false 为未锁定
+    private boolean languageLocked;
+
     /**
      * 默认构造方法，使用默认配置
      */
@@ -42,6 +45,7 @@ public class ConfigData {
         this.subtitleSize = "medium"; // 默认为中等大小
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
+        this.languageLocked = false; // 默认不上锁
     }
     
     /**
@@ -57,6 +61,9 @@ public class ConfigData {
         this.enabled = true; // 默认开启模组
         this.recordKey = 88; // 默认为X键
         this.subtitleSize = "medium"; // 默认为中等大小
+        this.boundVizEnabled = false; // 默认关闭边界可视化
+        this.language = "zh_cn"; // 默认中文
+        this.languageLocked = false; // 默认不上锁
     }
 
     /**
@@ -73,6 +80,9 @@ public class ConfigData {
         this.enabled = enabled;
         this.recordKey = 88; // 默认为X键
         this.subtitleSize = "medium"; // 默认为中等大小
+        this.boundVizEnabled = false; // 默认关闭边界可视化
+        this.language = "zh_cn"; // 默认中文
+        this.languageLocked = false; // 默认不上锁
     }
     
     /**
@@ -212,6 +222,22 @@ public class ConfigData {
         if (language != null && !language.isEmpty()) {
             this.language = language;
         }
+    }
+
+    /**
+     * 获取语言锁定状态
+     * @return 语言是否已锁定
+     */
+    public boolean isLanguageLocked() {
+        return languageLocked;
+    }
+
+    /**
+     * 设置语言锁定状态
+     * @param languageLocked 语言锁定状态
+     */
+    public void setLanguageLocked(boolean languageLocked) {
+        this.languageLocked = languageLocked;
     }
 
     /**

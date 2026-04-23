@@ -82,10 +82,33 @@ public class ClientNetworking {
                 ClientNetworking::handleClientCommand
         );
 
-        // 连接服务器时同步模组语言设置
+        // 连接服务器时先自动适配模组语言，再同步给服务端
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.register(
-            (handler, sender, client) -> sendLanguageToServer()
+            (handler, sender, client) -> {
+                adaptLanguageOnJoinIfUnlocked();
+                sendLanguageToServer();
+            }
         );
+    }
+
+    /**
+     * 在进入世界时自动适配模组语言（未上锁时）
+     */
+    private static void adaptLanguageOnJoinIfUnlocked() {
+        if (ClientConfig.isLanguageLocked()) {
+            AreashintClient.LOGGER.info("语言已锁定，跳过进入世界时的自动语言适配");
+            return;
+        }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null || client.options == null) {
+            return;
+        }
+
+        String minecraftLanguage = client.options.language;
+        String appliedLanguage = I18nManager.loadLanguage(minecraftLanguage);
+        ClientConfig.setLanguage(appliedLanguage);
+        AreashintClient.LOGGER.info("进入世界时自动适配模组语言: {} -> {}", minecraftLanguage, appliedLanguage);
     }
 
     /** 将客户端模组语言同步给服务端 */

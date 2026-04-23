@@ -5,6 +5,8 @@ import areahint.data.AreaData;
 import areahint.data.ConfigData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonSyntaxException;
 import net.fabricmc.loader.api.FabricLoader;
@@ -134,7 +136,10 @@ public class FileManager {
                     "  \"subtitleSize\": \"" + defaultConfig.getSubtitleSize() + "\",\n\n" +
                     "  // Language: 语言设置\n" +
                     "  // 对应 areas-hint/lang/ 文件夹中的语言文件名（不含.json后缀）\n" +
-                    "  \"language\": \"" + defaultConfig.getLanguage() + "\"\n" +
+                    "  \"language\": \"" + defaultConfig.getLanguage() + "\",\n\n" +
+                    "  // LanguageLocked: 语言锁\n" +
+                    "  // false: 进入世界时自动跟随当前游戏语言, true: 使用 /areahint language 后锁定当前模组语言\n" +
+                    "  \"languageLocked\": " + defaultConfig.isLanguageLocked() + "\n" +
                     "}";
 
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));
@@ -202,7 +207,9 @@ public class FileManager {
                 sb.append(line).append("\n");
             }
 
-            ConfigData config = GSON.fromJson(sb.toString(), ConfigData.class);
+            String normalizedJson = sb.toString();
+            JsonObject configJson = JsonParser.parseString(normalizedJson).getAsJsonObject();
+            ConfigData config = GSON.fromJson(normalizedJson, ConfigData.class);
             // 如果解析失败，返回默认配置
             if (config == null) {
                 return new ConfigData();
@@ -254,6 +261,13 @@ public class FileManager {
                 Areashint.LOGGER.warn("配置项 'language' 无效或缺失，已补全为默认值: " + defaultConfig.getLanguage());
             }
 
+            // 检查并补全 languageLocked
+            if (!configJson.has("languageLocked")) {
+                config.setLanguageLocked(defaultConfig.isLanguageLocked());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'languageLocked' 缺失，已补全为默认值: " + defaultConfig.isLanguageLocked());
+            }
+
             // 如果有缺失项，立即保存更新后的配置
             if (needsUpdate) {
                 Areashint.LOGGER.info("检测到配置不完整，正在保存补全后的配置...");
@@ -296,7 +310,10 @@ public class FileManager {
                     "  \"subtitleSize\": \"" + config.getSubtitleSize() + "\",\n\n" +
                     "  // Language: 语言设置\n" +
                     "  // 对应 areas-hint/lang/ 文件夹中的语言文件名（不含.json后缀）\n" +
-                    "  \"language\": \"" + (config.getLanguage() != null ? config.getLanguage() : "zh_cn") + "\"\n" +
+                    "  \"language\": \"" + (config.getLanguage() != null ? config.getLanguage() : "zh_cn") + "\",\n\n" +
+                    "  // LanguageLocked: 语言锁\n" +
+                    "  // false: 进入世界时自动跟随当前游戏语言, true: 使用 /areahint language 后锁定当前模组语言\n" +
+                    "  \"languageLocked\": " + config.isLanguageLocked() + "\n" +
                     "}";
 
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));

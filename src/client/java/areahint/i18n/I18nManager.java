@@ -24,6 +24,7 @@ public class I18nManager {
     private static final Gson GSON = new Gson();
     private static final String LANG_FOLDER = "lang";
     private static final String DEFAULT_LANGUAGE = "zh_cn";
+    private static final String FALLBACK_LANGUAGE = "en_us";
 
     // 当前语言的翻译映射
     private static Map<String, String> translations = new HashMap<>();
@@ -129,39 +130,62 @@ public class I18nManager {
     }
 
     /**
+     * 解析请求语言，若不存在则回退到英语
+     * @param requestedLanguage 请求的语言代码
+     * @return 实际应加载的语言代码
+     */
+    public static String resolveLanguageOrFallback(String requestedLanguage) {
+        String resolvedLanguage = requestedLanguage;
+        if (resolvedLanguage == null || resolvedLanguage.isEmpty()) {
+            resolvedLanguage = ClientConfig.getLanguage();
+        }
+        if (resolvedLanguage == null || resolvedLanguage.isEmpty()) {
+            resolvedLanguage = DEFAULT_LANGUAGE;
+        }
+
+        Path requestedFile = getLangFolder().resolve(resolvedLanguage + ".json");
+        if (Files.exists(requestedFile)) {
+            return resolvedLanguage;
+        }
+
+        AreashintClient.LOGGER.warn("语言文件不存在: " + resolvedLanguage + ".json，回退到 " + FALLBACK_LANGUAGE);
+        Path fallbackFile = getLangFolder().resolve(FALLBACK_LANGUAGE + ".json");
+        if (Files.exists(fallbackFile)) {
+            return FALLBACK_LANGUAGE;
+        }
+
+        AreashintClient.LOGGER.warn("回退语言文件也不存在: " + FALLBACK_LANGUAGE + ".json，将使用空翻译");
+        return FALLBACK_LANGUAGE;
+    }
+
+    /**
      * 加载指定语言
      * @param language 语言代码（如 zh_cn, en_us）
+     * @return 实际加载生效的语言代码
      */
-    public static void loadLanguage(String language) {
-        if (language == null || language.isEmpty()) {
-            language = DEFAULT_LANGUAGE;
-        }
-
-        Path langFile = getLangFolder().resolve(language + ".json");
-        if (Files.notExists(langFile)) {
-            AreashintClient.LOGGER.warn("语言文件不存在: " + language + ".json，使用默认语言");
-            language = DEFAULT_LANGUAGE;
-            langFile = getLangFolder().resolve(language + ".json");
-        }
+    public static String loadLanguage(String language) {
+        String resolvedLanguage = resolveLanguageOrFallback(language);
+        Path langFile = getLangFolder().resolve(resolvedLanguage + ".json");
 
         if (Files.notExists(langFile)) {
-            AreashintClient.LOGGER.warn("默认语言文件也不存在，使用空翻译");
             translations = new HashMap<>();
-            currentLanguage = language;
-            return;
+            currentLanguage = resolvedLanguage;
+            return resolvedLanguage;
         }
 
         try {
             String json = Files.readString(langFile, StandardCharsets.UTF_8);
             Map<String, String> loaded = GSON.fromJson(json, new TypeToken<Map<String, String>>(){}.getType());
             translations = loaded != null ? loaded : new HashMap<>();
-            currentLanguage = language;
-            AreashintClient.LOGGER.info("已加载语言: " + language + " (" + translations.size() + " 条翻译)");
+            currentLanguage = resolvedLanguage;
+            AreashintClient.LOGGER.info("已加载语言: " + resolvedLanguage + " (" + translations.size() + " 条翻译)");
         } catch (Exception e) {
             AreashintClient.LOGGER.error("加载语言文件失败: " + e.getMessage());
             translations = new HashMap<>();
-            currentLanguage = language;
+            currentLanguage = resolvedLanguage;
         }
+
+        return resolvedLanguage;
     }
 
     /**

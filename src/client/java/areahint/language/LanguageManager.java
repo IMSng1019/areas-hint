@@ -40,6 +40,7 @@ public class LanguageManager {
         }
 
         currentState = State.SELECTING_LANGUAGE;
+        ClientConfig.setLanguageLocked(true);
         LanguageUI.showLanguageSelectionScreen();
     }
 
@@ -55,17 +56,17 @@ public class LanguageManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        // 保存语言设置
-        ClientConfig.setLanguage(langCode);
+        // 先加载语言，并获取最终实际生效的语言代码
+        String appliedLanguage = I18nManager.loadLanguage(langCode);
 
-        // 重新加载语言
-        I18nManager.loadLanguage(langCode);
+        // 保存实际生效语言
+        ClientConfig.setLanguage(appliedLanguage);
 
         // 同步语言给服务端
         areahint.network.ClientNetworking.sendLanguageToServer();
 
-        String displayName = I18nManager.getLanguageDisplayName(langCode);
-        client.player.sendMessage(Text.of(I18nManager.translate("language.message.language") + displayName + " (" + langCode + ")"), false);
+        String displayName = I18nManager.getLanguageDisplayName(appliedLanguage);
+        client.player.sendMessage(Text.of(I18nManager.translate("language.message.language") + displayName + " (" + appliedLanguage + ")"), false);
 
         resetState();
     }
