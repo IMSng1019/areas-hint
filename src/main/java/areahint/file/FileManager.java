@@ -139,7 +139,9 @@ public class FileManager {
                     "  \"language\": \"" + defaultConfig.getLanguage() + "\",\n\n" +
                     "  // LanguageLocked: 语言锁\n" +
                     "  // false: 进入世界时自动跟随当前游戏语言, true: 使用 /areahint language 后锁定当前模组语言\n" +
-                    "  \"languageLocked\": " + defaultConfig.isLanguageLocked() + "\n" +
+                    "  \"languageLocked\": " + defaultConfig.isLanguageLocked() + ",\n\n" +
+                    "  // TeleportFormat: 传送命令头，默认 tp\n" +
+                    "  \"teleportFormat\": \"" + defaultConfig.getTeleportFormat() + "\"\n" +
                     "}";
 
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));
@@ -268,6 +270,19 @@ public class FileManager {
                 Areashint.LOGGER.warn("配置项 'languageLocked' 缺失，已补全为默认值: " + defaultConfig.isLanguageLocked());
             }
 
+            // 检查并补全 teleportFormat
+            String rawTeleportFormat = null;
+            if (configJson.has("teleportFormat") && !configJson.get("teleportFormat").isJsonNull()
+                    && configJson.get("teleportFormat").isJsonPrimitive()
+                    && configJson.get("teleportFormat").getAsJsonPrimitive().isString()) {
+                rawTeleportFormat = configJson.get("teleportFormat").getAsString();
+            }
+            if (!ConfigData.isValidTeleportFormat(rawTeleportFormat)) {
+                config.setTeleportFormat(defaultConfig.getTeleportFormat());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'teleportFormat' 无效或缺失，已补全为默认值: " + defaultConfig.getTeleportFormat());
+            }
+
             // 如果有缺失项，立即保存更新后的配置
             if (needsUpdate) {
                 Areashint.LOGGER.info("检测到配置不完整，正在保存补全后的配置...");
@@ -313,7 +328,9 @@ public class FileManager {
                     "  \"language\": \"" + (config.getLanguage() != null ? config.getLanguage() : "zh_cn") + "\",\n\n" +
                     "  // LanguageLocked: 语言锁\n" +
                     "  // false: 进入世界时自动跟随当前游戏语言, true: 使用 /areahint language 后锁定当前模组语言\n" +
-                    "  \"languageLocked\": " + config.isLanguageLocked() + "\n" +
+                    "  \"languageLocked\": " + config.isLanguageLocked() + ",\n\n" +
+                    "  // TeleportFormat: 传送命令头，默认 tp\n" +
+                    "  \"teleportFormat\": \"" + config.getTeleportFormat() + "\"\n" +
                     "}";
 
             Files.write(path, jsonWithComments.getBytes(StandardCharsets.UTF_8));

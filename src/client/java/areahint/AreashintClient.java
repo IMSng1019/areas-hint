@@ -86,7 +86,10 @@ public class AreashintClient implements ClientModInitializer {
 		
 		// 初始化SetHigh客户端命令
 		areahint.command.SetHighClientCommand.init();
-		
+
+		// 初始化Teleport客户端交互
+		areahint.teleport.TeleportClientManager.init();
+
 		// 初始化EasyAdd功能
 		initEasyAdd();
 		

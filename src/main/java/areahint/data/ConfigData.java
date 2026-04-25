@@ -32,6 +32,9 @@ public class ConfigData {
     // 语言锁定状态：true 为已锁定，false 为未锁定
     private boolean languageLocked;
 
+    // 传送命令头
+    private String teleportFormat;
+
     /**
      * 默认构造方法，使用默认配置
      */
@@ -46,6 +49,7 @@ public class ConfigData {
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
         this.languageLocked = false; // 默认不上锁
+        this.teleportFormat = "tp"; // 默认传送命令头
     }
     
     /**
@@ -64,6 +68,7 @@ public class ConfigData {
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
         this.languageLocked = false; // 默认不上锁
+        this.teleportFormat = "tp"; // 默认传送命令头
     }
 
     /**
@@ -83,6 +88,7 @@ public class ConfigData {
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
         this.languageLocked = false; // 默认不上锁
+        this.teleportFormat = "tp"; // 默认传送命令头
     }
     
     /**
@@ -238,6 +244,25 @@ public class ConfigData {
      */
     public void setLanguageLocked(boolean languageLocked) {
         this.languageLocked = languageLocked;
+    }
+
+    public String getTeleportFormat() {
+        return isValidTeleportFormat(teleportFormat) ? teleportFormat : "tp";
+    }
+
+    public void setTeleportFormat(String teleportFormat) {
+        this.teleportFormat = isValidTeleportFormat(teleportFormat) ? teleportFormat.trim() : "tp";
+    }
+
+    public static boolean isValidTeleportFormat(String teleportFormat) {
+        if (teleportFormat == null) {
+            return false;
+        }
+        String normalized = teleportFormat.trim().toLowerCase();
+        return "tp".equals(normalized)
+                || "minecraft:tp".equals(normalized)
+                || "teleport".equals(normalized)
+                || "minecraft:teleport".equals(normalized);
     }
 
     /**

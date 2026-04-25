@@ -60,6 +60,12 @@ public class ClientNetworking {
         // 注册rename响应接收处理器（由 RenameNetworking 处理）
         areahint.rename.RenameNetworking.registerClientReceivers();
 
+        // 注册Teleport响应接收处理器
+        ClientPlayNetworking.registerGlobalReceiver(
+                Packets.S2C_TELEPORT_RESPONSE,
+                ClientNetworking::handleTeleportResponse
+        );
+
         // 注册SetHigh相关的网络处理器
         ClientPlayNetworking.registerGlobalReceiver(
                 Packets.S2C_SETHIGH_AREA_LIST,
@@ -74,12 +80,6 @@ public class ClientNetworking {
         ClientPlayNetworking.registerGlobalReceiver(
                 Packets.S2C_SETHIGH_RESPONSE,
                 ClientNetworking::handleSetHighResponse
-        );
-        
-        // 注册客户端命令处理器
-        ClientPlayNetworking.registerGlobalReceiver(
-                new Identifier(Packets.S2C_CLIENT_COMMAND),
-                ClientNetworking::handleClientCommand
         );
 
         // 连接服务器时先自动适配模组语言，再同步给服务端
@@ -307,6 +307,10 @@ public class ClientNetworking {
                     // 处理模组开关命令
                     else if (action.equals("on") || action.equals("off")) {
                         areahint.command.ModToggleCommand.handleToggleCommand(action);
+                    }
+                    // 处理Teleport命令
+                    else if (action.startsWith("tcp") || action.startsWith("udp") || action.startsWith("settp")) {
+                        areahint.teleport.TeleportClientManager.getInstance().handleClientCommand(action);
                     }
                     // 处理SetHigh命令
                     else if (action.startsWith("sethigh")) {
@@ -1096,10 +1100,19 @@ public class ClientNetworking {
         });
     }
     
+    private static void handleTeleportResponse(MinecraftClient client,
+                                               ClientPlayNetworkHandler handler,
+                                               PacketByteBuf buf,
+                                               PacketSender responseSender) {
+        boolean success = buf.readBoolean();
+        String message = buf.readString();
+        client.execute(() -> areahint.teleport.TeleportClientManager.getInstance().handleServerResponse(success, message));
+    }
+
     /**
      * 处理SetHigh响应
      */
-    private static void handleSetHighResponse(MinecraftClient client, 
+    private static void handleSetHighResponse(MinecraftClient client,
                                             ClientPlayNetworkHandler handler,
                                             PacketByteBuf buf, 
                                             PacketSender responseSender) {
@@ -1114,6 +1127,18 @@ public class ClientNetworking {
         });
     }
     
+    public static void sendTeleportRequest(String mode, String areaName, String teleportFormat) {
+        try {
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeString(mode);
+            buf.writeString(areaName);
+            buf.writeString(teleportFormat);
+            ClientPlayNetworking.send(Packets.C2S_TELEPORT_REQUEST, buf);
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("发送传送请求时发生错误: " + e.getMessage(), e);
+        }
+    }
+
     /**
      * 发送SetHigh高度设置请求到服务器
      * @param areaName 域名名称

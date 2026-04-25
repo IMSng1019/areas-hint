@@ -248,4 +248,13 @@ public class ClientConfig {
         config.setBoundVizEnabled(enabled);
         save();
     }
+
+    public static String getTeleportFormat() {
+        return config.getTeleportFormat();
+    }
+
+    public static void setTeleportFormat(String teleportFormat) {
+        config.setTeleportFormat(teleportFormat);
+        save();
+    }
 }

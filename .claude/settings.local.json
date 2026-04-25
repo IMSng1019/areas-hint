@@ -22,7 +22,14 @@
       "WebFetch(domain:repo.bluecolored.de)",
       "Bash(javap:*)",
       "Bash(git:*)",
-      "Bash(jar tf:*)"
+      "Bash(jar tf:*)",
+      "Bash(\"J:/mc/mods/gradlew\" test:*)",
+      "Bash(\"J:/mc/mods/gradlew\" compileJava:*)",
+      "Bash(\"J:/mc/mods/gradlew\" build:*)",
+      "Bash(\"J:/mc/mods/gradlew\" compileTestJava:*)",
+      "Bash(unzip:*)",
+      "Bash(java:*)",
+      "Bash(\"J:/mc/mods/gradlew\":*)"
     ],
     "deny": [],
     "ask": []

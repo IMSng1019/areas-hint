@@ -254,6 +254,19 @@ public class ServerNetworking {
                 }
             });
 
+        // 注册Teleport请求处理器
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_TELEPORT_REQUEST,
+            (server, player, handler, buf, responseSender) -> {
+                try {
+                    final String mode = buf.readString();
+                    final String areaName = buf.readString();
+                    final String teleportFormat = buf.readString();
+                    server.execute(() -> areahint.teleport.TeleportService.handleTeleportRequest(player, mode, areaName, teleportFormat));
+                } catch (Exception e) {
+                    Areashint.LOGGER.error("处理传送请求时发生错误", e);
+                }
+            });
+
         // 注册SetHigh请求处理器
         ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_SETHIGH_REQUEST,
             (server, player, handler, buf, responseSender) -> {

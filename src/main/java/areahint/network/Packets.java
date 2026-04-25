@@ -44,7 +44,11 @@ public class Packets {
     public static final Identifier S2C_SETHIGH_AREA_LIST = new Identifier(Areashint.MOD_ID, "s2c_sethigh_area_list");
     public static final Identifier S2C_SETHIGH_AREA_SELECTION = new Identifier(Areashint.MOD_ID, "s2c_sethigh_area_selection");
     public static final Identifier S2C_SETHIGH_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_sethigh_response");
-    
+
+    // Teleport功能相关的包ID
+    public static final Identifier C2S_TELEPORT_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_teleport_request");
+    public static final Identifier S2C_TELEPORT_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_teleport_response");
+
     // ExpandArea功能相关的包ID
     public static final Identifier EXPAND_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "expand_area");
     public static final Identifier EXPAND_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "expand_area_response");

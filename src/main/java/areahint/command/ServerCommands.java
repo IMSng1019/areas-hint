@@ -310,6 +310,29 @@ public class ServerCommands {
                 .then(literal("cancel")
                     .executes(RenameAreaCommand::executeRenameCancel)))
                             
+            // tcp 命令（中心传送）
+            .then(literal("tcp")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.TELEPORT, 0))
+                .executes(context -> executeTeleportStart(context, "tcp"))
+                .then(argument("areaName", StringArgumentType.greedyString())
+                    .suggests(TELEPORT_AREA_SUGGESTIONS)
+                    .executes(context -> executeTeleportSelect(context, "tcp", StringArgumentType.getString(context, "areaName")))))
+
+            // udp 命令（随机传送）
+            .then(literal("udp")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.TELEPORT, 0))
+                .executes(context -> executeTeleportStart(context, "udp"))
+                .then(argument("areaName", StringArgumentType.greedyString())
+                    .suggests(TELEPORT_AREA_SUGGESTIONS)
+                    .executes(context -> executeTeleportSelect(context, "udp", StringArgumentType.getString(context, "areaName")))))
+
+            // settp 命令（设置传送命令头）
+            .then(literal("settp")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SETTP, 0))
+                .executes(ServerCommands::executeSetTpStart)
+                .then(argument("format", StringArgumentType.greedyString())
+                    .executes(context -> executeSetTpSet(context, StringArgumentType.getString(context, "format")))))
+
             // sethigh 命令
             .then(literal("sethigh")
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SETHIGH, 0))
@@ -408,6 +431,9 @@ public class ServerCommands {
         source.sendMessage(Text.translatable("help.command.recolor"));
         source.sendMessage(Text.translatable("help.command.rename"));
         source.sendMessage(Text.translatable("help.command.sethigh"));
+        source.sendMessage(Text.literal("/areahint tcp [域名] - 中心传送到当前维度域名"));
+        source.sendMessage(Text.literal("/areahint udp [域名] - 随机传送到当前维度域名"));
+        source.sendMessage(Text.literal("/areahint settp [命令头] - 设置传送命令头"));
         source.sendMessage(Text.translatable("help.command.replacebutton"));
         source.sendMessage(Text.translatable("help.command.check"));
         source.sendMessage(Text.translatable("help.command.dimensionalityname"));
@@ -536,6 +562,57 @@ public class ServerCommands {
         }
     }
     
+    private static int executeTeleportStart(CommandContext<ServerCommandSource> context, String mode) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.translatable("command.error.general_9"));
+            return 0;
+        }
+        sendClientCommand(source, "areahint:" + mode + "_start");
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int executeTeleportSelect(CommandContext<ServerCommandSource> context, String mode, String areaName) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.translatable("command.error.general_9"));
+            return 0;
+        }
+        sendClientCommand(source, "areahint:" + mode + "_select:" + stripQuotes(areaName));
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int executeSetTpStart(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.translatable("command.error.general_9"));
+            return 0;
+        }
+        sendClientCommand(source, "areahint:settp_start");
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int executeSetTpSet(CommandContext<ServerCommandSource> context, String format) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.translatable("command.error.general_9"));
+            return 0;
+        }
+        sendClientCommand(source, "areahint:settp_set:" + stripQuotes(format));
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static String stripQuotes(String value) {
+        if (value == null) {
+            return "";
+        }
+        String trimmed = value.trim();
+        if (trimmed.startsWith("\"") && trimmed.endsWith("\"") && trimmed.length() > 1) {
+            return trimmed.substring(1, trimmed.length() - 1);
+        }
+        return trimmed;
+    }
+
     /**
      * 从命令源获取当前维度
      * @param source 命令源
@@ -1711,6 +1788,41 @@ public class ServerCommands {
             Areashint.LOGGER.error("获取可设置高度的域名列表时发生错误", e);
             return List.of();
         }
+    }
+
+    private static List<String> getTeleportAreaNames(ServerCommandSource source, String dimension) {
+        try {
+            String fileName = Packets.getFileNameForDimension(dimension);
+            if (fileName == null) {
+                return List.of();
+            }
+
+            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+            if (!areaFile.toFile().exists()) {
+                return List.of();
+            }
+
+            return FileManager.readAreaData(areaFile).stream()
+                .filter(AreaData::isValid)
+                .map(AreaData::getName)
+                .toList();
+        } catch (Exception e) {
+            Areashint.LOGGER.error("获取可传送域名列表时发生错误", e);
+            return List.of();
+        }
+    }
+
+    private static final SuggestionProvider<ServerCommandSource> TELEPORT_AREA_SUGGESTIONS =
+        (context, builder) -> suggestAreaNames(builder, getTeleportAreaNames(context.getSource(), getDimensionFromSource(context.getSource())));
+
+    private static CompletableFuture<Suggestions> suggestAreaNames(SuggestionsBuilder builder, List<String> areaNames) {
+        String remaining = builder.getRemaining().toLowerCase();
+        for (String areaName : areaNames) {
+            if (areaName.toLowerCase().startsWith(remaining)) {
+                builder.suggest(areaName);
+            }
+        }
+        return builder.buildFuture();
     }
 
     /**
