@@ -64,6 +64,14 @@ public class BoundVizManager {
     }
 
     /**
+     * 从已保存的客户端配置同步运行时状态，不重复写配置文件。
+     */
+    public void applyConfigEnabled(boolean enabled) {
+        this.enabled = enabled;
+        reload();
+    }
+
+    /**
      * 获取边界可视化状态
      */
     public boolean isEnabled() {

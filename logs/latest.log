@@ -1,0 +1,3 @@
+[23:13:29] [Test worker/WARN]: 配置项 'boundVizEnabled' 缺失，已补全为默认值: false
+[23:13:29] [Test worker/INFO]: 检测到配置不完整，正在保存补全后的配置...
+[23:13:29] [Test worker/INFO]: 已创建默认配置文件: C:\Users\郁小悟~1\AppData\Local\Temp\junit3881736506183283632\config.json

@@ -92,6 +92,25 @@ public class ConfigData {
     }
     
     /**
+     * 复制当前配置，用于界面草稿等一次性提交场景。
+     * @return 独立的配置副本
+     */
+    public ConfigData copy() {
+        ConfigData copy = new ConfigData();
+        copy.setFrequency(this.frequency);
+        copy.setSubtitleRender(normalizeRenderMode(this.subtitleRender));
+        copy.setSubtitleStyle(normalizeStyleMode(this.subtitleStyle));
+        copy.setEnabled(this.enabled);
+        copy.setRecordKey(this.recordKey);
+        copy.setSubtitleSize(normalizeSize(this.subtitleSize));
+        copy.setBoundVizEnabled(this.boundVizEnabled);
+        copy.setLanguage(this.language != null && !this.language.isEmpty() ? this.language : "zh_cn");
+        copy.setLanguageLocked(this.languageLocked);
+        copy.setTeleportFormat(this.teleportFormat);
+        return copy;
+    }
+
+    /**
      * 获取检测频率
      * @return 检测频率
      */

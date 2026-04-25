@@ -1,6 +1,7 @@
 package areahint;
 
 import areahint.config.ClientConfig;
+import areahint.data.ConfigData;
 import areahint.detection.AreaDetector;
 import areahint.detection.AsyncAreaDetector;
 import areahint.network.ClientNetworking;
@@ -604,6 +605,33 @@ public class AreashintClient implements ClientModInitializer {
 	}
 	
 	/**
+	 * 从配置界面一次性应用客户端配置，并刷新依赖配置的客户端系统。
+	 * @param draft 草稿配置
+	 * @param recordKeyChanged 记录按键是否变化
+	 */
+	public static void applyClientConfig(ConfigData draft, boolean recordKeyChanged) {
+		LOGGER.info("应用客户端配置界面修改...");
+		ClientConfig.apply(draft);
+		ClientConfig.correctSubtitleRenderForEnvironment();
+		I18nManager.loadLanguage(ClientConfig.getLanguage());
+		areahint.network.ClientNetworking.sendLanguageToServer();
+
+		if (recordKeyChanged) {
+			areahint.keyhandler.UnifiedKeyHandler.reregisterKey();
+		}
+
+		if (renderManager != null) {
+			renderManager.updateRenderMode();
+			LOGGER.info("渲染管理器已更新");
+		}
+
+		areahint.boundviz.BoundVizManager.getInstance().applyConfigEnabled(ClientConfig.isBoundVizEnabled());
+		LOGGER.info("边界可视化状态和数据已重新加载");
+
+		reloadCurrentDimensionAreaData();
+	}
+
+	/**
 	 * 重新加载配置和区域数据
 	 */
 	public static void reload() {
@@ -624,26 +652,32 @@ public class AreashintClient implements ClientModInitializer {
 		areahint.boundviz.BoundVizManager.getInstance().reload();
 		LOGGER.info("边界可视化数据已重新加载");
 
-		if (currentDimension != null) {
-			String dimensionFileName = getDimensionFileName(currentDimension);
-			LOGGER.info("重新加载维度{}的区域文件：{}", currentDimension.toString(), dimensionFileName);
+		reloadCurrentDimensionAreaData();
+	}
 
-			// 获取文件路径并检查是否存在
-			Path areaFile = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(dimensionFileName);
-			LOGGER.info("[调试] 重新加载区域文件路径: {}", areaFile.toAbsolutePath());
-			if (java.nio.file.Files.exists(areaFile)) {
-				try {
-					String content = java.nio.file.Files.readString(areaFile);
-					LOGGER.info("[调试] 区域文件大小: {} 字节", content.length());
-				} catch (Exception e) {
-					LOGGER.error("读取区域文件失败", e);
-				}
-			} else {
-				LOGGER.warn("[调试] 区域文件不存在: {}", areaFile.toAbsolutePath());
-			}
-
-			areaDetector.loadAreaData(dimensionFileName);
+	private static void reloadCurrentDimensionAreaData() {
+		if (currentDimension == null || areaDetector == null) {
+			return;
 		}
+
+		String dimensionFileName = getDimensionFileName(currentDimension);
+		LOGGER.info("重新加载维度{}的区域文件：{}", currentDimension.toString(), dimensionFileName);
+
+		// 获取文件路径并检查是否存在
+		Path areaFile = areahint.world.ClientWorldFolderManager.getWorldDimensionFile(dimensionFileName);
+		LOGGER.info("[调试] 重新加载区域文件路径: {}", areaFile.toAbsolutePath());
+		if (java.nio.file.Files.exists(areaFile)) {
+			try {
+				String content = java.nio.file.Files.readString(areaFile);
+				LOGGER.info("[调试] 区域文件大小: {} 字节", content.length());
+			} catch (Exception e) {
+				LOGGER.error("读取区域文件失败", e);
+			}
+		} else {
+			LOGGER.warn("[调试] 区域文件不存在: {}", areaFile.toAbsolutePath());
+		}
+
+		areaDetector.loadAreaData(dimensionFileName);
 	}
 	
 	/**

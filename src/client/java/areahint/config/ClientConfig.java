@@ -76,6 +76,27 @@ public class ClientConfig {
     }
     
     /**
+     * 获取当前配置副本。
+     * @return 当前配置的独立副本
+     */
+    public static ConfigData copy() {
+        return config.copy();
+    }
+
+    /**
+     * 一次性应用新的客户端配置。
+     * @param newConfig 新配置
+     */
+    public static void apply(ConfigData newConfig) {
+        if (newConfig == null) {
+            return;
+        }
+
+        config = newConfig.copy();
+        save();
+    }
+
+    /**
      * 保存配置
      */
     public static void save() {

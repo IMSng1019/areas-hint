@@ -134,6 +134,9 @@ public class FileManager {
                     "  // SubtitleSize: 字幕大小\n" +
                     "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
                     "  \"subtitleSize\": \"" + defaultConfig.getSubtitleSize() + "\",\n\n" +
+                    "  // BoundVizEnabled: 边界可视化开关\n" +
+                    "  // true: 显示域名边界, false: 隐藏域名边界\n" +
+                    "  \"boundVizEnabled\": " + defaultConfig.isBoundVizEnabled() + ",\n\n" +
                     "  // Language: 语言设置\n" +
                     "  // 对应 areas-hint/lang/ 文件夹中的语言文件名（不含.json后缀）\n" +
                     "  \"language\": \"" + defaultConfig.getLanguage() + "\",\n\n" +
@@ -256,6 +259,13 @@ public class FileManager {
                 Areashint.LOGGER.warn("配置项 'recordKey' 无效或缺失，已补全为默认值: " + defaultConfig.getRecordKey());
             }
 
+            // 检查并补全 boundVizEnabled
+            if (!configJson.has("boundVizEnabled")) {
+                config.setBoundVizEnabled(defaultConfig.isBoundVizEnabled());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'boundVizEnabled' 缺失，已补全为默认值: " + defaultConfig.isBoundVizEnabled());
+            }
+
             // 检查并补全 language
             if (config.getLanguage() == null || config.getLanguage().isEmpty()) {
                 config.setLanguage(defaultConfig.getLanguage());
@@ -323,6 +333,9 @@ public class FileManager {
                     "  // SubtitleSize: 字幕大小\n" +
                     "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
                     "  \"subtitleSize\": \"" + config.getSubtitleSize() + "\",\n\n" +
+                    "  // BoundVizEnabled: 边界可视化开关\n" +
+                    "  // true: 显示域名边界, false: 隐藏域名边界\n" +
+                    "  \"boundVizEnabled\": " + config.isBoundVizEnabled() + ",\n\n" +
                     "  // Language: 语言设置\n" +
                     "  // 对应 areas-hint/lang/ 文件夹中的语言文件名（不含.json后缀）\n" +
                     "  \"language\": \"" + (config.getLanguage() != null ? config.getLanguage() : "zh_cn") + "\",\n\n" +
