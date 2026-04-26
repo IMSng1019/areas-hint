@@ -106,6 +106,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化DeleteHint功能
 		initDeleteHint();
 
+		// 初始化Signature功能
+		initSignature();
+
 		// 初始化DivideArea功能
 		initDivideArea();
 
@@ -205,6 +208,19 @@ public class AreashintClient implements ClientModInitializer {
 			LOGGER.info("DeleteHint功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化DeleteHint功能时发生错误", e);
+		}
+	}
+
+	/**
+	 * 初始化Signature功能
+	 */
+	private void initSignature() {
+		try {
+			areahint.signature.SignatureManager.init();
+			areahint.signature.SignatureClientNetworking.registerClientReceivers();
+			LOGGER.info("Signature功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化Signature功能时发生错误", e);
 		}
 	}
 

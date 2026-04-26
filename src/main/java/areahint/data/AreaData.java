@@ -18,6 +18,7 @@ public class AreaData {
     @SerializedName("base-name")
     private String baseName;               // 基础名称（上级区域）
     private String signature;              // 域名创建者签名
+    private List<String> signatures = new ArrayList<>(); // 域名创建者签名列表
     private String color;                  // 域名颜色（十六进制格式）
     private String surfacename;            // 联合域名（表面域名）
 
@@ -125,6 +126,72 @@ public class AreaData {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public List<String> getSignatures() {
+        signatures = cleanSignatures(signatures);
+        return signatures;
+    }
+
+    public void setSignatures(List<String> signatures) {
+        this.signatures = cleanSignatures(signatures);
+    }
+
+    public List<String> getAllSignatures() {
+        List<String> allSignatures = new ArrayList<>();
+        String cleanedSignature = cleanSignature(signature);
+        if (cleanedSignature != null) {
+            allSignatures.add(cleanedSignature);
+        }
+        for (String playerName : cleanSignatures(getSignatures())) {
+            if (!allSignatures.contains(playerName)) {
+                allSignatures.add(playerName);
+            }
+        }
+        return allSignatures;
+    }
+
+    public boolean hasSignature(String playerName) {
+        String cleanedPlayerName = cleanSignature(playerName);
+        return cleanedPlayerName != null && getAllSignatures().contains(cleanedPlayerName);
+    }
+
+    public void addSignature(String playerName) {
+        String cleanedPlayerName = cleanSignature(playerName);
+        if (cleanedPlayerName == null || hasSignature(cleanedPlayerName)) {
+            return;
+        }
+        getSignatures().add(cleanedPlayerName);
+    }
+
+    public void removeSignature(String playerName) {
+        String cleanedPlayerName = cleanSignature(playerName);
+        if (cleanedPlayerName == null) {
+            return;
+        }
+        getSignatures().removeIf(signature -> cleanedPlayerName.equals(cleanSignature(signature)));
+    }
+
+    private static List<String> cleanSignatures(List<String> signatures) {
+        List<String> cleanedSignatures = new ArrayList<>();
+        if (signatures == null) {
+            return cleanedSignatures;
+        }
+        for (String signature : signatures) {
+            String cleanedSignature = cleanSignature(signature);
+            if (cleanedSignature != null && !cleanedSignatures.contains(cleanedSignature)) {
+                cleanedSignatures.add(cleanedSignature);
+            }
+        }
+        return cleanedSignatures;
+    }
+
+    private static String cleanSignature(String signature) {
+        if (signature == null) {
+            return null;
+        }
+        String cleanedSignature = signature.trim();
+        return cleanedSignature.isEmpty() ? null : cleanedSignature;
     }
 
     public String getColor() {

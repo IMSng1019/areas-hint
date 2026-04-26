@@ -89,13 +89,13 @@ public class ExpandAreaManager {
         // 检查是否为域名的basename引用玩家
         if (area.getBaseName() != null) {
             AreaData baseArea = findAreaByName(area.getBaseName());
-            if (baseArea != null && playerName.equals(baseArea.getSignature())) {
+            if (baseArea != null && baseArea.hasSignature(playerName)) {
                 return true;
             }
         }
-        
-        // 检查是否为域名创建者
-        return playerName.equals(area.getSignature());
+
+        // 检查是否为域名签名者
+        return area.hasSignature(playerName);
     }
     
     /**
@@ -173,15 +173,15 @@ public class ExpandAreaManager {
                 result.add(area);
                 System.out.println("DEBUG: 管理员权限，添加域名: " + area.getName());
             } else {
-                // 普通玩家只能修改自己创建的或basename引用自己的域名
-                if (playerName.equals(area.getSignature())) {
+                // 普通玩家只能修改自己签名的或basename引用自己签名域名的域名
+                if (area.hasSignature(playerName)) {
                     result.add(area);
-                    System.out.println("DEBUG: 玩家创建的域名，添加: " + area.getName());
+                    System.out.println("DEBUG: 玩家签名的域名，添加: " + area.getName());
                 } else if (area.getBaseName() != null) {
                     AreaData baseArea = findAreaByName(area.getBaseName());
-                    if (baseArea != null && playerName.equals(baseArea.getSignature())) {
+                    if (baseArea != null && baseArea.hasSignature(playerName)) {
                         result.add(area);
-                        System.out.println("DEBUG: 基于玩家域名的扩展，添加: " + area.getName());
+                        System.out.println("DEBUG: 基于玩家签名域名的扩展，添加: " + area.getName());
                     }
                 }
             }

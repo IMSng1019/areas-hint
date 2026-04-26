@@ -6,6 +6,7 @@ import areahint.map.BlueMapCompat;
 import areahint.i18n.ServerI18nManager;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
+import areahint.util.AreaPermissionUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -412,15 +413,9 @@ public class ServerNetworking {
 
             // 筛选可删除的域名
             for (areahint.data.AreaData area : allAreas) {
-                String signature = area.getSignature();
-
                 // 检查权限
-                boolean canDelete = PermissionService.hasNodeOr(player, PermissionNodes.DELETE, () -> {
-                    if (signature == null) {
-                        return player.hasPermissionLevel(2);
-                    }
-                    return signature.equals(playerName) || player.hasPermissionLevel(2);
-                });
+                boolean canDelete = PermissionService.hasNodeOr(player, PermissionNodes.DELETE,
+                    () -> player.hasPermissionLevel(2) || AreaPermissionUtil.isSignedBy(area, playerName));
 
                 if (canDelete) {
                     // 检查是否有次级域名引用此域名
@@ -522,13 +517,10 @@ public class ServerNetworking {
             Areashint.LOGGER.info(ServerI18nManager.translate("message.message.area_11") + areaName + ServerI18nManager.translate("message.message.general_3") + targetArea.getSignature());
 
             // 检查签名权限
-            String signature = targetArea.getSignature();
-            boolean canDelete = PermissionService.hasNodeOr(player, PermissionNodes.DELETE, () -> {
-                if (signature == null) {
-                    return player.hasPermissionLevel(2);
-                }
-                return signature.equals(playerName) || player.hasPermissionLevel(2);
-            });
+            final areahint.data.AreaData finalTargetArea = targetArea;
+            String signature = finalTargetArea.getSignature();
+            boolean canDelete = PermissionService.hasNodeOr(player, PermissionNodes.DELETE,
+                () -> player.hasPermissionLevel(2) || AreaPermissionUtil.isSignedBy(finalTargetArea, playerName));
             if (!canDelete) {
                 if (signature == null) {
                     Areashint.LOGGER.warn(ServerI18nManager.translate("message.message.general_28") + playerName + ServerI18nManager.translate("message.message.area.delete") + ServerI18nManager.translate("message.message.area.delete_4"));

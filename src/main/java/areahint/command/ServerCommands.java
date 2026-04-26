@@ -11,6 +11,7 @@ import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
+import areahint.util.AreaPermissionUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -138,6 +139,40 @@ public class ServerCommands {
                     .executes(ServerCommands::executeDeleteCancel))
             )
             
+            // addsignature 命令 (交互式添加签名)
+            .then(literal("addsignature")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADDSIGNATURE, 0))
+                .executes(ServerCommands::executeAddSignatureStart)
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeAddSignatureSelect(context,
+                            StringArgumentType.getString(context, "areaName")))))
+                .then(literal("name")
+                    .then(argument("playerName", StringArgumentType.greedyString())
+                        .executes(context -> executeAddSignatureName(context,
+                            StringArgumentType.getString(context, "playerName")))))
+                .then(literal("confirm")
+                    .executes(ServerCommands::executeAddSignatureConfirm))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeAddSignatureCancel)))
+
+            // deletesignature 命令 (交互式删除签名)
+            .then(literal("deletesignature")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DELETESIGNATURE, 0))
+                .executes(ServerCommands::executeDeleteSignatureStart)
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeDeleteSignatureSelect(context,
+                            StringArgumentType.getString(context, "areaName")))))
+                .then(literal("name")
+                    .then(argument("playerName", StringArgumentType.greedyString())
+                        .executes(context -> executeDeleteSignatureName(context,
+                            StringArgumentType.getString(context, "playerName")))))
+                .then(literal("confirm")
+                    .executes(ServerCommands::executeDeleteSignatureConfirm))
+                .then(literal("cancel")
+                    .executes(ServerCommands::executeDeleteSignatureCancel)))
+
             // frequency 命令
             .then(literal("frequency")
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.FREQUENCY, 0))
@@ -613,6 +648,56 @@ public class ServerCommands {
         return trimmed;
     }
 
+    private static int forwardSignatureCommand(CommandContext<ServerCommandSource> context, String command) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.translatable("command.error.general_9"));
+            return 0;
+        }
+        sendClientCommand(source, command);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int executeAddSignatureStart(CommandContext<ServerCommandSource> context) {
+        return forwardSignatureCommand(context, "areahint:addsignature_start");
+    }
+
+    private static int executeAddSignatureSelect(CommandContext<ServerCommandSource> context, String areaName) {
+        return forwardSignatureCommand(context, "areahint:addsignature_select:" + areaName);
+    }
+
+    private static int executeAddSignatureName(CommandContext<ServerCommandSource> context, String playerName) {
+        return forwardSignatureCommand(context, "areahint:addsignature_name:" + playerName);
+    }
+
+    private static int executeAddSignatureConfirm(CommandContext<ServerCommandSource> context) {
+        return forwardSignatureCommand(context, "areahint:addsignature_confirm");
+    }
+
+    private static int executeAddSignatureCancel(CommandContext<ServerCommandSource> context) {
+        return forwardSignatureCommand(context, "areahint:addsignature_cancel");
+    }
+
+    private static int executeDeleteSignatureStart(CommandContext<ServerCommandSource> context) {
+        return forwardSignatureCommand(context, "areahint:deletesignature_start");
+    }
+
+    private static int executeDeleteSignatureSelect(CommandContext<ServerCommandSource> context, String areaName) {
+        return forwardSignatureCommand(context, "areahint:deletesignature_select:" + areaName);
+    }
+
+    private static int executeDeleteSignatureName(CommandContext<ServerCommandSource> context, String playerName) {
+        return forwardSignatureCommand(context, "areahint:deletesignature_name:" + playerName);
+    }
+
+    private static int executeDeleteSignatureConfirm(CommandContext<ServerCommandSource> context) {
+        return forwardSignatureCommand(context, "areahint:deletesignature_confirm");
+    }
+
+    private static int executeDeleteSignatureCancel(CommandContext<ServerCommandSource> context) {
+        return forwardSignatureCommand(context, "areahint:deletesignature_cancel");
+    }
+
     /**
      * 从命令源获取当前维度
      * @param source 命令源
@@ -950,13 +1035,8 @@ public class ServerCommands {
     }
     
     private static boolean canDeleteArea(ServerPlayerEntity player, String playerName, AreaData area) {
-        return PermissionService.hasNodeOr(player, PermissionNodes.DELETE, () -> {
-            String signature = area.getSignature();
-            if (signature == null) {
-                return player.hasPermissionLevel(2);
-            }
-            return signature.equals(playerName) || player.hasPermissionLevel(2);
-        });
+        return PermissionService.hasNodeOr(player, PermissionNodes.DELETE,
+            () -> player.hasPermissionLevel(2) || AreaPermissionUtil.isSignedBy(area, playerName));
     }
 
     private static boolean canSetHighArea(ServerPlayerEntity player, String playerName, AreaData area, List<AreaData> areas) {
@@ -964,13 +1044,12 @@ public class ServerCommands {
             if (player.hasPermissionLevel(2)) {
                 return true;
             }
-            if (area.getSignature() != null && area.getSignature().equals(playerName)) {
+            if (AreaPermissionUtil.isSignedBy(area, playerName)) {
                 return true;
             }
             for (AreaData otherArea : areas) {
                 if (area.getName().equals(otherArea.getBaseName())
-                    && otherArea.getSignature() != null
-                    && otherArea.getSignature().equals(playerName)) {
+                    && AreaPermissionUtil.isSignedBy(otherArea, playerName)) {
                     return true;
                 }
             }
@@ -979,22 +1058,8 @@ public class ServerCommands {
     }
 
     private static boolean canExpandArea(ServerPlayerEntity player, String playerName, AreaData area, List<AreaData> areas) {
-        return PermissionService.hasNodeOr(player, PermissionNodes.EXPANDAREA, () -> {
-            if (player.hasPermissionLevel(2)) {
-                return true;
-            }
-            if (playerName.equals(area.getSignature())) {
-                return true;
-            }
-            if (area.getBaseName() != null) {
-                AreaData baseArea = areas.stream()
-                    .filter(other -> area.getBaseName().equals(other.getName()))
-                    .findFirst()
-                    .orElse(null);
-                return baseArea != null && playerName.equals(baseArea.getSignature());
-            }
-            return false;
-        });
+        return PermissionService.hasNodeOr(player, PermissionNodes.EXPANDAREA,
+            () -> AreaPermissionUtil.canModifyArea(player, area, areas));
     }
 
     private static boolean canShrinkArea(ServerPlayerEntity player, String playerName, AreaData area, List<AreaData> areas) {
@@ -1006,11 +1071,8 @@ public class ServerCommands {
             if (baseName == null) {
                 return false;
             }
-            AreaData baseArea = areas.stream()
-                .filter(other -> baseName.equals(other.getName()))
-                .findFirst()
-                .orElse(null);
-            return baseArea != null && playerName.equals(baseArea.getSignature());
+            AreaData baseArea = AreaPermissionUtil.findByName(areas, baseName);
+            return AreaPermissionUtil.isSignedBy(baseArea, playerName);
         });
     }
 

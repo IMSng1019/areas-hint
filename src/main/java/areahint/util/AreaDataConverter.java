@@ -28,6 +28,13 @@ public class AreaDataConverter {
         jsonObject.addProperty("level", areaData.getLevel());
         jsonObject.addProperty("base-name", areaData.getBaseName());
         jsonObject.addProperty("signature", areaData.getSignature());
+        if (!areaData.getSignatures().isEmpty()) {
+            JsonArray signaturesArray = new JsonArray();
+            for (String signature : areaData.getSignatures()) {
+                signaturesArray.add(signature);
+            }
+            jsonObject.add("signatures", signaturesArray);
+        }
         jsonObject.addProperty("color", areaData.getColor());
         jsonObject.addProperty("surfacename", areaData.getSurfacename());
         
@@ -94,6 +101,16 @@ public class AreaDataConverter {
         }
         if (jsonObject.has("signature") && !jsonObject.get("signature").isJsonNull()) {
             areaData.setSignature(jsonObject.get("signature").getAsString());
+        }
+        if (jsonObject.has("signatures") && jsonObject.get("signatures").isJsonArray()) {
+            JsonArray signaturesArray = jsonObject.getAsJsonArray("signatures");
+            ArrayList<String> signatures = new ArrayList<>();
+            for (int i = 0; i < signaturesArray.size(); i++) {
+                if (!signaturesArray.get(i).isJsonNull() && signaturesArray.get(i).isJsonPrimitive()) {
+                    signatures.add(signaturesArray.get(i).getAsString());
+                }
+            }
+            areaData.setSignatures(signatures);
         }
         if (jsonObject.has("color") && !jsonObject.get("color").isJsonNull()) {
             areaData.setColor(jsonObject.get("color").getAsString());

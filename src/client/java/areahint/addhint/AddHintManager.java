@@ -242,11 +242,11 @@ public class AddHintManager {
         for (AreaData area : allAreas) {
             if (isAdmin) {
                 result.add(area);
-            } else if (playerName.equals(area.getSignature())) {
+            } else if (area.hasSignature(playerName)) {
                 result.add(area);
             } else if (area.getBaseName() != null) {
                 AreaData baseArea = findAreaByName(area.getBaseName(), allAreas);
-                if (baseArea != null && playerName.equals(baseArea.getSignature())) {
+                if (baseArea != null && baseArea.hasSignature(playerName)) {
                     result.add(area);
                 }
             }

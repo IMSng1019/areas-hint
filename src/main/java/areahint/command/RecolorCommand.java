@@ -11,6 +11,7 @@ import areahint.permission.PermissionService;
 import areahint.network.TranslatableMessage.Part;
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
+import areahint.util.AreaPermissionUtil;
 import areahint.util.ColorUtil;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -230,7 +231,7 @@ public class RecolorCommand {
     
     private static boolean canEditArea(ServerPlayerEntity player, String playerName, AreaData area) {
         return PermissionService.hasNodeOr(player, PermissionNodes.RECOLOR,
-            () -> player.hasPermissionLevel(2) || playerName.equals(area.getSignature()));
+            () -> player.hasPermissionLevel(2) || AreaPermissionUtil.isSignedBy(area, playerName));
     }
 
     /**

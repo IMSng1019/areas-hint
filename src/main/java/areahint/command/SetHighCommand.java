@@ -8,6 +8,7 @@ import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
+import areahint.util.AreaPermissionUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.ServerCommandSource;
@@ -255,14 +256,13 @@ public class SetHighCommand {
                 return true;
             }
 
-            if (area.getSignature() != null && area.getSignature().equals(playerName)) {
+            if (AreaPermissionUtil.isSignedBy(area, playerName)) {
                 return true;
             }
 
             for (AreaData otherArea : allAreas) {
                 if (area.getName().equals(otherArea.getBaseName())
-                    && otherArea.getSignature() != null
-                    && otherArea.getSignature().equals(playerName)) {
+                    && AreaPermissionUtil.isSignedBy(otherArea, playerName)) {
                     return true;
                 }
             }

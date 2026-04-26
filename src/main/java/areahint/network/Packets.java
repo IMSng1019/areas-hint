@@ -74,6 +74,10 @@ public class Packets {
     public static final Identifier DELETEHINT_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "deletehint_area");
     public static final Identifier DELETEHINT_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "deletehint_area_response");
 
+    // Signature功能相关的包ID
+    public static final Identifier SIGNATURE_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "signature_area");
+    public static final Identifier SIGNATURE_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "signature_area_response");
+
     // DivideArea功能相关的包ID
     public static final Identifier DIVIDE_AREA_CHANNEL = new Identifier(Areashint.MOD_ID, "divide_area");
     public static final Identifier DIVIDE_AREA_RESPONSE_CHANNEL = new Identifier(Areashint.MOD_ID, "divide_area_response");

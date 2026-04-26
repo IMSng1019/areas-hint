@@ -9,6 +9,7 @@ import areahint.network.TranslatableMessage.Part;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
 import areahint.util.AreaDataConverter;
+import areahint.util.AreaPermissionUtil;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -69,22 +70,8 @@ public class DivideAreaServerNetworking {
 
     private static boolean validatePermission(ServerPlayerEntity player, String areaName, String dimType) {
         return PermissionService.hasNodeOr(player, PermissionNodes.DIVIDEAREA, () -> {
-            if (player.hasPermissionLevel(2)) {
-                return true;
-            }
-            String playerName = player.getGameProfile().getName();
-            AreaData area = findArea(areaName, dimType);
-            if (area == null) {
-                return false;
-            }
-            if (playerName.equals(area.getSignature())) {
-                return true;
-            }
-            if (area.getBaseName() != null) {
-                AreaData base = findArea(area.getBaseName(), dimType);
-                return base != null && playerName.equals(base.getSignature());
-            }
-            return false;
+            List<AreaData> areas = readAreas(dimType);
+            return AreaPermissionUtil.canModifyAreaName(player, areaName, areas);
         });
     }
 
@@ -104,16 +91,12 @@ public class DivideAreaServerNetworking {
         }
     }
 
-    private static AreaData findArea(String name, String dimType) {
+    private static List<AreaData> readAreas(String dimType) {
         try {
             String fileName = Packets.getFileNameForDimension(dimType);
             if (fileName == null) return null;
             Path path = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-            for (AreaData area : FileManager.readAreaData(path)) {
-                if (area.getName().equals(name)) {
-                    return area;
-                }
-            }
+            return FileManager.readAreaData(path);
         } catch (Exception e) {
             e.printStackTrace();
         }

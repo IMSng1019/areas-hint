@@ -9,6 +9,7 @@ import areahint.network.TranslatableMessage.Part;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
 import areahint.util.AreaDataConverter;
+import areahint.util.AreaPermissionUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -65,17 +66,20 @@ public class DeleteHintServerNetworking {
                 return;
             }
 
-            // 验证权限
-            String playerDimType = convertDimensionIdToType(
-                player.getWorld().getRegistryKey().getValue().toString());
-            if (!validatePermission(player, updatedArea, playerDimType)) {
-                sendResponse(player, false, key("addhint.message.area.modify.permission"));
+            // 读取目标维度中的已存域名，并基于已存数据验证权限
+            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+            List<AreaData> areas = FileManager.readAreaData(areaFile);
+            AreaData existingArea = AreaPermissionUtil.findByName(areas, updatedArea.getName());
+
+            if (existingArea == null) {
+                sendResponse(player, false, key("addhint.message.area_3"), lit(updatedArea.getName()));
                 return;
             }
 
-            // 读取并更新域名
-            Path areaFile = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-            List<AreaData> areas = FileManager.readAreaData(areaFile);
+            if (!validatePermission(player, existingArea, areas)) {
+                sendResponse(player, false, key("addhint.message.area.modify.permission"));
+                return;
+            }
 
             boolean found = false;
             for (int i = 0; i < areas.size(); i++) {
@@ -105,32 +109,9 @@ public class DeleteHintServerNetworking {
         }
     }
 
-    private static boolean validatePermission(ServerPlayerEntity player, AreaData area, String dimType) {
-        return PermissionService.hasNodeOr(player, PermissionNodes.DELETEHINT, () -> {
-            String playerName = player.getGameProfile().getName();
-            if (player.hasPermissionLevel(2)) {
-                return true;
-            }
-            if (playerName.equals(area.getSignature())) {
-                return true;
-            }
-            if (area.getBaseName() != null && dimType != null) {
-                try {
-                    String fileName = Packets.getFileNameForDimension(dimType);
-                    if (fileName != null) {
-                        Path path = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-                        List<AreaData> areas = FileManager.readAreaData(path);
-                        for (AreaData existing : areas) {
-                            if (existing.getName().equals(area.getBaseName())) {
-                                return playerName.equals(existing.getSignature());
-                            }
-                        }
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-            return false;
-        });
+    private static boolean validatePermission(ServerPlayerEntity player, AreaData existingArea, List<AreaData> areas) {
+        return PermissionService.hasNodeOr(player, PermissionNodes.DELETEHINT,
+            () -> AreaPermissionUtil.canModifyArea(player, existingArea, areas));
     }
 
     private static String convertDimensionIdToType(String dim) {

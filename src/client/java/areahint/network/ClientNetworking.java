@@ -288,6 +288,10 @@ public class ClientNetworking {
                     else if (action.startsWith("rename")) {
                         handleRenameCommand(action);
                     }
+                    // 处理Signature命令，必须在delete泛匹配前处理
+                    else if (action.startsWith("addsignature") || action.startsWith("deletesignature")) {
+                        handleSignatureCommand(action);
+                    }
                     // 处理Delete命令
                     else if (action.startsWith("delete")) {
                         handleDeleteCommand(action);
@@ -642,6 +646,39 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理SetHigh命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    private static void handleSignatureCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理Signature命令: " + action);
+            areahint.signature.SignatureManager manager = areahint.signature.SignatureManager.getInstance();
+
+            if (action.equals("addsignature_start")) {
+                manager.startAdd();
+            } else if (action.startsWith("addsignature_select:")) {
+                manager.selectArea(action.substring("addsignature_select:".length()));
+            } else if (action.startsWith("addsignature_name:")) {
+                manager.setPlayerName(action.substring("addsignature_name:".length()));
+            } else if (action.equals("addsignature_confirm")) {
+                manager.confirm();
+            } else if (action.equals("addsignature_cancel")) {
+                manager.cancel();
+            } else if (action.equals("deletesignature_start")) {
+                manager.startDelete();
+            } else if (action.startsWith("deletesignature_select:")) {
+                manager.selectArea(action.substring("deletesignature_select:".length()));
+            } else if (action.startsWith("deletesignature_name:")) {
+                manager.setPlayerName(action.substring("deletesignature_name:".length()));
+            } else if (action.equals("deletesignature_confirm")) {
+                manager.confirm();
+            } else if (action.equals("deletesignature_cancel")) {
+                manager.cancel();
+            } else {
+                AreashintClient.LOGGER.warn("未知的Signature命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理Signature命令时出错: " + e.getMessage(), e);
         }
     }
 

@@ -213,16 +213,13 @@ public class ShrinkAreaManager {
             return true;
         }
 
-        // 检查是否为域名的basename引用玩家
+        // 收缩权限与服务端保持一致：普通玩家需要签名在上级域名上
         if (area.getBaseName() != null) {
             AreaData baseArea = findAreaByName(area.getBaseName());
-            if (baseArea != null && playerName.equals(baseArea.getSignature())) {
-                return true;
-            }
+            return baseArea != null && baseArea.hasSignature(playerName);
         }
 
-        // 检查是否为域名创建者
-        return playerName.equals(area.getSignature());
+        return false;
     }
 
     /**
@@ -321,14 +318,10 @@ public class ShrinkAreaManager {
                 if (isAdmin) {
                     availableAreas.add(area);
                 } else {
-                    // 如果是普通玩家，只显示自己创建的域名（signature等于玩家名）
-                    // 或者basename引用自己的域名
-                    if (playerName.equals(area.getSignature())) {
-                        availableAreas.add(area);
-                    } else if (area.getBaseName() != null) {
-                        // 查找basename对应的域名，检查其signature是否为当前玩家
+                    // 收缩权限与服务端保持一致：普通玩家只能收缩上级域名由自己签名的域名
+                    if (area.getBaseName() != null) {
                         AreaData baseArea = findAreaByNameInList(area.getBaseName(), allAreas);
-                        if (baseArea != null && playerName.equals(baseArea.getSignature())) {
+                        if (baseArea != null && baseArea.hasSignature(playerName)) {
                             availableAreas.add(area);
                         }
                     }

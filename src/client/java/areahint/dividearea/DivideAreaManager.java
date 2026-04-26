@@ -679,10 +679,10 @@ public class DivideAreaManager {
         List<AreaData> all = loadAllAreas();
         for (AreaData area : all) {
             if (isAdmin) { result.add(area); continue; }
-            if (playerName.equals(area.getSignature())) { result.add(area); continue; }
+            if (area.hasSignature(playerName)) { result.add(area); continue; }
             if (area.getBaseName() != null) {
                 for (AreaData base : all) {
-                    if (base.getName().equals(area.getBaseName()) && playerName.equals(base.getSignature())) {
+                    if (base.getName().equals(area.getBaseName()) && base.hasSignature(playerName)) {
                         result.add(area); break;
                     }
                 }

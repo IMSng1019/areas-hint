@@ -9,6 +9,7 @@ import areahint.network.ServerNetworking;
 import areahint.network.TranslatableMessage;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
+import areahint.util.AreaPermissionUtil;
 import areahint.network.TranslatableMessage.Part;
 import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
@@ -311,7 +312,7 @@ public class RenameAreaCommand {
      */
     private static boolean canRenameArea(ServerPlayerEntity player, AreaData area, String playerName) {
         return PermissionService.hasNodeOr(player, PermissionNodes.RENAME,
-            () -> player.hasPermissionLevel(2) || (area.getSignature() != null && area.getSignature().equals(playerName)));
+            () -> player.hasPermissionLevel(2) || AreaPermissionUtil.isSignedBy(area, playerName));
     }
 
     /**

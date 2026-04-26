@@ -23,6 +23,8 @@ public final class PermissionNodes {
     public static final String SETTP = "areahint.command.settp";
     public static final String ADDHINT = "areahint.command.addhint";
     public static final String DELETEHINT = "areahint.command.deletehint";
+    public static final String ADDSIGNATURE = "areahint.command.addsignature";
+    public static final String DELETESIGNATURE = "areahint.command.deletesignature";
     public static final String FREQUENCY = "areahint.command.frequency";
     public static final String SUBTITLE_RENDER = "areahint.command.subtitlerender";
     public static final String SUBTITLE_STYLE = "areahint.command.subtitlestyle";

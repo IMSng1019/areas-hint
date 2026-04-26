@@ -8,6 +8,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -120,7 +121,19 @@ public class JsonHelper {
                     areaData.setSignature(signatureElement.getAsString());
                 }
             }
-            
+
+            // 反序列化signatures（签名列表）
+            if (jsonObject.has("signatures") && jsonObject.get("signatures").isJsonArray()) {
+                JsonArray signaturesArray = jsonObject.getAsJsonArray("signatures");
+                List<String> signatures = new ArrayList<>();
+                for (JsonElement signatureElement : signaturesArray) {
+                    if (signatureElement != null && !signatureElement.isJsonNull() && signatureElement.isJsonPrimitive()) {
+                        signatures.add(signatureElement.getAsString());
+                    }
+                }
+                areaData.setSignatures(signatures);
+            }
+
             // 反序列化color（颜色）
             if (jsonObject.has("color")) {
                 JsonElement colorElement = jsonObject.get("color");

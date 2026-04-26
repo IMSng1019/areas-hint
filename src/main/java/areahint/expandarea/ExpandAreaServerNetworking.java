@@ -9,6 +9,7 @@ import areahint.network.TranslatableMessage.Part;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
 import areahint.util.AreaDataConverter;
+import areahint.util.AreaPermissionUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -54,12 +55,24 @@ public class ExpandAreaServerNetworking {
             JsonObject areaJson = JsonParser.parseString(areaJsonString).getAsJsonObject();
             AreaData expandedArea = AreaDataConverter.fromJsonObject(areaJson);
 
-            // 获取玩家所在维度
-            String playerDimension = player.getWorld().getRegistryKey().getValue().toString();
-            String playerDimensionType = Packets.convertDimensionPathToType(playerDimension);
+            // 使用客户端指定的目标维度读取已存域名，权限判断只基于服务端已存数据
+            String dimensionType = convertDimensionIdToType(dimension);
+            String fileName = Packets.getFileNameForDimension(dimensionType);
+            if (fileName == null) {
+                sendResponse(player, false, key("expandarea.error.area.save"));
+                return;
+            }
+            Path areaPath = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
+            List<AreaData> existingAreas = FileManager.readAreaData(areaPath);
+            AreaData existingArea = AreaPermissionUtil.findByName(existingAreas, expandedArea.getName());
+            if (existingArea == null) {
+                System.err.println("未找到要扩展的域名: " + expandedArea.getName());
+                sendResponse(player, false, key("expandarea.error.area.save"));
+                return;
+            }
 
-            // 验证权限（只在玩家所在维度查找）
-            if (!validatePermission(player, expandedArea, playerDimensionType)) {
+            // 验证权限
+            if (!validatePermission(player, existingArea, existingAreas)) {
                 sendResponse(player, false, key("expandarea.message.area.expand.permission"));
                 return;
             }
@@ -71,7 +84,7 @@ public class ExpandAreaServerNetworking {
             }
 
             // 保存扩展后的域名
-            if (!saveExpandedArea(expandedArea, dimension)) {
+            if (!saveExpandedArea(expandedArea, areaPath, existingAreas)) {
                 sendResponse(player, false, key("expandarea.error.area.save"));
                 return;
             }
@@ -94,37 +107,14 @@ public class ExpandAreaServerNetworking {
     }
 
     /**
-     * 验证玩家权限
+     * 基于服务端已存域名验证玩家权限
      * @param player 玩家
-     * @param area 域名数据
-     * @param dimensionType 玩家所在维度类型（用于查找basename）
+     * @param existingArea 服务端已存域名数据
+     * @param existingAreas 目标维度的已存域名列表
      */
-    private static boolean validatePermission(ServerPlayerEntity player, AreaData area, String dimensionType) {
-        return PermissionService.hasNodeOr(player, PermissionNodes.EXPANDAREA, () -> {
-            String playerName = player.getGameProfile().getName();
-
-            // 检查是否为管理员
-            if (player.hasPermissionLevel(2)) {
-                return true;
-            }
-
-            // 检查是否为域名创建者
-            if (playerName.equals(area.getSignature())) {
-                return true;
-            }
-
-            // 检查是否为basename引用的玩家（只在玩家所在维度查找）
-            if (area.getBaseName() != null) {
-                try {
-                    AreaData baseArea = findAreaByName(area.getBaseName(), dimensionType);
-                    return baseArea != null && playerName.equals(baseArea.getSignature());
-                } catch (Exception e) {
-                    System.err.println("检查basename权限时发生错误: " + e.getMessage());
-                }
-            }
-
-            return false;
-        });
+    private static boolean validatePermission(ServerPlayerEntity player, AreaData existingArea, List<AreaData> existingAreas) {
+        return PermissionService.hasNodeOr(player, PermissionNodes.EXPANDAREA,
+            () -> AreaPermissionUtil.canModifyArea(player, existingArea, existingAreas));
     }
 
     /**
@@ -140,7 +130,7 @@ public class ExpandAreaServerNetworking {
             return false;
         }
 
-        if (area.getSignature() == null || area.getSignature().trim().isEmpty()) {
+        if (area.getAllSignatures().isEmpty()) {
             return false;
         }
 
@@ -150,23 +140,8 @@ public class ExpandAreaServerNetworking {
     /**
      * 保存扩展后的域名
      */
-    private static boolean saveExpandedArea(AreaData expandedArea, String dimension) {
+    private static boolean saveExpandedArea(AreaData expandedArea, Path areaPath, List<AreaData> existingAreas) {
         try {
-            // 将维度ID转换为Packets期望的维度类型（参考EasyAdd的实现）
-            String dimensionType = convertDimensionIdToType(dimension);
-            String fileName = Packets.getFileNameForDimension(dimensionType);
-
-            if (fileName == null) {
-                System.err.println("无效的维度: " + dimension);
-                return false;
-            }
-
-            // 获取当前区域文件路径
-            Path areaPath = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-
-            // 加载现有域名
-            List<AreaData> existingAreas = FileManager.readAreaData(areaPath);
-
             // 查找并更新现有域名
             boolean found = false;
             for (int i = 0; i < existingAreas.size(); i++) {
@@ -206,45 +181,6 @@ public class ExpandAreaServerNetworking {
             return Packets.DIMENSION_NETHER;
         } else if (dimension.contains("end")) {
             return Packets.DIMENSION_END;
-        }
-        return null;
-    }
-
-    /**
-     * 根据名称查找域名（只在指定维度查找）
-     * @param name 域名名称
-     * @param dimensionType 维度类型（overworld/the_nether/the_end）
-     * @return 找到的域名，如果未找到则返回null
-     */
-    private static AreaData findAreaByName(String name, String dimensionType) {
-        if (dimensionType == null) {
-            System.err.println("维度类型为null，无法查找域名");
-            return null;
-        }
-
-        try {
-            // 根据维度类型获取文件名
-            String fileName = Packets.getFileNameForDimension(dimensionType);
-            if (fileName == null) {
-                System.err.println("无效的维度类型: " + dimensionType);
-                return null;
-            }
-
-            // 获取当前区域文件路径
-            Path areaPath = areahint.world.WorldFolderManager.getWorldDimensionFile(fileName);
-
-            // 读取域名列表
-            List<AreaData> areas = FileManager.readAreaData(areaPath);
-
-            // 查找指定名称的域名
-            for (AreaData area : areas) {
-                if (area.getName().equals(name)) {
-                    return area;
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("查找域名失败: " + e.getMessage());
-            e.printStackTrace();
         }
         return null;
     }
