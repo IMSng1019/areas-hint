@@ -44,6 +44,10 @@ dependencies {
 	compileOnly "net.luckperms:api:5.4"
 	compileOnly "de.bluecolored.bluemap:BlueMapAPI:2.7.2"
 
+	testImplementation platform("org.junit:junit-bom:5.12.2")
+	testImplementation "org.junit.jupiter:junit-jupiter"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
 }
 
 processResources {
@@ -56,6 +60,10 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17
+}
+
+test {
+	useJUnitPlatform()
 }
 
 java {

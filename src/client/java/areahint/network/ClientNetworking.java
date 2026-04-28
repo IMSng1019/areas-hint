@@ -288,6 +288,13 @@ public class ClientNetworking {
                     else if (action.startsWith("rename")) {
                         handleRenameCommand(action);
                     }
+                    // 处理Description命令，必须在delete泛匹配前处理
+                    else if (action.startsWith("adddescription")
+                            || action.startsWith("deletedescription")
+                            || action.startsWith("adddimensionalitydescription")
+                            || action.startsWith("deletedimensionalitydescription")) {
+                        areahint.description.DescriptionManager.getInstance().handleClientCommand(action);
+                    }
                     // 处理Signature命令，必须在delete泛匹配前处理
                     else if (action.startsWith("addsignature") || action.startsWith("deletesignature")) {
                         handleSignatureCommand(action);

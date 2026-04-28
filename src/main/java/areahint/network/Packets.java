@@ -97,6 +97,15 @@ public class Packets {
     // 语言同步包ID
     public static final Identifier C2S_LANGUAGE_SYNC = new Identifier(Areashint.MOD_ID, "c2s_language_sync");
 
+    // Description功能相关的包ID
+    public static final Identifier C2S_DESCRIPTION_QUERY = new Identifier(Areashint.MOD_ID, "c2s_description_query");
+    public static final Identifier S2C_DESCRIPTION_QUERY_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_description_query_response");
+    public static final Identifier C2S_DESCRIPTION_LIST_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_description_list_request");
+    public static final Identifier S2C_DESCRIPTION_AREA_LIST = new Identifier(Areashint.MOD_ID, "s2c_description_area_list");
+    public static final Identifier C2S_DESCRIPTION_WRITE = new Identifier(Areashint.MOD_ID, "c2s_description_write");
+    public static final Identifier C2S_DESCRIPTION_DELETE = new Identifier(Areashint.MOD_ID, "c2s_description_delete");
+    public static final Identifier S2C_DESCRIPTION_MUTATION_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_description_mutation_response");
+
     /**
      * 将维度路径转换为维度类型字符串
      * @param dimensionPath 维度路径
@@ -128,7 +137,7 @@ public class Packets {
         if (dimensionType == null) {
             return null;
         }
-        
+
         switch (dimensionType) {
             case DIMENSION_OVERWORLD:
                 return Areashint.OVERWORLD_FILE;
@@ -140,4 +149,21 @@ public class Packets {
                 return null;
         }
     }
-} 
+
+    public static String getDatabaseFolderForDimension(String dimensionType) {
+        if (dimensionType == null) {
+            return null;
+        }
+
+        switch (dimensionType) {
+            case DIMENSION_OVERWORLD:
+                return DIMENSION_OVERWORLD;
+            case DIMENSION_NETHER:
+                return DIMENSION_NETHER;
+            case DIMENSION_END:
+                return DIMENSION_END;
+            default:
+                return null;
+        }
+    }
+}

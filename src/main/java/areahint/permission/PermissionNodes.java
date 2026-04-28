@@ -23,6 +23,10 @@ public final class PermissionNodes {
     public static final String SETTP = "areahint.command.settp";
     public static final String ADDHINT = "areahint.command.addhint";
     public static final String DELETEHINT = "areahint.command.deletehint";
+    public static final String ADD_DESCRIPTION = "areahint.command.adddescription";
+    public static final String DELETE_DESCRIPTION = "areahint.command.deletedescription";
+    public static final String ADD_DIMENSIONALITY_DESCRIPTION = "areahint.command.adddimensionalitydescription";
+    public static final String DELETE_DIMENSIONALITY_DESCRIPTION = "areahint.command.deletedimensionalitydescription";
     public static final String ADDSIGNATURE = "areahint.command.addsignature";
     public static final String DELETESIGNATURE = "areahint.command.deletesignature";
     public static final String FREQUENCY = "areahint.command.frequency";

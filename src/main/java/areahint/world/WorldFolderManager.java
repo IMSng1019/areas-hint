@@ -2,6 +2,7 @@ package areahint.world;
 
 import areahint.Areashint;
 import areahint.file.FileManager;
+import areahint.network.Packets;
 import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
@@ -89,12 +90,14 @@ public class WorldFolderManager {
         if (Files.notExists(worldFolderPath)) {
             Files.createDirectories(worldFolderPath);
             Areashint.LOGGER.info("已创建世界文件夹: {}", worldFolderPath);
-            
+
             // 创建默认文件
             createDefaultWorldFiles(worldFolderPath);
         } else {
             Areashint.LOGGER.info("世界文件夹已存在: {}", worldFolderPath);
         }
+
+        createDatabaseFolders(worldFolderPath);
         
         // 设置当前世界文件夹
         currentWorldFolder = worldFolderPath;
@@ -189,6 +192,36 @@ public class WorldFolderManager {
             return FileManager.getConfigFolder();
         }
         return currentWorldFolder;
+    }
+
+    /**
+     * 创建数据库文件夹结构
+     * @param worldFolderPath 世界文件夹路径
+     */
+    public static void createDatabaseFolders(Path worldFolderPath) throws IOException {
+        Path databaseFolder = worldFolderPath.resolve("database");
+        Files.createDirectories(databaseFolder);
+        Files.createDirectories(databaseFolder.resolve(Packets.getDatabaseFolderForDimension(Packets.DIMENSION_OVERWORLD)));
+        Files.createDirectories(databaseFolder.resolve(Packets.getDatabaseFolderForDimension(Packets.DIMENSION_NETHER)));
+        Files.createDirectories(databaseFolder.resolve(Packets.getDatabaseFolderForDimension(Packets.DIMENSION_END)));
+    }
+
+    /**
+     * 获取当前世界数据库根目录
+     * @return 数据库根目录路径
+     */
+    public static Path getWorldDatabaseFolder() {
+        return getCurrentWorldFolder().resolve("database");
+    }
+
+    /**
+     * 获取当前世界指定维度的数据库目录
+     * @param dimensionType 维度类型
+     * @return 维度数据库目录路径
+     */
+    public static Path getWorldDimensionDatabaseFolder(String dimensionType) {
+        String folderName = Packets.getDatabaseFolderForDimension(dimensionType);
+        return getWorldDatabaseFolder().resolve(folderName != null ? folderName : dimensionType);
     }
     
     /**

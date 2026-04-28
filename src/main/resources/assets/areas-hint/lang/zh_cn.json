@@ -1504,5 +1504,19 @@
   "server.log.level.3": "三级域名",
   "server.log.level.other": "{0}级域名",
   "command.success.serverlanguage": "服务端语言已设置为: {0}",
-  "help.command.serverlanguage": "§a/areahint serverlanguage <语言代码> §7- 设置服务端日志语言 (仅控制台)"
+  "help.command.serverlanguage": "§a/areahint serverlanguage <语言代码> §7- 设置服务端日志语言 (仅控制台)",
+  "help.command.adddescription": "§a/areahint adddescription §7- 添加普通域名描述",
+  "help.command.deletedescription": "§a/areahint deletedescription §7- 删除普通域名描述",
+  "help.command.adddimensionalitydescription": "§a/areahint adddimensionalitydescription §7- 添加维度域名描述",
+  "help.command.deletedimensionalitydescription": "§a/areahint deletedimensionalitydescription §7- 删除维度域名描述",
+  "key.areahint.description.query": "查询当前域名描述",
+  "category.areahint.general": "Areas Hint",
+  "description.no_description": "对应域名暂无描述",
+  "description.save.success": "描述已保存",
+  "description.delete.success": "描述已删除",
+  "description.no_permission": "你没有权限修改该域名描述",
+  "description.search.prompt": "请输入要搜索的域名名称",
+  "description.delete.confirm": "只删除描述文件，不删除域名",
+  "description.too_long": "描述过长，最多 32767 个字符",
+  "description.filename_conflict": "描述文件名冲突"
 }

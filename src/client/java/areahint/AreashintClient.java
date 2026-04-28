@@ -109,6 +109,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化Signature功能
 		initSignature();
 
+		// 初始化Description功能
+		initDescription();
+
 		// 初始化DivideArea功能
 		initDivideArea();
 
@@ -221,6 +224,19 @@ public class AreashintClient implements ClientModInitializer {
 			LOGGER.info("Signature功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化Signature功能时发生错误", e);
+		}
+	}
+
+	/**
+	 * 初始化Description功能
+	 */
+	private void initDescription() {
+		try {
+			areahint.description.DescriptionClientNetworking.registerClientReceivers();
+			areahint.description.DescriptionKeyHandler.register();
+			LOGGER.info("Description功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化Description功能时发生错误", e);
 		}
 	}
 
@@ -349,8 +365,9 @@ public class AreashintClient implements ClientModInitializer {
 			pendingFirstNameDimId = null;
 			firstNameTimeoutTicks = 0;
 
-			// 重置区域追踪器和异步检测器
+			// 重置区域追踪器、描述状态机和异步检测器
 			areahint.log.AreaChangeTracker.reset();
+			areahint.description.DescriptionManager.getInstance().reset();
 			asyncAreaDetector.reset();
 
 			LOGGER.info("世界文件夹管理器状态已清理");
@@ -391,8 +408,9 @@ public class AreashintClient implements ClientModInitializer {
 
 				// 只有在维度或服务器变化时才重新加载数据和初始化
 				if (dimensionChanged || serverChanged) {
-					// 重置区域追踪器和异步检测器
+					// 重置区域追踪器、描述交互状态和异步检测器
 					areahint.log.AreaChangeTracker.reset();
+					areahint.description.DescriptionManager.getInstance().reset();
 					asyncAreaDetector.reset();
 
 					// 如果服务器变化了，重置状态并重新初始化客户端世界文件夹

@@ -139,6 +139,86 @@ public class ServerCommands {
                     .executes(ServerCommands::executeDeleteCancel))
             )
             
+            // adddescription 命令 (交互式添加域名描述)
+            .then(literal("adddescription")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD_DESCRIPTION, 0))
+                .executes(ServerCommands::executeAddDescriptionStart)
+                .then(literal("search")
+                    .then(argument("query", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "adddescription_search:",
+                            StringArgumentType.getString(context, "query")))))
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "adddescription_select:",
+                            StringArgumentType.getString(context, "areaName")))))
+                .then(literal("text")
+                    .then(argument("description", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "adddescription_text:",
+                            StringArgumentType.getString(context, "description")))))
+                .then(literal("confirm")
+                    .executes(context -> executeDescriptionAction(context, "adddescription_confirm", null)))
+                .then(literal("cancel")
+                    .executes(context -> executeDescriptionAction(context, "adddescription_cancel", null))))
+
+            // deletedescription 命令 (交互式删除域名描述)
+            .then(literal("deletedescription")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DELETE_DESCRIPTION, 0))
+                .executes(ServerCommands::executeDeleteDescriptionStart)
+                .then(literal("search")
+                    .then(argument("query", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "deletedescription_search:",
+                            StringArgumentType.getString(context, "query")))))
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "deletedescription_select:",
+                            StringArgumentType.getString(context, "areaName")))))
+                .then(literal("confirm")
+                    .executes(context -> executeDescriptionAction(context, "deletedescription_confirm", null)))
+                .then(literal("confirm2")
+                    .executes(context -> executeDescriptionAction(context, "deletedescription_confirm2", null)))
+                .then(literal("cancel")
+                    .executes(context -> executeDescriptionAction(context, "deletedescription_cancel", null))))
+
+            // adddimensionalitydescription 命令 (交互式添加维度域名描述)
+            .then(literal("adddimensionalitydescription")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD_DIMENSIONALITY_DESCRIPTION, 2))
+                .executes(ServerCommands::executeAddDimensionalityDescriptionStart)
+                .then(literal("search")
+                    .then(argument("query", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_search:",
+                            StringArgumentType.getString(context, "query")))))
+                .then(literal("select")
+                    .then(argument("dimensionId", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_select:",
+                            StringArgumentType.getString(context, "dimensionId")))))
+                .then(literal("text")
+                    .then(argument("description", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_text:",
+                            StringArgumentType.getString(context, "description")))))
+                .then(literal("confirm")
+                    .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_confirm", null)))
+                .then(literal("cancel")
+                    .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_cancel", null))))
+
+            // deletedimensionalitydescription 命令 (交互式删除维度域名描述)
+            .then(literal("deletedimensionalitydescription")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DELETE_DIMENSIONALITY_DESCRIPTION, 2))
+                .executes(ServerCommands::executeDeleteDimensionalityDescriptionStart)
+                .then(literal("search")
+                    .then(argument("query", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "deletedimensionalitydescription_search:",
+                            StringArgumentType.getString(context, "query")))))
+                .then(literal("select")
+                    .then(argument("dimensionId", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "deletedimensionalitydescription_select:",
+                            StringArgumentType.getString(context, "dimensionId")))))
+                .then(literal("confirm")
+                    .executes(context -> executeDescriptionAction(context, "deletedimensionalitydescription_confirm", null)))
+                .then(literal("confirm2")
+                    .executes(context -> executeDescriptionAction(context, "deletedimensionalitydescription_confirm2", null)))
+                .then(literal("cancel")
+                    .executes(context -> executeDescriptionAction(context, "deletedimensionalitydescription_cancel", null))))
+
             // addsignature 命令 (交互式添加签名)
             .then(literal("addsignature")
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADDSIGNATURE, 0))
@@ -483,6 +563,10 @@ public class ServerCommands {
         source.sendMessage(Text.translatable("help.command.firstdimname"));
         source.sendMessage(Text.translatable("help.command.firstdimname_skip"));
         source.sendMessage(Text.translatable("help.command.debug"));
+        source.sendMessage(Text.translatable("help.command.adddescription"));
+        source.sendMessage(Text.translatable("help.command.deletedescription"));
+        source.sendMessage(Text.translatable("help.command.adddimensionalitydescription"));
+        source.sendMessage(Text.translatable("help.command.deletedimensionalitydescription"));
         source.sendMessage(Text.translatable("help.command.serverlanguage"));
 
         return Command.SINGLE_SUCCESS;
@@ -729,6 +813,32 @@ public class ServerCommands {
         }
     }
     
+    private static int executeAddDescriptionStart(CommandContext<ServerCommandSource> context) {
+        return executeDescriptionAction(context, "adddescription_start", null);
+    }
+
+    private static int executeDeleteDescriptionStart(CommandContext<ServerCommandSource> context) {
+        return executeDescriptionAction(context, "deletedescription_start", null);
+    }
+
+    private static int executeAddDimensionalityDescriptionStart(CommandContext<ServerCommandSource> context) {
+        return executeDescriptionAction(context, "adddimensionalitydescription_start", null);
+    }
+
+    private static int executeDeleteDimensionalityDescriptionStart(CommandContext<ServerCommandSource> context) {
+        return executeDescriptionAction(context, "deletedimensionalitydescription_start", null);
+    }
+
+    private static int executeDescriptionAction(CommandContext<ServerCommandSource> context, String action, String value) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.translatable("command.error.general_9"));
+            return 0;
+        }
+        sendClientCommand(source, "areahint:" + action + (value == null ? "" : value));
+        return Command.SINGLE_SUCCESS;
+    }
+
     /**
      * 执行frequency命令（显示当前频率）
      * @param context 命令上下文

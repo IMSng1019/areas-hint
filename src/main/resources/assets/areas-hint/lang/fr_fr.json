@@ -1503,5 +1503,19 @@
   "server.log.level.3": "zone de niveau 3",
   "server.log.level.other": "zone de niveau {0}",
   "command.success.serverlanguage": "Langue du serveur définie à : {0}",
-  "help.command.serverlanguage": "§a/areahint serverlanguage <code langue> §7- Définir la langue des logs serveur (console uniquement)"
+  "help.command.serverlanguage": "§a/areahint serverlanguage <code langue> §7- Définir la langue des logs serveur (console uniquement)",
+  "help.command.adddescription": "§a/areahint adddescription §7- Add an area description",
+  "help.command.deletedescription": "§a/areahint deletedescription §7- Delete an area description",
+  "help.command.adddimensionalitydescription": "§a/areahint adddimensionalitydescription §7- Add a dimension description",
+  "help.command.deletedimensionalitydescription": "§a/areahint deletedimensionalitydescription §7- Delete a dimension description",
+  "key.areahint.description.query": "Query current domain description",
+  "category.areahint.general": "Areas Hint",
+  "description.no_description": "No description for this domain yet",
+  "description.save.success": "Description saved",
+  "description.delete.success": "Description deleted",
+  "description.no_permission": "You do not have permission to modify this description",
+  "description.search.prompt": "Enter a domain name to search",
+  "description.delete.confirm": "Only deletes the description file, not the domain",
+  "description.too_long": "Description is too long; maximum 32767 characters",
+  "description.filename_conflict": "Description file name conflict"
 }

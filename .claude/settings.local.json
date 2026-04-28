@@ -33,7 +33,11 @@
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-17\" PATH=\"/c/Program Files/Java/jdk-17/bin:$PATH\" ./gradlew test:*)",
       "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-17\" PATH=\"/c/Program Files/Java/jdk-17/bin:$PATH\" ./gradlew compileClientJava:*)",
       "Bash(python -m json.tool \"src/main/resources/assets/areas-hint/lang/zh_cn.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/en_us.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/de_de.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/en_pt.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/es_es.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/fr_fr.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/ja_jp.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/ko_kr.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/ru_ru.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/zh_cn_neko.json\" >/dev/null && python -m json.tool \"src/main/resources/assets/areas-hint/lang/zh_tw.json\" >/dev/null)",
-      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-17\" PATH=\"/c/Program Files/Java/jdk-17/bin:$PATH\" ./gradlew build:*)"
+      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-17\" PATH=\"/c/Program Files/Java/jdk-17/bin:$PATH\" ./gradlew build:*)",
+      "Bash(env:*)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-17\" ./gradlew test:*)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-17\" ./gradlew build:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

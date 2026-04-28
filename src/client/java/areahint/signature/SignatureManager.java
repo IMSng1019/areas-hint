@@ -253,6 +253,10 @@ public class SignatureManager {
         this.state = State.IDLE;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
     private void reset() {
         resetStateOnly();
     }
