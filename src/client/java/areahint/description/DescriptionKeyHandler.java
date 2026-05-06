@@ -7,8 +7,6 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -44,8 +42,7 @@ public final class DescriptionKeyHandler {
         if (client.player == null || client.world == null) {
             return;
         }
-        if (isInteractionActive()) {
-            client.player.sendMessage(Text.literal("当前有交互流程正在进行，暂不查询描述").formatted(Formatting.YELLOW), false);
+        if (client.currentScreen != null || isInteractionActive()) {
             return;
         }
 

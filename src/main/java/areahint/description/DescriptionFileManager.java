@@ -47,11 +47,14 @@ public final class DescriptionFileManager {
     }
 
     public static Path getAreaDescriptionFile(String dimensionType, String surfaceName) {
-        return getAreaDescriptionFile(WorldFolderManager.getWorldDatabaseFolder(), dimensionType, surfaceName);
+        return WorldFolderManager.getWorldDimensionDatabaseFolder(dimensionType)
+            .resolve(sanitizeDescriptionFileName(surfaceName) + FILE_EXTENSION);
     }
 
     public static Path getAreaDescriptionFile(Path databaseFolder, String dimensionType, String surfaceName) {
-        return databaseFolder.resolve(dimensionType).resolve(sanitizeDescriptionFileName(surfaceName) + FILE_EXTENSION);
+        return databaseFolder
+            .resolve(WorldFolderManager.getDatabaseFolderNameForDimension(dimensionType))
+            .resolve(sanitizeDescriptionFileName(surfaceName) + FILE_EXTENSION);
     }
 
     public static Path getDimensionalDescriptionFile(String dimensionalDisplayName) {

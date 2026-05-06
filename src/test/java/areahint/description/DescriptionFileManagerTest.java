@@ -43,6 +43,20 @@ class DescriptionFileManagerTest {
     }
 
     @Test
+    void getAreaDescriptionFileUsesSafeFolderForUnknownDimension() {
+        Path file = DescriptionFileManager.getAreaDescriptionFile(tempDir, "custom:bad/dimension<name>", "联合域名");
+
+        assertEquals(tempDir.resolve("custom_bad_dimension_name_").resolve("联合域名.json"), file);
+    }
+
+    @Test
+    void getAreaDescriptionFileFallsBackToUnknownFolderForBlankDimension() {
+        Path file = DescriptionFileManager.getAreaDescriptionFile(tempDir, "  ", "联合域名");
+
+        assertEquals(tempDir.resolve("Unknown").resolve("联合域名.json"), file);
+    }
+
+    @Test
     void getDimensionalDescriptionFileUsesDatabaseRootAndSanitizedDisplayName() {
         Path file = DescriptionFileManager.getDimensionalDescriptionFile(tempDir, "维度:名");
 

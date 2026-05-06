@@ -1,5 +1,7 @@
 package areahint.description;
 
+import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -15,31 +17,23 @@ public class DescriptionManager {
 
     public enum State {
         IDLE,
-        ADD_SEARCH_INPUT,
-        ADD_SELECT_AREA,
-        ADD_DESCRIPTION_INPUT,
-        ADD_CONFIRM,
-        DELETE_SEARCH_INPUT,
-        DELETE_SELECT_AREA,
-        DELETE_CONFIRM_FIRST,
-        DELETE_CONFIRM_SECOND,
-        ADD_DIM_SEARCH_INPUT,
-        ADD_DIM_SELECT,
-        ADD_DIM_DESCRIPTION_INPUT,
-        ADD_DIM_CONFIRM,
-        DELETE_DIM_SEARCH_INPUT,
-        DELETE_DIM_SELECT,
-        DELETE_DIM_CONFIRM_FIRST,
-        DELETE_DIM_CONFIRM_SECOND
+        WAITING_SEARCH_INPUT,
+        WAITING_TARGET_SELECT,
+        WAITING_DESCRIPTION_INPUT,
+        WAITING_CONFIRM,
+        WAITING_SECOND_CONFIRM,
+        SUBMITTING
     }
 
     private State state = State.IDLE;
     private String operation;
     private String targetType;
+    private String commandPrefix;
     private String currentDimension;
     private final List<DescriptionListEntry> entries = new ArrayList<>();
     private DescriptionListEntry selectedEntry;
     private String pendingDescription;
+    private boolean chatListenerRegistered;
 
     private DescriptionManager() {
     }
@@ -52,111 +46,118 @@ public class DescriptionManager {
     }
 
     public void handleClientCommand(String action) {
-        if (action.equals("adddescription_start")) {
-            startAreaAdd();
-        } else if (action.startsWith("adddescription_search:")) {
-            searchAreaAdd(action.substring("adddescription_search:".length()));
-        } else if (action.startsWith("adddescription_select:")) {
-            select(action.substring("adddescription_select:".length()));
-        } else if (action.startsWith("adddescription_text:")) {
-            setDescription(action.substring("adddescription_text:".length()));
-        } else if (action.equals("adddescription_confirm")) {
-            confirmAdd();
-        } else if (action.equals("adddescription_cancel")) {
-            cancel();
-        } else if (action.equals("deletedescription_start")) {
-            startAreaDelete();
-        } else if (action.startsWith("deletedescription_search:")) {
-            searchAreaDelete(action.substring("deletedescription_search:".length()));
-        } else if (action.startsWith("deletedescription_select:")) {
-            select(action.substring("deletedescription_select:".length()));
-        } else if (action.equals("deletedescription_confirm")) {
-            confirmDeleteFirst();
-        } else if (action.equals("deletedescription_confirm2")) {
-            confirmDeleteSecond();
-        } else if (action.equals("deletedescription_cancel")) {
-            cancel();
-        } else if (action.equals("adddimensionalitydescription_start")) {
-            startDimAdd();
-        } else if (action.startsWith("adddimensionalitydescription_search:")) {
-            searchDimAdd(action.substring("adddimensionalitydescription_search:".length()));
-        } else if (action.startsWith("adddimensionalitydescription_select:")) {
-            select(action.substring("adddimensionalitydescription_select:".length()));
-        } else if (action.startsWith("adddimensionalitydescription_text:")) {
-            setDescription(action.substring("adddimensionalitydescription_text:".length()));
-        } else if (action.equals("adddimensionalitydescription_confirm")) {
-            confirmAdd();
-        } else if (action.equals("adddimensionalitydescription_cancel")) {
-            cancel();
-        } else if (action.equals("deletedimensionalitydescription_start")) {
-            startDimDelete();
-        } else if (action.startsWith("deletedimensionalitydescription_search:")) {
-            searchDimDelete(action.substring("deletedimensionalitydescription_search:".length()));
-        } else if (action.startsWith("deletedimensionalitydescription_select:")) {
-            select(action.substring("deletedimensionalitydescription_select:".length()));
-        } else if (action.equals("deletedimensionalitydescription_confirm")) {
-            confirmDeleteFirst();
-        } else if (action.equals("deletedimensionalitydescription_confirm2")) {
-            confirmDeleteSecond();
-        } else if (action.equals("deletedimensionalitydescription_cancel")) {
-            cancel();
+        if (handleCommand(action, "adddescription", "add", "area")) {
+            return;
         }
+        if (handleCommand(action, "deletedescription", "delete", "area")) {
+            return;
+        }
+        if (handleCommand(action, "adddimensionalitydescription", "add", "dimension")) {
+            return;
+        }
+        handleCommand(action, "deletedimensionalitydescription", "delete", "dimension");
     }
 
-    private void startAreaAdd() {
-        start("add", "area", State.ADD_SEARCH_INPUT, "adddescription", false);
+    private boolean handleCommand(String action, String prefix, String operation, String targetType) {
+        if (action.equals(prefix + "_start")) {
+            start(operation, targetType, prefix);
+            return true;
+        }
+        if (action.startsWith(prefix + "_search:")) {
+            handleSearchInput(action.substring((prefix + "_search:").length()));
+            return true;
+        }
+        if (action.startsWith(prefix + "_select:")) {
+            select(action.substring((prefix + "_select:").length()));
+            return true;
+        }
+        if (action.startsWith(prefix + "_text:")) {
+            openBookEditor();
+            return true;
+        }
+        if (action.equals(prefix + "_confirm")) {
+            confirm();
+            return true;
+        }
+        if (action.equals(prefix + "_confirm2")) {
+            confirmSecond();
+            return true;
+        }
+        if (action.equals(prefix + "_cancel")) {
+            cancel();
+            return true;
+        }
+        return false;
     }
 
-    private void startAreaDelete() {
-        start("delete", "area", State.DELETE_SEARCH_INPUT, "deletedescription", false);
-    }
-
-    private void startDimAdd() {
-        start("add", "dimension", State.ADD_DIM_SEARCH_INPUT, "adddimensionalitydescription", true);
-    }
-
-    private void startDimDelete() {
-        start("delete", "dimension", State.DELETE_DIM_SEARCH_INPUT, "deletedimensionalitydescription", true);
-    }
-
-    private void start(String operation, String targetType, State nextState, String commandPrefix, boolean dimensionTarget) {
+    private void start(String operation, String targetType, String commandPrefix) {
         if (isActive()) {
             sendMessage("已有描述交互流程正在进行", Formatting.RED);
             return;
         }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null || client.world == null) {
+            return;
+        }
+
+        registerChatListener();
+        resetStateOnly();
         this.operation = operation;
         this.targetType = targetType;
+        this.commandPrefix = commandPrefix;
         this.currentDimension = getCurrentDimensionType();
-        this.state = nextState;
-        DescriptionUI.showSearchPrompt(commandPrefix, dimensionTarget, "delete".equals(operation));
+        this.state = State.WAITING_SEARCH_INPUT;
+        DescriptionUI.showSearchPrompt(commandPrefix, isDimensionTarget(), isDeleteOperation());
     }
 
-    private void searchAreaAdd(String query) {
-        if (state != State.ADD_SEARCH_INPUT) return;
-        state = State.ADD_SELECT_AREA;
-        DescriptionClientNetworking.sendListRequest("add", "area", currentDimension, query);
+    private void registerChatListener() {
+        if (chatListenerRegistered) {
+            return;
+        }
+        ClientReceiveMessageEvents.CHAT.register((message, signedMessage, sender, params, receptionTimestamp) -> {
+            if (state != State.IDLE && state != State.SUBMITTING && isLocalPlayerMessage(sender)) {
+                handleChatInput(message.getString());
+            }
+        });
+        chatListenerRegistered = true;
     }
 
-    private void searchAreaDelete(String query) {
-        if (state != State.DELETE_SEARCH_INPUT) return;
-        state = State.DELETE_SELECT_AREA;
-        DescriptionClientNetworking.sendListRequest("delete", "area", currentDimension, query);
+    private boolean isLocalPlayerMessage(GameProfile sender) {
+        if (sender == null) {
+            return true;
+        }
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) {
+            return false;
+        }
+        if (sender.getId() != null && sender.getId().equals(client.player.getUuid())) {
+            return true;
+        }
+        return sender.getName() != null && sender.getName().equals(client.player.getGameProfile().getName());
     }
 
-    private void searchDimAdd(String query) {
-        if (state != State.ADD_DIM_SEARCH_INPUT) return;
-        state = State.ADD_DIM_SELECT;
-        DescriptionClientNetworking.sendListRequest("add", "dimension", currentDimension, query);
+    private void handleChatInput(String input) {
+        String cleaned = stripChatPrefix(input);
+        if (state == State.WAITING_SEARCH_INPUT) {
+            handleSearchInput(cleaned);
+        }
     }
 
-    private void searchDimDelete(String query) {
-        if (state != State.DELETE_DIM_SEARCH_INPUT) return;
-        state = State.DELETE_DIM_SELECT;
-        DescriptionClientNetworking.sendListRequest("delete", "dimension", currentDimension, query);
+    private void handleSearchInput(String query) {
+        if (state != State.WAITING_SEARCH_INPUT || operation == null || targetType == null) {
+            return;
+        }
+        entries.clear();
+        selectedEntry = null;
+        pendingDescription = null;
+        state = State.WAITING_TARGET_SELECT;
+        sendMessage("正在搜索可操作目标...", Formatting.YELLOW);
+        DescriptionClientNetworking.sendListRequest(operation, targetType, currentDimension, query == null ? "" : query.trim());
     }
 
     public void receiveList(String operation, String targetType, String dimension, List<DescriptionListEntry> entries) {
-        if (!isActive()) {
+        if (state != State.WAITING_TARGET_SELECT) {
             return;
         }
         if (!isMatchingListResponse(operation, targetType, dimension)) {
@@ -165,15 +166,16 @@ public class DescriptionManager {
         this.entries.clear();
         this.entries.addAll(entries);
         if (entries.isEmpty()) {
-            sendMessage("没有找到可操作的目标", Formatting.RED);
-            reset();
+            sendMessage("没有找到可操作的目标，请重新搜索或取消", Formatting.RED);
+            state = State.WAITING_SEARCH_INPUT;
+            DescriptionUI.showSearchPrompt(getCommandPrefix(), isDimensionTarget(), isDeleteOperation());
             return;
         }
         DescriptionUI.showSelection(getCommandPrefix(), entries);
     }
 
     private void select(String rawId) {
-        if (!isSelectState()) {
+        if (state != State.WAITING_TARGET_SELECT) {
             return;
         }
         String id = stripQuotes(rawId);
@@ -181,11 +183,12 @@ public class DescriptionManager {
             if (entry.id().equals(id)) {
                 selectedEntry = entry;
                 if (isDeleteOperation()) {
-                    state = isDimensionTarget() ? State.DELETE_DIM_CONFIRM_FIRST : State.DELETE_CONFIRM_FIRST;
+                    state = State.WAITING_CONFIRM;
                     DescriptionUI.showDeleteConfirmFirst(getCommandPrefix(), selectedEntry);
                 } else {
-                    state = isDimensionTarget() ? State.ADD_DIM_DESCRIPTION_INPUT : State.ADD_DESCRIPTION_INPUT;
+                    state = State.WAITING_DESCRIPTION_INPUT;
                     DescriptionUI.showDescriptionInput(getCommandPrefix(), selectedEntry);
+                    DescriptionBookEditScreen.open(selectedEntry.displayName(), pendingDescription);
                 }
                 return;
             }
@@ -193,52 +196,72 @@ public class DescriptionManager {
         sendMessage("未找到所选目标：" + id, Formatting.RED);
     }
 
-    private void setDescription(String description) {
-        if (state != State.ADD_DESCRIPTION_INPUT && state != State.ADD_DIM_DESCRIPTION_INPUT) {
+    private void openBookEditor() {
+        if (state != State.WAITING_DESCRIPTION_INPUT || selectedEntry == null) {
+            return;
+        }
+        DescriptionBookEditScreen.open(selectedEntry.displayName(), pendingDescription);
+    }
+
+    public void receiveBookDescription(String description) {
+        handleDescriptionInput(description);
+    }
+
+    public boolean isWaitingForBookInput() {
+        return state == State.WAITING_DESCRIPTION_INPUT;
+    }
+
+    private void handleDescriptionInput(String description) {
+        if (state != State.WAITING_DESCRIPTION_INPUT) {
             return;
         }
         String cleaned = description == null ? "" : description.trim();
         if (cleaned.isEmpty()) {
-            sendMessage("描述不能为空", Formatting.RED);
+            sendMessage("描述不能为空，请重新输入或取消", Formatting.RED);
             return;
         }
         if (cleaned.length() > DescriptionServerNetworking.MAX_DESCRIPTION_LENGTH) {
-            sendMessage("描述过长，最多 32767 个字符", Formatting.RED);
+            sendMessage("描述过长，最多 32767 个字符，请重新输入或取消", Formatting.RED);
             return;
         }
         pendingDescription = cleaned;
-        state = isDimensionTarget() ? State.ADD_DIM_CONFIRM : State.ADD_CONFIRM;
+        state = State.WAITING_CONFIRM;
         DescriptionUI.showAddConfirm(getCommandPrefix(), selectedEntry, pendingDescription);
     }
 
+    private void confirm() {
+        if (isAddOperation()) {
+            confirmAdd();
+        } else if (isDeleteOperation()) {
+            confirmDeleteFirst();
+        }
+    }
+
     private void confirmAdd() {
-        if ((state != State.ADD_CONFIRM && state != State.ADD_DIM_CONFIRM) || selectedEntry == null || pendingDescription == null) {
+        if (state != State.WAITING_CONFIRM || selectedEntry == null || pendingDescription == null) {
             return;
         }
         if (DescriptionClientNetworking.sendWrite(targetType, currentDimension, selectedEntry.id(), pendingDescription)) {
+            state = State.SUBMITTING;
             sendMessage("已发送保存请求", Formatting.YELLOW);
         }
     }
 
     private void confirmDeleteFirst() {
-        if (state != State.DELETE_CONFIRM_FIRST && state != State.DELETE_DIM_CONFIRM_FIRST) {
+        if (state != State.WAITING_CONFIRM || selectedEntry == null) {
             return;
         }
-        state = isDimensionTarget() ? State.DELETE_DIM_CONFIRM_SECOND : State.DELETE_CONFIRM_SECOND;
+        state = State.WAITING_SECOND_CONFIRM;
         DescriptionUI.showDeleteConfirmSecond(getCommandPrefix(), selectedEntry);
     }
 
-    private void confirmDeleteSecond() {
-        if ((state != State.DELETE_CONFIRM_SECOND && state != State.DELETE_DIM_CONFIRM_SECOND) || selectedEntry == null) {
+    private void confirmSecond() {
+        if (state != State.WAITING_SECOND_CONFIRM || !isDeleteOperation() || selectedEntry == null) {
             return;
         }
         DescriptionClientNetworking.sendDelete(targetType, currentDimension, selectedEntry.id());
+        state = State.SUBMITTING;
         sendMessage("已发送删除请求", Formatting.YELLOW);
-    }
-
-    private boolean isSelectState() {
-        return state == State.ADD_SELECT_AREA || state == State.DELETE_SELECT_AREA
-            || state == State.ADD_DIM_SELECT || state == State.DELETE_DIM_SELECT;
     }
 
     private boolean isMatchingListResponse(String responseOperation, String responseTargetType, String responseDimension) {
@@ -252,6 +275,10 @@ public class DescriptionManager {
         return left == null ? right == null : left.equals(right);
     }
 
+    private boolean isAddOperation() {
+        return "add".equals(operation);
+    }
+
     private boolean isDeleteOperation() {
         return "delete".equals(operation);
     }
@@ -261,6 +288,9 @@ public class DescriptionManager {
     }
 
     private String getCommandPrefix() {
+        if (commandPrefix != null) {
+            return commandPrefix;
+        }
         if ("dimension".equals(targetType)) {
             return isDeleteOperation() ? "deletedimensionalitydescription" : "adddimensionalitydescription";
         }
@@ -283,9 +313,14 @@ public class DescriptionManager {
     }
 
     public void reset() {
+        resetStateOnly();
+    }
+
+    private void resetStateOnly() {
         state = State.IDLE;
         operation = null;
         targetType = null;
+        commandPrefix = null;
         currentDimension = null;
         entries.clear();
         selectedEntry = null;
@@ -297,7 +332,8 @@ public class DescriptionManager {
         if (client.world == null) {
             return "";
         }
-        return areahint.network.Packets.convertDimensionPathToType(client.world.getRegistryKey().getValue().getPath());
+        String dimensionType = areahint.network.Packets.convertDimensionPathToType(client.world.getRegistryKey().getValue().getPath());
+        return dimensionType == null ? "" : dimensionType;
     }
 
     private void sendMessage(String message, Formatting formatting) {
@@ -305,6 +341,17 @@ public class DescriptionManager {
         if (client.player != null) {
             client.player.sendMessage(Text.literal(message).formatted(formatting), false);
         }
+    }
+
+    private String stripChatPrefix(String value) {
+        String cleaned = value == null ? "" : value.trim();
+        if (cleaned.startsWith("<") && cleaned.contains(">")) {
+            int endIndex = cleaned.indexOf(">") + 1;
+            if (endIndex < cleaned.length()) {
+                cleaned = cleaned.substring(endIndex).trim();
+            }
+        }
+        return cleaned;
     }
 
     private String stripQuotes(String value) {

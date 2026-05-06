@@ -4,6 +4,8 @@ import areahint.Areashint;
 import areahint.file.FileManager;
 import areahint.network.Packets;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,7 +38,8 @@ public class WorldFolderManager {
             String serverAddress = "localhost"; // 服务端默认使用localhost
             
             initializeWorldFolder(serverAddress, worldName);
-            
+            createDatabaseFolders(currentWorldFolder, server);
+
             Areashint.LOGGER.info("服务端世界文件夹初始化完成: {}", currentWorldFolder);
             
         } catch (Exception e) {
@@ -207,6 +210,27 @@ public class WorldFolderManager {
     }
 
     /**
+     * 根据服务端已加载维度创建描述数据库目录。
+     * @param worldFolderPath 世界文件夹路径
+     * @param server 服务器实例
+     */
+    public static void createDatabaseFolders(Path worldFolderPath, MinecraftServer server) throws IOException {
+        createDatabaseFolders(worldFolderPath);
+        if (server == null) {
+            return;
+        }
+        Path databaseFolder = worldFolderPath.resolve("database");
+        for (ServerWorld world : server.getWorlds()) {
+            Identifier dimensionId = world.getRegistryKey().getValue();
+            String dimensionFolder = getDatabaseFolderNameForDimension(Packets.convertDimensionPathToType(dimensionId.getPath()));
+            if (dimensionFolder == null || dimensionFolder.isBlank() || "Unknown".equals(dimensionFolder)) {
+                dimensionFolder = sanitizeInput(dimensionId.toString());
+            }
+            Files.createDirectories(databaseFolder.resolve(dimensionFolder));
+        }
+    }
+
+    /**
      * 获取当前世界数据库根目录
      * @return 数据库根目录路径
      */
@@ -220,8 +244,20 @@ public class WorldFolderManager {
      * @return 维度数据库目录路径
      */
     public static Path getWorldDimensionDatabaseFolder(String dimensionType) {
-        String folderName = Packets.getDatabaseFolderForDimension(dimensionType);
-        return getWorldDatabaseFolder().resolve(folderName != null ? folderName : dimensionType);
+        return getWorldDatabaseFolder().resolve(getDatabaseFolderNameForDimension(dimensionType));
+    }
+
+    /**
+     * 获取描述数据库使用的安全维度目录名。
+     * @param dimensionType 维度类型
+     * @return 安全维度目录名
+     */
+    public static String getDatabaseFolderNameForDimension(String dimensionType) {
+        String vanillaFolderName = Packets.getDatabaseFolderForDimension(dimensionType);
+        if (vanillaFolderName != null) {
+            return vanillaFolderName;
+        }
+        return sanitizeInput(dimensionType);
     }
     
     /**

@@ -77,6 +77,9 @@ public final class DescriptionServerNetworking {
         try {
             if (TARGET_DIMENSION.equals(targetType)) {
                 String dimensionId = clean(targetName);
+                if (dimensionId.isBlank()) {
+                    dimensionId = getPlayerDimensionId(player);
+                }
                 String displayName = DimensionalNameManager.getDimensionalName(dimensionId);
                 Path file = DescriptionFileManager.getDimensionalDescriptionFile(displayName);
                 DescriptionData data = DescriptionFileManager.readDescription(file);
@@ -86,7 +89,7 @@ public final class DescriptionServerNetworking {
 
             String dimensionType = getPlayerDimensionType(player);
             if (dimensionType == null) {
-                sendQueryResponse(player, "未知维度", null);
+                sendQueryResponse(player, "当前维度不支持普通域名描述", null);
                 return;
             }
 
@@ -299,7 +302,17 @@ public final class DescriptionServerNetworking {
     }
 
     private static String getPlayerDimensionType(ServerPlayerEntity player) {
+        if (player == null || player.getWorld() == null) {
+            return null;
+        }
         return Packets.convertDimensionPathToType(player.getWorld().getRegistryKey().getValue().getPath());
+    }
+
+    private static String getPlayerDimensionId(ServerPlayerEntity player) {
+        if (player == null || player.getWorld() == null) {
+            return "";
+        }
+        return player.getWorld().getRegistryKey().getValue().toString();
     }
 
     private static String getSurfaceName(AreaData area) {

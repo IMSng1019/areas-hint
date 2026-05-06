@@ -144,6 +144,7 @@ public class ServerCommands {
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD_DESCRIPTION, 0))
                 .executes(ServerCommands::executeAddDescriptionStart)
                 .then(literal("search")
+                    .executes(context -> executeDescriptionAction(context, "adddescription_search:", ""))
                     .then(argument("query", StringArgumentType.greedyString())
                         .executes(context -> executeDescriptionAction(context, "adddescription_search:",
                             StringArgumentType.getString(context, "query")))))
@@ -152,6 +153,7 @@ public class ServerCommands {
                         .executes(context -> executeDescriptionAction(context, "adddescription_select:",
                             StringArgumentType.getString(context, "areaName")))))
                 .then(literal("text")
+                    .executes(context -> executeDescriptionAction(context, "adddescription_text:", ""))
                     .then(argument("description", StringArgumentType.greedyString())
                         .executes(context -> executeDescriptionAction(context, "adddescription_text:",
                             StringArgumentType.getString(context, "description")))))
@@ -165,6 +167,7 @@ public class ServerCommands {
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DELETE_DESCRIPTION, 0))
                 .executes(ServerCommands::executeDeleteDescriptionStart)
                 .then(literal("search")
+                    .executes(context -> executeDescriptionAction(context, "deletedescription_search:", ""))
                     .then(argument("query", StringArgumentType.greedyString())
                         .executes(context -> executeDescriptionAction(context, "deletedescription_search:",
                             StringArgumentType.getString(context, "query")))))
@@ -184,6 +187,7 @@ public class ServerCommands {
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD_DIMENSIONALITY_DESCRIPTION, 2))
                 .executes(ServerCommands::executeAddDimensionalityDescriptionStart)
                 .then(literal("search")
+                    .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_search:", ""))
                     .then(argument("query", StringArgumentType.greedyString())
                         .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_search:",
                             StringArgumentType.getString(context, "query")))))
@@ -192,6 +196,7 @@ public class ServerCommands {
                         .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_select:",
                             StringArgumentType.getString(context, "dimensionId")))))
                 .then(literal("text")
+                    .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_text:", ""))
                     .then(argument("description", StringArgumentType.greedyString())
                         .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_text:",
                             StringArgumentType.getString(context, "description")))))
@@ -205,6 +210,7 @@ public class ServerCommands {
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DELETE_DIMENSIONALITY_DESCRIPTION, 2))
                 .executes(ServerCommands::executeDeleteDimensionalityDescriptionStart)
                 .then(literal("search")
+                    .executes(context -> executeDescriptionAction(context, "deletedimensionalitydescription_search:", ""))
                     .then(argument("query", StringArgumentType.greedyString())
                         .executes(context -> executeDescriptionAction(context, "deletedimensionalitydescription_search:",
                             StringArgumentType.getString(context, "query")))))
