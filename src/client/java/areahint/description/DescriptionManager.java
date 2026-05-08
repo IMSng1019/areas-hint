@@ -64,7 +64,7 @@ public class DescriptionManager {
             return true;
         }
         if (action.startsWith(prefix + "_search:")) {
-            handleSearchInput(action.substring((prefix + "_search:").length()));
+            requestList();
             return true;
         }
         if (action.startsWith(prefix + "_select:")) {
@@ -108,7 +108,8 @@ public class DescriptionManager {
         this.commandPrefix = commandPrefix;
         this.currentDimension = getCurrentDimensionType();
         this.state = State.WAITING_SEARCH_INPUT;
-        DescriptionUI.showSearchPrompt(commandPrefix, isDimensionTarget(), isDeleteOperation());
+        DescriptionUI.showLoadingList(commandPrefix, isDimensionTarget(), isDeleteOperation());
+        requestList();
     }
 
     private void registerChatListener() {
@@ -138,13 +139,9 @@ public class DescriptionManager {
     }
 
     private void handleChatInput(String input) {
-        String cleaned = stripChatPrefix(input);
-        if (state == State.WAITING_SEARCH_INPUT) {
-            handleSearchInput(cleaned);
-        }
     }
 
-    private void handleSearchInput(String query) {
+    private void requestList() {
         if (state != State.WAITING_SEARCH_INPUT || operation == null || targetType == null) {
             return;
         }
@@ -152,8 +149,8 @@ public class DescriptionManager {
         selectedEntry = null;
         pendingDescription = null;
         state = State.WAITING_TARGET_SELECT;
-        sendMessage("正在搜索可操作目标...", Formatting.YELLOW);
-        DescriptionClientNetworking.sendListRequest(operation, targetType, currentDimension, query == null ? "" : query.trim());
+        sendMessage("正在加载可操作目标...", Formatting.YELLOW);
+        DescriptionClientNetworking.sendListRequest(operation, targetType, currentDimension, "");
     }
 
     public void receiveList(String operation, String targetType, String dimension, List<DescriptionListEntry> entries) {
@@ -166,9 +163,8 @@ public class DescriptionManager {
         this.entries.clear();
         this.entries.addAll(entries);
         if (entries.isEmpty()) {
-            sendMessage("没有找到可操作的目标，请重新搜索或取消", Formatting.RED);
-            state = State.WAITING_SEARCH_INPUT;
-            DescriptionUI.showSearchPrompt(getCommandPrefix(), isDimensionTarget(), isDeleteOperation());
+            sendMessage("没有可操作的目标", Formatting.RED);
+            reset();
             return;
         }
         DescriptionUI.showSelection(getCommandPrefix(), entries);
@@ -225,8 +221,7 @@ public class DescriptionManager {
             return;
         }
         pendingDescription = cleaned;
-        state = State.WAITING_CONFIRM;
-        DescriptionUI.showAddConfirm(getCommandPrefix(), selectedEntry, pendingDescription);
+        confirmAdd();
     }
 
     private void confirm() {
@@ -238,7 +233,7 @@ public class DescriptionManager {
     }
 
     private void confirmAdd() {
-        if (state != State.WAITING_CONFIRM || selectedEntry == null || pendingDescription == null) {
+        if ((state != State.WAITING_CONFIRM && state != State.WAITING_DESCRIPTION_INPUT) || selectedEntry == null || pendingDescription == null) {
             return;
         }
         if (DescriptionClientNetworking.sendWrite(targetType, currentDimension, selectedEntry.id(), pendingDescription)) {

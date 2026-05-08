@@ -89,6 +89,9 @@ public final class DescriptionServerNetworking {
 
             String dimensionType = getPlayerDimensionType(player);
             if (dimensionType == null) {
+                dimensionType = clean(ignoredDimensionType);
+            }
+            if (dimensionType.isBlank()) {
                 sendQueryResponse(player, "当前维度不支持普通域名描述", null);
                 return;
             }
@@ -289,7 +292,16 @@ public final class DescriptionServerNetworking {
 
     private static AreaContext findAreaContext(String dimensionType, String areaName) {
         List<AreaData> areas = readAreas(dimensionType);
-        AreaData area = AreaPermissionUtil.findByName(areas, stripQuotes(areaName));
+        String cleanAreaName = stripQuotes(areaName);
+        AreaData area = AreaPermissionUtil.findByName(areas, cleanAreaName);
+        if (area == null) {
+            for (AreaData candidate : areas) {
+                if (candidate != null && getSurfaceName(candidate).equals(cleanAreaName)) {
+                    area = candidate;
+                    break;
+                }
+            }
+        }
         return area == null ? null : new AreaContext(area, areas, getSurfaceName(area));
     }
 

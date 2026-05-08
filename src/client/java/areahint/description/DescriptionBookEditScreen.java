@@ -1,34 +1,57 @@
 package areahint.description;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.BookEditScreen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.PageTurnWidget;
+import net.minecraft.client.util.SelectionManager;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
+import net.minecraft.util.Formatting;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * 使用原版书本编辑界面录入描述。
+ * 使用原版书本外观录入描述，点击完成后直接保存到描述数据库。
  */
-public final class DescriptionBookEditScreen extends BookEditScreen {
-    private final ItemStack descriptionBook;
-    private final Screen previousScreen;
-    private boolean submitted;
+public final class DescriptionBookEditScreen extends Screen {
+    private static final int MAX_TEXT_WIDTH = 114;
+    private static final int PAGE_TEXT_X_OFFSET = 36;
+    private static final int PAGE_TEXT_Y_OFFSET = 32;
+    private static final int PAGE_TEXT_WIDTH = 114;
+    private static final int PAGE_TEXT_HEIGHT = 128;
+    private static final int PAGE_BACKGROUND_WIDTH = 192;
+    private static final int PAGE_BACKGROUND_HEIGHT = 192;
+    private static final int PAGE_CHARACTER_LIMIT = 1024;
 
-    private DescriptionBookEditScreen(PlayerEntity player, ItemStack descriptionBook, Screen previousScreen) {
-        super(player, descriptionBook, Hand.MAIN_HAND);
-        this.descriptionBook = descriptionBook;
+    private final PlayerEntity player;
+    private final Screen previousScreen;
+    private final List<String> pages;
+    private final SelectionManager selectionManager;
+    private int currentPage;
+    private PageTurnWidget nextPageButton;
+    private PageTurnWidget previousPageButton;
+    private boolean submitted;
+    private boolean canceled;
+
+    private DescriptionBookEditScreen(PlayerEntity player, List<String> pages, Screen previousScreen) {
+        super(Text.literal("编辑域名描述"));
+        this.player = player;
+        this.pages = pages;
         this.previousScreen = previousScreen;
+        this.selectionManager = new SelectionManager(
+            this::getCurrentPageContent,
+            this::setCurrentPageContent,
+            SelectionManager.makeClipboardGetter(MinecraftClient.getInstance()),
+            SelectionManager.makeClipboardSetter(MinecraftClient.getInstance()),
+            this::isPageContentValid
+        );
     }
 
     public static void open(String title, String initialDescription) {
@@ -36,53 +59,126 @@ public final class DescriptionBookEditScreen extends BookEditScreen {
         if (client.player == null) {
             return;
         }
-        ItemStack book = new ItemStack(Items.WRITABLE_BOOK);
-        NbtCompound nbt = new NbtCompound();
-        NbtList pages = new NbtList();
-        for (String page : splitToBookPages(initialDescription)) {
-            pages.add(NbtString.of(page));
-        }
-        nbt.put("pages", pages);
-        book.setNbt(nbt);
+        client.player.sendMessage(Text.literal("请在打开的书本界面中编辑描述，点击『完成』后将直接保存。"), false);
+        client.setScreen(new DescriptionBookEditScreen(client.player, splitToBookPages(initialDescription), client.currentScreen));
+    }
 
-        client.player.sendMessage(Text.literal("请在打开的原版书本中编辑描述，点击『完成』后将进入确认保存。"), false);
-        client.setScreen(new DescriptionBookEditScreen(client.player, book, client.currentScreen));
+    @Override
+    protected void init() {
+        int centerX = width / 2;
+        int buttonY = 196;
+        addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> submit())
+            .dimensions(centerX + 2, buttonY, 98, 20)
+            .build());
+        addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> close())
+            .dimensions(centerX - 100, buttonY, 98, 20)
+            .build());
+
+        int bookX = (width - PAGE_BACKGROUND_WIDTH) / 2;
+        nextPageButton = addDrawableChild(new PageTurnWidget(bookX + 116, 159, true, button -> openNextPage(), true));
+        previousPageButton = addDrawableChild(new PageTurnWidget(bookX + 43, 159, false, button -> openPreviousPage(), true));
+        updatePageButtons();
+        selectionManager.putCursorAtEnd();
     }
 
     @Override
     public void removed() {
-        super.removed();
-        if (submitted) {
-            return;
-        }
-        Optional<String> description = readDescriptionFromBook(descriptionBook);
-        if (description.isPresent()) {
-            submitted = true;
-            DescriptionManager.getInstance().receiveBookDescription(description.get());
-        } else if (DescriptionManager.getInstance().isWaitingForBookInput()) {
+        if (!submitted && !canceled && DescriptionManager.getInstance().isWaitingForBookInput()) {
             DescriptionManager.getInstance().cancel();
         }
     }
 
     @Override
     public void close() {
+        canceled = true;
         MinecraftClient client = MinecraftClient.getInstance();
         if (client != null) {
             client.setScreen(previousScreen);
-        } else {
-            super.close();
         }
     }
 
-    private static Optional<String> readDescriptionFromBook(ItemStack book) {
-        NbtCompound nbt = book.getNbt();
-        if (nbt == null || !nbt.contains("pages", NbtElement.LIST_TYPE)) {
-            return Optional.empty();
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
         }
-        NbtList pages = nbt.getList("pages", NbtElement.STRING_TYPE);
+        if (Screen.isSelectAll(keyCode)) {
+            selectionManager.selectAll();
+            return true;
+        }
+        if (Screen.isCopy(keyCode)) {
+            selectionManager.copy();
+            return true;
+        }
+        if (Screen.isPaste(keyCode)) {
+            selectionManager.paste();
+            return true;
+        }
+        if (Screen.isCut(keyCode)) {
+            selectionManager.cut();
+            return true;
+        }
+        switch (keyCode) {
+            case GLFW.GLFW_KEY_BACKSPACE -> selectionManager.delete(-1);
+            case GLFW.GLFW_KEY_DELETE -> selectionManager.delete(1);
+            case GLFW.GLFW_KEY_RIGHT -> selectionManager.moveCursor(1, Screen.hasShiftDown());
+            case GLFW.GLFW_KEY_LEFT -> selectionManager.moveCursor(-1, Screen.hasShiftDown());
+            case GLFW.GLFW_KEY_HOME -> selectionManager.moveCursorToStart(Screen.hasShiftDown());
+            case GLFW.GLFW_KEY_END -> selectionManager.moveCursorToEnd(Screen.hasShiftDown());
+            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> selectionManager.insert("\n");
+            default -> {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean charTyped(char chr, int modifiers) {
+        if (super.charTyped(chr, modifiers)) {
+            return true;
+        }
+        if (SharedConstants.isValidChar(chr)) {
+            selectionManager.insert(Character.toString(chr));
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.render(context, mouseX, mouseY, delta);
+        int bookX = (width - PAGE_BACKGROUND_WIDTH) / 2;
+        context.drawTexture(net.minecraft.client.gui.screen.ingame.BookScreen.BOOK_TEXTURE, bookX, 2, 0, 0, PAGE_BACKGROUND_WIDTH, PAGE_BACKGROUND_HEIGHT);
+        Text pageIndicator = Text.literal((currentPage + 1) + "/" + pages.size());
+        context.drawText(textRenderer, pageIndicator, bookX + PAGE_TEXT_X_OFFSET + PAGE_TEXT_WIDTH - textRenderer.getWidth(pageIndicator), 18, 0, false);
+
+        int textX = bookX + PAGE_TEXT_X_OFFSET;
+        int textY = PAGE_TEXT_Y_OFFSET;
+        String page = getCurrentPageContent();
+        context.drawTextWrapped(textRenderer, Text.literal(page), textX, textY, MAX_TEXT_WIDTH, 0);
+        drawCursor(context, textX, textY, page);
+    }
+
+    private void submit() {
+        Optional<String> description = getDescription();
+        if (description.isEmpty()) {
+            if (player != null) {
+                player.sendMessage(Text.literal("描述不能为空").formatted(Formatting.RED), false);
+            }
+            return;
+        }
+        submitted = true;
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client != null) {
+            client.setScreen(previousScreen);
+        }
+        DescriptionManager.getInstance().receiveBookDescription(description.get());
+    }
+
+    private Optional<String> getDescription() {
         List<String> cleanedPages = new ArrayList<>();
-        for (int i = 0; i < pages.size(); i++) {
-            String page = pages.getString(i);
+        for (String page : pages) {
             if (!page.trim().isEmpty() || !cleanedPages.isEmpty()) {
                 cleanedPages.add(page);
             }
@@ -94,6 +190,76 @@ public final class DescriptionBookEditScreen extends BookEditScreen {
         return description.isEmpty() ? Optional.empty() : Optional.of(description);
     }
 
+    private void openPreviousPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            selectionManager.putCursorAtEnd();
+            updatePageButtons();
+        }
+    }
+
+    private void openNextPage() {
+        if (currentPage < pages.size() - 1) {
+            currentPage++;
+        } else {
+            pages.add("");
+            currentPage++;
+        }
+        selectionManager.putCursorAtEnd();
+        updatePageButtons();
+    }
+
+    private void updatePageButtons() {
+        if (previousPageButton != null) {
+            previousPageButton.visible = currentPage > 0;
+        }
+        if (nextPageButton != null) {
+            nextPageButton.visible = true;
+        }
+    }
+
+    private String getCurrentPageContent() {
+        if (currentPage < 0 || currentPage >= pages.size()) {
+            return "";
+        }
+        return pages.get(currentPage);
+    }
+
+    private void setCurrentPageContent(String content) {
+        if (currentPage < 0 || currentPage >= pages.size()) {
+            return;
+        }
+        pages.set(currentPage, content);
+    }
+
+    private boolean isPageContentValid(String content) {
+        return content != null
+            && content.length() <= PAGE_CHARACTER_LIMIT
+            && textRenderer.getWrappedLinesHeight(content, MAX_TEXT_WIDTH) <= PAGE_TEXT_HEIGHT;
+    }
+
+    private void drawCursor(DrawContext context, int textX, int textY, String page) {
+        int cursor = selectionManager.getSelectionEnd();
+        if (cursor < 0 || cursor > page.length()) {
+            return;
+        }
+        String beforeCursor = page.substring(0, cursor);
+        String[] rawLines = beforeCursor.split("\\n", -1);
+        String currentLine = rawLines.length == 0 ? "" : rawLines[rawLines.length - 1];
+        int wrappedLineCountBeforeCurrent = 0;
+        for (int i = 0; i < rawLines.length - 1; i++) {
+            wrappedLineCountBeforeCurrent += Math.max(1, textRenderer.wrapLines(Text.literal(rawLines[i]), MAX_TEXT_WIDTH).size());
+        }
+        List<?> currentWrappedLines = textRenderer.wrapLines(Text.literal(currentLine), MAX_TEXT_WIDTH);
+        int currentWrappedLine = Math.max(0, currentWrappedLines.size() - 1);
+        int lineIndex = wrappedLineCountBeforeCurrent + currentWrappedLine;
+        int cursorX = textX + Math.min(MAX_TEXT_WIDTH, textRenderer.getWidth(currentLine));
+        int cursorY = textY + lineIndex * 9;
+        if ((MinecraftClient.getInstance().inGameHud.getTicks() / 6) % 2 == 0) {
+            context.fill(cursorX, cursorY, cursorX + 1, cursorY + 9, 0xFF000000);
+        }
+    }
+
     private static List<String> splitToBookPages(String description) {
         List<String> pages = new ArrayList<>();
         String clean = description == null ? "" : description;
@@ -103,16 +269,7 @@ public final class DescriptionBookEditScreen extends BookEditScreen {
         }
         String[] split = clean.split("\\n\\n", -1);
         for (String page : split) {
-            if (page.length() <= DescriptionServerNetworking.MAX_DESCRIPTION_LENGTH) {
-                pages.add(page);
-                continue;
-            }
-            int index = 0;
-            while (index < page.length()) {
-                int end = Math.min(index + DescriptionServerNetworking.MAX_DESCRIPTION_LENGTH, page.length());
-                pages.add(page.substring(index, end));
-                index = end;
-            }
+            pages.add(page);
         }
         if (pages.isEmpty()) {
             pages.add("");

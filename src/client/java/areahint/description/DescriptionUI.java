@@ -17,7 +17,7 @@ public final class DescriptionUI {
     private DescriptionUI() {
     }
 
-    public static void showSearchPrompt(String commandPrefix, boolean dimensionTarget, boolean deleteOperation) {
+    public static void showLoadingList(String commandPrefix, boolean dimensionTarget, boolean deleteOperation) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
             return;
@@ -26,27 +26,8 @@ public final class DescriptionUI {
         String target = dimensionTarget ? "维度域名" : "域名";
         String operation = deleteOperation ? "删除描述" : "添加描述";
         client.player.sendMessage(Text.literal("==== " + target + operation + " ====").formatted(Formatting.AQUA), false);
-        client.player.sendMessage(Text.literal("请在聊天栏直接输入要搜索的" + target + "名称，或点击下面按钮。"), false);
-        MutableText input = Text.literal("[输入搜索词]")
-            .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
-                    "/areahint " + commandPrefix + " search "))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.literal("点击后在命令栏输入搜索词")))
-                .withColor(Formatting.GOLD));
-        MutableText all = Text.literal("[显示全部]")
-            .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "/areahint " + commandPrefix + " search"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.literal("列出全部可操作目标")))
-                .withColor(Formatting.AQUA));
-        client.player.sendMessage(Text.empty()
-            .append(input)
-            .append(Text.literal("  "))
-            .append(all)
-            .append(Text.literal("  "))
-            .append(cancelButton(commandPrefix)), false);
+        client.player.sendMessage(Text.literal("正在列出全部可修改的" + target + "..."), false);
+        client.player.sendMessage(cancelButton(commandPrefix), false);
     }
 
     public static void showSelection(String commandPrefix, List<DescriptionListEntry> entries) {
@@ -75,18 +56,8 @@ public final class DescriptionUI {
         }
 
         client.player.sendMessage(Text.literal("已选择：" + nullToText(entry.displayName())).formatted(Formatting.GREEN), false);
-        client.player.sendMessage(Text.literal("将打开原版书本编辑界面，请在书中输入描述。"), false);
-        MutableText input = Text.literal("[打开书本编辑]")
-            .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "/areahint " + commandPrefix + " text"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    Text.literal("使用原版书本编辑描述")))
-                .withColor(Formatting.GOLD));
-        client.player.sendMessage(Text.empty()
-            .append(input)
-            .append(Text.literal("  "))
-            .append(cancelButton(commandPrefix)), false);
+        client.player.sendMessage(Text.literal("将打开原版书本编辑界面，请在书中输入描述并点击完成保存。"), false);
+        client.player.sendMessage(cancelButton(commandPrefix), false);
     }
 
     public static void showAddConfirm(String commandPrefix, DescriptionListEntry entry, String description) {

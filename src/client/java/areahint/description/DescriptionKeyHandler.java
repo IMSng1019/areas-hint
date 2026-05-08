@@ -1,6 +1,8 @@
 package areahint.description;
 
+import areahint.AreashintClient;
 import areahint.data.AreaData;
+import areahint.detection.AreaDetector;
 import areahint.log.AreaChangeTracker;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -48,6 +50,12 @@ public final class DescriptionKeyHandler {
 
         String dimensionType = areahint.network.Packets.convertDimensionPathToType(client.world.getRegistryKey().getValue().getPath());
         AreaData area = AreaChangeTracker.getCurrentAreaData();
+        if (area == null) {
+            AreaDetector detector = AreashintClient.getAreaDetector();
+            if (detector != null) {
+                area = detector.findAreaRaw(client.player.getX(), client.player.getY(), client.player.getZ());
+            }
+        }
         if (area != null && area.getName() != null) {
             DescriptionClientNetworking.sendQuery("area", dimensionType, area.getName());
         } else {
