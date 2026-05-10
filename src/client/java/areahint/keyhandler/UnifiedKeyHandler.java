@@ -6,6 +6,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
+import areahint.description.DescriptionClientNetworking;
 import areahint.easyadd.EasyAddManager;
 import areahint.expandarea.ExpandAreaManager;
 import areahint.shrinkarea.ShrinkAreaManager;
@@ -127,9 +128,8 @@ public class UnifiedKeyHandler {
             return;
         }
 
-        System.out.println("DEBUG: 没有模块处理记录键");
-        // 如果没有模块处于记录状态，则忽略按键
-        // （避免误操作）
+        System.out.println("DEBUG: 没有模块处理记录键，查询当前域名描述");
+        DescriptionClientNetworking.sendCurrentAreaQuery();
     }
 
     /**

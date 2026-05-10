@@ -69,6 +69,12 @@ public final class DescriptionClientNetworking {
         ClientPlayNetworking.send(Packets.C2S_DESCRIPTION_QUERY, buf);
     }
 
+    public static void sendCurrentAreaQuery() {
+        if (ClientPlayNetworking.canSend(Packets.C2S_DESCRIPTION_CURRENT_QUERY)) {
+            ClientPlayNetworking.send(Packets.C2S_DESCRIPTION_CURRENT_QUERY, PacketByteBufs.create());
+        }
+    }
+
     public static void sendListRequest(String operation, String targetType, String dimensionType, String query) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeString(clean(operation));

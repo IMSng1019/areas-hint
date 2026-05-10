@@ -8,6 +8,7 @@ import areahint.file.FileManager;
 import areahint.network.Packets;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
+import areahint.teleport.ServerAreaGeometry;
 import areahint.util.AreaPermissionUtil;
 import areahint.world.WorldFolderManager;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -18,7 +19,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,6 +49,9 @@ public final class DescriptionServerNetworking {
                 server.execute(() -> handleQuery(player, targetType, dimensionType, targetName));
             });
 
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_DESCRIPTION_CURRENT_QUERY,
+            (server, player, handler, buf, responseSender) -> server.execute(() -> handleCurrentAreaQuery(player)));
+
         ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_DESCRIPTION_LIST_REQUEST,
             (server, player, handler, buf, responseSender) -> {
                 String operation = buf.readString();
@@ -71,6 +77,30 @@ public final class DescriptionServerNetworking {
                 String targetName = buf.readString();
                 server.execute(() -> handleDelete(player, targetType, dimensionType, targetName));
             });
+    }
+
+    private static void handleCurrentAreaQuery(ServerPlayerEntity player) {
+        try {
+            String dimensionType = getPlayerDimensionType(player);
+            if (dimensionType == null || dimensionType.isBlank()) {
+                sendQueryResponse(player, "域名描述", null);
+                return;
+            }
+
+            AreaData area = findCurrentArea(readAreas(dimensionType), player.getX(), player.getY(), player.getZ());
+            if (area == null) {
+                sendQueryResponse(player, "域名描述", null);
+                return;
+            }
+
+            String surfaceName = getSurfaceName(area);
+            Path file = DescriptionFileManager.getAreaDescriptionFile(dimensionType, surfaceName);
+            DescriptionData data = DescriptionFileManager.readDescription(file);
+            sendQueryResponse(player, surfaceName, data);
+        } catch (Exception e) {
+            Areashint.LOGGER.error("查询当前域名描述失败", e);
+            sendQueryResponse(player, "域名描述", null);
+        }
     }
 
     private static void handleQuery(ServerPlayerEntity player, String targetType, String ignoredDimensionType, String targetName) {
@@ -288,6 +318,95 @@ public final class DescriptionServerNetworking {
         data.setAuthor(player.getGameProfile().getName());
         data.setUpdatedAt(System.currentTimeMillis());
         return data;
+    }
+
+    private static AreaData findCurrentArea(List<AreaData> areas, double x, double y, double z) {
+        if (areas == null || areas.isEmpty()) {
+            return null;
+        }
+
+        Map<Integer, List<AreaData>> areasByLevel = new HashMap<>();
+        for (AreaData area : areas) {
+            if (area != null && ServerAreaGeometry.isWithinAltitude(area, y)) {
+                areasByLevel.computeIfAbsent(area.getLevel(), key -> new ArrayList<>()).add(area);
+            }
+        }
+        if (areasByLevel.isEmpty()) {
+            return null;
+        }
+
+        List<Integer> levels = new ArrayList<>(areasByLevel.keySet());
+        Collections.sort(levels);
+
+        AreaData currentArea = null;
+        List<AreaData> levelOneAreas = sortAreasByDistance(areasByLevel.getOrDefault(1, Collections.emptyList()), x, z);
+        for (AreaData area : levelOneAreas) {
+            if (ServerAreaGeometry.contains(area, x, y, z)) {
+                currentArea = area;
+                break;
+            }
+        }
+        if (currentArea == null) {
+            return null;
+        }
+
+        String baseName = currentArea.getName();
+        for (Integer level : levels) {
+            if (level <= currentArea.getLevel()) {
+                continue;
+            }
+
+            List<AreaData> childAreas = new ArrayList<>();
+            for (AreaData area : areasByLevel.getOrDefault(level, Collections.emptyList())) {
+                if (baseName != null && baseName.equals(area.getBaseName())) {
+                    childAreas.add(area);
+                }
+            }
+
+            boolean foundChild = false;
+            for (AreaData area : sortAreasByDistance(childAreas, x, z)) {
+                if (ServerAreaGeometry.contains(area, x, y, z)) {
+                    currentArea = area;
+                    baseName = area.getName();
+                    foundChild = true;
+                    break;
+                }
+            }
+            if (!foundChild) {
+                break;
+            }
+        }
+
+        return currentArea;
+    }
+
+    private static List<AreaData> sortAreasByDistance(List<AreaData> areas, double x, double z) {
+        if (areas == null || areas.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<AreaData> result = new ArrayList<>(areas);
+        result.sort(Comparator.comparingDouble(area -> distanceToArea(area, x, z)));
+        return result;
+    }
+
+    private static double distanceToArea(AreaData area, double x, double z) {
+        List<AreaData.Vertex> vertices = area == null ? null : area.getVertices();
+        if (vertices == null || vertices.isEmpty()) {
+            return Double.MAX_VALUE;
+        }
+
+        double centerX = 0;
+        double centerZ = 0;
+        for (AreaData.Vertex vertex : vertices) {
+            centerX += vertex.getX();
+            centerZ += vertex.getZ();
+        }
+        centerX /= vertices.size();
+        centerZ /= vertices.size();
+
+        double dx = x - centerX;
+        double dz = z - centerZ;
+        return dx * dx + dz * dz;
     }
 
     private static AreaContext findAreaContext(String dimensionType, String areaName) {

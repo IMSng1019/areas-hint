@@ -99,6 +99,7 @@ public class Packets {
 
     // Description功能相关的包ID
     public static final Identifier C2S_DESCRIPTION_QUERY = new Identifier(Areashint.MOD_ID, "c2s_description_query");
+    public static final Identifier C2S_DESCRIPTION_CURRENT_QUERY = new Identifier(Areashint.MOD_ID, "c2s_description_current_query");
     public static final Identifier S2C_DESCRIPTION_QUERY_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_description_query_response");
     public static final Identifier C2S_DESCRIPTION_LIST_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_description_list_request");
     public static final Identifier S2C_DESCRIPTION_AREA_LIST = new Identifier(Areashint.MOD_ID, "s2c_description_area_list");
