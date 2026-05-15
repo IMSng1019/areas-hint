@@ -1,6 +1,7 @@
 package areahint.description;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -42,6 +43,10 @@ public final class BookDescriptionScreenUtil {
         client.setScreen(new DescriptionBookScreen(BookScreen.Contents.create(book)));
     }
 
+    static boolean isDescriptionBookScreen(Screen screen) {
+        return screen instanceof DescriptionBookScreen;
+    }
+
     private static final class DescriptionBookScreen extends BookScreen {
         private DescriptionBookScreen(Contents contents) {
             super(contents);
@@ -55,6 +60,16 @@ public final class BookDescriptionScreenUtil {
                 return true;
             }
             return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (DescriptionKeyHandler.shouldCloseOnBoundMouse(button)) {
+                DescriptionKeyHandler.consumeCloseDescriptionBookMouse(button);
+                close();
+                return true;
+            }
+            return super.mouseClicked(mouseX, mouseY, button);
         }
     }
 

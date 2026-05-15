@@ -151,6 +151,16 @@ public final class DescriptionBookEditScreen extends Screen {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (DescriptionKeyHandler.shouldCloseOnBoundMouse(button)) {
+            DescriptionKeyHandler.consumeCloseDescriptionBookMouse(button);
+            close();
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         int bookX = (width - PAGE_BACKGROUND_WIDTH) / 2;

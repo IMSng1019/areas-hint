@@ -7,6 +7,7 @@ import areahint.log.AreaChangeTracker;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
@@ -38,9 +39,12 @@ public final class DescriptionKeyHandler {
                 if (queryKeyBinding.wasPressed()) {
                     if (skipNextQueryKeyPress) {
                         skipNextQueryKeyPress = false;
-                        while (queryKeyBinding.wasPressed()) {
-                            // Consume the close-key press so it cannot reopen the description book.
-                        }
+                        drainQueryKeyPresses();
+                        return;
+                    }
+                    if (closeDescriptionBookScreen(client.currentScreen)) {
+                        skipNextQueryKeyPress = true;
+                        drainQueryKeyPresses();
                         return;
                     }
                     handleQueryKey();
@@ -92,19 +96,57 @@ public final class DescriptionKeyHandler {
     }
 
     public static boolean consumeCloseDescriptionBookKey(int keyCode, int scanCode) {
-        if (queryKeyBinding == null || queryKeyBinding.isUnbound() || !queryKeyBinding.matchesKey(keyCode, scanCode)) {
+        if (!shouldCloseOnBoundKey(keyCode, scanCode)) {
             return false;
         }
         skipNextQueryKeyPress = true;
-        while (queryKeyBinding.wasPressed()) {
-            // Drain queued presses so closing the book does not immediately query again.
+        drainQueryKeyPresses();
+        return true;
+    }
+
+    public static boolean consumeCloseDescriptionBookMouse(int button) {
+        if (!shouldCloseOnBoundMouse(button)) {
+            return false;
         }
+        skipNextQueryKeyPress = true;
+        drainQueryKeyPresses();
         return true;
     }
 
     static boolean shouldCloseOnBoundKey(int keyCode, int scanCode) {
-        return queryKeyBinding != null
-            && !queryKeyBinding.isUnbound()
-            && queryKeyBinding.matchesKey(keyCode, scanCode);
+        return shouldCloseOnBoundInput(
+            queryKeyBinding != null,
+            queryKeyBinding == null || queryKeyBinding.isUnbound(),
+            queryKeyBinding != null && queryKeyBinding.matchesKey(keyCode, scanCode)
+        );
+    }
+
+    static boolean shouldCloseOnBoundMouse(int button) {
+        return shouldCloseOnBoundInput(
+            queryKeyBinding != null,
+            queryKeyBinding == null || queryKeyBinding.isUnbound(),
+            queryKeyBinding != null && queryKeyBinding.matchesMouse(button)
+        );
+    }
+
+    static boolean shouldCloseOnBoundInput(boolean bindingRegistered, boolean bindingUnbound, boolean bindingMatches) {
+        return bindingRegistered && !bindingUnbound && bindingMatches;
+    }
+
+    private static boolean closeDescriptionBookScreen(Screen screen) {
+        if (screen instanceof DescriptionBookEditScreen || BookDescriptionScreenUtil.isDescriptionBookScreen(screen)) {
+            screen.close();
+            return true;
+        }
+        return false;
+    }
+
+    private static void drainQueryKeyPresses() {
+        if (queryKeyBinding == null) {
+            return;
+        }
+        while (queryKeyBinding.wasPressed()) {
+            // Drain queued presses so closing the book does not immediately query again.
+        }
     }
 }
