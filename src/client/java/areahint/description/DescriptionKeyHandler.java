@@ -17,6 +17,7 @@ import org.lwjgl.glfw.GLFW;
 public final class DescriptionKeyHandler {
     private static KeyBinding queryKeyBinding;
     private static boolean registered;
+    private static boolean skipNextQueryKeyPress;
 
     private DescriptionKeyHandler() {
     }
@@ -31,8 +32,20 @@ public final class DescriptionKeyHandler {
 
         if (!registered) {
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
-                if (queryKeyBinding != null && queryKeyBinding.wasPressed()) {
+                if (queryKeyBinding == null) {
+                    return;
+                }
+                if (queryKeyBinding.wasPressed()) {
+                    if (skipNextQueryKeyPress) {
+                        skipNextQueryKeyPress = false;
+                        while (queryKeyBinding.wasPressed()) {
+                            // Consume the close-key press so it cannot reopen the description book.
+                        }
+                        return;
+                    }
                     handleQueryKey();
+                } else if (skipNextQueryKeyPress) {
+                    skipNextQueryKeyPress = false;
                 }
             });
             registered = true;
@@ -76,5 +89,22 @@ public final class DescriptionKeyHandler {
             || areahint.rename.RenameManager.getInstance().getCurrentState() != areahint.rename.RenameManager.RenameState.IDLE
             || areahint.recolor.RecolorManager.getInstance().getCurrentState() != areahint.recolor.RecolorManager.RecolorState.IDLE
             || areahint.signature.SignatureManager.getInstance().isActive();
+    }
+
+    public static boolean consumeCloseDescriptionBookKey(int keyCode, int scanCode) {
+        if (queryKeyBinding == null || queryKeyBinding.isUnbound() || !queryKeyBinding.matchesKey(keyCode, scanCode)) {
+            return false;
+        }
+        skipNextQueryKeyPress = true;
+        while (queryKeyBinding.wasPressed()) {
+            // Drain queued presses so closing the book does not immediately query again.
+        }
+        return true;
+    }
+
+    static boolean shouldCloseOnBoundKey(int keyCode, int scanCode) {
+        return queryKeyBinding != null
+            && !queryKeyBinding.isUnbound()
+            && queryKeyBinding.matchesKey(keyCode, scanCode);
     }
 }

@@ -39,7 +39,23 @@ public final class BookDescriptionScreenUtil {
         nbt.put("pages", pages);
         book.setNbt(nbt);
 
-        client.setScreen(new BookScreen(BookScreen.Contents.create(book)));
+        client.setScreen(new DescriptionBookScreen(BookScreen.Contents.create(book)));
+    }
+
+    private static final class DescriptionBookScreen extends BookScreen {
+        private DescriptionBookScreen(Contents contents) {
+            super(contents);
+        }
+
+        @Override
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            if (DescriptionKeyHandler.shouldCloseOnBoundKey(keyCode, scanCode)) {
+                DescriptionKeyHandler.consumeCloseDescriptionBookKey(keyCode, scanCode);
+                close();
+                return true;
+            }
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
     }
 
     private static String sanitizeBookField(String value, String fallback) {

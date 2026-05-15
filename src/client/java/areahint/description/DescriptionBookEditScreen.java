@@ -99,6 +99,11 @@ public final class DescriptionBookEditScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (DescriptionKeyHandler.shouldCloseOnBoundKey(keyCode, scanCode)) {
+            DescriptionKeyHandler.consumeCloseDescriptionBookKey(keyCode, scanCode);
+            close();
+            return true;
+        }
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }
