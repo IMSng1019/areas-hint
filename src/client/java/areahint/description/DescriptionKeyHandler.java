@@ -4,6 +4,7 @@ import areahint.AreashintClient;
 import areahint.data.AreaData;
 import areahint.detection.AreaDetector;
 import areahint.log.AreaChangeTracker;
+import areahint.keyhandler.UnifiedKeyHandler;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
@@ -19,6 +20,14 @@ public final class DescriptionKeyHandler {
     private static KeyBinding queryKeyBinding;
     private static boolean registered;
     private static boolean skipNextQueryKeyPress;
+    private static boolean skipNextRecordKeyPress;
+
+    enum BoundKeyAction {
+        NONE,
+        CLOSE_DESCRIPTION,
+        SKIP_PRESS,
+        QUERY
+    }
 
     private DescriptionKeyHandler() {
     }
@@ -36,24 +45,73 @@ public final class DescriptionKeyHandler {
                 if (queryKeyBinding == null) {
                     return;
                 }
-                if (queryKeyBinding.wasPressed()) {
+                if (!queryKeyBinding.wasPressed()) {
                     if (skipNextQueryKeyPress) {
                         skipNextQueryKeyPress = false;
-                        drainQueryKeyPresses();
-                        return;
                     }
-                    if (closeDescriptionBookScreen(client.currentScreen)) {
-                        skipNextQueryKeyPress = true;
+                    return;
+                }
+
+                switch (resolveBoundKeyAction(skipNextQueryKeyPress, true, isDescriptionBookScreen(client.currentScreen))) {
+                    case CLOSE_DESCRIPTION -> {
+                        closeDescriptionBookScreen(client.currentScreen);
+                        skipNextQueryKeyPress = false;
+                        skipNextRecordKeyPress = true;
                         drainQueryKeyPresses();
-                        return;
                     }
-                    handleQueryKey();
-                } else if (skipNextQueryKeyPress) {
-                    skipNextQueryKeyPress = false;
+                    case SKIP_PRESS -> {
+                        skipNextQueryKeyPress = false;
+                        drainQueryKeyPresses();
+                    }
+                    case QUERY -> handleQueryKey();
+                    case NONE -> {
+                    }
                 }
             });
             registered = true;
         }
+    }
+
+    public static boolean closeCurrentDescriptionBookScreen() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null) {
+            return false;
+        }
+        boolean closed = closeDescriptionBookScreen(client.currentScreen);
+        if (closed) {
+            skipNextQueryKeyPress = false;
+            drainQueryKeyPresses();
+        }
+        return closed;
+    }
+
+    public static boolean consumeSuppressedRecordKeyPress() {
+        if (!skipNextRecordKeyPress) {
+            return false;
+        }
+        skipNextRecordKeyPress = false;
+        return true;
+    }
+
+    public static void clearSuppressedRecordKeyPress() {
+        skipNextRecordKeyPress = false;
+    }
+
+    static BoundKeyAction resolveBoundKeyAction(boolean skipNextPress, boolean keyPressed, boolean descriptionBookScreenOpen) {
+        if (!keyPressed) {
+            return BoundKeyAction.NONE;
+        }
+        if (descriptionBookScreenOpen) {
+            return BoundKeyAction.CLOSE_DESCRIPTION;
+        }
+        if (skipNextPress) {
+            return BoundKeyAction.SKIP_PRESS;
+        }
+        return BoundKeyAction.QUERY;
+    }
+
+    private static boolean isDescriptionBookScreen(Screen screen) {
+        return screen instanceof DescriptionBookEditScreen || BookDescriptionScreenUtil.isDescriptionBookScreen(screen);
     }
 
     private static void handleQueryKey() {
@@ -99,7 +157,12 @@ public final class DescriptionKeyHandler {
         if (!shouldCloseOnBoundKey(keyCode, scanCode)) {
             return false;
         }
-        skipNextQueryKeyPress = true;
+        if (matchesQueryKey(keyCode, scanCode)) {
+            skipNextQueryKeyPress = true;
+        }
+        if (matchesRecordKey(keyCode, scanCode)) {
+            skipNextRecordKeyPress = true;
+        }
         drainQueryKeyPresses();
         return true;
     }
@@ -108,12 +171,29 @@ public final class DescriptionKeyHandler {
         if (!shouldCloseOnBoundMouse(button)) {
             return false;
         }
-        skipNextQueryKeyPress = true;
+        if (matchesQueryMouse(button)) {
+            skipNextQueryKeyPress = true;
+        }
+        if (matchesRecordMouse(button)) {
+            skipNextRecordKeyPress = true;
+        }
         drainQueryKeyPresses();
         return true;
     }
 
     static boolean shouldCloseOnBoundKey(int keyCode, int scanCode) {
+        KeyBinding recordKeyBinding = UnifiedKeyHandler.getRecordKeyBinding();
+        return shouldCloseOnAnyBoundInput(
+            queryKeyBinding != null,
+            queryKeyBinding == null || queryKeyBinding.isUnbound(),
+            queryKeyBinding != null && queryKeyBinding.matchesKey(keyCode, scanCode),
+            recordKeyBinding != null,
+            recordKeyBinding == null || recordKeyBinding.isUnbound(),
+            recordKeyBinding != null && recordKeyBinding.matchesKey(keyCode, scanCode)
+        );
+    }
+
+    private static boolean matchesQueryKey(int keyCode, int scanCode) {
         return shouldCloseOnBoundInput(
             queryKeyBinding != null,
             queryKeyBinding == null || queryKeyBinding.isUnbound(),
@@ -121,7 +201,16 @@ public final class DescriptionKeyHandler {
         );
     }
 
-    static boolean shouldCloseOnBoundMouse(int button) {
+    private static boolean matchesRecordKey(int keyCode, int scanCode) {
+        KeyBinding recordKeyBinding = UnifiedKeyHandler.getRecordKeyBinding();
+        return shouldCloseOnBoundInput(
+            recordKeyBinding != null,
+            recordKeyBinding == null || recordKeyBinding.isUnbound(),
+            recordKeyBinding != null && recordKeyBinding.matchesKey(keyCode, scanCode)
+        );
+    }
+
+    private static boolean matchesQueryMouse(int button) {
         return shouldCloseOnBoundInput(
             queryKeyBinding != null,
             queryKeyBinding == null || queryKeyBinding.isUnbound(),
@@ -129,12 +218,45 @@ public final class DescriptionKeyHandler {
         );
     }
 
+    private static boolean matchesRecordMouse(int button) {
+        KeyBinding recordKeyBinding = UnifiedKeyHandler.getRecordKeyBinding();
+        return shouldCloseOnBoundInput(
+            recordKeyBinding != null,
+            recordKeyBinding == null || recordKeyBinding.isUnbound(),
+            recordKeyBinding != null && recordKeyBinding.matchesMouse(button)
+        );
+    }
+
+    static boolean shouldCloseOnBoundMouse(int button) {
+        KeyBinding recordKeyBinding = UnifiedKeyHandler.getRecordKeyBinding();
+        return shouldCloseOnAnyBoundInput(
+            queryKeyBinding != null,
+            queryKeyBinding == null || queryKeyBinding.isUnbound(),
+            queryKeyBinding != null && queryKeyBinding.matchesMouse(button),
+            recordKeyBinding != null,
+            recordKeyBinding == null || recordKeyBinding.isUnbound(),
+            recordKeyBinding != null && recordKeyBinding.matchesMouse(button)
+        );
+    }
+
     static boolean shouldCloseOnBoundInput(boolean bindingRegistered, boolean bindingUnbound, boolean bindingMatches) {
         return bindingRegistered && !bindingUnbound && bindingMatches;
     }
 
+    static boolean shouldCloseOnAnyBoundInput(
+        boolean queryBindingRegistered,
+        boolean queryBindingUnbound,
+        boolean queryBindingMatches,
+        boolean recordBindingRegistered,
+        boolean recordBindingUnbound,
+        boolean recordBindingMatches
+    ) {
+        return shouldCloseOnBoundInput(queryBindingRegistered, queryBindingUnbound, queryBindingMatches)
+            || shouldCloseOnBoundInput(recordBindingRegistered, recordBindingUnbound, recordBindingMatches);
+    }
+
     private static boolean closeDescriptionBookScreen(Screen screen) {
-        if (screen instanceof DescriptionBookEditScreen || BookDescriptionScreenUtil.isDescriptionBookScreen(screen)) {
+        if (isDescriptionBookScreen(screen)) {
             screen.close();
             return true;
         }

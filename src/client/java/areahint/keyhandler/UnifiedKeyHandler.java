@@ -47,6 +47,8 @@ public class UnifiedKeyHandler {
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
                 if (recordKeyBinding != null && recordKeyBinding.wasPressed()) {
                     handleRecordKeyPress();
+                } else {
+                    areahint.description.DescriptionKeyHandler.clearSuppressedRecordKeyPress();
                 }
             });
             tickEventRegistered = true;
@@ -87,6 +89,13 @@ public class UnifiedKeyHandler {
      */
     private static void handleRecordKeyPress() {
         System.out.println("DEBUG: 记录键被按下");
+
+        if (areahint.description.DescriptionKeyHandler.consumeSuppressedRecordKeyPress()) {
+            return;
+        }
+        if (areahint.description.DescriptionKeyHandler.closeCurrentDescriptionBookScreen()) {
+            return;
+        }
 
         // 检查EasyAdd是否活跃且在记录状态
         EasyAddManager easyAddManager = EasyAddManager.getInstance();
