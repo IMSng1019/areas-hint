@@ -1,10 +1,7 @@
 package areahint.signature;
 
-import areahint.data.AreaData;
 import areahint.network.Packets;
 import areahint.network.TranslatableMessage;
-import areahint.util.AreaDataConverter;
-import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
@@ -16,12 +13,11 @@ import net.minecraft.util.Formatting;
  */
 public class SignatureClientNetworking {
 
-    public static void sendToServer(String operation, AreaData area, String dimension, String targetPlayerName) {
+    public static void sendToServer(String operation, String areaName, String dimension, String targetPlayerName) {
         try {
             PacketByteBuf buf = PacketByteBufs.create();
-            JsonObject json = AreaDataConverter.toJsonObject(area);
             buf.writeString(operation);
-            buf.writeString(json.toString());
+            buf.writeString(areaName);
             buf.writeString(dimension);
             buf.writeString(targetPlayerName);
             ClientPlayNetworking.send(Packets.SIGNATURE_AREA_CHANNEL, buf);

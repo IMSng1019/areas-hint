@@ -679,6 +679,8 @@ public class ClientNetworking {
                 manager.setPlayerName(action.substring("deletesignature_name:".length()));
             } else if (action.equals("deletesignature_confirm")) {
                 manager.confirm();
+            } else if (action.equals("deletesignature_confirm2")) {
+                manager.confirmDeleteFinal();
             } else if (action.equals("deletesignature_cancel")) {
                 manager.cancel();
             } else {
@@ -1217,4 +1219,4 @@ public class ClientNetworking {
             AreashintClient.LOGGER.error("发送SetHigh请求时发生错误: " + e.getMessage(), e);
         }
     }
-} 
+}

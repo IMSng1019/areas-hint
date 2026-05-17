@@ -256,6 +256,8 @@ public class ServerCommands {
                             StringArgumentType.getString(context, "playerName")))))
                 .then(literal("confirm")
                     .executes(ServerCommands::executeDeleteSignatureConfirm))
+                .then(literal("confirm2")
+                    .executes(ServerCommands::executeDeleteSignatureConfirm2))
                 .then(literal("cancel")
                     .executes(ServerCommands::executeDeleteSignatureCancel)))
 
@@ -782,6 +784,10 @@ public class ServerCommands {
 
     private static int executeDeleteSignatureConfirm(CommandContext<ServerCommandSource> context) {
         return forwardSignatureCommand(context, "areahint:deletesignature_confirm");
+    }
+
+    private static int executeDeleteSignatureConfirm2(CommandContext<ServerCommandSource> context) {
+        return forwardSignatureCommand(context, "areahint:deletesignature_confirm2");
     }
 
     private static int executeDeleteSignatureCancel(CommandContext<ServerCommandSource> context) {
