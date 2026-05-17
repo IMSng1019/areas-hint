@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
+import static areahint.network.TranslatableMessage.key;
 import static areahint.network.TranslatableMessage.lit;
 
 /**
@@ -40,7 +41,7 @@ public class SignatureServerNetworking {
                     String targetPlayerName = buf.readString(32767);
                     server.execute(() -> handleRequest(player, operation, areaName, dimension, targetPlayerName));
                 } catch (Exception e) {
-                    sendResponse(player, false, lit("签名请求解析失败："), lit(e.getMessage()));
+                    sendResponse(player, false, key("signature.server.error.parse"), lit(e.getMessage()));
                 }
             }
         );
@@ -54,26 +55,26 @@ public class SignatureServerNetworking {
         try {
             String normalizedOperation = cleanText(operation);
             if (!"add".equals(normalizedOperation) && !"delete".equals(normalizedOperation)) {
-                sendResponse(player, false, lit("未知签名操作："), lit(String.valueOf(operation)));
+                sendResponse(player, false, key("signature.server.error.unknown_operation"), lit(String.valueOf(operation)));
                 return;
             }
 
             String cleanedAreaName = cleanText(areaName);
             if (cleanedAreaName == null) {
-                sendResponse(player, false, lit("域名不能为空"));
+                sendResponse(player, false, key("signature.server.error.empty_area"));
                 return;
             }
 
             String target = cleanText(targetPlayerName);
             if (target == null) {
-                sendResponse(player, false, lit("玩家名不能为空"));
+                sendResponse(player, false, key("signature.server.error.empty_player"));
                 return;
             }
 
             String dimType = convertDimensionIdToType(dimension);
             String fileName = Packets.getFileNameForDimension(dimType);
             if (fileName == null) {
-                sendResponse(player, false, lit("未知维度："), lit(String.valueOf(dimension)));
+                sendResponse(player, false, key("signature.server.error.unknown_dimension"), lit(String.valueOf(dimension)));
                 return;
             }
 
@@ -81,7 +82,7 @@ public class SignatureServerNetworking {
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             AreaData storedArea = AreaPermissionUtil.findByName(areas, cleanedAreaName);
             if (storedArea == null) {
-                sendResponse(player, false, lit("未找到域名："), lit(cleanedAreaName));
+                sendResponse(player, false, key("signature.server.error.area_not_found"), lit(cleanedAreaName));
                 return;
             }
 
@@ -89,35 +90,35 @@ public class SignatureServerNetworking {
                 ? PermissionNodes.ADDSIGNATURE
                 : PermissionNodes.DELETESIGNATURE;
             if (!PermissionService.hasNodeOr(player, node, () -> canModifySignatureArea(player, storedArea, areas))) {
-                sendResponse(player, false, lit("你没有权限修改该域名签名"));
+                sendResponse(player, false, key("signature.server.error.no_permission"));
                 return;
             }
 
             if ("add".equals(normalizedOperation)) {
                 if (storedArea.hasSignature(target)) {
-                    sendResponse(player, false, lit("签名已存在："), lit(target));
+                    sendResponse(player, false, key("signature.server.error.exists"), lit(target));
                     return;
                 }
                 storedArea.addSignature(target);
             } else {
                 if (!hasExtensionSignature(storedArea.getSignatures(), target)) {
-                    sendResponse(player, false, lit("扩展签名中不存在："), lit(target));
+                    sendResponse(player, false, key("signature.server.error.not_exists"), lit(target));
                     return;
                 }
                 storedArea.removeSignature(target);
             }
 
             if (!FileManager.writeAreaData(areaFile, areas)) {
-                sendResponse(player, false, lit("保存域名签名失败"));
+                sendResponse(player, false, key("signature.server.error.save"));
                 return;
             }
 
             ServerNetworking.sendAllAreaDataToAll();
             sendResponse(player, true,
-                lit("add".equals(normalizedOperation) ? "签名添加成功：" : "签名删除成功："),
+                key("add".equals(normalizedOperation) ? "signature.server.success.add" : "signature.server.success.delete"),
                 lit(target));
         } catch (Exception e) {
-            sendResponse(player, false, lit("签名操作失败："), lit(e.getMessage()));
+            sendResponse(player, false, key("signature.server.error.process"), lit(e.getMessage()));
         }
     }
 

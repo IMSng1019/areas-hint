@@ -28,6 +28,8 @@ public class I18nManager {
 
     // 当前语言的翻译映射
     private static Map<String, String> translations = new HashMap<>();
+    // 英语回退翻译，避免非核心语言文件缺少新key时直接显示key本身
+    private static Map<String, String> fallbackTranslations = new HashMap<>();
     // 当前语言
     private static String currentLanguage = DEFAULT_LANGUAGE;
 
@@ -164,6 +166,7 @@ public class I18nManager {
      * @return 实际加载生效的语言代码
      */
     public static String loadLanguage(String language) {
+        fallbackTranslations = loadTranslations(resolveLanguageFile(FALLBACK_LANGUAGE));
         String resolvedLanguage = resolveLanguageOrFallback(language);
         Path langFile = getLangFolder().resolve(resolvedLanguage + ".json");
 
@@ -188,17 +191,39 @@ public class I18nManager {
         return resolvedLanguage;
     }
 
+    private static Path resolveLanguageFile(String language) {
+        return getLangFolder().resolve(language + ".json");
+    }
+
+    private static Map<String, String> loadTranslations(Path langFile) {
+        if (Files.notExists(langFile)) {
+            return new HashMap<>();
+        }
+        try {
+            String json = Files.readString(langFile, StandardCharsets.UTF_8);
+            Map<String, String> loaded = GSON.fromJson(json, new TypeToken<Map<String, String>>(){}.getType());
+            return loaded != null ? loaded : new HashMap<>();
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("读取语言文件失败: " + langFile + " - " + e.getMessage());
+            return new HashMap<>();
+        }
+    }
+
     /**
      * 获取翻译文本
      * @param key 翻译键
      * @return 翻译后的文本，如果不存在则返回key本身
      */
     public static boolean hasKey(String key) {
-        return translations.containsKey(key);
+        return translations.containsKey(key) || fallbackTranslations.containsKey(key);
     }
 
     public static String translate(String key) {
-        return translations.getOrDefault(key, key);
+        String value = translations.get(key);
+        if (value != null) {
+            return value;
+        }
+        return fallbackTranslations.getOrDefault(key, key);
     }
 
     /**
@@ -207,7 +232,7 @@ public class I18nManager {
      * @param args 替换参数（按顺序替换 {0}, {1}, ...）
      */
     public static String translate(String key, Object... args) {
-        String text = translations.getOrDefault(key, key);
+        String text = translate(key);
         for (int i = 0; i < args.length; i++) {
             text = text.replace("{" + i + "}", String.valueOf(args[i]));
         }

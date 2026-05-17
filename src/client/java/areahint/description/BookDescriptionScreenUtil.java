@@ -1,5 +1,6 @@
 package areahint.description;
 
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
@@ -30,11 +31,12 @@ public final class BookDescriptionScreenUtil {
 
         ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
         NbtCompound nbt = new NbtCompound();
-        nbt.putString("title", sanitizeBookField(title, "域名描述"));
+        nbt.putString("title", sanitizeBookField(title, I18nManager.translate("description.book.default.title")));
         nbt.putString("author", sanitizeBookField(author, "Areas Hint"));
 
         NbtList pages = new NbtList();
-        for (String page : paginate(description == null || description.isEmpty() ? "对应域名暂无描述" : description)) {
+        String fallbackDescription = I18nManager.translate("description.book.no_description");
+        for (String page : paginate(description == null || description.isEmpty() ? fallbackDescription : description)) {
             pages.add(NbtString.of(Text.Serialization.toJsonString(Text.literal(page))));
         }
         nbt.put("pages", pages);

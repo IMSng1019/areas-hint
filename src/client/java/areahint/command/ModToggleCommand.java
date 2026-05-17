@@ -88,8 +88,8 @@ public class ModToggleCommand {
     private static void showUsage(MinecraftClient client) {
         if (client.player != null) {
             client.player.sendMessage(Text.literal(I18nManager.translate("command.button.general_2")), false);
-            client.player.sendMessage(Text.literal("§7/areahint on  §f- " + I18nManager.translate("command.message.general_26")), false);
-            client.player.sendMessage(Text.literal("§7/areahint off §f- " + I18nManager.translate("command.message.general_27")), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("command.usage.on")), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("command.usage.off")), false);
         }
     }
 } 

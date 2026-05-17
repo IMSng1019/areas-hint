@@ -172,7 +172,7 @@ public class SetHighClientCommand {
         if (client.player == null) return;
         
         // 检查取消操作
-        if (input.trim().isEmpty() || input.contains("取消")) {
+        if (input.trim().isEmpty() || input.contains(I18nManager.translate("common.cancel.keyword"))) {
             client.player.sendMessage(Text.of(I18nManager.translate("command.error.altitude.cancel_2")), false);
             resetCustomHeightState();
             return;

@@ -15,6 +15,8 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import areahint.i18n.I18nManager;
+
 import java.nio.file.Path;
 import java.util.List;
 
@@ -80,17 +82,17 @@ public class TeleportClientManager {
 
         List<AreaData> areas = loadCurrentDimensionAreas(client);
         if (areas.isEmpty()) {
-            client.player.sendMessage(Text.literal("§c当前维度没有可传送域名"), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("teleport.error.no_areas")), false);
             return;
         }
 
-        client.player.sendMessage(Text.literal("§6请选择要" + mode.toUpperCase() + "传送的域名："), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("teleport.prompt.select", mode.toUpperCase())), false);
         for (int i = 0; i < areas.size(); i++) {
             AreaData area = areas.get(i);
             MutableText line = Text.literal(String.format("§a%d. §f%s", i + 1, area.getName()))
                     .setStyle(Style.EMPTY
                             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint " + mode + " " + area.getName()))
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("传送到 " + area.getName())))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(I18nManager.translate("teleport.hover.teleport_to", area.getName()))))
                             .withColor(Formatting.AQUA));
             client.player.sendMessage(line, false);
         }
@@ -114,15 +116,15 @@ public class TeleportClientManager {
             return;
         }
         if (areaName == null || areaName.trim().isEmpty()) {
-            client.player.sendMessage(Text.literal("§c域名不能为空"), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("teleport.error.empty_name")), false);
             return;
         }
         String teleportFormat = ClientConfig.getTeleportFormat();
         if (!isValidTeleportFormat(teleportFormat)) {
-            client.player.sendMessage(Text.literal("§c传送格式无效，请使用 /areahint settp 重新设置"), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("teleport.error.invalid_format")), false);
             return;
         }
-        client.player.sendMessage(Text.literal("§7正在请求传送到域名: " + areaName), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("teleport.message.requesting", areaName)), false);
         ClientNetworking.sendTeleportRequest(mode, stripQuotes(areaName), teleportFormat);
     }
 
@@ -132,11 +134,11 @@ public class TeleportClientManager {
             return;
         }
         if (state != State.IDLE) {
-            client.player.sendMessage(Text.literal("§c请先结束当前传送设置流程"), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("teleport.error.busy")), false);
             return;
         }
         state = State.INPUT_FORMAT;
-        client.player.sendMessage(Text.literal("§6请输入传送命令头（当前: " + ClientConfig.getTeleportFormat() + "），输入 cancel 取消"), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("teleport.prompt.format_input", ClientConfig.getTeleportFormat())), false);
     }
 
     private boolean handleChatInput(String input) {
@@ -147,9 +149,9 @@ public class TeleportClientManager {
             return true;
         }
         String value = input.trim();
-        if (value.equalsIgnoreCase("cancel") || value.equals("取消")) {
+        if (value.equalsIgnoreCase("cancel") || value.equals(I18nManager.translate("teleport.cancel.keyword"))) {
             state = State.IDLE;
-            sendLocalMessage("§e已取消传送格式设置");
+            sendLocalMessage(I18nManager.translate("teleport.message.cancelled"));
             return true;
         }
         if (setTeleportFormat(value)) {
@@ -165,11 +167,11 @@ public class TeleportClientManager {
         }
         String value = stripQuotes(format);
         if (!isValidTeleportFormat(value)) {
-            client.player.sendMessage(Text.literal("§c传送格式无效，只能作为命令头使用，例如 tp 或 minecraft:tp"), false);
+            client.player.sendMessage(Text.literal(I18nManager.translate("teleport.error.invalid_format_detail")), false);
             return false;
         }
         ClientConfig.setTeleportFormat(value);
-        client.player.sendMessage(Text.literal("§a传送格式已设置为: " + ClientConfig.getTeleportFormat()), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("teleport.message.format_set", ClientConfig.getTeleportFormat())), false);
         return true;
     }
 

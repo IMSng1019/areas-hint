@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServerI18nManager {
     private static final Gson GSON = new Gson();
     private static final String DEFAULT_LANGUAGE = "zh_cn";
+    private static final String FALLBACK_LANGUAGE = "en_us";
 
     // 语言代码 -> 翻译映射
     private static final Map<String, Map<String, String>> allTranslations = new HashMap<>();
@@ -30,7 +31,7 @@ public class ServerI18nManager {
 
     public static void init() {
         loadLanguageFile(DEFAULT_LANGUAGE);
-        loadLanguageFile("en_us");
+        loadLanguageFile(FALLBACK_LANGUAGE);
         translations = allTranslations.getOrDefault(DEFAULT_LANGUAGE, new HashMap<>());
         currentLanguage = DEFAULT_LANGUAGE;
     }
@@ -71,7 +72,11 @@ public class ServerI18nManager {
     public static String translateForPlayer(UUID playerUuid, String key) {
         String lang = playerLanguages.getOrDefault(playerUuid, DEFAULT_LANGUAGE);
         Map<String, String> langMap = allTranslations.getOrDefault(lang, translations);
-        return langMap.getOrDefault(key, key);
+        String value = langMap.get(key);
+        if (value != null) {
+            return value;
+        }
+        return getFallbackTranslations().getOrDefault(key, key);
     }
 
     /** 按玩家语言翻译（带参数） */
@@ -85,7 +90,11 @@ public class ServerI18nManager {
 
     /** 服务端日志用（默认语言） */
     public static String translate(String key) {
-        return translations.getOrDefault(key, key);
+        String value = translations.get(key);
+        if (value != null) {
+            return value;
+        }
+        return getFallbackTranslations().getOrDefault(key, key);
     }
 
     public static String translate(String key, Object... args) {
@@ -101,6 +110,13 @@ public class ServerI18nManager {
         if (!allTranslations.containsKey(language)) loadLanguageFile(language);
         translations = allTranslations.getOrDefault(language, new HashMap<>());
         currentLanguage = language;
+    }
+
+    private static Map<String, String> getFallbackTranslations() {
+        if (!allTranslations.containsKey(FALLBACK_LANGUAGE)) {
+            loadLanguageFile(FALLBACK_LANGUAGE);
+        }
+        return allTranslations.getOrDefault(FALLBACK_LANGUAGE, new HashMap<>());
     }
 
     public static String getCurrentLanguage() {

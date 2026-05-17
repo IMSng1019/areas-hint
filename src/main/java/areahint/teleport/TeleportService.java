@@ -3,6 +3,7 @@ package areahint.teleport;
 import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
@@ -41,30 +42,30 @@ public final class TeleportService {
         }
 
         if (!PermissionService.hasCommandPermission(player, PermissionNodes.TELEPORT, 0)) {
-            sendResponse(player, false, "权限不足，无法使用域名传送");
+            sendResponse(player, false, translate(player, "teleport.server.error.no_permission"));
             return;
         }
 
         String normalizedMode = normalizeMode(mode);
         if (normalizedMode == null) {
-            sendResponse(player, false, "未知传送模式: " + mode);
+            sendResponse(player, false, translate(player, "teleport.server.error.unknown_mode", mode));
             return;
         }
 
         if (areaName == null || areaName.trim().isEmpty()) {
-            sendResponse(player, false, "域名不能为空");
+            sendResponse(player, false, translate(player, "teleport.server.error.empty_name"));
             return;
         }
 
         if (!isValidTeleportFormat(teleportFormat)) {
-            sendResponse(player, false, "传送格式无效，请使用 /areahint settp 重新设置");
+            sendResponse(player, false, translate(player, "teleport.server.error.invalid_format"));
             return;
         }
 
         String dimensionType = getPlayerDimensionType(player);
         String fileName = Packets.getFileNameForDimension(dimensionType);
         if (fileName == null) {
-            sendResponse(player, false, "当前维度不支持域名传送");
+            sendResponse(player, false, translate(player, "teleport.server.error.unsupported_dimension"));
             return;
         }
 
@@ -72,7 +73,7 @@ public final class TeleportService {
         List<AreaData> areas = FileManager.readAreaData(areaFile);
         AreaData area = findArea(areas, areaName.trim());
         if (area == null) {
-            sendResponse(player, false, "当前维度找不到域名: " + areaName);
+            sendResponse(player, false, translate(player, "teleport.server.error.area_not_found", areaName));
             return;
         }
 
@@ -82,15 +83,16 @@ public final class TeleportService {
                 : SAFE_LANDING_FINDER.findRandomLanding(world, area);
 
         if (landing.isEmpty()) {
-            sendResponse(player, false, "域内未找到可站立位置: " + area.getName());
+            sendResponse(player, false, translate(player, "teleport.server.error.no_landing", area.getName()));
             return;
         }
 
         Vec3d position = landing.get();
         if (executeTeleport(player, position)) {
-            sendResponse(player, true, String.format(Locale.ROOT, "已传送到 %s (%.1f, %.1f, %.1f)", area.getName(), position.x, position.y, position.z));
+            sendResponse(player, true, translate(player, "teleport.server.success.teleported",
+                area.getName(), formatCoordinate(position.x), formatCoordinate(position.y), formatCoordinate(position.z)));
         } else {
-            sendResponse(player, false, "传送执行失败");
+            sendResponse(player, false, translate(player, "teleport.server.error.execute_failed"));
         }
     }
 
@@ -134,6 +136,14 @@ public final class TeleportService {
     public static void writeResponse(PacketByteBuf buf, boolean success, String message) {
         buf.writeBoolean(success);
         buf.writeString(message == null ? "" : message);
+    }
+
+    private static String translate(ServerPlayerEntity player, String key, Object... args) {
+        return ServerI18nManager.translateForPlayer(player.getUuid(), key, args);
+    }
+
+    private static String formatCoordinate(double value) {
+        return String.format(Locale.ROOT, "%.1f", value);
     }
 
     private static void sendResponse(ServerPlayerEntity player, boolean success, String message) {

@@ -1,6 +1,7 @@
 package areahint.description;
 
 import areahint.AreashintClient;
+import areahint.i18n.I18nManager;
 import areahint.network.Packets;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -88,7 +89,7 @@ public final class DescriptionClientNetworking {
         if (description == null || description.length() > DescriptionServerNetworking.MAX_DESCRIPTION_LENGTH) {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player != null) {
-                client.player.sendMessage(Text.literal("描述过长，最多 32767 个字符").formatted(Formatting.RED), false);
+                client.player.sendMessage(Text.literal(I18nManager.translate("description.error.too_long")).formatted(Formatting.RED), false);
             }
             return false;
         }

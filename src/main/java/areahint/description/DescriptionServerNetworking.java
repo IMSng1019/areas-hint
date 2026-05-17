@@ -5,6 +5,7 @@ import areahint.command.DimensionalNameCommands;
 import areahint.data.AreaData;
 import areahint.dimensional.DimensionalNameManager;
 import areahint.file.FileManager;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
@@ -35,7 +36,6 @@ public final class DescriptionServerNetworking {
     private static final String TARGET_DIMENSION = "dimension";
     private static final String OPERATION_ADD = "add";
     private static final String OPERATION_DELETE = "delete";
-    private static final String NO_DESCRIPTION = "对应域名暂无描述";
 
     private DescriptionServerNetworking() {
     }
@@ -83,7 +83,7 @@ public final class DescriptionServerNetworking {
         try {
             String dimensionType = getPlayerDimensionType(player);
             if (dimensionType == null || dimensionType.isBlank()) {
-                sendQueryResponse(player, "域名描述", null);
+                sendQueryResponse(player, defaultTitle(player), null);
                 return;
             }
 
@@ -114,7 +114,7 @@ public final class DescriptionServerNetworking {
             }
         } catch (Exception e) {
             Areashint.LOGGER.error("查询当前域名描述失败", e);
-            sendQueryResponse(player, "域名描述", null);
+            sendQueryResponse(player, defaultTitle(player), null);
         }
     }
 
@@ -137,7 +137,7 @@ public final class DescriptionServerNetworking {
                 dimensionType = clean(ignoredDimensionType);
             }
             if (dimensionType.isBlank()) {
-                sendQueryResponse(player, "当前维度不支持普通域名描述", null);
+                sendQueryResponse(player, translate(player, "description.server.query.unsupported_area"), null);
                 return;
             }
 
@@ -214,11 +214,11 @@ public final class DescriptionServerNetworking {
 
     private static void handleWrite(ServerPlayerEntity player, String targetType, String ignoredDimensionType, String targetName, String description) {
         if (description == null || description.trim().isEmpty()) {
-            sendMutationResponse(player, false, "描述不能为空");
+            sendMutationResponse(player, false, translate(player, "description.server.error.empty"));
             return;
         }
         if (description.length() > MAX_DESCRIPTION_LENGTH) {
-            sendMutationResponse(player, false, "描述过长，最多 32767 个字符");
+            sendMutationResponse(player, false, translate(player, "description.server.error.too_long"));
             return;
         }
 
@@ -232,34 +232,35 @@ public final class DescriptionServerNetworking {
     private static void writeAreaDescription(ServerPlayerEntity player, String areaName, String description) {
         String dimensionType = getPlayerDimensionType(player);
         if (dimensionType == null) {
-            sendMutationResponse(player, false, "当前维度不支持普通域名描述");
+            sendMutationResponse(player, false, translate(player, "description.server.error.unsupported_area"));
             return;
         }
 
         AreaContext context = findAreaContext(dimensionType, areaName);
         if (context == null) {
-            sendMutationResponse(player, false, "未找到域名：" + clean(areaName));
+            sendMutationResponse(player, false, translate(player, "description.server.error.area_not_found", clean(areaName)));
             return;
         }
         if (!PermissionService.hasCommandPermission(player, PermissionNodes.ADD_DESCRIPTION, 0)
             || !AreaPermissionUtil.canModifyArea(player, context.area(), context.allAreas())) {
-            sendMutationResponse(player, false, "你没有权限修改该域名描述");
+            sendMutationResponse(player, false, translate(player, "description.server.error.no_modify_permission"));
             return;
         }
 
         Path file = DescriptionFileManager.getAreaDescriptionFile(dimensionType, context.surfaceName());
         if (hasSurfaceNameConflict(file, context.surfaceName())) {
-            sendMutationResponse(player, false, "描述文件名冲突：清理后的文件名已被其他域名描述使用");
+            sendMutationResponse(player, false, translate(player, "description.server.error.area_filename_conflict"));
             return;
         }
 
         DescriptionData data = createDescriptionData(TARGET_AREA, context.area().getName(), context.surfaceName(), dimensionType, description, player);
-        sendMutationResponse(player, DescriptionFileManager.writeDescription(file, data), "描述已保存：" + context.surfaceName());
+        sendMutationResponse(player, DescriptionFileManager.writeDescription(file, data),
+            translate(player, "description.server.success.area_saved", context.surfaceName()));
     }
 
     private static void writeDimensionalDescription(ServerPlayerEntity player, String dimensionId, String description) {
         if (!PermissionService.hasCommandPermission(player, PermissionNodes.ADD_DIMENSIONALITY_DESCRIPTION, 2)) {
-            sendMutationResponse(player, false, "你没有权限修改维度域名描述");
+            sendMutationResponse(player, false, translate(player, "description.server.error.no_dimension_modify_permission"));
             return;
         }
 
@@ -267,12 +268,13 @@ public final class DescriptionServerNetworking {
         String displayName = DimensionalNameManager.getDimensionalName(cleanDimensionId);
         Path file = DescriptionFileManager.getDimensionalDescriptionFile(displayName);
         if (hasSurfaceNameConflict(file, displayName)) {
-            sendMutationResponse(player, false, "描述文件名冲突：清理后的文件名已被其他维度域名描述使用");
+            sendMutationResponse(player, false, translate(player, "description.server.error.dimension_filename_conflict"));
             return;
         }
 
         DescriptionData data = createDescriptionData(TARGET_DIMENSION, cleanDimensionId, displayName, cleanDimensionId, description, player);
-        sendMutationResponse(player, DescriptionFileManager.writeDescription(file, data), "维度域名描述已保存：" + displayName);
+        sendMutationResponse(player, DescriptionFileManager.writeDescription(file, data),
+            translate(player, "description.server.success.dimension_saved", displayName));
     }
 
     private static void handleDelete(ServerPlayerEntity player, String targetType, String ignoredDimensionType, String targetName) {
@@ -286,30 +288,32 @@ public final class DescriptionServerNetworking {
     private static void deleteAreaDescription(ServerPlayerEntity player, String areaName) {
         String dimensionType = getPlayerDimensionType(player);
         if (dimensionType == null) {
-            sendMutationResponse(player, false, "当前维度不支持普通域名描述");
+            sendMutationResponse(player, false, translate(player, "description.server.error.unsupported_area"));
             return;
         }
 
         AreaContext context = findAreaContext(dimensionType, areaName);
         if (context == null) {
-            sendMutationResponse(player, false, "未找到域名：" + clean(areaName));
+            sendMutationResponse(player, false, translate(player, "description.server.error.area_not_found", clean(areaName)));
             return;
         }
         if (!PermissionService.hasCommandPermission(player, PermissionNodes.DELETE_DESCRIPTION, 0)
             || !AreaPermissionUtil.canModifyArea(player, context.area(), context.allAreas())) {
-            sendMutationResponse(player, false, "你没有权限删除该域名描述");
+            sendMutationResponse(player, false, translate(player, "description.server.error.no_delete_permission"));
             return;
         }
 
         Path file = DescriptionFileManager.getAreaDescriptionFile(dimensionType, context.surfaceName());
         boolean existed = Files.exists(file);
         boolean success = DescriptionFileManager.deleteDescription(file);
-        sendMutationResponse(player, success, existed ? "描述已删除：" + context.surfaceName() : "该域名暂无描述或已删除");
+        sendMutationResponse(player, success, existed
+            ? translate(player, "description.server.success.area_deleted", context.surfaceName())
+            : translate(player, "description.server.message.no_description_or_deleted"));
     }
 
     private static void deleteDimensionalDescription(ServerPlayerEntity player, String dimensionId) {
         if (!PermissionService.hasCommandPermission(player, PermissionNodes.DELETE_DIMENSIONALITY_DESCRIPTION, 2)) {
-            sendMutationResponse(player, false, "你没有权限删除维度域名描述");
+            sendMutationResponse(player, false, translate(player, "description.server.error.no_dimension_delete_permission"));
             return;
         }
 
@@ -318,7 +322,9 @@ public final class DescriptionServerNetworking {
         Path file = DescriptionFileManager.getDimensionalDescriptionFile(displayName);
         boolean existed = Files.exists(file);
         boolean success = DescriptionFileManager.deleteDescription(file);
-        sendMutationResponse(player, success, existed ? "维度域名描述已删除：" + displayName : "该域名暂无描述或已删除");
+        sendMutationResponse(player, success, existed
+            ? translate(player, "description.server.success.dimension_deleted", displayName)
+            : translate(player, "description.server.message.no_description_or_deleted"));
     }
 
     private static DescriptionData createDescriptionData(String targetType, String targetName, String surfaceName,
@@ -484,17 +490,25 @@ public final class DescriptionServerNetworking {
 
     private static void sendQueryResponse(ServerPlayerEntity player, String title, DescriptionData data) {
         String description = data == null || data.getDescription() == null || data.getDescription().trim().isEmpty()
-            ? NO_DESCRIPTION
+            ? translate(player, "description.book.no_description")
             : clamp(data.getDescription());
         String author = data == null || data.getAuthor() == null || data.getAuthor().trim().isEmpty()
             ? "Areas Hint"
             : data.getAuthor();
 
         PacketByteBuf buffer = PacketByteBufs.create();
-        buffer.writeString(clamp(title == null || title.isBlank() ? "域名描述" : title));
+        buffer.writeString(clamp(title == null || title.isBlank() ? defaultTitle(player) : title));
         buffer.writeString(clamp(author));
         buffer.writeString(description);
         ServerPlayNetworking.send(player, Packets.S2C_DESCRIPTION_QUERY_RESPONSE, buffer);
+    }
+
+    private static String defaultTitle(ServerPlayerEntity player) {
+        return translate(player, "description.book.default.title");
+    }
+
+    private static String translate(ServerPlayerEntity player, String key, Object... args) {
+        return ServerI18nManager.translateForPlayer(player.getUuid(), key, args);
     }
 
     private static void sendListResponse(ServerPlayerEntity player, String operation, String targetType, String dimensionType, List<ListEntry> entries) {

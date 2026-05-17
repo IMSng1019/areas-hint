@@ -1,5 +1,6 @@
 package areahint.description;
 
+import areahint.i18n.I18nManager;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.MinecraftClient;
@@ -92,7 +93,7 @@ public class DescriptionManager {
 
     private void start(String operation, String targetType, String commandPrefix) {
         if (isActive()) {
-            sendMessage("已有描述交互流程正在进行", Formatting.RED);
+            sendMessage(I18nManager.translate("description.manager.error.active"), Formatting.RED);
             return;
         }
 
@@ -149,7 +150,7 @@ public class DescriptionManager {
         selectedEntry = null;
         pendingDescription = null;
         state = State.WAITING_TARGET_SELECT;
-        sendMessage("正在加载可操作目标...", Formatting.YELLOW);
+        sendMessage(I18nManager.translate("description.manager.loading.targets"), Formatting.YELLOW);
         DescriptionClientNetworking.sendListRequest(operation, targetType, currentDimension, "");
     }
 
@@ -163,7 +164,7 @@ public class DescriptionManager {
         this.entries.clear();
         this.entries.addAll(entries);
         if (entries.isEmpty()) {
-            sendMessage("没有可操作的目标", Formatting.RED);
+            sendMessage(I18nManager.translate("description.manager.error.no_targets"), Formatting.RED);
             reset();
             return;
         }
@@ -189,7 +190,7 @@ public class DescriptionManager {
                 return;
             }
         }
-        sendMessage("未找到所选目标：" + id, Formatting.RED);
+        sendMessage(I18nManager.translate("description.manager.error.not_found", id), Formatting.RED);
     }
 
     private void openBookEditor() {
@@ -213,11 +214,11 @@ public class DescriptionManager {
         }
         String cleaned = description == null ? "" : description.trim();
         if (cleaned.isEmpty()) {
-            sendMessage("描述不能为空，请重新输入或取消", Formatting.RED);
+            sendMessage(I18nManager.translate("description.manager.error.empty.retry"), Formatting.RED);
             return;
         }
         if (cleaned.length() > DescriptionServerNetworking.MAX_DESCRIPTION_LENGTH) {
-            sendMessage("描述过长，最多 32767 个字符，请重新输入或取消", Formatting.RED);
+            sendMessage(I18nManager.translate("description.manager.error.too_long.retry"), Formatting.RED);
             return;
         }
         pendingDescription = cleaned;
@@ -238,7 +239,7 @@ public class DescriptionManager {
         }
         if (DescriptionClientNetworking.sendWrite(targetType, currentDimension, selectedEntry.id(), pendingDescription)) {
             state = State.SUBMITTING;
-            sendMessage("已发送保存请求", Formatting.YELLOW);
+            sendMessage(I18nManager.translate("description.manager.message.save.sent"), Formatting.YELLOW);
         }
     }
 
@@ -256,7 +257,7 @@ public class DescriptionManager {
         }
         DescriptionClientNetworking.sendDelete(targetType, currentDimension, selectedEntry.id());
         state = State.SUBMITTING;
-        sendMessage("已发送删除请求", Formatting.YELLOW);
+        sendMessage(I18nManager.translate("description.manager.message.delete.sent"), Formatting.YELLOW);
     }
 
     private boolean isMatchingListResponse(String responseOperation, String responseTargetType, String responseDimension) {
@@ -302,7 +303,7 @@ public class DescriptionManager {
 
     public void cancel() {
         if (isActive()) {
-            sendMessage("已取消描述操作", Formatting.YELLOW);
+            sendMessage(I18nManager.translate("description.manager.message.cancelled"), Formatting.YELLOW);
         }
         reset();
     }

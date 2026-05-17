@@ -3,6 +3,7 @@ package areahint.signature;
 import areahint.data.AreaData;
 import areahint.dimensional.ClientDimensionalNameManager;
 import areahint.file.FileManager;
+import areahint.i18n.I18nManager;
 import areahint.network.Packets;
 import areahint.world.ClientWorldFolderManager;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
@@ -105,7 +106,7 @@ public class SignatureManager {
             return;
         }
         if (active) {
-            sendMessage("当前已有签名操作正在进行", Formatting.RED);
+            sendMessage(I18nManager.translate("signature.manager.error.active"), Formatting.RED);
             return;
         }
 
@@ -119,7 +120,7 @@ public class SignatureManager {
         selectableAreas.clear();
         selectableAreas.addAll(loadModifiableAreas());
         if (selectableAreas.isEmpty()) {
-            sendMessage("没有可修改签名的域名", Formatting.RED);
+            sendMessage(I18nManager.translate("signature.manager.error.no_areas"), Formatting.RED);
             reset();
             return;
         }
@@ -138,12 +139,12 @@ public class SignatureManager {
         String cleanedName = stripQuotes(areaName);
         AreaData area = findAreaByName(cleanedName, selectableAreas);
         if (area == null) {
-            sendMessage("无权修改或未找到域名：" + cleanedName, Formatting.RED);
+            sendMessage(I18nManager.translate("signature.manager.error.area_not_found_or_denied", cleanedName), Formatting.RED);
             return;
         }
 
         if (operation == Operation.DELETE && getRemovableSignatures(area).isEmpty()) {
-            sendMessage("该域名没有可删除的扩展签名：" + cleanedName, Formatting.RED);
+            sendMessage(I18nManager.translate("signature.manager.error.no_removable_signatures", cleanedName), Formatting.RED);
             SignatureUI.showAreaSelectionScreen(operation, selectableAreas, currentPlayerAdmin);
             return;
         }
@@ -163,18 +164,18 @@ public class SignatureManager {
 
         String cleanedPlayerName = stripQuotes(playerName);
         if (cleanedPlayerName.isEmpty()) {
-            sendMessage("玩家名不能为空", Formatting.RED);
+            sendMessage(I18nManager.translate("signature.manager.error.empty_player"), Formatting.RED);
             SignatureUI.showPlayerNamePrompt(operation, selectedArea, getRemovableSignatures(selectedArea));
             return;
         }
 
         if (operation == Operation.ADD && selectedArea.hasSignature(cleanedPlayerName)) {
-            sendMessage("该玩家已经是此域名签名：" + cleanedPlayerName, Formatting.RED);
+            sendMessage(I18nManager.translate("signature.manager.error.player_already_signed", cleanedPlayerName), Formatting.RED);
             SignatureUI.showPlayerNamePrompt(operation, selectedArea, getRemovableSignatures(selectedArea));
             return;
         }
         if (operation == Operation.DELETE && !hasExtensionSignature(selectedArea, cleanedPlayerName)) {
-            sendMessage("扩展签名中不存在该玩家：" + cleanedPlayerName, Formatting.RED);
+            sendMessage(I18nManager.translate("signature.manager.error.player_not_extension", cleanedPlayerName), Formatting.RED);
             SignatureUI.showPlayerNamePrompt(operation, selectedArea, getRemovableSignatures(selectedArea));
             return;
         }
@@ -193,7 +194,7 @@ public class SignatureManager {
         }
 
         String cleanedInput = input == null ? "" : input.trim();
-        if ("cancel".equalsIgnoreCase(cleanedInput) || "取消".equals(cleanedInput)) {
+        if ("cancel".equalsIgnoreCase(cleanedInput) || I18nManager.translate("common.cancel.keyword").equals(cleanedInput)) {
             cancel();
             return true;
         }
@@ -239,7 +240,7 @@ public class SignatureManager {
      */
     private void submitToServer() {
         if (client.world == null || selectedArea == null || selectedArea.getName() == null) {
-            sendMessage("当前世界或域名不可用", Formatting.RED);
+            sendMessage(I18nManager.translate("signature.manager.error.world_or_area_unavailable"), Formatting.RED);
             reset();
             return;
         }
@@ -250,13 +251,13 @@ public class SignatureManager {
             : client.world.getRegistryKey().getValue().toString();
         String operationName = operation == Operation.ADD ? "add" : "delete";
         SignatureClientNetworking.sendToServer(operationName, selectedArea.getName(), dimension, targetPlayerName);
-        sendMessage("签名请求已发送到服务端处理", Formatting.GREEN);
+        sendMessage(I18nManager.translate("signature.manager.message.request.sent"), Formatting.GREEN);
         reset();
     }
 
     public void cancel() {
         if (active) {
-            sendMessage("已取消签名操作", Formatting.YELLOW);
+            sendMessage(I18nManager.translate("signature.manager.message.cancelled"), Formatting.YELLOW);
         }
         reset();
     }

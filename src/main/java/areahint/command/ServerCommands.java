@@ -554,9 +554,9 @@ public class ServerCommands {
         source.sendMessage(Text.translatable("help.command.recolor"));
         source.sendMessage(Text.translatable("help.command.rename"));
         source.sendMessage(Text.translatable("help.command.sethigh"));
-        source.sendMessage(Text.literal("/areahint tcp [域名] - 中心传送到当前维度域名"));
-        source.sendMessage(Text.literal("/areahint udp [域名] - 随机传送到当前维度域名"));
-        source.sendMessage(Text.literal("/areahint settp [命令头] - 设置传送命令头"));
+        source.sendMessage(Text.translatable("help.command.tcp"));
+        source.sendMessage(Text.translatable("help.command.udp"));
+        source.sendMessage(Text.translatable("help.command.settp"));
         source.sendMessage(Text.translatable("help.command.replacebutton"));
         source.sendMessage(Text.translatable("help.command.check"));
         source.sendMessage(Text.translatable("help.command.dimensionalityname"));
@@ -879,7 +879,7 @@ public class ServerCommands {
         // 向客户端发送命令
         sendClientCommand(source, "areahint:frequency " + value);
         
-        source.sendMessage(Text.translatable("command.message.general_16").append(Text.literal(value + "§a Hz")));
+        source.sendMessage(Text.translatable("command.message.general_16").append(Text.literal(value + " ")).append(Text.translatable("command.message.frequency.unit")));
         
         return Command.SINGLE_SUCCESS;
     }
@@ -915,7 +915,7 @@ public class ServerCommands {
             // 向客户端发送命令
             sendClientCommand(source, "areahint:subtitlerender " + normalizedMode);
 
-            source.sendMessage(Text.literal("§a已将字幕渲染方式请求发送到客户端，最终结果以客户端提示为准"));
+            source.sendMessage(Text.translatable("command.message.subtitlerender.sent"));
 
             return Command.SINGLE_SUCCESS;
         } else {

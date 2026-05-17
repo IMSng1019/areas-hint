@@ -13,6 +13,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 
+import areahint.i18n.I18nManager;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +43,7 @@ public final class DescriptionBookEditScreen extends Screen {
     private boolean canceled;
 
     private DescriptionBookEditScreen(PlayerEntity player, List<String> pages, Screen previousScreen) {
-        super(Text.literal("编辑域名描述"));
+        super(Text.literal(I18nManager.translate("description.book.title")));
         this.player = player;
         this.pages = pages;
         this.previousScreen = previousScreen;
@@ -59,7 +61,7 @@ public final class DescriptionBookEditScreen extends Screen {
         if (client.player == null) {
             return;
         }
-        client.player.sendMessage(Text.literal("请在打开的书本界面中编辑描述，点击『完成』后将直接保存。"), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.book.instruction")), false);
         client.setScreen(new DescriptionBookEditScreen(client.player, splitToBookPages(initialDescription), client.currentScreen));
     }
 
@@ -179,7 +181,7 @@ public final class DescriptionBookEditScreen extends Screen {
         Optional<String> description = getDescription();
         if (description.isEmpty()) {
             if (player != null) {
-                player.sendMessage(Text.literal("描述不能为空").formatted(Formatting.RED), false);
+                player.sendMessage(Text.literal(I18nManager.translate("description.book.error.empty")).formatted(Formatting.RED), false);
             }
             return;
         }

@@ -8,6 +8,8 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import areahint.i18n.I18nManager;
+
 import java.util.List;
 
 /**
@@ -23,10 +25,10 @@ public final class DescriptionUI {
             return;
         }
 
-        String target = dimensionTarget ? "维度域名" : "域名";
-        String operation = deleteOperation ? "删除描述" : "添加描述";
-        client.player.sendMessage(Text.literal("==== " + target + operation + " ====").formatted(Formatting.AQUA), false);
-        client.player.sendMessage(Text.literal("正在列出全部可修改的" + target + "..."), false);
+        String target = dimensionTarget ? I18nManager.translate("description.ui.target.dimension") : I18nManager.translate("description.ui.target.area");
+        String operation = deleteOperation ? I18nManager.translate("description.ui.operation.delete") : I18nManager.translate("description.ui.operation.add");
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.title.header", target, operation)).formatted(Formatting.AQUA), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.loading", target)), false);
         client.player.sendMessage(cancelButton(commandPrefix), false);
     }
 
@@ -36,7 +38,7 @@ public final class DescriptionUI {
             return;
         }
 
-        client.player.sendMessage(Text.literal("请选择目标：").formatted(Formatting.AQUA), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.select.prompt")).formatted(Formatting.AQUA), false);
         for (DescriptionListEntry entry : entries) {
             MutableText button = Text.literal("[" + nullToText(entry.displayName()) + "]")
                 .setStyle(Style.EMPTY
@@ -55,8 +57,8 @@ public final class DescriptionUI {
             return;
         }
 
-        client.player.sendMessage(Text.literal("已选择：" + nullToText(entry.displayName())).formatted(Formatting.GREEN), false);
-        client.player.sendMessage(Text.literal("将打开原版书本编辑界面，请在书中输入描述并点击完成保存。"), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.selected", nullToText(entry.displayName()))).formatted(Formatting.GREEN), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.book.instruction")), false);
         client.player.sendMessage(cancelButton(commandPrefix), false);
     }
 
@@ -66,20 +68,20 @@ public final class DescriptionUI {
             return;
         }
 
-        client.player.sendMessage(Text.literal("==== 确认保存描述 ====").formatted(Formatting.AQUA), false);
-        client.player.sendMessage(Text.literal("目标：" + nullToText(entry.displayName())), false);
-        client.player.sendMessage(Text.literal("描述长度：" + (description == null ? 0 : description.length())), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.confirm.save.title")).formatted(Formatting.AQUA), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.confirm.target", nullToText(entry.displayName()))), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.confirm.length", (description == null ? 0 : description.length()))), false);
         String preview = description == null ? "" : description;
         if (preview.length() > 120) {
             preview = preview.substring(0, 120) + "...";
         }
-        client.player.sendMessage(Text.literal("预览：" + preview), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.confirm.preview", preview)), false);
 
-        MutableText confirm = Text.literal("[确认保存]")
+        MutableText confirm = Text.literal(I18nManager.translate("description.ui.button.confirm.save"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint " + commandPrefix + " confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("保存描述文件")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(I18nManager.translate("description.ui.hover.save"))))
                 .withColor(Formatting.GREEN));
         client.player.sendMessage(Text.empty().append(confirm).append(Text.literal(" ")).append(cancelButton(commandPrefix)), false);
     }
@@ -90,14 +92,14 @@ public final class DescriptionUI {
             return;
         }
 
-        client.player.sendMessage(Text.literal("==== 确认删除描述 ====").formatted(Formatting.RED), false);
-        client.player.sendMessage(Text.literal("目标：" + nullToText(entry.displayName())), false);
-        client.player.sendMessage(Text.literal("此操作只删除描述文件，不删除域名。"), false);
-        MutableText confirm = Text.literal("[继续删除]")
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.confirm.delete.title")).formatted(Formatting.RED), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.confirm.target", nullToText(entry.displayName()))), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.confirm.delete.warning")), false);
+        MutableText confirm = Text.literal(I18nManager.translate("description.ui.button.continue.delete"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint " + commandPrefix + " confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("进入二次确认")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(I18nManager.translate("description.ui.hover.second.confirm"))))
                 .withColor(Formatting.RED));
         client.player.sendMessage(Text.empty().append(confirm).append(Text.literal(" ")).append(cancelButton(commandPrefix)), false);
     }
@@ -108,35 +110,35 @@ public final class DescriptionUI {
             return;
         }
 
-        client.player.sendMessage(Text.literal("二次确认：只删除描述文件，不删除域名。").formatted(Formatting.RED), false);
-        client.player.sendMessage(Text.literal("目标：" + nullToText(entry.displayName())), false);
-        MutableText confirm = Text.literal("[确认只删除描述]")
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.confirm.delete.second.warning")).formatted(Formatting.RED), false);
+        client.player.sendMessage(Text.literal(I18nManager.translate("description.ui.confirm.target", nullToText(entry.displayName()))), false);
+        MutableText confirm = Text.literal(I18nManager.translate("description.ui.button.confirm.delete.only"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint " + commandPrefix + " confirm2"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("确认删除描述文件")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(I18nManager.translate("description.ui.hover.confirm.delete"))))
                 .withColor(Formatting.RED)
                 .withBold(true));
         client.player.sendMessage(Text.empty().append(confirm).append(Text.literal(" ")).append(cancelButton(commandPrefix)), false);
     }
 
     private static MutableText cancelButton(String commandPrefix) {
-        return Text.literal("[取消]")
+        return Text.literal(I18nManager.translate("description.ui.button.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint " + commandPrefix + " cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("取消本次操作")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(I18nManager.translate("description.ui.hover.cancel"))))
                 .withColor(Formatting.RED));
     }
 
     private static Text createHoverText(DescriptionListEntry entry) {
         return Text.literal(
-            "显示名：" + nullToText(entry.displayName()) + "\n" +
-            "真实名称/维度ID：" + nullToText(entry.id()) + "\n" +
-            "等级：" + (entry.level() == 0 ? "维度域名" : entry.level()) + "\n" +
-            "上级域名：" + nullToText(entry.baseName()) + "\n" +
-            "签名者：" + nullToText(entry.signature()) + "\n" +
-            "维度：" + nullToText(entry.dimension())
+            I18nManager.translate("description.ui.hover.displayname") + nullToText(entry.displayName()) + "\n" +
+            I18nManager.translate("description.ui.hover.realname") + nullToText(entry.id()) + "\n" +
+            I18nManager.translate("description.ui.hover.level") + (entry.level() == 0 ? I18nManager.translate("description.ui.target.dimension") : entry.level()) + "\n" +
+            I18nManager.translate("description.ui.hover.parent") + nullToText(entry.baseName()) + "\n" +
+            I18nManager.translate("description.ui.hover.signature") + nullToText(entry.signature()) + "\n" +
+            I18nManager.translate("description.ui.hover.dimension") + nullToText(entry.dimension())
         );
     }
 
@@ -146,6 +148,6 @@ public final class DescriptionUI {
     }
 
     private static String nullToText(String value) {
-        return value == null || value.trim().isEmpty() ? "无" : value;
+        return value == null || value.trim().isEmpty() ? I18nManager.translate("description.ui.none") : value;
     }
 }
