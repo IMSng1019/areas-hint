@@ -1,8 +1,9 @@
 package areahint.signature;
 
-import areahint.Areashint;
 import areahint.data.AreaData;
+import areahint.dimensional.ClientDimensionalNameManager;
 import areahint.file.FileManager;
+import areahint.network.Packets;
 import areahint.world.ClientWorldFolderManager;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.minecraft.client.MinecraftClient;
@@ -12,6 +13,7 @@ import net.minecraft.util.Formatting;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Signature客户端交互状态管理。
@@ -242,7 +244,10 @@ public class SignatureManager {
             return;
         }
 
-        String dimension = client.world.getRegistryKey().getValue().toString();
+        // 签名流程开始时已经锁定了维度，提交时继续使用同一个维度，避免玩家中途切维度后写错文件。
+        String dimension = currentDimension != null
+            ? currentDimension
+            : client.world.getRegistryKey().getValue().toString();
         String operationName = operation == Operation.ADD ? "add" : "delete";
         SignatureClientNetworking.sendToServer(operationName, selectedArea.getName(), dimension, targetPlayerName);
         sendMessage("签名请求已发送到服务端处理", Formatting.GREEN);
@@ -288,7 +293,34 @@ public class SignatureManager {
             return false;
         }
         AreaData baseArea = findAreaByName(area.getBaseName(), allAreas);
-        return baseArea != null && baseArea.hasSignature(playerName);
+        return baseArea != null && baseArea.hasSignature(playerName)
+            || isDimensionalBaseSignedByPlayer(area.getBaseName(), playerName);
+    }
+
+    /**
+     * 客户端预筛选也要识别维度域名签名。
+     *
+     * <p>最终权限仍由服务端判断；这里仅用于让普通玩家在交互列表里看到
+     * base-name 指向其维度域名签名的域名。</p>
+     */
+    private boolean isDimensionalBaseSignedByPlayer(String baseName, String playerName) {
+        String cleanedBaseName = cleanSignature(baseName);
+        String cleanedPlayerName = cleanSignature(playerName);
+        if (cleanedBaseName == null || cleanedPlayerName == null) {
+            return false;
+        }
+
+        if (ClientDimensionalNameManager.isSignedBy(cleanedBaseName, cleanedPlayerName)) {
+            return true;
+        }
+
+        for (java.util.Map.Entry<String, String> entry : ClientDimensionalNameManager.getAllDimensionalNames().entrySet()) {
+            if (cleanedBaseName.equals(entry.getKey()) || cleanedBaseName.equals(entry.getValue())) {
+                return ClientDimensionalNameManager.isSignedBy(entry.getKey(), cleanedPlayerName);
+            }
+        }
+
+        return false;
     }
 
     private List<AreaData> loadCurrentDimensionAreas() {
@@ -314,17 +346,29 @@ public class SignatureManager {
             return null;
         }
 
-        String lower = dimension.toLowerCase();
-        if (lower.contains("overworld")) {
-            return Areashint.OVERWORLD_FILE;
+        String dimensionType = convertDimensionIdToType(dimension);
+        return Packets.getFileNameForDimension(dimensionType);
+    }
+
+    /**
+     * 将完整维度ID或维度路径转换为模组内部维度类型。
+     *
+     * <p>这里必须精确比较 path，不能用 contains，否则类似 other:end_city
+     * 这样的自定义维度会被误判为末地文件。</p>
+     */
+    private String convertDimensionIdToType(String dimension) {
+        if (dimension == null) {
+            return null;
         }
-        if (lower.contains("nether")) {
-            return Areashint.NETHER_FILE;
+
+        String normalized = dimension.trim().toLowerCase(Locale.ROOT);
+        if (normalized.isEmpty()) {
+            return null;
         }
-        if (lower.contains("end")) {
-            return Areashint.END_FILE;
-        }
-        return null;
+
+        int colonIndex = normalized.lastIndexOf(':');
+        String dimensionPath = colonIndex >= 0 ? normalized.substring(colonIndex + 1) : normalized;
+        return Packets.convertDimensionPathToType(dimensionPath);
     }
 
     private AreaData findAreaByName(String name, List<AreaData> areas) {

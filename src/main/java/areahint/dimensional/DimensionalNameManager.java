@@ -31,6 +31,8 @@ public class DimensionalNameManager {
     private static Map<String, String> dimensionalNames = new HashMap<>();
     // 当前维度颜色配置
     private static Map<String, String> dimensionalColors = new HashMap<>();
+    // 当前维度签名配置
+    private static Map<String, String> dimensionalSignatures = new HashMap<>();
     
     /**
      * 初始化维度域名管理器
@@ -58,10 +60,14 @@ public class DimensionalNameManager {
             
             dimensionalNames.clear();
             dimensionalColors.clear();
+            dimensionalSignatures.clear();
             for (DimensionalNameData data : dataList) {
                 dimensionalNames.put(data.getDimensionId(), data.getDisplayName());
                 if (data.getColor() != null) {
                     dimensionalColors.put(data.getDimensionId(), data.getColor());
+                }
+                if (data.getSignature() != null && !data.getSignature().trim().isEmpty()) {
+                    dimensionalSignatures.put(data.getDimensionId(), data.getSignature().trim());
                 }
             }
             
@@ -71,6 +77,8 @@ public class DimensionalNameManager {
             Areashint.LOGGER.error("加载维度域名配置失败，使用默认配置: " + e.getMessage());
             dimensionalNames.clear();
             dimensionalNames.putAll(DEFAULT_DIMENSIONAL_NAMES);
+            dimensionalColors.clear();
+            dimensionalSignatures.clear();
         }
     }
     
@@ -85,7 +93,8 @@ public class DimensionalNameManager {
             List<DimensionalNameData> dataList = new ArrayList<>();
             for (Map.Entry<String, String> entry : dimensionalNames.entrySet()) {
                 dataList.add(new DimensionalNameData(entry.getKey(), entry.getValue(),
-                    dimensionalColors.get(entry.getKey())));
+                    dimensionalColors.get(entry.getKey()),
+                    dimensionalSignatures.get(entry.getKey())));
             }
             
             String json = GSON.toJson(dataList);
@@ -119,6 +128,8 @@ public class DimensionalNameManager {
         // 初始化当前配置
         dimensionalNames.clear();
         dimensionalNames.putAll(DEFAULT_DIMENSIONAL_NAMES);
+        dimensionalColors.clear();
+        dimensionalSignatures.clear();
         
         Areashint.LOGGER.info("已创建默认维度域名配置文件: " + configFile);
     }
@@ -150,6 +161,17 @@ public class DimensionalNameManager {
     public static void setDimensionalName(String dimensionId, String displayName) {
         dimensionalNames.put(dimensionId, displayName);
         Areashint.LOGGER.info("已更新维度域名: {} -> {}", dimensionId, displayName);
+    }
+
+    /**
+     * 设置维度域名，并在没有签名时记录首次创建者。
+     * @param dimensionId 维度标识符
+     * @param displayName 显示名称
+     * @param signature 创建者签名
+     */
+    public static void setDimensionalName(String dimensionId, String displayName, String signature) {
+        setDimensionalName(dimensionId, displayName);
+        setDimensionalSignatureIfAbsent(dimensionId, signature);
     }
     
     /**
@@ -185,10 +207,52 @@ public class DimensionalNameManager {
         return new HashMap<>(dimensionalColors);
     }
 
+    public static String getDimensionalSignature(String dimensionId) {
+        return dimensionalSignatures.getOrDefault(dimensionId, null);
+    }
+
+    public static void setDimensionalSignature(String dimensionId, String signature) {
+        String cleanedSignature = cleanSignature(signature);
+        if (cleanedSignature == null) {
+            dimensionalSignatures.remove(dimensionId);
+            Areashint.LOGGER.info("已清除维度域名签名: {}", dimensionId);
+            return;
+        }
+        dimensionalSignatures.put(dimensionId, cleanedSignature);
+        Areashint.LOGGER.info("已更新维度域名签名: {} -> {}", dimensionId, cleanedSignature);
+    }
+
+    /**
+     * 只在维度域名还没有签名时写入签名，避免后续改名覆盖原创建者。
+     */
+    public static void setDimensionalSignatureIfAbsent(String dimensionId, String signature) {
+        if (getDimensionalSignature(dimensionId) != null) {
+            return;
+        }
+        String cleanedSignature = cleanSignature(signature);
+        if (cleanedSignature != null) {
+            dimensionalSignatures.put(dimensionId, cleanedSignature);
+            Areashint.LOGGER.info("已记录维度域名首次签名: {} -> {}", dimensionId, cleanedSignature);
+        }
+    }
+
+    public static Map<String, String> getAllDimensionalSignatures() {
+        return new HashMap<>(dimensionalSignatures);
+    }
+
     public static void resetToDefaults() {
         dimensionalNames.clear();
         dimensionalNames.putAll(DEFAULT_DIMENSIONAL_NAMES);
         dimensionalColors.clear();
+        dimensionalSignatures.clear();
         Areashint.LOGGER.info("维度域名配置已重置为默认值");
+    }
+
+    private static String cleanSignature(String signature) {
+        if (signature == null) {
+            return null;
+        }
+        String cleanedSignature = signature.trim();
+        return cleanedSignature.isEmpty() ? null : cleanedSignature;
     }
 } 

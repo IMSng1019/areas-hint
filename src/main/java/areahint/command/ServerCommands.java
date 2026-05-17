@@ -1193,8 +1193,7 @@ public class ServerCommands {
             if (baseName == null) {
                 return false;
             }
-            AreaData baseArea = AreaPermissionUtil.findByName(areas, baseName);
-            return AreaPermissionUtil.isSignedBy(baseArea, playerName);
+            return AreaPermissionUtil.isBaseSignedByPlayer(baseName, areas, playerName);
         });
     }
 

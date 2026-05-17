@@ -159,7 +159,7 @@ public class DimensionalNameCommands {
     public static void handleDimNameChange(ServerCommandSource source, String dimensionId, String newName) {
         try {
             String oldName = DimensionalNameManager.getDimensionalName(dimensionId);
-            DimensionalNameManager.setDimensionalName(dimensionId, newName);
+            DimensionalNameManager.setDimensionalName(dimensionId, newName, source.getName());
 
             if (DimensionalNameManager.saveDimensionalNames()) {
                 source.sendFeedback(() -> Text.translatable("command.message.area.dimension_2"), false);

@@ -17,6 +17,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 
 import static areahint.network.TranslatableMessage.lit;
 
@@ -138,25 +139,23 @@ public class SignatureServerNetworking {
         }
 
         String playerName = player.getGameProfile().getName();
-        AreaData baseArea = AreaPermissionUtil.findByName(allAreas, baseName);
-        return baseArea != null && baseArea.hasSignature(playerName);
+        return AreaPermissionUtil.isBaseSignedByPlayer(baseName, allAreas, playerName);
     }
 
     private static String convertDimensionIdToType(String dimension) {
         if (dimension == null) {
             return null;
         }
-        String normalizedDimension = dimension.trim().toLowerCase();
-        if ("overworld".equals(normalizedDimension) || "minecraft:overworld".equals(normalizedDimension)) {
-            return Packets.DIMENSION_OVERWORLD;
+
+        String normalizedDimension = dimension.trim().toLowerCase(Locale.ROOT);
+        if (normalizedDimension.isEmpty()) {
+            return null;
         }
-        if ("the_nether".equals(normalizedDimension) || "minecraft:the_nether".equals(normalizedDimension)) {
-            return Packets.DIMENSION_NETHER;
-        }
-        if ("the_end".equals(normalizedDimension) || "minecraft:the_end".equals(normalizedDimension)) {
-            return Packets.DIMENSION_END;
-        }
-        return null;
+
+        // 客户端可能传完整ID（minecraft:the_end）或内部路径（the_end），服务端统一取 path 精确匹配。
+        int colonIndex = normalizedDimension.lastIndexOf(':');
+        String dimensionPath = colonIndex >= 0 ? normalizedDimension.substring(colonIndex + 1) : normalizedDimension;
+        return Packets.convertDimensionPathToType(dimensionPath);
     }
 
     private static boolean hasExtensionSignature(List<String> signatures, String target) {

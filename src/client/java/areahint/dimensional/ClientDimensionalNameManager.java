@@ -34,6 +34,8 @@ public class ClientDimensionalNameManager {
 
     // 当前维度颜色配置
     private static Map<String, String> dimensionalColors = new HashMap<>(DEFAULT_DIMENSIONAL_COLORS);
+    // 当前维度签名配置
+    private static Map<String, String> dimensionalSignatures = new HashMap<>();
     
     /**
      * 初始化客户端维度域名管理器
@@ -53,6 +55,7 @@ public class ClientDimensionalNameManager {
             
             dimensionalNames.clear();
             dimensionalColors.clear();
+            dimensionalSignatures.clear();
             dimensionalNames.putAll(DEFAULT_DIMENSIONAL_NAMES);
             dimensionalColors.putAll(DEFAULT_DIMENSIONAL_COLORS);
 
@@ -60,6 +63,9 @@ public class ClientDimensionalNameManager {
                 dimensionalNames.put(data.getDimensionId(), data.getDisplayName());
                 if (data.getColor() != null) {
                     dimensionalColors.put(data.getDimensionId(), data.getColor());
+                }
+                if (data.getSignature() != null && !data.getSignature().trim().isEmpty()) {
+                    dimensionalSignatures.put(data.getDimensionId(), data.getSignature().trim());
                 }
             }
             
@@ -106,11 +112,21 @@ public class ClientDimensionalNameManager {
         return new HashMap<>(dimensionalColors);
     }
 
+    public static String getDimensionalSignature(String dimensionId) {
+        return dimensionalSignatures.getOrDefault(dimensionId, null);
+    }
+
+    public static boolean isSignedBy(String dimensionId, String playerName) {
+        String signature = getDimensionalSignature(dimensionId);
+        return signature != null && playerName != null && signature.equals(playerName.trim());
+    }
+
     public static void resetToDefaults() {
         dimensionalNames.clear();
         dimensionalNames.putAll(DEFAULT_DIMENSIONAL_NAMES);
         dimensionalColors.clear();
         dimensionalColors.putAll(DEFAULT_DIMENSIONAL_COLORS);
+        dimensionalSignatures.clear();
         AreashintClient.LOGGER.info("客户端维度域名配置已重置为默认值");
     }
 } 

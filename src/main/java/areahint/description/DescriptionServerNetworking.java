@@ -88,15 +88,30 @@ public final class DescriptionServerNetworking {
             }
 
             AreaData area = findCurrentArea(readAreas(dimensionType), player.getX(), player.getY(), player.getZ());
-            if (area == null) {
-                sendQueryResponse(player, "域名描述", null);
+            if (area != null) {
+                String surfaceName = getSurfaceName(area);
+                Path areaFile = DescriptionFileManager.getAreaDescriptionFile(dimensionType, surfaceName);
+                DescriptionData areaDescription = DescriptionFileManager.readDescription(areaFile);
+                if (hasUsableDescription(areaDescription)) {
+                    sendQueryResponse(player, surfaceName, areaDescription);
+                    return;
+                }
+            }
+
+            String dimensionId = getPlayerDimensionId(player);
+            String displayName = DimensionalNameManager.getDimensionalName(dimensionId);
+            Path dimensionFile = DescriptionFileManager.getDimensionalDescriptionFile(displayName);
+            DescriptionData dimensionDescription = DescriptionFileManager.readDescription(dimensionFile);
+            if (hasUsableDescription(dimensionDescription)) {
+                sendQueryResponse(player, displayName, dimensionDescription);
                 return;
             }
 
-            String surfaceName = getSurfaceName(area);
-            Path file = DescriptionFileManager.getAreaDescriptionFile(dimensionType, surfaceName);
-            DescriptionData data = DescriptionFileManager.readDescription(file);
-            sendQueryResponse(player, surfaceName, data);
+            if (area != null) {
+                sendQueryResponse(player, getSurfaceName(area), null);
+            } else {
+                sendQueryResponse(player, displayName, null);
+            }
         } catch (Exception e) {
             Areashint.LOGGER.error("查询当前域名描述失败", e);
             sendQueryResponse(player, "域名描述", null);
@@ -459,6 +474,12 @@ public final class DescriptionServerNetworking {
         return existing != null
             && existing.getSurfaceName() != null
             && !existing.getSurfaceName().equals(surfaceName);
+    }
+
+    private static boolean hasUsableDescription(DescriptionData data) {
+        return data != null
+            && data.getDescription() != null
+            && !data.getDescription().trim().isEmpty();
     }
 
     private static void sendQueryResponse(ServerPlayerEntity player, String title, DescriptionData data) {

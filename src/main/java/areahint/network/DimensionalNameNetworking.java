@@ -64,10 +64,12 @@ public class DimensionalNameNetworking {
     private static String buildJsonData() {
         Map<String, String> names = DimensionalNameManager.getAllDimensionalNames();
         Map<String, String> colors = DimensionalNameManager.getAllDimensionalColors();
+        Map<String, String> signatures = DimensionalNameManager.getAllDimensionalSignatures();
         List<DimensionalNameData> dataList = new ArrayList<>();
         for (Map.Entry<String, String> entry : names.entrySet()) {
             dataList.add(new DimensionalNameData(entry.getKey(), entry.getValue(),
-                colors.get(entry.getKey())));
+                colors.get(entry.getKey()),
+                signatures.get(entry.getKey())));
         }
         return GSON.toJson(dataList);
     }

@@ -121,8 +121,7 @@ public class ShrinkAreaServerNetworking {
                 return true;
             }
             String playerName = player.getGameProfile().getName();
-            AreaData baseArea = AreaPermissionUtil.findByName(existingAreas, existingArea.getBaseName());
-            return AreaPermissionUtil.isSignedBy(baseArea, playerName);
+            return AreaPermissionUtil.isBaseSignedByPlayer(existingArea.getBaseName(), existingAreas, playerName);
         });
     }
 
