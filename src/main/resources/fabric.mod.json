@@ -21,6 +21,9 @@
 		"client": [
 			"areahint.AreashintClient"
 		],
+		"modmenu": [
+			"areahint.modmenu.AreasHintModMenuApi"
+		],
 		"fabric-datagen": [
 			"areahint.AreashintDataGenerator"
 		]
@@ -40,6 +43,7 @@
 	},
 	"suggests": {
 		"sodium": "*",
+		"modmenu": "*",
 		"luckperms": "*",
 		"bluemap": "*",
 		"vulkanmod": "*"
