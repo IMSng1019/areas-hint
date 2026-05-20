@@ -46,7 +46,7 @@ public class AreasHintConfigScreen extends Screen {
     protected void init() {
         this.listeningForKey = false;
         this.list = new ConfigListWidget(this.client, this.width, this.height, 32, this.height - 32);
-        this.addSelectableChild(this.list);
+        this.addDrawableChild(this.list);
         rebuildList();
         addFooterButtons();
     }
@@ -158,7 +158,6 @@ public class AreasHintConfigScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context, mouseX, mouseY, delta);
-        this.list.render(context, mouseX, mouseY, delta);
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 12, 0xFFFFFF);
         super.render(context, mouseX, mouseY, delta);
     }
@@ -257,6 +256,8 @@ public class AreasHintConfigScreen extends Screen {
     }
 
     private class ConfigListWidget extends ElementListWidget<ConfigListWidget.Entry> {
+        private ClickableWidget focusedConfigWidget;
+
         ConfigListWidget(MinecraftClient client, int width, int height, int top, int bottom) {
             super(client, width, bottom - top, top, 24);
             this.setRenderBackground(false);
@@ -279,7 +280,56 @@ public class AreasHintConfigScreen extends Screen {
             return Math.min(420, AreasHintConfigScreen.this.width - 40);
         }
 
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            ClickableWidget widget = findConfigWidgetAt(mouseX, mouseY);
+            if (widget != null && widget.mouseClicked(mouseX, mouseY, button)) {
+                // 原版列表的行命中只知道“点中了某一行”，这里再明确把点击交给行内按钮或滑块。
+                this.focusedConfigWidget = widget;
+                return true;
+            }
+
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+
+        @Override
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            if (this.focusedConfigWidget != null) {
+                ClickableWidget widget = this.focusedConfigWidget;
+                this.focusedConfigWidget = null;
+                if (widget.mouseReleased(mouseX, mouseY, button)) {
+                    return true;
+                }
+            }
+
+            return super.mouseReleased(mouseX, mouseY, button);
+        }
+
+        @Override
+        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            if (this.focusedConfigWidget != null
+                    && this.focusedConfigWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
+                return true;
+            }
+
+            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        }
+
+        private ClickableWidget findConfigWidgetAt(double mouseX, double mouseY) {
+            for (Entry entry : this.children()) {
+                ClickableWidget widget = entry.getConfigWidget();
+                if (widget != null && widget.isMouseOver(mouseX, mouseY)) {
+                    return widget;
+                }
+            }
+
+            return null;
+        }
+
         abstract class Entry extends ElementListWidget.Entry<Entry> {
+            ClickableWidget getConfigWidget() {
+                return null;
+            }
         }
 
         private class GroupEntry extends Entry {
@@ -329,6 +379,11 @@ public class AreasHintConfigScreen extends Screen {
             @Override
             public List<? extends net.minecraft.client.gui.Selectable> selectableChildren() {
                 return List.of(this.widget);
+            }
+
+            @Override
+            ClickableWidget getConfigWidget() {
+                return this.widget;
             }
         }
     }
