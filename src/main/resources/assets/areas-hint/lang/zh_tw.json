@@ -1519,7 +1519,6 @@
   "description.delete.confirm": "只刪除描述檔，不刪除域名",
   "description.too_long": "描述過長，最多 32767 個字元",
   "description.filename_conflict": "描述檔名衝突",
-
   "description.ui.target.dimension": "維度域名",
   "description.ui.target.area": "域名",
   "description.ui.operation.delete": "刪除描述",
@@ -1555,7 +1554,6 @@
   "description.book.instruction": "請在開啟的書本介面中編輯描述，點擊『完成』後將直接儲存。",
   "description.book.error.empty": "描述不能為空",
   "description.error.too_long": "描述過長，最多 32767 個字元",
-
   "signature.ui.title.select": "{0}域名擴展簽名 - 選擇域名",
   "signature.ui.prompt.select": "§a請選擇需要{0}擴展簽名的域名：",
   "signature.ui.mode.admin": "§7管理員模式：目前維度全部域名均可選擇",
@@ -1591,7 +1589,6 @@
   "signature.ui.operation.add": "新增",
   "signature.ui.operation.delete": "刪除",
   "signature.ui.none": "無",
-
   "teleport.error.no_areas": "§c目前維度沒有可傳送域名",
   "teleport.prompt.select": "§6請選擇要{0}傳送的域名：",
   "teleport.hover.teleport_to": "傳送到 {0}",
@@ -1604,7 +1601,6 @@
   "teleport.message.cancelled": "§e已取消傳送格式設定",
   "teleport.error.invalid_format_detail": "§c傳送格式無效，只能作為命令頭使用，例如 tp 或 minecraft:tp",
   "teleport.message.format_set": "§a傳送格式已設定為: {0}",
-
   "help.command.tcp": "§a/areahint tcp [域名] §7- 中心傳送到目前維度域名",
   "help.command.udp": "§a/areahint udp [域名] §7- 隨機傳送到目前維度域名",
   "help.command.settp": "§a/areahint settp [命令頭] §7- 設定傳送命令頭",
@@ -1671,5 +1667,11 @@
   "teleport.server.error.no_landing": "域內未找到可站立位置: {0}",
   "teleport.server.success.teleported": "已傳送到 {0} ({1}, {2}, {3})",
   "teleport.server.error.execute_failed": "傳送執行失敗",
-  "common.cancel.keyword": "取消"
+  "common.cancel.keyword": "取消",
+  "dividearea.error.internal": "處理分割域名請求時發生內部錯誤",
+  "dividearea.error.permission": "你沒有權限分割該域名",
+  "dividearea.error.save": "儲存分割域名失敗",
+  "dividearea.error.process": "處理分割域名請求失敗: ",
+  "expandarea.message.record": " §a記錄目前位置",
+  "message.hover.dimension.setname": "為該維度命名: "
 }

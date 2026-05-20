@@ -1667,5 +1667,11 @@
   "teleport.server.error.no_landing": "No standable position found in domain: {0}",
   "teleport.server.success.teleported": "Teleported to {0} ({1}, {2}, {3})",
   "teleport.server.error.execute_failed": "Teleport execution failed",
-  "common.cancel.keyword": "cancel"
+  "common.cancel.keyword": "cancel",
+  "dividearea.error.internal": "Внутренняя ошибка при обработке запроса разделения области",
+  "dividearea.error.permission": "У вас нет прав на разделение этой области",
+  "dividearea.error.save": "Не удалось сохранить разделённые области",
+  "dividearea.error.process": "Не удалось обработать запрос разделения области: ",
+  "expandarea.message.record": " §aЗаписать текущую позицию",
+  "message.hover.dimension.setname": "Назвать это измерение: "
 }

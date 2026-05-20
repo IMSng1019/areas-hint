@@ -1667,5 +1667,11 @@
   "teleport.server.error.no_landing": "No standable position found in domain: {0}",
   "teleport.server.success.teleported": "Teleported to {0} ({1}, {2}, {3})",
   "teleport.server.error.execute_failed": "Teleport execution failed",
-  "common.cancel.keyword": "cancel"
+  "common.cancel.keyword": "cancel",
+  "dividearea.error.internal": "エリア分割リクエストの処理中に内部エラーが発生しました",
+  "dividearea.error.permission": "このエリアを分割する権限がありません",
+  "dividearea.error.save": "分割後のエリアの保存に失敗しました",
+  "dividearea.error.process": "エリア分割リクエストの処理に失敗しました: ",
+  "expandarea.message.record": " §a現在位置を記録",
+  "message.hover.dimension.setname": "このディメンションに名前を付ける: "
 }

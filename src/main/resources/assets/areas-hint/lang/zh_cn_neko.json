@@ -1667,5 +1667,11 @@
   "teleport.server.error.no_landing": "域内找不到可站立位置: {0}",
   "teleport.server.success.teleported": "已传送到 {0} ({1}, {2}, {3})",
   "teleport.server.error.execute_failed": "传送执行失败呜~",
-  "common.cancel.keyword": "取消"
+  "common.cancel.keyword": "取消",
+  "dividearea.error.internal": "处理分割域名请求时发生内部错误喵呜...",
+  "dividearea.error.permission": "你没有权限分割该域名喵呜...",
+  "dividearea.error.save": "保存分割域名失败喵呜...",
+  "dividearea.error.process": "处理分割域名请求失败: ",
+  "expandarea.message.record": " §a记录当前位置喵~",
+  "message.hover.dimension.setname": "为该维度命名: "
 }

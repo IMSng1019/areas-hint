@@ -1667,5 +1667,11 @@
   "teleport.server.error.no_landing": "No standable position found in domain: {0}",
   "teleport.server.success.teleported": "Teleported to {0} ({1}, {2}, {3})",
   "teleport.server.error.execute_failed": "Teleport execution failed",
-  "common.cancel.keyword": "cancel"
+  "common.cancel.keyword": "cancel",
+  "dividearea.error.internal": "영역 분할 요청을 처리하는 중 내부 오류가 발생했습니다",
+  "dividearea.error.permission": "이 영역을 분할할 권한이 없습니다",
+  "dividearea.error.save": "분할된 영역 저장에 실패했습니다",
+  "dividearea.error.process": "영역 분할 요청 처리 실패: ",
+  "expandarea.message.record": " §a현재 위치 기록",
+  "message.hover.dimension.setname": "이 차원 이름 지정: "
 }

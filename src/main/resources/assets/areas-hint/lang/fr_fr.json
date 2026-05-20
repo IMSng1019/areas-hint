@@ -1667,5 +1667,11 @@
   "teleport.server.error.no_landing": "No standable position found in domain: {0}",
   "teleport.server.success.teleported": "Teleported to {0} ({1}, {2}, {3})",
   "teleport.server.error.execute_failed": "Teleport execution failed",
-  "common.cancel.keyword": "cancel"
+  "common.cancel.keyword": "cancel",
+  "dividearea.error.internal": "Erreur interne lors du traitement de la division de la zone",
+  "dividearea.error.permission": "Vous n'avez pas la permission de diviser cette zone",
+  "dividearea.error.save": "Échec de l'enregistrement des zones divisées",
+  "dividearea.error.process": "Échec du traitement de la division de la zone : ",
+  "expandarea.message.record": " §aEnregistrer la position actuelle",
+  "message.hover.dimension.setname": "Nommer cette dimension : "
 }

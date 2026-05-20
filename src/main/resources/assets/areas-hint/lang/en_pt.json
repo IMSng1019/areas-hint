@@ -1667,5 +1667,11 @@
   "teleport.server.error.no_landing": "No standable position found in domain: {0}",
   "teleport.server.success.teleported": "Teleported to {0} ({1}, {2}, {3})",
   "teleport.server.error.execute_failed": "Teleport execution failed",
-  "common.cancel.keyword": "cancel"
+  "common.cancel.keyword": "cancel",
+  "dividearea.error.internal": "INTERNAL ERROR WHILE PROCESSIN AREA DIVIDE",
+  "dividearea.error.permission": "U DO NOT HAS PERMISHUN TO DIVIDE DIS AREA",
+  "dividearea.error.save": "FAILED TO SAVE DIVIDED AREAS",
+  "dividearea.error.process": "FAILED TO PROCESS AREA DIVIDE: ",
+  "expandarea.message.record": " §aRECORD CURRENT POSISHUN",
+  "message.hover.dimension.setname": "NAME DIS DIMENSHUN: "
 }

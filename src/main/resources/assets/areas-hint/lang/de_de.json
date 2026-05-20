@@ -1667,5 +1667,11 @@
   "teleport.server.error.no_landing": "No standable position found in domain: {0}",
   "teleport.server.success.teleported": "Teleported to {0} ({1}, {2}, {3})",
   "teleport.server.error.execute_failed": "Teleport execution failed",
-  "common.cancel.keyword": "cancel"
+  "common.cancel.keyword": "cancel",
+  "dividearea.error.internal": "Interner Fehler beim Verarbeiten der Gebietsaufteilung",
+  "dividearea.error.permission": "Du hast keine Berechtigung, dieses Gebiet zu teilen",
+  "dividearea.error.save": "Speichern der geteilten Gebiete fehlgeschlagen",
+  "dividearea.error.process": "Verarbeiten der Gebietsaufteilung fehlgeschlagen: ",
+  "expandarea.message.record": " §aAktuelle Position aufzeichnen",
+  "message.hover.dimension.setname": "Diese Dimension benennen: "
 }

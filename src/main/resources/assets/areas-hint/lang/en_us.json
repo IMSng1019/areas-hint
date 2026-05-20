@@ -1519,7 +1519,6 @@
   "description.delete.confirm": "Only deletes the description file, not the domain",
   "description.too_long": "Description is too long; maximum 32767 characters",
   "description.filename_conflict": "Description file name conflict",
-
   "description.ui.target.dimension": "dimension domain",
   "description.ui.target.area": "domain",
   "description.ui.operation.delete": "delete description",
@@ -1555,7 +1554,6 @@
   "description.book.instruction": "Edit the description in the opened book screen. Click Done to save it directly.",
   "description.book.error.empty": "Description cannot be empty",
   "description.error.too_long": "Description is too long; maximum 32767 characters",
-
   "signature.ui.title.select": "{0} domain extended signature - select domain",
   "signature.ui.prompt.select": "§aPlease select the domain whose extended signature you want to {0}:",
   "signature.ui.mode.admin": "§7Admin mode: all domains in the current dimension are selectable",
@@ -1591,7 +1589,6 @@
   "signature.ui.operation.add": "add",
   "signature.ui.operation.delete": "delete",
   "signature.ui.none": "None",
-
   "teleport.error.no_areas": "§cThere are no teleportable domains in the current dimension",
   "teleport.prompt.select": "§6Please select the domain to teleport to with {0}:",
   "teleport.hover.teleport_to": "Teleport to {0}",
@@ -1604,7 +1601,6 @@
   "teleport.message.cancelled": "§eTeleport format setup cancelled",
   "teleport.error.invalid_format_detail": "§cInvalid teleport format. It must be usable as a command prefix, such as tp or minecraft:tp",
   "teleport.message.format_set": "§aTeleport format set to: {0}",
-
   "help.command.tcp": "§a/areahint tcp [domain] §7- Teleport to the center of a current-dimension domain",
   "help.command.udp": "§a/areahint udp [domain] §7- Randomly teleport to a current-dimension domain",
   "help.command.settp": "§a/areahint settp [command prefix] §7- Set teleport command prefix",
@@ -1671,5 +1667,11 @@
   "teleport.server.error.no_landing": "No standable position found in domain: {0}",
   "teleport.server.success.teleported": "Teleported to {0} ({1}, {2}, {3})",
   "teleport.server.error.execute_failed": "Teleport execution failed",
-  "common.cancel.keyword": "cancel"
+  "common.cancel.keyword": "cancel",
+  "dividearea.error.internal": "An internal error occurred while processing the divide area request",
+  "dividearea.error.permission": "You do not have permission to divide this area",
+  "dividearea.error.save": "Failed to save divided areas",
+  "dividearea.error.process": "Failed to process divide area request: ",
+  "expandarea.message.record": " §aRecord current position",
+  "message.hover.dimension.setname": "Name this dimension: "
 }
