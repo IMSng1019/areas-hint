@@ -24,6 +24,7 @@ public class AreasHintConfigScreen extends Screen {
     private static final int BUTTON_WIDTH = 150;
     private static final int BUTTON_HEIGHT = 20;
     private static final int BOTTOM_BUTTON_WIDTH = 74;
+    private static final int LIST_SCROLLBAR_GAP = 10;
     private static final int FREQUENCY_MIN = 1;
     private static final int FREQUENCY_MAX = 20;
     private static final String[] RENDER_MODES = {"CPU", "OpenGL", "Vulkan"};
@@ -278,6 +279,12 @@ public class AreasHintConfigScreen extends Screen {
         @Override
         public int getRowWidth() {
             return Math.min(420, AreasHintConfigScreen.this.width - 40);
+        }
+
+        @Override
+        protected int getScrollbarPositionX() {
+            // 原版列表会按默认宽度计算滚动条位置，宽屏下会压到右侧配置按钮中间。
+            return Math.min(this.width - 6, this.getRowRight() + LIST_SCROLLBAR_GAP);
         }
 
         @Override
