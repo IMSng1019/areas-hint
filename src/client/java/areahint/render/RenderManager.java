@@ -84,6 +84,16 @@ public class RenderManager {
     }
 
     /**
+     * 立即清空所有渲染器中的当前标题。
+     * 三种渲染器都会注册HUD回调，因此关闭模组时需要全部清理，避免旧渲染模式残留文字。
+     */
+    public void clearAreaTitle() {
+        cpuRender.clearTitle();
+        glRender.clearTitle();
+        vulkanRender.clearTitle();
+    }
+
+    /**
      * 渲染接口，定义渲染方法
      */
     public interface IRender {
@@ -93,5 +103,10 @@ public class RenderManager {
          * @param color 颜色值
          */
         void renderTitle(String title, String color);
+
+        /**
+         * 清空当前标题并停止动画。
+         */
+        void clearTitle();
     }
 } 

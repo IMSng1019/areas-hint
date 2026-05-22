@@ -139,6 +139,11 @@ public class AreaDetector {
      * @return 玩家所在的区域数据，如果不在任何区域内则返回null
      */
     public AreaData findAreaRaw(double x, double y, double z) {
+        // 模组关闭时禁止任何域名计算，仍保留已同步到本地的文件数据。
+        if (!ClientConfig.isEnabled()) {
+            return null;
+        }
+
         return findArea(x, y, z);
     }
 

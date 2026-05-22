@@ -331,6 +331,18 @@ public class CPURender implements RenderManager.IRender {
         AreashintClient.LOGGER.info("CPURender: 开始显示区域标题: {}, 动画状态: {}", title, animationState);
     }
 
+    @Override
+    public void clearTitle() {
+        // 关闭模组时立即停止当前标题动画，并丢弃CPU预渲染的文字位图。
+        currentText = null;
+        currentColor = "#FFFFFF";
+        animationState = AnimationState.NONE;
+        animationStartTime = 0;
+        lastYOffset = 0.0f;
+        lastAlpha = 0.0f;
+        renderedTextImage.set(null);
+    }
+
     private static int parseHexColor(String hex) {
         try {
             if (hex != null && hex.startsWith("#") && hex.length() == 7) {

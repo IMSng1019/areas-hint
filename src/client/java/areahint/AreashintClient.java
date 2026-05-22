@@ -457,7 +457,10 @@ public class AreashintClient implements ClientModInitializer {
 				double playerZ = player.getZ();
 
 				// 使用AreaChangeTracker检测区域变化并发送日志
-				String areaName = areahint.log.AreaChangeTracker.detectAndLogAreaChange(areaDetector, playerX, playerY, playerZ, currentDimension);
+				String areaName = null;
+				if (ClientConfig.isEnabled()) {
+					areaName = areahint.log.AreaChangeTracker.detectAndLogAreaChange(areaDetector, playerX, playerY, playerZ, currentDimension);
+				}
 
 				// 立即显示结果（仅在模组启用时）
 				if (ClientConfig.isEnabled()) {
@@ -541,14 +544,13 @@ public class AreashintClient implements ClientModInitializer {
 							renderManager.showAreaTitle(dimensionalName, dimColor != null ? dimColor : "#FFFFFF");
 							hasShownDimensionalName = true;
 						}
+						}
 					}
+				} else {
+					clearAreaDisplayState();
 				}
-			} else {
-				currentAreaName = null;
-				hasShownDimensionalName = false;
-			}
-		});
-	}
+			});
+		}
 	
 	/**
 	 * 获取外部配置目录路径
@@ -581,6 +583,24 @@ public class AreashintClient implements ClientModInitializer {
 	public static RenderManager getRenderManager() {
 		return renderManager;
 	}
+
+	/**
+	 * 清理当前域名显示相关的运行状态。
+	 * 模组关闭时只停止域名显示和检测，不清理已经接收并保存到本地的服务端文件。
+	 */
+	public static void clearAreaDisplayState() {
+		currentAreaName = null;
+		hasShownDimensionalName = false;
+		areahint.log.AreaChangeTracker.reset();
+
+		if (asyncAreaDetector != null) {
+			asyncAreaDetector.reset();
+		}
+
+		if (renderManager != null) {
+			renderManager.clearAreaTitle();
+		}
+	}
 	
 	/**
 	 * 强制重新检测当前区域（在网络同步完成后调用）
@@ -608,6 +628,13 @@ public class AreashintClient implements ClientModInitializer {
 				String dimensionFileName = getDimensionFileName(currentDimension);
 				LOGGER.info("强制重新加载维度{}的区域文件：{}", currentDimension.toString(), dimensionFileName);
 				areaDetector.loadAreaData(dimensionFileName);
+
+				// 关闭状态下只重新加载同步文件，不进行域名计算，也不显示维度域名。
+				if (!ClientConfig.isEnabled()) {
+					clearAreaDisplayState();
+					LOGGER.info("模组已关闭，网络同步后仅重新加载域名文件，不执行检测和显示");
+					return;
+				}
 				
 				// 立即检测当前位置
 				double playerX = player.getX();

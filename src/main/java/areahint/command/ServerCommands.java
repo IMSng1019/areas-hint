@@ -75,7 +75,13 @@ public class ServerCommands {
             .then(literal("reload")
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.RELOAD, 0))
                 .executes(ServerCommands::executeReload))
-            
+
+            // on/off 命令（客户端本地开关，权限等级0，只影响执行命令的玩家）
+            .then(literal("on")
+                .executes(context -> executeModToggle(context, "on")))
+            .then(literal("off")
+                .executes(context -> executeModToggle(context, "off")))
+	            
             // dimensionalityname 命令 (交互式维度域名管理)
             .then(literal("dimensionalityname")
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DIMENSIONALITY_NAME, 2))
@@ -543,6 +549,8 @@ public class ServerCommands {
         
         source.sendMessage(Text.translatable("command.title.general"));
         source.sendMessage(Text.translatable("help.command.help"));
+        source.sendMessage(Text.translatable("command.usage.on"));
+        source.sendMessage(Text.translatable("command.usage.off"));
         source.sendMessage(Text.translatable("help.command.reload"));
         source.sendMessage(Text.translatable("help.command.delete"));
         source.sendMessage(Text.translatable("help.command.frequency"));
@@ -824,7 +832,25 @@ public class ServerCommands {
             Areashint.LOGGER.error("发送客户端命令时出错", e);
         }
     }
-    
+
+    /**
+     * 执行模组客户端开关命令。
+     * 该开关只写入执行命令玩家自己的客户端配置，不改变服务端状态，也不影响其他玩家。
+     * @param context 命令上下文
+     * @param action 开关动作，取值为on或off
+     * @return 执行结果
+     */
+    private static int executeModToggle(CommandContext<ServerCommandSource> context, String action) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.translatable("command.error.general_9"));
+            return 0;
+        }
+
+        sendClientCommand(source, "areahint:" + action);
+        return Command.SINGLE_SUCCESS;
+    }
+	    
     private static int executeAddDescriptionStart(CommandContext<ServerCommandSource> context) {
         return executeDescriptionAction(context, "adddescription_start", null);
     }

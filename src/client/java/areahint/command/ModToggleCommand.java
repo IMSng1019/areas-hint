@@ -50,6 +50,9 @@ public class ModToggleCommand {
         if (client.player != null) {
             client.player.sendMessage(Text.literal(I18nManager.translate("command.button.area")), false);
         }
+
+        // 开启后立即按当前位置恢复一次域名检测和显示，避免必须等待下一次移动或检测周期。
+        AreashintClient.forceRedetectCurrentArea();
         
         AreashintClient.LOGGER.info("模组已通过命令启用");
     }
@@ -60,6 +63,7 @@ public class ModToggleCommand {
      */
     private static void disableMod(MinecraftClient client) {
         ClientConfig.setEnabled(false);
+        AreashintClient.clearAreaDisplayState();
         
         if (client.player != null) {
             client.player.sendMessage(Text.literal(I18nManager.translate("command.error.area")), false);
