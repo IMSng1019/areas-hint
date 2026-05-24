@@ -290,8 +290,10 @@ public class ClientNetworking {
                     }
                     // 处理Description命令，必须在delete泛匹配前处理
                     else if (action.startsWith("adddescription")
+                            || action.startsWith("replacedescription")
                             || action.startsWith("deletedescription")
                             || action.startsWith("adddimensionalitydescription")
+                            || action.startsWith("replacedimensionalitydescription")
                             || action.startsWith("deletedimensionalitydescription")) {
                         areahint.description.DescriptionManager.getInstance().handleClientCommand(action);
                     }

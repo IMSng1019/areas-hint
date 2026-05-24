@@ -20,6 +20,7 @@ public class DescriptionManager {
         IDLE,
         WAITING_SEARCH_INPUT,
         WAITING_TARGET_SELECT,
+        WAITING_EXISTING_DESCRIPTION,
         WAITING_DESCRIPTION_INPUT,
         WAITING_CONFIRM,
         WAITING_SECOND_CONFIRM,
@@ -31,6 +32,7 @@ public class DescriptionManager {
     private String targetType;
     private String commandPrefix;
     private String currentDimension;
+    private boolean loadExistingDescriptionOnEdit;
     private final List<DescriptionListEntry> entries = new ArrayList<>();
     private DescriptionListEntry selectedEntry;
     private String pendingDescription;
@@ -47,21 +49,27 @@ public class DescriptionManager {
     }
 
     public void handleClientCommand(String action) {
-        if (handleCommand(action, "adddescription", "add", "area")) {
+        if (handleCommand(action, "adddescription", "add", "area", true)) {
             return;
         }
-        if (handleCommand(action, "deletedescription", "delete", "area")) {
+        if (handleCommand(action, "replacedescription", "add", "area", false)) {
             return;
         }
-        if (handleCommand(action, "adddimensionalitydescription", "add", "dimension")) {
+        if (handleCommand(action, "deletedescription", "delete", "area", false)) {
             return;
         }
-        handleCommand(action, "deletedimensionalitydescription", "delete", "dimension");
+        if (handleCommand(action, "adddimensionalitydescription", "add", "dimension", true)) {
+            return;
+        }
+        if (handleCommand(action, "replacedimensionalitydescription", "add", "dimension", false)) {
+            return;
+        }
+        handleCommand(action, "deletedimensionalitydescription", "delete", "dimension", false);
     }
 
-    private boolean handleCommand(String action, String prefix, String operation, String targetType) {
+    private boolean handleCommand(String action, String prefix, String operation, String targetType, boolean loadExistingDescriptionOnEdit) {
         if (action.equals(prefix + "_start")) {
-            start(operation, targetType, prefix);
+            start(operation, targetType, prefix, loadExistingDescriptionOnEdit);
             return true;
         }
         if (action.startsWith(prefix + "_search:")) {
@@ -91,7 +99,7 @@ public class DescriptionManager {
         return false;
     }
 
-    private void start(String operation, String targetType, String commandPrefix) {
+    private void start(String operation, String targetType, String commandPrefix, boolean loadExistingDescriptionOnEdit) {
         if (isActive()) {
             sendMessage(I18nManager.translate("description.manager.error.active"), Formatting.RED);
             return;
@@ -108,6 +116,7 @@ public class DescriptionManager {
         this.targetType = targetType;
         this.commandPrefix = commandPrefix;
         this.currentDimension = getCurrentDimensionType();
+        this.loadExistingDescriptionOnEdit = loadExistingDescriptionOnEdit;
         this.state = State.WAITING_SEARCH_INPUT;
         DescriptionUI.showLoadingList(commandPrefix, isDimensionTarget(), isDeleteOperation());
         requestList();
@@ -183,14 +192,43 @@ public class DescriptionManager {
                     state = State.WAITING_CONFIRM;
                     DescriptionUI.showDeleteConfirmFirst(getCommandPrefix(), selectedEntry);
                 } else {
-                    state = State.WAITING_DESCRIPTION_INPUT;
+                    state = loadExistingDescriptionOnEdit ? State.WAITING_EXISTING_DESCRIPTION : State.WAITING_DESCRIPTION_INPUT;
                     DescriptionUI.showDescriptionInput(getCommandPrefix(), selectedEntry);
-                    DescriptionBookEditScreen.open(selectedEntry.displayName(), pendingDescription);
+                    if (loadExistingDescriptionOnEdit) {
+                        DescriptionClientNetworking.sendEditQuery(targetType, currentDimension, selectedEntry.id());
+                    } else {
+                        DescriptionBookEditScreen.open(selectedEntry.displayName(), pendingDescription);
+                    }
                 }
                 return;
             }
         }
         sendMessage(I18nManager.translate("description.manager.error.not_found", id), Formatting.RED);
+    }
+
+    public void receiveExistingDescription(String responseTargetType, String responseDimension, String responseTargetName,
+                                           boolean success, String message, String title, String description) {
+        if (state != State.WAITING_EXISTING_DESCRIPTION || selectedEntry == null) {
+            return;
+        }
+        if (!safeEquals(targetType, responseTargetType) || !safeEquals(selectedEntry.id(), responseTargetName)) {
+            return;
+        }
+        if (!isDimensionTarget() && !safeEquals(currentDimension, responseDimension)) {
+            return;
+        }
+        if (!success) {
+            sendMessage(message == null || message.isBlank()
+                ? I18nManager.translate("description.manager.error.not_found", selectedEntry.id())
+                : message, Formatting.RED);
+            reset();
+            return;
+        }
+
+        // adddescription 会在打开书本前读取旧描述；没有旧描述时保持空书本，方便直接添加。
+        pendingDescription = description == null ? "" : description;
+        state = State.WAITING_DESCRIPTION_INPUT;
+        DescriptionBookEditScreen.open(title == null || title.isBlank() ? selectedEntry.displayName() : title, pendingDescription);
     }
 
     private void openBookEditor() {
@@ -318,6 +356,7 @@ public class DescriptionManager {
         targetType = null;
         commandPrefix = null;
         currentDimension = null;
+        loadExistingDescriptionOnEdit = false;
         entries.clear();
         selectedEntry = null;
         pendingDescription = null;

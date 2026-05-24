@@ -61,6 +61,14 @@ public final class DescriptionServerNetworking {
                 server.execute(() -> handleListRequest(player, operation, targetType, dimensionType, query));
             });
 
+        ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_DESCRIPTION_EDIT_QUERY,
+            (server, player, handler, buf, responseSender) -> {
+                String targetType = buf.readString();
+                String dimensionType = buf.readString();
+                String targetName = buf.readString();
+                server.execute(() -> handleEditQuery(player, targetType, dimensionType, targetName));
+            });
+
         ServerPlayNetworking.registerGlobalReceiver(Packets.C2S_DESCRIPTION_WRITE,
             (server, player, handler, buf, responseSender) -> {
                 String targetType = buf.readString();
@@ -154,6 +162,77 @@ public final class DescriptionServerNetworking {
             Areashint.LOGGER.error("查询域名描述失败", e);
             sendQueryResponse(player, clean(targetName), null);
         }
+    }
+
+    private static void handleEditQuery(ServerPlayerEntity player, String targetType, String ignoredDimensionType, String targetName) {
+        try {
+            if (TARGET_DIMENSION.equals(targetType)) {
+                sendDimensionalEditDescription(player, targetName);
+            } else {
+                sendAreaEditDescription(player, ignoredDimensionType, targetName);
+            }
+        } catch (Exception e) {
+            Areashint.LOGGER.error("读取待编辑域名描述失败", e);
+            sendEditResponse(player, clean(targetType), clean(ignoredDimensionType), clean(targetName), false,
+                translate(player, "description.server.error.area_not_found", clean(targetName)), clean(targetName), "");
+        }
+    }
+
+    private static void sendAreaEditDescription(ServerPlayerEntity player, String ignoredDimensionType, String areaName) {
+        String dimensionType = getPlayerDimensionType(player);
+        if (dimensionType == null) {
+            dimensionType = clean(ignoredDimensionType);
+        }
+        if (dimensionType.isBlank()) {
+            sendEditResponse(player, TARGET_AREA, dimensionType, clean(areaName), false,
+                translate(player, "description.server.error.unsupported_area"), clean(areaName), "");
+            return;
+        }
+
+        AreaContext context = findAreaContext(dimensionType, areaName);
+        if (context == null) {
+            sendEditResponse(player, TARGET_AREA, dimensionType, clean(areaName), false,
+                translate(player, "description.server.error.area_not_found", clean(areaName)), clean(areaName), "");
+            return;
+        }
+        if (!PermissionService.hasCommandPermission(player, PermissionNodes.ADD_DESCRIPTION, 0)
+            || !AreaPermissionUtil.canModifyArea(player, context.area(), context.allAreas())) {
+            sendEditResponse(player, TARGET_AREA, dimensionType, context.area().getName(), false,
+                translate(player, "description.server.error.no_modify_permission"), context.surfaceName(), "");
+            return;
+        }
+
+        Path file = DescriptionFileManager.getAreaDescriptionFile(dimensionType, context.surfaceName());
+        if (hasSurfaceNameConflict(file, context.surfaceName())) {
+            sendEditResponse(player, TARGET_AREA, dimensionType, context.area().getName(), false,
+                translate(player, "description.server.error.area_filename_conflict"), context.surfaceName(), "");
+            return;
+        }
+
+        DescriptionData data = DescriptionFileManager.readDescription(file);
+        sendEditResponse(player, TARGET_AREA, dimensionType, context.area().getName(), true, "",
+            context.surfaceName(), hasUsableDescription(data) ? data.getDescription() : "");
+    }
+
+    private static void sendDimensionalEditDescription(ServerPlayerEntity player, String dimensionId) {
+        if (!PermissionService.hasCommandPermission(player, PermissionNodes.ADD_DIMENSIONALITY_DESCRIPTION, 2)) {
+            sendEditResponse(player, TARGET_DIMENSION, "", clean(dimensionId), false,
+                translate(player, "description.server.error.no_dimension_modify_permission"), clean(dimensionId), "");
+            return;
+        }
+
+        String cleanDimensionId = clean(dimensionId);
+        String displayName = DimensionalNameManager.getDimensionalName(cleanDimensionId);
+        Path file = DescriptionFileManager.getDimensionalDescriptionFile(displayName);
+        if (hasSurfaceNameConflict(file, displayName)) {
+            sendEditResponse(player, TARGET_DIMENSION, "", cleanDimensionId, false,
+                translate(player, "description.server.error.dimension_filename_conflict"), displayName, "");
+            return;
+        }
+
+        DescriptionData data = DescriptionFileManager.readDescription(file);
+        sendEditResponse(player, TARGET_DIMENSION, "", cleanDimensionId, true, "",
+            displayName, hasUsableDescription(data) ? data.getDescription() : "");
     }
 
     private static void handleListRequest(ServerPlayerEntity player, String operation, String targetType, String ignoredDimensionType, String query) {
@@ -501,6 +580,19 @@ public final class DescriptionServerNetworking {
         buffer.writeString(clamp(author));
         buffer.writeString(description);
         ServerPlayNetworking.send(player, Packets.S2C_DESCRIPTION_QUERY_RESPONSE, buffer);
+    }
+
+    private static void sendEditResponse(ServerPlayerEntity player, String targetType, String dimensionType, String targetName,
+                                         boolean success, String message, String title, String description) {
+        PacketByteBuf buffer = PacketByteBufs.create();
+        buffer.writeString(clean(targetType));
+        buffer.writeString(clean(dimensionType));
+        buffer.writeString(clean(targetName));
+        buffer.writeBoolean(success);
+        buffer.writeString(clamp(message));
+        buffer.writeString(clamp(title));
+        buffer.writeString(clamp(description));
+        ServerPlayNetworking.send(player, Packets.S2C_DESCRIPTION_EDIT_RESPONSE, buffer);
     }
 
     private static String defaultTitle(ServerPlayerEntity player) {

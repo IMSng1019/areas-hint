@@ -103,6 +103,8 @@ public class Packets {
     public static final Identifier S2C_DESCRIPTION_QUERY_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_description_query_response");
     public static final Identifier C2S_DESCRIPTION_LIST_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_description_list_request");
     public static final Identifier S2C_DESCRIPTION_AREA_LIST = new Identifier(Areashint.MOD_ID, "s2c_description_area_list");
+    public static final Identifier C2S_DESCRIPTION_EDIT_QUERY = new Identifier(Areashint.MOD_ID, "c2s_description_edit_query");
+    public static final Identifier S2C_DESCRIPTION_EDIT_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_description_edit_response");
     public static final Identifier C2S_DESCRIPTION_WRITE = new Identifier(Areashint.MOD_ID, "c2s_description_write");
     public static final Identifier C2S_DESCRIPTION_DELETE = new Identifier(Areashint.MOD_ID, "c2s_description_delete");
     public static final Identifier S2C_DESCRIPTION_MUTATION_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_description_mutation_response");

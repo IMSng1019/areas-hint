@@ -49,6 +49,19 @@ public final class DescriptionClientNetworking {
                 client.execute(() -> DescriptionManager.getInstance().receiveList(operation, targetType, dimension, entries));
             });
 
+        ClientPlayNetworking.registerGlobalReceiver(Packets.S2C_DESCRIPTION_EDIT_RESPONSE,
+            (client, handler, buf, responseSender) -> {
+                String targetType = buf.readString(32767);
+                String dimensionType = buf.readString(32767);
+                String targetName = buf.readString(32767);
+                boolean success = buf.readBoolean();
+                String message = buf.readString(32767);
+                String title = buf.readString(32767);
+                String description = buf.readString(32767);
+                client.execute(() -> DescriptionManager.getInstance().receiveExistingDescription(
+                    targetType, dimensionType, targetName, success, message, title, description));
+            });
+
         ClientPlayNetworking.registerGlobalReceiver(Packets.S2C_DESCRIPTION_MUTATION_RESPONSE,
             (client, handler, buf, responseSender) -> {
                 boolean success = buf.readBoolean();
@@ -83,6 +96,14 @@ public final class DescriptionClientNetworking {
         buf.writeString(clean(dimensionType));
         buf.writeString(clean(query));
         ClientPlayNetworking.send(Packets.C2S_DESCRIPTION_LIST_REQUEST, buf);
+    }
+
+    public static void sendEditQuery(String targetType, String dimensionType, String targetName) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeString(clean(targetType));
+        buf.writeString(clean(dimensionType));
+        buf.writeString(clean(targetName));
+        ClientPlayNetworking.send(Packets.C2S_DESCRIPTION_EDIT_QUERY, buf);
     }
 
     public static boolean sendWrite(String targetType, String dimensionType, String targetName, String description) {

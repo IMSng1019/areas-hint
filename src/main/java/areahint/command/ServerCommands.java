@@ -168,6 +168,29 @@ public class ServerCommands {
                 .then(literal("cancel")
                     .executes(context -> executeDescriptionAction(context, "adddescription_cancel", null))))
 
+            // replacedescription 命令 (交互式替换域名描述，保持原 adddescription 的空书本写入行为)
+            .then(literal("replacedescription")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD_DESCRIPTION, 0))
+                .executes(ServerCommands::executeReplaceDescriptionStart)
+                .then(literal("search")
+                    .executes(context -> executeDescriptionAction(context, "replacedescription_search:", ""))
+                    .then(argument("query", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "replacedescription_search:",
+                            StringArgumentType.getString(context, "query")))))
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "replacedescription_select:",
+                            StringArgumentType.getString(context, "areaName")))))
+                .then(literal("text")
+                    .executes(context -> executeDescriptionAction(context, "replacedescription_text:", ""))
+                    .then(argument("description", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "replacedescription_text:",
+                            StringArgumentType.getString(context, "description")))))
+                .then(literal("confirm")
+                    .executes(context -> executeDescriptionAction(context, "replacedescription_confirm", null)))
+                .then(literal("cancel")
+                    .executes(context -> executeDescriptionAction(context, "replacedescription_cancel", null))))
+
             // deletedescription 命令 (交互式删除域名描述)
             .then(literal("deletedescription")
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DELETE_DESCRIPTION, 0))
@@ -210,6 +233,29 @@ public class ServerCommands {
                     .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_confirm", null)))
                 .then(literal("cancel")
                     .executes(context -> executeDescriptionAction(context, "adddimensionalitydescription_cancel", null))))
+
+            // replacedimensionalitydescription 命令 (交互式替换维度域名描述，保持原 adddimensionalitydescription 的空书本写入行为)
+            .then(literal("replacedimensionalitydescription")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD_DIMENSIONALITY_DESCRIPTION, 2))
+                .executes(ServerCommands::executeReplaceDimensionalityDescriptionStart)
+                .then(literal("search")
+                    .executes(context -> executeDescriptionAction(context, "replacedimensionalitydescription_search:", ""))
+                    .then(argument("query", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "replacedimensionalitydescription_search:",
+                            StringArgumentType.getString(context, "query")))))
+                .then(literal("select")
+                    .then(argument("dimensionId", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "replacedimensionalitydescription_select:",
+                            StringArgumentType.getString(context, "dimensionId")))))
+                .then(literal("text")
+                    .executes(context -> executeDescriptionAction(context, "replacedimensionalitydescription_text:", ""))
+                    .then(argument("description", StringArgumentType.greedyString())
+                        .executes(context -> executeDescriptionAction(context, "replacedimensionalitydescription_text:",
+                            StringArgumentType.getString(context, "description")))))
+                .then(literal("confirm")
+                    .executes(context -> executeDescriptionAction(context, "replacedimensionalitydescription_confirm", null)))
+                .then(literal("cancel")
+                    .executes(context -> executeDescriptionAction(context, "replacedimensionalitydescription_cancel", null))))
 
             // deletedimensionalitydescription 命令 (交互式删除维度域名描述)
             .then(literal("deletedimensionalitydescription")
@@ -580,8 +626,10 @@ public class ServerCommands {
         source.sendMessage(Text.translatable("help.command.firstdimname_skip"));
         source.sendMessage(Text.translatable("help.command.debug"));
         source.sendMessage(Text.translatable("help.command.adddescription"));
+        source.sendMessage(Text.translatable("help.command.replacedescription"));
         source.sendMessage(Text.translatable("help.command.deletedescription"));
         source.sendMessage(Text.translatable("help.command.adddimensionalitydescription"));
+        source.sendMessage(Text.translatable("help.command.replacedimensionalitydescription"));
         source.sendMessage(Text.translatable("help.command.deletedimensionalitydescription"));
         source.sendMessage(Text.translatable("help.command.serverlanguage"));
 
@@ -855,12 +903,20 @@ public class ServerCommands {
         return executeDescriptionAction(context, "adddescription_start", null);
     }
 
+    private static int executeReplaceDescriptionStart(CommandContext<ServerCommandSource> context) {
+        return executeDescriptionAction(context, "replacedescription_start", null);
+    }
+
     private static int executeDeleteDescriptionStart(CommandContext<ServerCommandSource> context) {
         return executeDescriptionAction(context, "deletedescription_start", null);
     }
 
     private static int executeAddDimensionalityDescriptionStart(CommandContext<ServerCommandSource> context) {
         return executeDescriptionAction(context, "adddimensionalitydescription_start", null);
+    }
+
+    private static int executeReplaceDimensionalityDescriptionStart(CommandContext<ServerCommandSource> context) {
+        return executeDescriptionAction(context, "replacedimensionalitydescription_start", null);
     }
 
     private static int executeDeleteDimensionalityDescriptionStart(CommandContext<ServerCommandSource> context) {
