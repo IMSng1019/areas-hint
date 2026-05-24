@@ -137,6 +137,13 @@ public class UnifiedKeyHandler {
             return;
         }
 
+        // 没有录点功能消费绑定键时，默认行为是查询当前域名描述。
+        // 但如果玩家正在描述指令流程中，或当前已经打开任意界面，
+        // 绑定键不应额外打开“查看描述”界面，更不能干扰描述编辑/删除流程。
+        if (areahint.description.DescriptionKeyHandler.shouldSkipDefaultRecordKeyQuery()) {
+            return;
+        }
+
         System.out.println("DEBUG: 没有模块处理记录键，查询当前域名描述");
         DescriptionClientNetworking.sendCurrentAreaQuery();
     }

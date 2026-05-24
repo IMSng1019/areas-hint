@@ -101,11 +101,8 @@ public final class DescriptionBookEditScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (DescriptionKeyHandler.shouldCloseOnBoundKey(keyCode, scanCode)) {
-            DescriptionKeyHandler.consumeCloseDescriptionBookKey(keyCode, scanCode);
-            close();
-            return true;
-        }
+        // 描述指令中的书本是编辑界面，不是“查看描述”的只读界面。
+        // 绑定键在这里应继续作为普通按键输入处理，不能触发关闭界面。
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }
@@ -154,11 +151,7 @@ public final class DescriptionBookEditScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (DescriptionKeyHandler.shouldCloseOnBoundMouse(button)) {
-            DescriptionKeyHandler.consumeCloseDescriptionBookMouse(button);
-            close();
-            return true;
-        }
+        // 鼠标绑定键同样不能关闭描述编辑界面，避免 adddescription 流程被误取消。
         return super.mouseClicked(mouseX, mouseY, button);
     }
 

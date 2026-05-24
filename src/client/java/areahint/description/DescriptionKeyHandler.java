@@ -52,7 +52,7 @@ public final class DescriptionKeyHandler {
                     return;
                 }
 
-                switch (resolveBoundKeyAction(skipNextQueryKeyPress, true, isDescriptionBookScreen(client.currentScreen))) {
+                switch (resolveBoundKeyAction(skipNextQueryKeyPress, true, isViewDescriptionBookScreen(client.currentScreen))) {
                     case CLOSE_DESCRIPTION -> {
                         closeDescriptionBookScreen(client.currentScreen);
                         skipNextQueryKeyPress = false;
@@ -110,8 +110,24 @@ public final class DescriptionKeyHandler {
         return BoundKeyAction.QUERY;
     }
 
-    private static boolean isDescriptionBookScreen(Screen screen) {
-        return screen instanceof DescriptionBookEditScreen || BookDescriptionScreenUtil.isDescriptionBookScreen(screen);
+    /**
+     * 只有查询描述时打开的只读书本属于“查看描述界面”。
+     * 描述指令中用于录入内容的 DescriptionBookEditScreen 是编辑界面，
+     * 绑定键不能把它当成查看界面关闭。
+     */
+    private static boolean isViewDescriptionBookScreen(Screen screen) {
+        return BookDescriptionScreenUtil.isDescriptionBookScreen(screen);
+    }
+
+    /**
+     * 统一绑定键没有被记录顶点等功能消费时，会默认查询当前域名描述。
+     * 如果当前已经有任意界面打开，或者描述添加/删除流程正在进行，
+     * 这里需要阻止默认查询，避免描述指令流程中按绑定键又打开“查看描述”书本。
+     */
+    public static boolean shouldSkipDefaultRecordKeyQuery() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        return DescriptionManager.getInstance().isActive()
+            || (client != null && client.currentScreen != null);
     }
 
     private static void handleQueryKey() {
@@ -256,7 +272,7 @@ public final class DescriptionKeyHandler {
     }
 
     private static boolean closeDescriptionBookScreen(Screen screen) {
-        if (isDescriptionBookScreen(screen)) {
+        if (isViewDescriptionBookScreen(screen)) {
             screen.close();
             return true;
         }
