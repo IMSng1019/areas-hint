@@ -14,6 +14,7 @@ import areahint.permission.PermissionService;
 import areahint.util.AreaPermissionUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -348,33 +349,10 @@ public class ServerCommands {
                     .executes(ServerCommands::executeSubtitleSizeCancel)))
                 
             // easyadd 命令（带多个子命令）
-            .then(literal("easyadd")
-                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.EASYADD, 0))
-                .executes(ServerCommands::executeEasyAddStart)
-                .then(literal("cancel")
-                    .executes(ServerCommands::executeEasyAddCancel))
-                .then(literal("level")
-                    .then(argument("levelValue", IntegerArgumentType.integer(1, 3))
-                        .executes(context -> executeEasyAddLevel(context, IntegerArgumentType.getInteger(context, "levelValue")))))
-                .then(literal("base")
-                    .then(argument("baseName", StringArgumentType.greedyString())
-                        .executes(context -> executeEasyAddBase(context, StringArgumentType.getString(context, "baseName")))))
-                .then(literal("continue")
-                    .executes(ServerCommands::executeEasyAddContinue))
-                                        .then(literal("finish")
-                            .executes(ServerCommands::executeEasyAddFinish))
-                        .then(literal("altitude")
-                            .then(literal("auto")
-                                .executes(ServerCommands::executeEasyAddAltitudeAuto))
-                            .then(literal("custom")
-                                .executes(ServerCommands::executeEasyAddAltitudeCustom))
-                            .then(literal("unlimited")
-                                .executes(ServerCommands::executeEasyAddAltitudeUnlimited)))
-                        .then(literal("color")
-                            .then(argument("colorValue", StringArgumentType.greedyString())
-                                .executes(context -> executeEasyAddColor(context, StringArgumentType.getString(context, "colorValue")))))
-                        .then(literal("save")
-                            .executes(ServerCommands::executeEasyAddSave)))
+            .then(createEasyAddCommand("easyadd"))
+
+            // addarea 是 easyadd 的完整别名，权限与执行逻辑都复用 EasyAdd。
+            .then(createEasyAddCommand("addarea"))
                             
             // expandarea 命令 (域名扩展)
             .then(literal("expandarea")
@@ -583,6 +561,45 @@ public class ServerCommands {
                 .then(argument("langCode", StringArgumentType.word())
                     .executes(context -> executeServerLanguage(context, StringArgumentType.getString(context, "langCode")))))
         );
+    }
+
+    /**
+     * 创建EasyAdd命令树。
+     * <p>
+     * easyadd 与 addarea 需要保持完全一致，所以这里集中维护所有子命令；
+     * 新增或调整EasyAdd流程时，只需要改这一处，两个指令会同时生效。
+     *
+     * @param commandName 指令名称，例如 easyadd 或 addarea
+     * @return 已绑定EasyAdd执行逻辑的命令节点
+     */
+    private static LiteralArgumentBuilder<ServerCommandSource> createEasyAddCommand(String commandName) {
+        return literal(commandName)
+            .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.EASYADD, 0))
+            .executes(ServerCommands::executeEasyAddStart)
+            .then(literal("cancel")
+                .executes(ServerCommands::executeEasyAddCancel))
+            .then(literal("level")
+                .then(argument("levelValue", IntegerArgumentType.integer(1, 3))
+                    .executes(context -> executeEasyAddLevel(context, IntegerArgumentType.getInteger(context, "levelValue")))))
+            .then(literal("base")
+                .then(argument("baseName", StringArgumentType.greedyString())
+                    .executes(context -> executeEasyAddBase(context, StringArgumentType.getString(context, "baseName")))))
+            .then(literal("continue")
+                .executes(ServerCommands::executeEasyAddContinue))
+            .then(literal("finish")
+                .executes(ServerCommands::executeEasyAddFinish))
+            .then(literal("altitude")
+                .then(literal("auto")
+                    .executes(ServerCommands::executeEasyAddAltitudeAuto))
+                .then(literal("custom")
+                    .executes(ServerCommands::executeEasyAddAltitudeCustom))
+                .then(literal("unlimited")
+                    .executes(ServerCommands::executeEasyAddAltitudeUnlimited)))
+            .then(literal("color")
+                .then(argument("colorValue", StringArgumentType.greedyString())
+                    .executes(context -> executeEasyAddColor(context, StringArgumentType.getString(context, "colorValue")))))
+            .then(literal("save")
+                .executes(ServerCommands::executeEasyAddSave));
     }
     
     /**
