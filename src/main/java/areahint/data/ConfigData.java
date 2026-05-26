@@ -8,11 +8,11 @@ public class ConfigData {
     // 检测频率，每秒检测的最大次数
     private int frequency;
     
-    // 字幕渲染方式：CPU、OpenGL、Vulkan
-    private String subtitleRender;
+    // 提示文字渲染方式：CPU、OpenGL、Vulkan
+    private String hintRender;
     
-    // 字幕样式：full、simple、mixed
-    private String subtitleStyle;
+    // 域名标题样式：full、simple、mixed
+    private String titleStyle;
     
     // 模组启用状态：true为开启，false为关闭
     private boolean enabled;
@@ -20,8 +20,8 @@ public class ConfigData {
     // 记录顶点的按键代码（GLFW键码）
     private int recordKey;
 
-    // 字幕大小：extra_large、large、medium_large、medium、medium_small、small、extra_small
-    private String subtitleSize;
+    // 域名标题大小：extra_large、large、medium_large、medium、medium_small、small、extra_small
+    private String titleSize;
 
     // 边界可视化开关：true为开启，false为关闭
     private boolean boundVizEnabled;
@@ -41,11 +41,11 @@ public class ConfigData {
     public ConfigData() {
         // 默认配置
         this.frequency = 1;
-        this.subtitleRender = "OpenGL";
-        this.subtitleStyle = "mixed";
+        this.hintRender = "OpenGL";
+        this.titleStyle = "mixed";
         this.enabled = true; // 默认开启模组
         this.recordKey = 88; // 默认为X键 (GLFW_KEY_X = 88)
-        this.subtitleSize = "medium"; // 默认为中等大小
+        this.titleSize = "medium"; // 默认为中等大小
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
         this.languageLocked = false; // 默认不上锁
@@ -55,16 +55,16 @@ public class ConfigData {
     /**
      * 构造方法
      * @param frequency 检测频率
-     * @param subtitleRender 字幕渲染方式
-     * @param subtitleStyle 字幕样式
+     * @param hintRender 提示文字渲染方式
+     * @param titleStyle 域名标题样式
      */
-    public ConfigData(int frequency, String subtitleRender, String subtitleStyle) {
+    public ConfigData(int frequency, String hintRender, String titleStyle) {
         this.frequency = frequency;
-        this.subtitleRender = subtitleRender;
-        this.subtitleStyle = subtitleStyle;
+        this.hintRender = hintRender;
+        this.titleStyle = titleStyle;
         this.enabled = true; // 默认开启模组
         this.recordKey = 88; // 默认为X键
-        this.subtitleSize = "medium"; // 默认为中等大小
+        this.titleSize = "medium"; // 默认为中等大小
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
         this.languageLocked = false; // 默认不上锁
@@ -74,17 +74,17 @@ public class ConfigData {
     /**
      * 完整构造方法
      * @param frequency 检测频率
-     * @param subtitleRender 字幕渲染方式
-     * @param subtitleStyle 字幕样式
+     * @param hintRender 提示文字渲染方式
+     * @param titleStyle 域名标题样式
      * @param enabled 模组启用状态
      */
-    public ConfigData(int frequency, String subtitleRender, String subtitleStyle, boolean enabled) {
+    public ConfigData(int frequency, String hintRender, String titleStyle, boolean enabled) {
         this.frequency = frequency;
-        this.subtitleRender = subtitleRender;
-        this.subtitleStyle = subtitleStyle;
+        this.hintRender = hintRender;
+        this.titleStyle = titleStyle;
         this.enabled = enabled;
         this.recordKey = 88; // 默认为X键
-        this.subtitleSize = "medium"; // 默认为中等大小
+        this.titleSize = "medium"; // 默认为中等大小
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
         this.languageLocked = false; // 默认不上锁
@@ -98,11 +98,11 @@ public class ConfigData {
     public ConfigData copy() {
         ConfigData copy = new ConfigData();
         copy.setFrequency(this.frequency);
-        copy.setSubtitleRender(normalizeRenderMode(this.subtitleRender));
-        copy.setSubtitleStyle(normalizeStyleMode(this.subtitleStyle));
+        copy.setHintRender(normalizeRenderMode(this.hintRender));
+        copy.setTitleStyle(normalizeStyleMode(this.titleStyle));
         copy.setEnabled(this.enabled);
         copy.setRecordKey(this.recordKey);
-        copy.setSubtitleSize(normalizeSize(this.subtitleSize));
+        copy.setTitleSize(normalizeSize(this.titleSize));
         copy.setBoundVizEnabled(this.boundVizEnabled);
         copy.setLanguage(this.language != null && !this.language.isEmpty() ? this.language : "zh_cn");
         copy.setLanguageLocked(this.languageLocked);
@@ -130,38 +130,38 @@ public class ConfigData {
     }
     
     /**
-     * 获取字幕渲染方式
-     * @return 字幕渲染方式
+     * 获取提示文字渲染方式
+     * @return 提示文字渲染方式
      */
-    public String getSubtitleRender() {
-        return subtitleRender;
+    public String getHintRender() {
+        return hintRender;
     }
     
     /**
-     * 设置字幕渲染方式
-     * @param subtitleRender 字幕渲染方式
+     * 设置提示文字渲染方式
+     * @param hintRender 提示文字渲染方式
      */
-    public void setSubtitleRender(String subtitleRender) {
-        if (isValidRenderMode(subtitleRender)) {
-            this.subtitleRender = subtitleRender;
+    public void setHintRender(String hintRender) {
+        if (isValidRenderMode(hintRender)) {
+            this.hintRender = hintRender;
         }
     }
     
     /**
-     * 获取字幕样式
-     * @return 字幕样式
+     * 获取域名标题样式
+     * @return 域名标题样式
      */
-    public String getSubtitleStyle() {
-        return subtitleStyle;
+    public String getTitleStyle() {
+        return titleStyle;
     }
     
     /**
-     * 设置字幕样式
-     * @param subtitleStyle 字幕样式
+     * 设置域名标题样式
+     * @param titleStyle 域名标题样式
      */
-    public void setSubtitleStyle(String subtitleStyle) {
-        if (isValidStyleMode(subtitleStyle)) {
-            this.subtitleStyle = subtitleStyle;
+    public void setTitleStyle(String titleStyle) {
+        if (isValidStyleMode(titleStyle)) {
+            this.titleStyle = titleStyle;
         }
     }
     
@@ -198,20 +198,20 @@ public class ConfigData {
     }
 
     /**
-     * 获取字幕大小
-     * @return 字幕大小
+     * 获取域名标题大小
+     * @return 域名标题大小
      */
-    public String getSubtitleSize() {
-        return subtitleSize;
+    public String getTitleSize() {
+        return titleSize;
     }
 
     /**
-     * 设置字幕大小
-     * @param subtitleSize 字幕大小
+     * 设置域名标题大小
+     * @param titleSize 域名标题大小
      */
-    public void setSubtitleSize(String subtitleSize) {
-        if (isValidSize(subtitleSize)) {
-            this.subtitleSize = subtitleSize;
+    public void setTitleSize(String titleSize) {
+        if (isValidSize(titleSize)) {
+            this.titleSize = titleSize;
         }
     }
 
@@ -303,8 +303,8 @@ public class ConfigData {
     }
 
     /**
-     * 验证字幕大小是否有效
-     * @param size 字幕大小
+     * 验证域名标题大小是否有效
+     * @param size 域名标题大小
      * @return 是否有效
      */
     public static boolean isValidSize(String size) {
@@ -360,9 +360,9 @@ public class ConfigData {
     }
 
     /**
-     * 根据命令行输入转换为合适的字幕大小
+     * 根据命令行输入转换为合适的域名标题大小
      * @param input 命令行输入
-     * @return 标准的字幕大小字符串
+     * @return 标准的域名标题大小字符串
      */
     public static String normalizeSize(String input) {
         if (input == null) {

@@ -1,4 +1,4 @@
-package areahint.subtitlestyle;
+package areahint.titlestyle;
 
 import areahint.config.ClientConfig;
 import areahint.i18n.I18nManager;
@@ -7,43 +7,43 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 /**
- * SubtitleStyle交互式管理器
- * 负责字幕样式设置的交互流程
+ * TitleStyle交互式管理器
+ * 负责域名标题样式设置的交互流程
  */
-public class SubtitleStyleManager {
+public class TitleStyleManager {
 
     /**
-     * SubtitleStyle状态枚举
+     * TitleStyle状态枚举
      */
-    public enum SubtitleStyleState {
+    public enum TitleStyleState {
         IDLE,           // 空闲状态
         SELECTING_STYLE // 选择样式状态
     }
 
     // 单例实例
-    private static SubtitleStyleManager instance;
+    private static TitleStyleManager instance;
 
     // 当前状态
-    private SubtitleStyleState currentState = SubtitleStyleState.IDLE;
+    private TitleStyleState currentState = TitleStyleState.IDLE;
 
     // 私有构造函数（单例模式）
-    private SubtitleStyleManager() {}
+    private TitleStyleManager() {}
 
     /**
      * 获取单例实例
      */
-    public static SubtitleStyleManager getInstance() {
+    public static TitleStyleManager getInstance() {
         if (instance == null) {
-            instance = new SubtitleStyleManager();
+            instance = new TitleStyleManager();
         }
         return instance;
     }
 
     /**
-     * 启动SubtitleStyle交互流程
+     * 启动TitleStyle交互流程
      */
-    public void startSubtitleStyleSelection() {
-        if (currentState != SubtitleStyleState.IDLE) {
+    public void startTitleStyleSelection() {
+        if (currentState != TitleStyleState.IDLE) {
             MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_6")), false);
             return;
         }
@@ -51,13 +51,13 @@ public class SubtitleStyleManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
             // 设置状态并显示UI
-            currentState = SubtitleStyleState.SELECTING_STYLE;
+            currentState = TitleStyleState.SELECTING_STYLE;
 
             // 获取当前样式
-            String currentStyle = ClientConfig.getSubtitleStyle();
+            String currentStyle = ClientConfig.getTitleStyle();
 
             // 显示选择界面
-            SubtitleStyleUI.showStyleSelectionScreen(currentStyle);
+            TitleStyleUI.showStyleSelectionScreen(currentStyle);
         }
     }
 
@@ -66,7 +66,7 @@ public class SubtitleStyleManager {
      * @param style 选择的样式
      */
     public void handleStyleSelection(String style) {
-        if (currentState != SubtitleStyleState.SELECTING_STYLE) {
+        if (currentState != TitleStyleState.SELECTING_STYLE) {
             return;
         }
 
@@ -80,7 +80,7 @@ public class SubtitleStyleManager {
         }
 
         // 保存样式设置
-        ClientConfig.setSubtitleStyle(style);
+        ClientConfig.setTitleStyle(style);
 
         // 显示成功消息
         String styleDisplay = getStyleDisplayName(style);
@@ -95,9 +95,9 @@ public class SubtitleStyleManager {
     }
 
     /**
-     * 取消SubtitleStyle流程
+     * 取消TitleStyle流程
      */
-    public void cancelSubtitleStyle() {
+    public void cancelTitleStyle() {
         MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_5")), false);
         resetState();
     }
@@ -106,7 +106,7 @@ public class SubtitleStyleManager {
      * 重置状态
      */
     private void resetState() {
-        currentState = SubtitleStyleState.IDLE;
+        currentState = TitleStyleState.IDLE;
     }
 
     /**
@@ -133,7 +133,7 @@ public class SubtitleStyleManager {
     }
 
     // Getters
-    public SubtitleStyleState getCurrentState() {
+    public TitleStyleState getCurrentState() {
         return currentState;
     }
 }

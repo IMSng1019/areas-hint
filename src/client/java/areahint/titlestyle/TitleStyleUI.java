@@ -1,4 +1,4 @@
-package areahint.subtitlestyle;
+package areahint.titlestyle;
 
 import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
@@ -10,10 +10,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 /**
- * SubtitleStyle用户界面系统
+ * TitleStyle用户界面系统
  * 使用聊天消息和可点击组件实现交互
  */
-public class SubtitleStyleUI {
+public class TitleStyleUI {
 
     /**
      * 显示样式选择界面
@@ -31,28 +31,28 @@ public class SubtitleStyleUI {
         // 创建样式选择按钮
         MutableText fullButton = Text.literal(I18nManager.translate("gui.button.general_3"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle select full"))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint titlestyle select full"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     Text.of(I18nManager.translate("gui.message.area_6"))))
                 .withColor(Formatting.AQUA));
 
         MutableText simpleButton = Text.literal(I18nManager.translate("gui.button.general_5"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle select simple"))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint titlestyle select simple"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     Text.of(I18nManager.translate("gui.message.area_5"))))
                 .withColor(Formatting.YELLOW));
 
         MutableText mixedButton = Text.literal(I18nManager.translate("gui.button.general_4"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle select mixed"))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint titlestyle select mixed"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     Text.of(I18nManager.translate("gui.message.area_7"))))
                 .withColor(Formatting.LIGHT_PURPLE));
 
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlestyle cancel"))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint titlestyle cancel"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_6"))))
                 .withColor(Formatting.RED));
 

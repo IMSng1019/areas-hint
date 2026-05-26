@@ -37,7 +37,7 @@ public class RenderManager {
      * 更新当前的渲染模式
      */
     public void updateRenderMode() {
-        String mode = ClientConfig.getSubtitleRender();
+        String mode = ClientConfig.getHintRender();
         switch (mode) {
             case "CPU":
                 currentRender = cpuRender;

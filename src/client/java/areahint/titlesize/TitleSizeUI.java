@@ -1,4 +1,4 @@
-package areahint.subtitlesize;
+package areahint.titlesize;
 
 import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
@@ -10,10 +10,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 /**
- * SubtitleSize用户界面系统
+ * TitleSize用户界面系统
  * 使用聊天消息和可点击组件实现交互
  */
-public class SubtitleSizeUI {
+public class TitleSizeUI {
 
     /**
      * 显示大小选择界面
@@ -49,7 +49,7 @@ public class SubtitleSizeUI {
         // 取消按钮
         MutableText cancelButton = Text.literal(I18nManager.translate("addhint.error.cancel"))
             .setStyle(Style.EMPTY
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint subtitlesize cancel"))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint titlesize cancel"))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(I18nManager.translate("gui.message.cancel_4"))))
                 .withColor(Formatting.RED));
 
@@ -67,7 +67,7 @@ public class SubtitleSizeUI {
         return Text.literal(colorCode + "[" + displayName + "]")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "/areahint subtitlesize select " + sizeValue))
+                    "/areahint titlesize select " + sizeValue))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     Text.of(I18nManager.translate("addhint.prompt.general") + displayName + I18nManager.translate("gui.message.general_2")))));
     }

@@ -1,13 +1,13 @@
-# SubtitleSize 功能说明
+# TitleSize 功能说明
 
 ## 功能概述
-`subtitlesize` 是一个交互式命令，用于调整模组进入域名时显示的字幕大小。
+`titlesize` 是一个交互式命令，用于调整模组进入域名时显示的域名标题大小。
 
 ## 命令使用
 
 ### 基本命令
 ```
-/areahint subtitlesize
+/areahint titlesize
 ```
 
 ### 功能特点
@@ -22,12 +22,12 @@
    - 极小 (extra_small)
 
 3. **自动保存**：选择后自动保存到配置文件并重新加载模组
-4. **显示当前设置**：启动命令时会显示当前的字幕大小
+4. **显示当前设置**：启动命令时会显示当前的域名标题大小
 
 ## 使用流程
 
-1. 输入命令 `/areahint subtitlesize`
-2. 系统显示当前字幕大小和可选项
+1. 输入命令 `/areahint titlesize`
+2. 系统显示当前域名标题大小和可选项
 3. 点击想要的大小按钮（例如：[极大] [大] [较大] [中] [较小] [小] [极小]）
 4. 系统自动保存配置并重新加载
 5. 如需取消，点击 [取消] 按钮
@@ -37,43 +37,43 @@
 - **作用范围**：仅影响玩家自己的本地配置文件
 
 ## 配置文件
-字幕大小设置保存在 `.minecraft/areas-hint/config.json` 中：
+域名标题大小设置保存在 `.minecraft/areas-hint/config.json` 中：
 ```json
 {
-  "Frequency": 1,
-  "SubtitleRender": "OpenGL",
-  "SubtitleStyle": "mixed",
-  "SubtitleSize": "medium"
+  "frequency": 1,
+  "hintRender": "OpenGL",
+  "titleStyle": "mixed",
+  "titleSize": "medium"
 }
 ```
 
 ## 技术实现
 
 ### 新增文件
-1. `SubtitleSizeManager.java` - 管理字幕大小选择流程
-2. `SubtitleSizeUI.java` - 处理用户界面显示
+1. `TitleSizeManager.java` - 管理域名标题大小选择流程
+2. `TitleSizeUI.java` - 处理用户界面显示
 
 ### 修改文件
-1. `ConfigData.java` - 添加 `subtitleSize` 字段和相关方法
+1. `ConfigData.java` - 添加 `titleSize` 字段和相关方法
 2. `ClientConfig.java` - 添加 getter/setter 方法
 3. `ServerCommands.java` - 注册新命令
 4. `ClientNetworking.java` - 处理客户端命令
 
 ### 默认值
-- 首次初始化时，字幕大小默认为 "medium"（中）
+- 首次初始化时，域名标题大小默认为 "medium"（中）
 
 ## 示例
 
 ### 启动命令
 ```
-/areahint subtitlesize
+/areahint titlesize
 ```
 
 ### 输出示例
 ```
-=== 字幕大小设置 ===
+=== 域名标题大小设置 ===
 当前大小: 中
-请选择新的字幕大小：
+请选择新的域名标题大小：
 
 [极大]  [大]  [较大]  [中]
 [较小]  [小]  [极小]
@@ -84,7 +84,7 @@
 
 ### 选择后输出
 ```
-字幕大小已设置为: 大
+域名标题大小已设置为: 大
 配置已重新加载
 ```
 

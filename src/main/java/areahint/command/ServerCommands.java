@@ -321,32 +321,32 @@ public class ServerCommands {
                     .executes(context -> executeFrequency(context, IntegerArgumentType.getInteger(context, "value"))))
                 .executes(ServerCommands::executeFrequencyInfo))
             
-            // subtitlerender 命令
-            .then(literal("subtitlerender")
-                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SUBTITLE_RENDER, 0))
+            // hintrender 命令
+            .then(literal("hintrender")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.HINT_RENDER, 0))
                 .then(argument("mode", StringArgumentType.word())
-                    .executes(context -> executeSubtitleRender(context, StringArgumentType.getString(context, "mode"))))
-                .executes(ServerCommands::executeSubtitleRenderInfo))
+                    .executes(context -> executeHintRender(context, StringArgumentType.getString(context, "mode"))))
+                .executes(ServerCommands::executeHintRenderInfo))
             
-            // subtitlestyle 命令（交互式）
-            .then(literal("subtitlestyle")
-                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SUBTITLE_STYLE, 0))
-                .executes(ServerCommands::executeSubtitleStyleStart)
+            // titlestyle 命令（交互式）
+            .then(literal("titlestyle")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.TITLE_STYLE, 0))
+                .executes(ServerCommands::executeTitleStyleStart)
                 .then(literal("select")
                     .then(argument("style", StringArgumentType.word())
-                        .executes(context -> executeSubtitleStyleSelect(context, StringArgumentType.getString(context, "style")))))
+                        .executes(context -> executeTitleStyleSelect(context, StringArgumentType.getString(context, "style")))))
                 .then(literal("cancel")
-                    .executes(ServerCommands::executeSubtitleStyleCancel)))
+                    .executes(ServerCommands::executeTitleStyleCancel)))
 
-            // subtitlesize 命令（交互式）
-            .then(literal("subtitlesize")
-                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.SUBTITLE_SIZE, 0))
-                .executes(ServerCommands::executeSubtitleSizeStart)
+            // titlesize 命令（交互式）
+            .then(literal("titlesize")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.TITLE_SIZE, 0))
+                .executes(ServerCommands::executeTitleSizeStart)
                 .then(literal("select")
                     .then(argument("size", StringArgumentType.word())
-                        .executes(context -> executeSubtitleSizeSelect(context, StringArgumentType.getString(context, "size")))))
+                        .executes(context -> executeTitleSizeSelect(context, StringArgumentType.getString(context, "size")))))
                 .then(literal("cancel")
-                    .executes(ServerCommands::executeSubtitleSizeCancel)))
+                    .executes(ServerCommands::executeTitleSizeCancel)))
                 
             // easyadd 命令（带多个子命令）
             .then(createEasyAddCommand("easyadd"))
@@ -617,9 +617,9 @@ public class ServerCommands {
         source.sendMessage(Text.translatable("help.command.reload"));
         source.sendMessage(Text.translatable("help.command.delete"));
         source.sendMessage(Text.translatable("help.command.frequency"));
-        source.sendMessage(Text.translatable("help.command.subtitlerender"));
-        source.sendMessage(Text.translatable("help.command.subtitlestyle"));
-        source.sendMessage(Text.translatable("help.command.subtitlesize"));
+        source.sendMessage(Text.translatable("help.command.hintrender"));
+        source.sendMessage(Text.translatable("help.command.titlestyle"));
+        source.sendMessage(Text.translatable("help.command.titlesize"));
         source.sendMessage(Text.translatable("help.command.add"));
         source.sendMessage(Text.translatable("help.command.easyadd"));
         source.sendMessage(Text.translatable("help.command.recolor"));
@@ -984,15 +984,15 @@ public class ServerCommands {
     }
     
     /**
-     * 执行subtitlerender命令（显示当前渲染方式）
+     * 执行hintrender命令（显示当前渲染方式）
      * @param context 命令上下文
      * @return 执行结果
      */
-    private static int executeSubtitleRenderInfo(CommandContext<ServerCommandSource> context) {
+    private static int executeHintRenderInfo(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         
         // 向客户端发送命令
-        sendClientCommand(source, "areahint:subtitlerender_info");
+        sendClientCommand(source, "areahint:hintrender_info");
         
         source.sendMessage(Text.translatable("command.message.general_13"));
         
@@ -1000,21 +1000,21 @@ public class ServerCommands {
     }
     
     /**
-     * 执行subtitlerender命令（设置渲染方式）
+     * 执行hintrender命令（设置渲染方式）
      * @param context 命令上下文
      * @param mode 渲染方式
      * @return 执行结果
      */
-    private static int executeSubtitleRender(CommandContext<ServerCommandSource> context, String mode) {
+    private static int executeHintRender(CommandContext<ServerCommandSource> context, String mode) {
         ServerCommandSource source = context.getSource();
         
         String normalizedMode = ConfigData.normalizeRenderMode(mode);
         
         if (ConfigData.isValidRenderMode(normalizedMode)) {
             // 向客户端发送命令
-            sendClientCommand(source, "areahint:subtitlerender " + normalizedMode);
+            sendClientCommand(source, "areahint:hintrender " + normalizedMode);
 
-            source.sendMessage(Text.translatable("command.message.subtitlerender.sent"));
+            source.sendMessage(Text.translatable("command.message.hintrender.sent"));
 
             return Command.SINGLE_SUCCESS;
         } else {
@@ -1024,11 +1024,11 @@ public class ServerCommands {
     }
     
     /**
-     * 执行subtitlestyle命令（启动交互式样式选择流程）
+     * 执行titlestyle命令（启动交互式样式选择流程）
      * @param context 命令上下文
      * @return 执行结果
      */
-    private static int executeSubtitleStyleStart(CommandContext<ServerCommandSource> context) {
+    private static int executeTitleStyleStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
 
         // 检查是否为客户端命令
@@ -1040,7 +1040,7 @@ public class ServerCommands {
         // 发送客户端命令
         try {
             // 通过网络发送到客户端处理
-            sendClientCommand(source, "areahint:subtitlestyle_start");
+            sendClientCommand(source, "areahint:titlestyle_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.translatable("command.error.start_4").append(Text.literal(e.getMessage())));
@@ -1049,12 +1049,12 @@ public class ServerCommands {
     }
 
     /**
-     * 执行subtitlestyle select命令（选择样式）
+     * 执行titlestyle select命令（选择样式）
      * @param context 命令上下文
      * @param style 样式
      * @return 执行结果
      */
-    private static int executeSubtitleStyleSelect(CommandContext<ServerCommandSource> context, String style) {
+    private static int executeTitleStyleSelect(CommandContext<ServerCommandSource> context, String style) {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
@@ -1063,7 +1063,7 @@ public class ServerCommands {
         }
 
         try {
-            sendClientCommand(source, "areahint:subtitlestyle_select:" + style);
+            sendClientCommand(source, "areahint:titlestyle_select:" + style);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.translatable("command.error.general_14").append(Text.literal(e.getMessage())));
@@ -1072,11 +1072,11 @@ public class ServerCommands {
     }
 
     /**
-     * 执行subtitlestyle cancel命令（取消样式选择）
+     * 执行titlestyle cancel命令（取消样式选择）
      * @param context 命令上下文
      * @return 执行结果
      */
-    private static int executeSubtitleStyleCancel(CommandContext<ServerCommandSource> context) {
+    private static int executeTitleStyleCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
@@ -1085,7 +1085,7 @@ public class ServerCommands {
         }
 
         try {
-            sendClientCommand(source, "areahint:subtitlestyle_cancel");
+            sendClientCommand(source, "areahint:titlestyle_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.translatable("command.error.cancel_5").append(Text.literal(e.getMessage())));
@@ -1094,11 +1094,11 @@ public class ServerCommands {
     }
 
     /**
-     * 执行subtitlesize命令（启动交互式大小选择流程）
+     * 执行titlesize命令（启动交互式大小选择流程）
      * @param context 命令上下文
      * @return 执行结果
      */
-    private static int executeSubtitleSizeStart(CommandContext<ServerCommandSource> context) {
+    private static int executeTitleSizeStart(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
 
         // 检查是否为客户端命令
@@ -1110,7 +1110,7 @@ public class ServerCommands {
         // 发送客户端命令
         try {
             // 通过网络发送到客户端处理
-            sendClientCommand(source, "areahint:subtitlesize_start");
+            sendClientCommand(source, "areahint:titlesize_start");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.translatable("command.error.start_3").append(Text.literal(e.getMessage())));
@@ -1119,12 +1119,12 @@ public class ServerCommands {
     }
 
     /**
-     * 执行subtitlesize select命令（选择大小）
+     * 执行titlesize select命令（选择大小）
      * @param context 命令上下文
      * @param size 大小
      * @return 执行结果
      */
-    private static int executeSubtitleSizeSelect(CommandContext<ServerCommandSource> context, String size) {
+    private static int executeTitleSizeSelect(CommandContext<ServerCommandSource> context, String size) {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
@@ -1133,7 +1133,7 @@ public class ServerCommands {
         }
 
         try {
-            sendClientCommand(source, "areahint:subtitlesize_select:" + size);
+            sendClientCommand(source, "areahint:titlesize_select:" + size);
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.translatable("command.error.general_13").append(Text.literal(e.getMessage())));
@@ -1142,11 +1142,11 @@ public class ServerCommands {
     }
 
     /**
-     * 执行subtitlesize cancel命令（取消大小选择）
+     * 执行titlesize cancel命令（取消大小选择）
      * @param context 命令上下文
      * @return 执行结果
      */
-    private static int executeSubtitleSizeCancel(CommandContext<ServerCommandSource> context) {
+    private static int executeTitleSizeCancel(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
 
         if (!source.isExecutedByPlayer()) {
@@ -1155,7 +1155,7 @@ public class ServerCommands {
         }
 
         try {
-            sendClientCommand(source, "areahint:subtitlesize_cancel");
+            sendClientCommand(source, "areahint:titlesize_cancel");
             return Command.SINGLE_SUCCESS;
         } catch (Exception e) {
             source.sendMessage(Text.translatable("command.error.cancel_3").append(Text.literal(e.getMessage())));

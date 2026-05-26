@@ -232,21 +232,21 @@ public class ClientNetworking {
                             }
                         }
                     }
-                    // 处理subtitlerender命令
-                    else if (action.startsWith("subtitlerender")) {
-                        if (action.equals("subtitlerender_info")) {
-                            displaySubtitleRenderInfo(client);
+                    // 处理hintrender命令
+                    else if (action.startsWith("hintrender")) {
+                        if (action.equals("hintrender_info")) {
+                            displayHintRenderInfo(client);
                         } else {
-                            handleSubtitleRenderCommand(client, action);
+                            handleHintRenderCommand(client, action);
                         }
                     }
-                    // 处理subtitlestyle命令
-                    else if (action.startsWith("subtitlestyle")) {
-                        handleSubtitleStyleCommand(action);
+                    // 处理titlestyle命令
+                    else if (action.startsWith("titlestyle")) {
+                        handleTitleStyleCommand(action);
                     }
-                    // 处理subtitlesize命令
-                    else if (action.startsWith("subtitlesize")) {
-                        handleSubtitleSizeCommand(action);
+                    // 处理titlesize命令
+                    else if (action.startsWith("titlesize")) {
+                        handleTitleSizeCommand(action);
                     }
                     // 处理EasyAdd命令
                     else if (action.startsWith("easyadd")) {
@@ -555,56 +555,56 @@ public class ClientNetworking {
     }
 
     /**
-     * 处理SubtitleStyle命令
+     * 处理TitleStyle命令
      * @param action 命令动作
      */
-    private static void handleSubtitleStyleCommand(String action) {
+    private static void handleTitleStyleCommand(String action) {
         try {
-            AreashintClient.LOGGER.info("处理SubtitleStyle命令: " + action);
-            areahint.subtitlestyle.SubtitleStyleManager manager = areahint.subtitlestyle.SubtitleStyleManager.getInstance();
+            AreashintClient.LOGGER.info("处理TitleStyle命令: " + action);
+            areahint.titlestyle.TitleStyleManager manager = areahint.titlestyle.TitleStyleManager.getInstance();
 
-            if (action.equals("subtitlestyle_start")) {
-                AreashintClient.LOGGER.info("执行subtitlestyle_start");
-                manager.startSubtitleStyleSelection();
-            } else if (action.startsWith("subtitlestyle_select:")) {
-                String style = action.substring("subtitlestyle_select:".length());
-                AreashintClient.LOGGER.info("执行subtitlestyle_select: " + style);
+            if (action.equals("titlestyle_start")) {
+                AreashintClient.LOGGER.info("执行titlestyle_start");
+                manager.startTitleStyleSelection();
+            } else if (action.startsWith("titlestyle_select:")) {
+                String style = action.substring("titlestyle_select:".length());
+                AreashintClient.LOGGER.info("执行titlestyle_select: " + style);
                 manager.handleStyleSelection(style);
-            } else if (action.equals("subtitlestyle_cancel")) {
-                AreashintClient.LOGGER.info("执行subtitlestyle_cancel");
-                manager.cancelSubtitleStyle();
+            } else if (action.equals("titlestyle_cancel")) {
+                AreashintClient.LOGGER.info("执行titlestyle_cancel");
+                manager.cancelTitleStyle();
             } else {
-                AreashintClient.LOGGER.warn("未知的SubtitleStyle命令: " + action);
+                AreashintClient.LOGGER.warn("未知的TitleStyle命令: " + action);
             }
         } catch (Exception e) {
-            AreashintClient.LOGGER.error("处理SubtitleStyle命令时出错: " + e.getMessage(), e);
+            AreashintClient.LOGGER.error("处理TitleStyle命令时出错: " + e.getMessage(), e);
         }
     }
 
     /**
-     * 处理SubtitleSize命令
+     * 处理TitleSize命令
      * @param action 命令动作
      */
-    private static void handleSubtitleSizeCommand(String action) {
+    private static void handleTitleSizeCommand(String action) {
         try {
-            AreashintClient.LOGGER.info("处理SubtitleSize命令: " + action);
-            areahint.subtitlesize.SubtitleSizeManager manager = areahint.subtitlesize.SubtitleSizeManager.getInstance();
+            AreashintClient.LOGGER.info("处理TitleSize命令: " + action);
+            areahint.titlesize.TitleSizeManager manager = areahint.titlesize.TitleSizeManager.getInstance();
 
-            if (action.equals("subtitlesize_start")) {
-                AreashintClient.LOGGER.info("执行subtitlesize_start");
-                manager.startSubtitleSizeSelection();
-            } else if (action.startsWith("subtitlesize_select:")) {
-                String size = action.substring("subtitlesize_select:".length());
-                AreashintClient.LOGGER.info("执行subtitlesize_select: " + size);
+            if (action.equals("titlesize_start")) {
+                AreashintClient.LOGGER.info("执行titlesize_start");
+                manager.startTitleSizeSelection();
+            } else if (action.startsWith("titlesize_select:")) {
+                String size = action.substring("titlesize_select:".length());
+                AreashintClient.LOGGER.info("执行titlesize_select: " + size);
                 manager.handleSizeSelection(size);
-            } else if (action.equals("subtitlesize_cancel")) {
-                AreashintClient.LOGGER.info("执行subtitlesize_cancel");
-                manager.cancelSubtitleSize();
+            } else if (action.equals("titlesize_cancel")) {
+                AreashintClient.LOGGER.info("执行titlesize_cancel");
+                manager.cancelTitleSize();
             } else {
-                AreashintClient.LOGGER.warn("未知的SubtitleSize命令: " + action);
+                AreashintClient.LOGGER.warn("未知的TitleSize命令: " + action);
             }
         } catch (Exception e) {
-            AreashintClient.LOGGER.error("处理SubtitleSize命令时出错: " + e.getMessage(), e);
+            AreashintClient.LOGGER.error("处理TitleSize命令时出错: " + e.getMessage(), e);
         }
     }
 
@@ -810,19 +810,19 @@ public class ClientNetworking {
     }
     
     /**
-     * 处理字幕渲染方式切换命令。
+     * 处理提示文字渲染方式切换命令。
      */
-    private static void handleSubtitleRenderCommand(MinecraftClient client, String action) {
+    private static void handleHintRenderCommand(MinecraftClient client, String action) {
         String[] renderParts = action.split(" ");
         if (renderParts.length < 2) {
             return;
         }
 
         String targetMode = ConfigData.normalizeRenderMode(renderParts[1]);
-        String currentMode = ClientConfig.getSubtitleRender();
+        String currentMode = ClientConfig.getHintRender();
 
         if (currentMode.equals(targetMode)) {
-            sendSubtitleRenderMessage(client, "§a当前字幕渲染方式为: §6" + currentMode + "§a，无需重复设置");
+            sendHintRenderMessage(client, "§a当前提示文字渲染方式为: §6" + currentMode + "§a，无需重复设置");
             return;
         }
 
@@ -830,21 +830,21 @@ public class ClientNetworking {
         boolean targetIsVulkan = "Vulkan".equals(targetMode);
 
         if (targetIsVulkan && !VulkanModCompat.isLoaded()) {
-            sendSubtitleRenderMessage(client, "§c未检测到 VulkanMod，无法切换到 §6Vulkan§c 渲染");
+            sendHintRenderMessage(client, "§c未检测到 VulkanMod，无法切换到 §6Vulkan§c 渲染");
             return;
         }
 
         if ((currentIsVulkan && !targetIsVulkan) || (!currentIsVulkan && targetIsVulkan)) {
-            sendSubtitleRenderMessage(client, "§cVulkan 与 OpenGL/CPU 之间禁止直接切换");
+            sendHintRenderMessage(client, "§cVulkan 与 OpenGL/CPU 之间禁止直接切换");
             return;
         }
 
-        ClientConfig.setSubtitleRender(targetMode);
+        ClientConfig.setHintRender(targetMode);
         AreashintClient.reload();
-        sendSubtitleRenderMessage(client, "§a字幕渲染方式已设置为: §6" + targetMode);
+        sendHintRenderMessage(client, "§a提示文字渲染方式已设置为: §6" + targetMode);
     }
 
-    private static void sendSubtitleRenderMessage(MinecraftClient client, String message) {
+    private static void sendHintRenderMessage(MinecraftClient client, String message) {
         if (client.player != null) {
             client.player.sendMessage(net.minecraft.text.Text.of(message), false);
         }
@@ -854,20 +854,20 @@ public class ClientNetworking {
      * 显示当前渲染方式信息
      * @param client Minecraft客户端实例
      */
-    private static void displaySubtitleRenderInfo(MinecraftClient client) {
+    private static void displayHintRenderInfo(MinecraftClient client) {
         if (client.player != null) {
-            String renderMode = ClientConfig.getSubtitleRender();
+            String renderMode = ClientConfig.getHintRender();
             client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_49") + renderMode));
         }
     }
     
     /**
-     * 显示当前字幕样式信息
+     * 显示当前域名标题样式信息
      * @param client Minecraft客户端实例
      */
-    private static void displaySubtitleStyleInfo(MinecraftClient client) {
+    private static void displayTitleStyleInfo(MinecraftClient client) {
         if (client.player != null) {
-            String style = ClientConfig.getSubtitleStyle();
+            String style = ClientConfig.getTitleStyle();
             client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_48") + style));
         }
     }

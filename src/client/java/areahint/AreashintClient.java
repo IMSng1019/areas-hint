@@ -64,7 +64,7 @@ public class AreashintClient implements ClientModInitializer {
 
 		// 初始化配置
 		ClientConfig.init();
-		ClientConfig.correctSubtitleRenderForEnvironment();
+		ClientConfig.correctHintRenderForEnvironment();
 
 		// 初始化区域检测器
 		areaDetector = new AreaDetector();
@@ -673,7 +673,7 @@ public class AreashintClient implements ClientModInitializer {
 	public static void applyClientConfig(ConfigData draft, boolean recordKeyChanged) {
 		LOGGER.info("应用客户端配置界面修改...");
 		ClientConfig.apply(draft);
-		ClientConfig.correctSubtitleRenderForEnvironment();
+		ClientConfig.correctHintRenderForEnvironment();
 		I18nManager.loadLanguage(ClientConfig.getLanguage());
 		areahint.network.ClientNetworking.sendLanguageToServer();
 
@@ -698,9 +698,9 @@ public class AreashintClient implements ClientModInitializer {
 	public static void reload() {
 		LOGGER.info("重新加载区域提示模组配置和区域数据...");
 		ClientConfig.load();
-		ClientConfig.correctSubtitleRenderForEnvironment();
+		ClientConfig.correctHintRenderForEnvironment();
 
-		// 更新渲染管理器的渲染模式（这会重新读取字幕大小配置）
+		// 更新渲染管理器的渲染模式（这会重新读取域名标题大小配置）
 		if (renderManager != null) {
 			renderManager.updateRenderMode();
 			LOGGER.info("渲染管理器已更新");

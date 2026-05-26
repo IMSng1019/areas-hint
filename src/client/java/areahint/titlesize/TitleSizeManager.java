@@ -1,4 +1,4 @@
-package areahint.subtitlesize;
+package areahint.titlesize;
 
 import areahint.config.ClientConfig;
 import areahint.i18n.I18nManager;
@@ -7,43 +7,43 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 /**
- * SubtitleSize交互式管理器
- * 负责字幕大小设置的交互流程
+ * TitleSize交互式管理器
+ * 负责域名标题大小设置的交互流程
  */
-public class SubtitleSizeManager {
+public class TitleSizeManager {
 
     /**
-     * SubtitleSize状态枚举
+     * TitleSize状态枚举
      */
-    public enum SubtitleSizeState {
+    public enum TitleSizeState {
         IDLE,           // 空闲状态
         SELECTING_SIZE  // 选择大小状态
     }
 
     // 单例实例
-    private static SubtitleSizeManager instance;
+    private static TitleSizeManager instance;
 
     // 当前状态
-    private SubtitleSizeState currentState = SubtitleSizeState.IDLE;
+    private TitleSizeState currentState = TitleSizeState.IDLE;
 
     // 私有构造函数（单例模式）
-    private SubtitleSizeManager() {}
+    private TitleSizeManager() {}
 
     /**
      * 获取单例实例
      */
-    public static SubtitleSizeManager getInstance() {
+    public static TitleSizeManager getInstance() {
         if (instance == null) {
-            instance = new SubtitleSizeManager();
+            instance = new TitleSizeManager();
         }
         return instance;
     }
 
     /**
-     * 启动SubtitleSize交互流程
+     * 启动TitleSize交互流程
      */
-    public void startSubtitleSizeSelection() {
-        if (currentState != SubtitleSizeState.IDLE) {
+    public void startTitleSizeSelection() {
+        if (currentState != TitleSizeState.IDLE) {
             MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_5")), false);
             return;
         }
@@ -51,13 +51,13 @@ public class SubtitleSizeManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null) {
             // 设置状态并显示UI
-            currentState = SubtitleSizeState.SELECTING_SIZE;
+            currentState = TitleSizeState.SELECTING_SIZE;
 
             // 获取当前大小
-            String currentSize = ClientConfig.getSubtitleSize();
+            String currentSize = ClientConfig.getTitleSize();
 
             // 显示选择界面
-            SubtitleSizeUI.showSizeSelectionScreen(currentSize);
+            TitleSizeUI.showSizeSelectionScreen(currentSize);
         }
     }
 
@@ -66,7 +66,7 @@ public class SubtitleSizeManager {
      * @param size 选择的大小
      */
     public void handleSizeSelection(String size) {
-        if (currentState != SubtitleSizeState.SELECTING_SIZE) {
+        if (currentState != TitleSizeState.SELECTING_SIZE) {
             return;
         }
 
@@ -80,7 +80,7 @@ public class SubtitleSizeManager {
         }
 
         // 保存大小设置
-        ClientConfig.setSubtitleSize(size);
+        ClientConfig.setTitleSize(size);
 
         // 显示成功消息
         String sizeDisplay = getSizeDisplayName(size);
@@ -95,9 +95,9 @@ public class SubtitleSizeManager {
     }
 
     /**
-     * 取消SubtitleSize流程
+     * 取消TitleSize流程
      */
-    public void cancelSubtitleSize() {
+    public void cancelTitleSize() {
         MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.message.cancel_4")), false);
         resetState();
     }
@@ -106,7 +106,7 @@ public class SubtitleSizeManager {
      * 重置状态
      */
     private void resetState() {
-        currentState = SubtitleSizeState.IDLE;
+        currentState = TitleSizeState.IDLE;
     }
 
     /**
@@ -143,7 +143,7 @@ public class SubtitleSizeManager {
     }
 
     // Getters
-    public SubtitleSizeState getCurrentState() {
+    public TitleSizeState getCurrentState() {
         return currentState;
     }
 }

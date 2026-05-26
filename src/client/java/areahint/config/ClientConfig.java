@@ -41,23 +41,23 @@ public class ClientConfig {
         Path configFile = AreashintClient.getConfigFile();
         config = FileManager.readConfigData(configFile);
         loaded = true;
-        AreashintClient.LOGGER.info("已加载配置: 频率={}, 渲染方式={}, 字幕样式={}, 字幕大小={}",
-                config.getFrequency(), config.getSubtitleRender(), config.getSubtitleStyle(), config.getSubtitleSize());
+        AreashintClient.LOGGER.info("已加载配置: 频率={}, 渲染方式={}, 域名标题样式={}, 域名标题大小={}",
+                config.getFrequency(), config.getHintRender(), config.getTitleStyle(), config.getTitleSize());
     }
 
     /**
-     * 按当前运行环境修正字幕渲染方式配置。
+     * 按当前运行环境修正提示文字渲染方式配置。
      * 规则：
      * - 已加载 VulkanMod -> 强制使用 Vulkan
      * - 未加载 VulkanMod 且当前为 Vulkan -> 改回 OpenGL
      * - 未加载 VulkanMod 且当前为 OpenGL/CPU -> 保持不变
      */
-    public static void correctSubtitleRenderForEnvironment() {
+    public static void correctHintRenderForEnvironment() {
         if (!loaded) {
             return;
         }
 
-        String currentMode = ConfigData.normalizeRenderMode(config.getSubtitleRender());
+        String currentMode = ConfigData.normalizeRenderMode(config.getHintRender());
         String targetMode = currentMode;
 
         if (VulkanModCompat.isLoaded()) {
@@ -70,9 +70,9 @@ public class ClientConfig {
             return;
         }
 
-        config.setSubtitleRender(targetMode);
+        config.setHintRender(targetMode);
         save();
-        AreashintClient.LOGGER.info("已按运行环境修正字幕渲染方式: {} -> {}", currentMode, targetMode);
+        AreashintClient.LOGGER.info("已按运行环境修正提示文字渲染方式: {} -> {}", currentMode, targetMode);
     }
     
     /**
@@ -131,38 +131,38 @@ public class ClientConfig {
     }
     
     /**
-     * 获取字幕渲染方式
-     * @return 字幕渲染方式
+     * 获取提示文字渲染方式
+     * @return 提示文字渲染方式
      */
-    public static String getSubtitleRender() {
-        return config.getSubtitleRender();
+    public static String getHintRender() {
+        return config.getHintRender();
     }
     
     /**
-     * 设置字幕渲染方式
-     * @param subtitleRender 字幕渲染方式
+     * 设置提示文字渲染方式
+     * @param hintRender 提示文字渲染方式
      */
-    public static void setSubtitleRender(String subtitleRender) {
-        String normalizedRender = ConfigData.normalizeRenderMode(subtitleRender);
-        config.setSubtitleRender(normalizedRender);
+    public static void setHintRender(String hintRender) {
+        String normalizedRender = ConfigData.normalizeRenderMode(hintRender);
+        config.setHintRender(normalizedRender);
         save();
     }
     
     /**
-     * 获取字幕样式
-     * @return 字幕样式
+     * 获取域名标题样式
+     * @return 域名标题样式
      */
-    public static String getSubtitleStyle() {
-        return config.getSubtitleStyle();
+    public static String getTitleStyle() {
+        return config.getTitleStyle();
     }
     
     /**
-     * 设置字幕样式
-     * @param subtitleStyle 字幕样式
+     * 设置域名标题样式
+     * @param titleStyle 域名标题样式
      */
-    public static void setSubtitleStyle(String subtitleStyle) {
-        String normalizedStyle = ConfigData.normalizeStyleMode(subtitleStyle);
-        config.setSubtitleStyle(normalizedStyle);
+    public static void setTitleStyle(String titleStyle) {
+        String normalizedStyle = ConfigData.normalizeStyleMode(titleStyle);
+        config.setTitleStyle(normalizedStyle);
         save();
     }
 
@@ -201,20 +201,20 @@ public class ClientConfig {
     }
 
     /**
-     * 获取字幕大小
-     * @return 字幕大小
+     * 获取域名标题大小
+     * @return 域名标题大小
      */
-    public static String getSubtitleSize() {
-        return config.getSubtitleSize();
+    public static String getTitleSize() {
+        return config.getTitleSize();
     }
 
     /**
-     * 设置字幕大小
-     * @param subtitleSize 字幕大小
+     * 设置域名标题大小
+     * @param titleSize 域名标题大小
      */
-    public static void setSubtitleSize(String subtitleSize) {
-        String normalizedSize = ConfigData.normalizeSize(subtitleSize);
-        config.setSubtitleSize(normalizedSize);
+    public static void setTitleSize(String titleSize) {
+        String normalizedSize = ConfigData.normalizeSize(titleSize);
+        config.setTitleSize(normalizedSize);
         save();
     }
 

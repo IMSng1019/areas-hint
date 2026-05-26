@@ -30,9 +30,9 @@ public final class PermissionNodes {
     public static final String ADDSIGNATURE = "areahint.command.addsignature";
     public static final String DELETESIGNATURE = "areahint.command.deletesignature";
     public static final String FREQUENCY = "areahint.command.frequency";
-    public static final String SUBTITLE_RENDER = "areahint.command.subtitlerender";
-    public static final String SUBTITLE_STYLE = "areahint.command.subtitlestyle";
-    public static final String SUBTITLE_SIZE = "areahint.command.subtitlesize";
+    public static final String HINT_RENDER = "areahint.command.hintrender";
+    public static final String TITLE_STYLE = "areahint.command.titlestyle";
+    public static final String TITLE_SIZE = "areahint.command.titlesize";
     public static final String SERVER_LANGUAGE = "areahint.command.serverlanguage";
 
     private PermissionNodes() {

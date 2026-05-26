@@ -130,7 +130,7 @@ public class GLRender implements RenderManager.IRender {
         matrixStack.push();
         // 使用浮点数直接传递给矩阵变换，避免整数转换
         matrixStack.translate(x, y + yOffset, 0);
-        // 根据配置获取字幕大小
+        // 根据配置获取域名标题大小
         float textScale = getTextScale();
         matrixStack.scale(textScale, textScale, 1.0f);
         
@@ -213,7 +213,7 @@ public class GLRender implements RenderManager.IRender {
      * @return 文本缩放比例
      */
     private float getTextScale() {
-        String size = ClientConfig.getSubtitleSize();
+        String size = ClientConfig.getTitleSize();
         switch (size) {
             case "extra_large":
                 return 3.0f;

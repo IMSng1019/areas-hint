@@ -100,7 +100,7 @@ public class AreaDetector {
         }
         
         // 根据配置的样式格式化区域名称
-        String style = ClientConfig.getSubtitleStyle();
+        String style = ClientConfig.getTitleStyle();
         String formattedName = formatAreaName(currentArea, style);
         AreashintClient.LOGGER.debug("玩家在区域: {}, 格式化后的名称: {}", currentArea.getName(), formattedName);
         
@@ -128,7 +128,7 @@ public class AreaDetector {
      */
     public String formatAreaNameFromData(AreaData area) {
         if (area == null) return null;
-        return formatAreaName(area, ClientConfig.getSubtitleStyle());
+        return formatAreaName(area, ClientConfig.getTitleStyle());
     }
 
     /**

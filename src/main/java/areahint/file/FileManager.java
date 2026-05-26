@@ -113,27 +113,26 @@ public class FileManager {
     public static void createDefaultConfigFile(Path path) throws IOException {
         if (Files.notExists(path)) {
             ConfigData defaultConfig = new ConfigData();
-            String json = GSON.toJson(defaultConfig);
 
             // 添加注释
             String jsonWithComments = "{\n" +
                     "  // Frequency: 检测频率，每秒检测的最大次数（必须为正整数）\n" +
                     "  \"frequency\": " + defaultConfig.getFrequency() + ",\n\n" +
-                    "  // SubtitleRender: 字幕渲染方式\n" +
+                    "  // HintRender: 提示文字渲染方式\n" +
                     "  // 选项: \"CPU\" (使用CPU渲染), \"OpenGL\" (使用OpenGL渲染), \"Vulkan\" (使用Vulkan渲染)\n" +
-                    "  \"subtitleRender\": \"" + defaultConfig.getSubtitleRender() + "\",\n\n" +
-                    "  // SubtitleStyle: 字幕样式\n" +
+                    "  \"hintRender\": \"" + defaultConfig.getHintRender() + "\",\n\n" +
+                    "  // TitleStyle: 域名标题样式\n" +
                     "  // 选项: \"full\" (显示完整路径), \"simple\" (仅显示当前级别), \"mixed\" (混合模式)\n" +
-                    "  \"subtitleStyle\": \"" + defaultConfig.getSubtitleStyle() + "\",\n\n" +
+                    "  \"titleStyle\": \"" + defaultConfig.getTitleStyle() + "\",\n\n" +
                     "  // Enabled: 模组启用状态\n" +
                     "  // true: 启用模组, false: 禁用模组\n" +
                     "  \"enabled\": " + defaultConfig.isEnabled() + ",\n\n" +
                     "  // RecordKey: 记录顶点的按键代码（GLFW键码）\n" +
                     "  // 默认: 88 (X键), 可通过 /areahint replacebutton 命令修改\n" +
                     "  \"recordKey\": " + defaultConfig.getRecordKey() + ",\n\n" +
-                    "  // SubtitleSize: 字幕大小\n" +
+                    "  // TitleSize: 域名标题大小\n" +
                     "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
-                    "  \"subtitleSize\": \"" + defaultConfig.getSubtitleSize() + "\",\n\n" +
+                    "  \"titleSize\": \"" + defaultConfig.getTitleSize() + "\",\n\n" +
                     "  // BoundVizEnabled: 边界可视化开关\n" +
                     "  // true: 显示域名边界, false: 隐藏域名边界\n" +
                     "  \"boundVizEnabled\": " + defaultConfig.isBoundVizEnabled() + ",\n\n" +
@@ -214,70 +213,65 @@ public class FileManager {
 
             String normalizedJson = sb.toString();
             JsonObject configJson = JsonParser.parseString(normalizedJson).getAsJsonObject();
+            ConfigData defaultConfig = new ConfigData();
+
+            // 新版本配置必须同时包含全部字段。旧配置缺少 hintRender/titleStyle/titleSize
+            // 等新字段时，直接重置整份个人配置，避免旧字段继续残留或被部分迁移。
+            if (!hasAllRequiredConfigFields(configJson)) {
+                Areashint.LOGGER.warn("个人配置文件缺少必要字段，已重置为默认配置: " + path);
+                writeConfigData(path, defaultConfig);
+                return defaultConfig;
+            }
+
             ConfigData config = GSON.fromJson(normalizedJson, ConfigData.class);
             // 如果解析失败，返回默认配置
             if (config == null) {
                 return new ConfigData();
             }
 
-            // 检测配置完整性并补全缺失项
+            // 字段齐全后，再检查字段值是否有效；值非法时只修正对应值并保存。
             boolean needsUpdate = false;
-            ConfigData defaultConfig = new ConfigData();
 
             // 检查并补全 frequency
             if (config.getFrequency() <= 0) {
                 config.setFrequency(defaultConfig.getFrequency());
                 needsUpdate = true;
-                Areashint.LOGGER.warn("配置项 'frequency' 无效或缺失，已补全为默认值: " + defaultConfig.getFrequency());
+                Areashint.LOGGER.warn("配置项 'frequency' 无效，已补全为默认值: " + defaultConfig.getFrequency());
             }
 
-            // 检查并补全 subtitleRender
-            if (config.getSubtitleRender() == null || !ConfigData.isValidRenderMode(config.getSubtitleRender())) {
-                config.setSubtitleRender(defaultConfig.getSubtitleRender());
+            // 检查并补全 hintRender
+            if (config.getHintRender() == null || !ConfigData.isValidRenderMode(config.getHintRender())) {
+                config.setHintRender(defaultConfig.getHintRender());
                 needsUpdate = true;
-                Areashint.LOGGER.warn("配置项 'subtitleRender' 无效或缺失，已补全为默认值: " + defaultConfig.getSubtitleRender());
+                Areashint.LOGGER.warn("配置项 'hintRender' 无效，已补全为默认值: " + defaultConfig.getHintRender());
             }
 
-            // 检查并补全 subtitleStyle
-            if (config.getSubtitleStyle() == null || !ConfigData.isValidStyleMode(config.getSubtitleStyle())) {
-                config.setSubtitleStyle(defaultConfig.getSubtitleStyle());
+            // 检查并补全 titleStyle
+            if (config.getTitleStyle() == null || !ConfigData.isValidStyleMode(config.getTitleStyle())) {
+                config.setTitleStyle(defaultConfig.getTitleStyle());
                 needsUpdate = true;
-                Areashint.LOGGER.warn("配置项 'subtitleStyle' 无效或缺失，已补全为默认值: " + defaultConfig.getSubtitleStyle());
+                Areashint.LOGGER.warn("配置项 'titleStyle' 无效，已补全为默认值: " + defaultConfig.getTitleStyle());
             }
 
-            // 检查并补全 subtitleSize
-            if (config.getSubtitleSize() == null || !ConfigData.isValidSize(config.getSubtitleSize())) {
-                config.setSubtitleSize(defaultConfig.getSubtitleSize());
+            // 检查并补全 titleSize
+            if (config.getTitleSize() == null || !ConfigData.isValidSize(config.getTitleSize())) {
+                config.setTitleSize(defaultConfig.getTitleSize());
                 needsUpdate = true;
-                Areashint.LOGGER.warn("配置项 'subtitleSize' 无效或缺失，已补全为默认值: " + defaultConfig.getSubtitleSize());
+                Areashint.LOGGER.warn("配置项 'titleSize' 无效，已补全为默认值: " + defaultConfig.getTitleSize());
             }
 
             // 检查并补全 recordKey
             if (config.getRecordKey() <= 0) {
                 config.setRecordKey(defaultConfig.getRecordKey());
                 needsUpdate = true;
-                Areashint.LOGGER.warn("配置项 'recordKey' 无效或缺失，已补全为默认值: " + defaultConfig.getRecordKey());
-            }
-
-            // 检查并补全 boundVizEnabled
-            if (!configJson.has("boundVizEnabled")) {
-                config.setBoundVizEnabled(defaultConfig.isBoundVizEnabled());
-                needsUpdate = true;
-                Areashint.LOGGER.warn("配置项 'boundVizEnabled' 缺失，已补全为默认值: " + defaultConfig.isBoundVizEnabled());
+                Areashint.LOGGER.warn("配置项 'recordKey' 无效，已补全为默认值: " + defaultConfig.getRecordKey());
             }
 
             // 检查并补全 language
             if (config.getLanguage() == null || config.getLanguage().isEmpty()) {
                 config.setLanguage(defaultConfig.getLanguage());
                 needsUpdate = true;
-                Areashint.LOGGER.warn("配置项 'language' 无效或缺失，已补全为默认值: " + defaultConfig.getLanguage());
-            }
-
-            // 检查并补全 languageLocked
-            if (!configJson.has("languageLocked")) {
-                config.setLanguageLocked(defaultConfig.isLanguageLocked());
-                needsUpdate = true;
-                Areashint.LOGGER.warn("配置项 'languageLocked' 缺失，已补全为默认值: " + defaultConfig.isLanguageLocked());
+                Areashint.LOGGER.warn("配置项 'language' 无效，已补全为默认值: " + defaultConfig.getLanguage());
             }
 
             // 检查并补全 teleportFormat
@@ -290,12 +284,12 @@ public class FileManager {
             if (!ConfigData.isValidTeleportFormat(rawTeleportFormat)) {
                 config.setTeleportFormat(defaultConfig.getTeleportFormat());
                 needsUpdate = true;
-                Areashint.LOGGER.warn("配置项 'teleportFormat' 无效或缺失，已补全为默认值: " + defaultConfig.getTeleportFormat());
+                Areashint.LOGGER.warn("配置项 'teleportFormat' 无效，已补全为默认值: " + defaultConfig.getTeleportFormat());
             }
 
-            // 如果有缺失项，立即保存更新后的配置
+            // 如果字段值被修正，立即保存更新后的配置。
             if (needsUpdate) {
-                Areashint.LOGGER.info("检测到配置不完整，正在保存补全后的配置...");
+                Areashint.LOGGER.info("检测到配置值无效，正在保存修正后的配置...");
                 writeConfigData(path, config);
             }
 
@@ -304,6 +298,28 @@ public class FileManager {
             Areashint.LOGGER.error("读取配置数据失败: " + e.getMessage());
             return new ConfigData();
         }
+    }
+
+    /**
+     * 检查个人配置文件是否包含当前版本需要的全部字段。
+     * <p>
+     * 这里按字段是否存在判断，而不是按反序列化后的默认值判断，因为 boolean
+     * 字段缺失时会被 Gson 解析为 false，无法区分“用户设置为 false”和“旧配置缺字段”。
+     *
+     * @param configJson 去除注释后的配置 JSON 对象
+     * @return true 表示字段齐全，false 表示需要重置整份配置
+     */
+    private static boolean hasAllRequiredConfigFields(JsonObject configJson) {
+        return configJson.has("frequency")
+                && configJson.has("hintRender")
+                && configJson.has("titleStyle")
+                && configJson.has("enabled")
+                && configJson.has("recordKey")
+                && configJson.has("titleSize")
+                && configJson.has("boundVizEnabled")
+                && configJson.has("language")
+                && configJson.has("languageLocked")
+                && configJson.has("teleportFormat");
     }
     
     /**
@@ -318,21 +334,21 @@ public class FileManager {
             String jsonWithComments = "{\n" +
                     "  // Frequency: 检测频率，每秒检测的最大次数（必须为正整数）\n" +
                     "  \"frequency\": " + config.getFrequency() + ",\n\n" +
-                    "  // SubtitleRender: 字幕渲染方式\n" +
+                    "  // HintRender: 提示文字渲染方式\n" +
                     "  // 选项: \"CPU\" (使用CPU渲染), \"OpenGL\" (使用OpenGL渲染), \"Vulkan\" (使用Vulkan渲染)\n" +
-                    "  \"subtitleRender\": \"" + config.getSubtitleRender() + "\",\n\n" +
-                    "  // SubtitleStyle: 字幕样式\n" +
+                    "  \"hintRender\": \"" + config.getHintRender() + "\",\n\n" +
+                    "  // TitleStyle: 域名标题样式\n" +
                     "  // 选项: \"full\" (显示完整路径), \"simple\" (仅显示当前级别), \"mixed\" (混合模式)\n" +
-                    "  \"subtitleStyle\": \"" + config.getSubtitleStyle() + "\",\n\n" +
+                    "  \"titleStyle\": \"" + config.getTitleStyle() + "\",\n\n" +
                     "  // Enabled: 模组启用状态\n" +
                     "  // true: 启用模组, false: 禁用模组\n" +
                     "  \"enabled\": " + config.isEnabled() + ",\n\n" +
                     "  // RecordKey: 记录顶点的按键代码（GLFW键码）\n" +
                     "  // 默认: 88 (X键), 可通过 /areahint replacebutton 命令修改\n" +
                     "  \"recordKey\": " + config.getRecordKey() + ",\n\n" +
-                    "  // SubtitleSize: 字幕大小\n" +
+                    "  // TitleSize: 域名标题大小\n" +
                     "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
-                    "  \"subtitleSize\": \"" + config.getSubtitleSize() + "\",\n\n" +
+                    "  \"titleSize\": \"" + config.getTitleSize() + "\",\n\n" +
                     "  // BoundVizEnabled: 边界可视化开关\n" +
                     "  // true: 显示域名边界, false: 隐藏域名边界\n" +
                     "  \"boundVizEnabled\": " + config.isBoundVizEnabled() + ",\n\n" +

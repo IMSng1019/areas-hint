@@ -61,18 +61,18 @@ public class AreasHintConfigScreen extends Screen {
         }));
         this.list.addButton("screen.areahint.config.frequency", new FrequencySlider(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT));
 
-        this.list.addGroup("screen.areahint.config.group.subtitle");
-        this.list.addButton("screen.areahint.config.subtitle_render", cycleButton(renderText(draft.getSubtitleRender()), button -> {
-            draft.setSubtitleRender(nextRenderMode(draft.getSubtitleRender()));
-            button.setMessage(renderText(draft.getSubtitleRender()));
+        this.list.addGroup("screen.areahint.config.group.title");
+        this.list.addButton("screen.areahint.config.hint_render", cycleButton(renderText(draft.getHintRender()), button -> {
+            draft.setHintRender(nextRenderMode(draft.getHintRender()));
+            button.setMessage(renderText(draft.getHintRender()));
         }));
-        this.list.addButton("screen.areahint.config.subtitle_style", cycleButton(styleText(draft.getSubtitleStyle()), button -> {
-            draft.setSubtitleStyle(nextValue(draft.getSubtitleStyle(), STYLE_MODES));
-            button.setMessage(styleText(draft.getSubtitleStyle()));
+        this.list.addButton("screen.areahint.config.title_style", cycleButton(styleText(draft.getTitleStyle()), button -> {
+            draft.setTitleStyle(nextValue(draft.getTitleStyle(), STYLE_MODES));
+            button.setMessage(styleText(draft.getTitleStyle()));
         }));
-        this.list.addButton("screen.areahint.config.subtitle_size", cycleButton(sizeText(draft.getSubtitleSize()), button -> {
-            draft.setSubtitleSize(nextValue(draft.getSubtitleSize(), SIZE_MODES));
-            button.setMessage(sizeText(draft.getSubtitleSize()));
+        this.list.addButton("screen.areahint.config.title_size", cycleButton(sizeText(draft.getTitleSize()), button -> {
+            draft.setTitleSize(nextValue(draft.getTitleSize(), SIZE_MODES));
+            button.setMessage(sizeText(draft.getTitleSize()));
         }));
 
         this.list.addGroup("screen.areahint.config.group.input");
