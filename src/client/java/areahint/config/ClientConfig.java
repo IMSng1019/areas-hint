@@ -41,8 +41,8 @@ public class ClientConfig {
         Path configFile = AreashintClient.getConfigFile();
         config = FileManager.readConfigData(configFile);
         loaded = true;
-        AreashintClient.LOGGER.info("已加载配置: 频率={}, 渲染方式={}, 域名标题样式={}, 域名标题大小={}",
-                config.getFrequency(), config.getHintRender(), config.getTitleStyle(), config.getTitleSize());
+        AreashintClient.LOGGER.info("已加载配置: 频率={}, 渲染方式={}, 域名标题样式={}, 域名标题大小={}, 副字幕大小={}",
+                config.getFrequency(), config.getHintRender(), config.getTitleStyle(), config.getTitleSize(), config.getSubtitleSize());
     }
 
     /**
@@ -215,6 +215,24 @@ public class ClientConfig {
     public static void setTitleSize(String titleSize) {
         String normalizedSize = ConfigData.normalizeSize(titleSize);
         config.setTitleSize(normalizedSize);
+        save();
+    }
+
+    /**
+     * 获取副字幕大小
+     * @return 副字幕大小，auto 表示跟随主标题并小一级
+     */
+    public static String getSubtitleSize() {
+        return config.getSubtitleSize();
+    }
+
+    /**
+     * 设置副字幕大小
+     * @param subtitleSize 副字幕大小
+     */
+    public static void setSubtitleSize(String subtitleSize) {
+        String normalizedSize = ConfigData.normalizeSubtitleSize(subtitleSize);
+        config.setSubtitleSize(normalizedSize);
         save();
     }
 

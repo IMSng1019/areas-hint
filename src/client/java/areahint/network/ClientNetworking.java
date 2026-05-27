@@ -248,6 +248,13 @@ public class ClientNetworking {
                     else if (action.startsWith("titlesize")) {
                         handleTitleSizeCommand(action);
                     }
+                    // 处理副字幕命令
+                    else if (action.startsWith("addsubtitle")
+                            || action.startsWith("deletesubtitle")
+                            || action.startsWith("replacesubtitlecolor")
+                            || action.startsWith("replacesubtitlesize")) {
+                        handleSubtitleCommand(action);
+                    }
                     // 处理EasyAdd命令
                     else if (action.startsWith("easyadd")) {
                         handleEasyAddCommand(action);
@@ -605,6 +612,51 @@ public class ClientNetworking {
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("处理TitleSize命令时出错: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理副字幕命令。
+     * 服务端命令只负责权限和目标玩家，具体交互状态由客户端 SubtitleManager 保存。
+     */
+    private static void handleSubtitleCommand(String action) {
+        try {
+            AreashintClient.LOGGER.info("处理Subtitle命令: " + action);
+            areahint.subtitle.SubtitleManager manager = areahint.subtitle.SubtitleManager.getInstance();
+
+            if (action.startsWith("addsubtitle_select:")) {
+                manager.handleAddAreaSelection(action.substring("addsubtitle_select:".length()));
+            } else if (action.startsWith("addsubtitle_text:")) {
+                manager.handleSubtitleText(action.substring("addsubtitle_text:".length()));
+            } else if (action.equals("addsubtitle_confirm")) {
+                manager.confirmAddSubtitle();
+            } else if (action.equals("addsubtitle_cancel")) {
+                manager.cancel();
+            } else if (action.startsWith("deletesubtitle_select:")) {
+                manager.handleDeleteAreaSelection(action.substring("deletesubtitle_select:".length()));
+            } else if (action.equals("deletesubtitle_confirm")) {
+                manager.confirmDeleteSubtitle();
+            } else if (action.equals("deletesubtitle_cancel")) {
+                manager.cancel();
+            } else if (action.startsWith("replacesubtitlecolor_select:")) {
+                manager.handleColorAreaSelection(action.substring("replacesubtitlecolor_select:".length()));
+            } else if (action.startsWith("replacesubtitlecolor_color:")) {
+                manager.handleColorSelection(action.substring("replacesubtitlecolor_color:".length()));
+            } else if (action.equals("replacesubtitlecolor_confirm")) {
+                manager.confirmReplaceSubtitleColor();
+            } else if (action.equals("replacesubtitlecolor_cancel")) {
+                manager.cancel();
+            } else if (action.equals("replacesubtitlesize_start")) {
+                manager.startSubtitleSizeSelection();
+            } else if (action.startsWith("replacesubtitlesize_select:")) {
+                manager.handleSubtitleSizeSelection(action.substring("replacesubtitlesize_select:".length()));
+            } else if (action.equals("replacesubtitlesize_cancel")) {
+                manager.cancel();
+            } else {
+                AreashintClient.LOGGER.warn("未知的Subtitle命令: " + action);
+            }
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("处理Subtitle命令时出错: " + e.getMessage(), e);
         }
     }
 

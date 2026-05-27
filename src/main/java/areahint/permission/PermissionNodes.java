@@ -33,6 +33,10 @@ public final class PermissionNodes {
     public static final String HINT_RENDER = "areahint.command.hintrender";
     public static final String TITLE_STYLE = "areahint.command.titlestyle";
     public static final String TITLE_SIZE = "areahint.command.titlesize";
+    public static final String ADD_SUBTITLE = "areahint.command.addsubtitle";
+    public static final String DELETE_SUBTITLE = "areahint.command.deletesubtitle";
+    public static final String REPLACE_SUBTITLE_COLOR = "areahint.command.replacesubtitlecolor";
+    public static final String REPLACE_SUBTITLE_SIZE = "areahint.command.replacesubtitlesize";
     public static final String SERVER_LANGUAGE = "areahint.command.serverlanguage";
 
     private PermissionNodes() {

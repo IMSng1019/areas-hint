@@ -1,5 +1,7 @@
 package areahint.data;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * 配置数据模型类
  * 用于表示模组的配置选项
@@ -22,6 +24,10 @@ public class ConfigData {
 
     // 域名标题大小：extra_large、large、medium_large、medium、medium_small、small、extra_small
     private String titleSize;
+
+    // 副字幕大小：auto 表示始终比域名标题小一级，也可以手动使用标题大小的同组选项
+    @SerializedName(value = "subtitlesize", alternate = {"subtitleSize"})
+    private String subtitleSize;
 
     // 边界可视化开关：true为开启，false为关闭
     private boolean boundVizEnabled;
@@ -46,6 +52,7 @@ public class ConfigData {
         this.enabled = true; // 默认开启模组
         this.recordKey = 88; // 默认为X键 (GLFW_KEY_X = 88)
         this.titleSize = "medium"; // 默认为中等大小
+        this.subtitleSize = "auto"; // 默认比当前域名标题小一级
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
         this.languageLocked = false; // 默认不上锁
@@ -65,6 +72,7 @@ public class ConfigData {
         this.enabled = true; // 默认开启模组
         this.recordKey = 88; // 默认为X键
         this.titleSize = "medium"; // 默认为中等大小
+        this.subtitleSize = "auto"; // 默认比当前域名标题小一级
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
         this.languageLocked = false; // 默认不上锁
@@ -85,6 +93,7 @@ public class ConfigData {
         this.enabled = enabled;
         this.recordKey = 88; // 默认为X键
         this.titleSize = "medium"; // 默认为中等大小
+        this.subtitleSize = "auto"; // 默认比当前域名标题小一级
         this.boundVizEnabled = false; // 默认关闭边界可视化
         this.language = "zh_cn"; // 默认中文
         this.languageLocked = false; // 默认不上锁
@@ -103,6 +112,7 @@ public class ConfigData {
         copy.setEnabled(this.enabled);
         copy.setRecordKey(this.recordKey);
         copy.setTitleSize(normalizeSize(this.titleSize));
+        copy.setSubtitleSize(normalizeSubtitleSize(this.subtitleSize));
         copy.setBoundVizEnabled(this.boundVizEnabled);
         copy.setLanguage(this.language != null && !this.language.isEmpty() ? this.language : "zh_cn");
         copy.setLanguageLocked(this.languageLocked);
@@ -216,6 +226,24 @@ public class ConfigData {
     }
 
     /**
+     * 获取副字幕大小
+     * @return 副字幕大小
+     */
+    public String getSubtitleSize() {
+        return subtitleSize;
+    }
+
+    /**
+     * 设置副字幕大小
+     * @param subtitleSize 副字幕大小，auto 表示跟随主标题并小一级
+     */
+    public void setSubtitleSize(String subtitleSize) {
+        if (isValidSubtitleSize(subtitleSize)) {
+            this.subtitleSize = subtitleSize;
+        }
+    }
+
+    /**
      * 获取边界可视化开关状态
      * @return 边界可视化是否启用
      */
@@ -314,6 +342,15 @@ public class ConfigData {
     }
 
     /**
+     * 验证副字幕大小是否有效
+     * @param size 副字幕大小
+     * @return 是否有效
+     */
+    public static boolean isValidSubtitleSize(String size) {
+        return "auto".equals(size) || isValidSize(size);
+    }
+
+    /**
      * 根据命令行输入转换为合适的渲染模式
      * @param input 命令行输入
      * @return 标准的渲染模式字符串
@@ -388,5 +425,22 @@ public class ConfigData {
             default:
                 return "medium"; // 默认值
         }
+    }
+
+    /**
+     * 根据命令行输入转换为合适的副字幕大小
+     * @param input 命令行输入
+     * @return 标准的副字幕大小字符串
+     */
+    public static String normalizeSubtitleSize(String input) {
+        if (input == null) {
+            return "auto"; // 默认跟随主标题小一级
+        }
+
+        String normalized = input.toLowerCase();
+        if ("auto".equals(normalized)) {
+            return "auto";
+        }
+        return normalizeSize(normalized);
     }
 } 

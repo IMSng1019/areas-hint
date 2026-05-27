@@ -11,6 +11,7 @@ import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.permission.PermissionNodes;
 import areahint.permission.PermissionService;
+import areahint.subtitle.SubtitleCommand;
 import areahint.util.AreaPermissionUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -347,6 +348,53 @@ public class ServerCommands {
                         .executes(context -> executeTitleSizeSelect(context, StringArgumentType.getString(context, "size")))))
                 .then(literal("cancel")
                     .executes(ServerCommands::executeTitleSizeCancel)))
+
+            // addsubtitle 命令（交互式添加/替换域名副字幕）
+            .then(literal("addsubtitle")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD_SUBTITLE, 0))
+                .executes(SubtitleCommand::executeAddSubtitle)
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeSubtitleClientCommand(context,
+                            "addsubtitle_select:" + stripQuotes(StringArgumentType.getString(context, "areaName"))))))
+                .then(literal("text")
+                    .then(argument("subtitle", StringArgumentType.greedyString())
+                        .executes(context -> executeSubtitleClientCommand(context,
+                            "addsubtitle_text:" + StringArgumentType.getString(context, "subtitle")))))
+                .then(literal("confirm")
+                    .executes(context -> executeSubtitleClientCommand(context, "addsubtitle_confirm")))
+                .then(literal("cancel")
+                    .executes(context -> executeSubtitleClientCommand(context, "addsubtitle_cancel"))))
+
+            // deletesubtitle 命令（交互式删除域名副字幕字段）
+            .then(literal("deletesubtitle")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.DELETE_SUBTITLE, 0))
+                .executes(SubtitleCommand::executeDeleteSubtitle)
+                .then(literal("select")
+                    .then(argument("areaName", StringArgumentType.greedyString())
+                        .executes(context -> executeSubtitleClientCommand(context,
+                            "deletesubtitle_select:" + stripQuotes(StringArgumentType.getString(context, "areaName"))))))
+                .then(literal("confirm")
+                    .executes(context -> executeSubtitleClientCommand(context, "deletesubtitle_confirm")))
+                .then(literal("cancel")
+                    .executes(context -> executeSubtitleClientCommand(context, "deletesubtitle_cancel"))))
+
+            // replacesubtitlecolor 命令（交互式替换域名副字幕颜色）
+            .then(createReplaceSubtitleColorCommand("replacesubtitlecolor"))
+
+            // addsubtitlecolor 是 replacesubtitlecolor 的兼容别名，处理用户给出的名称差异。
+            .then(createReplaceSubtitleColorCommand("addsubtitlecolor"))
+
+            // replacesubtitlesize 命令（修改个人配置中的副字幕大小）
+            .then(literal("replacesubtitlesize")
+                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.REPLACE_SUBTITLE_SIZE, 0))
+                .executes(context -> executeSubtitleClientCommand(context, "replacesubtitlesize_start"))
+                .then(literal("select")
+                    .then(argument("size", StringArgumentType.word())
+                        .executes(context -> executeSubtitleClientCommand(context,
+                            "replacesubtitlesize_select:" + StringArgumentType.getString(context, "size")))))
+                .then(literal("cancel")
+                    .executes(context -> executeSubtitleClientCommand(context, "replacesubtitlesize_cancel"))))
                 
             // easyadd 命令（带多个子命令）
             .then(createEasyAddCommand("easyadd"))
@@ -600,6 +648,30 @@ public class ServerCommands {
                     .executes(context -> executeEasyAddColor(context, StringArgumentType.getString(context, "colorValue")))))
             .then(literal("save")
                 .executes(ServerCommands::executeEasyAddSave));
+    }
+
+    /**
+     * 创建副字幕颜色命令树。
+     * <p>
+     * replacesubtitlecolor 是主命令，addsubtitlecolor 作为兼容别名；两者交互流程完全一致，
+     * 都转发为 replacesubtitlecolor_* 客户端动作，避免客户端维护两套状态名。
+     */
+    private static LiteralArgumentBuilder<ServerCommandSource> createReplaceSubtitleColorCommand(String commandName) {
+        return literal(commandName)
+            .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.REPLACE_SUBTITLE_COLOR, 0))
+            .executes(SubtitleCommand::executeReplaceSubtitleColor)
+            .then(literal("select")
+                .then(argument("areaName", StringArgumentType.greedyString())
+                    .executes(context -> executeSubtitleClientCommand(context,
+                        "replacesubtitlecolor_select:" + stripQuotes(StringArgumentType.getString(context, "areaName"))))))
+            .then(literal("color")
+                .then(argument("colorValue", StringArgumentType.greedyString())
+                    .executes(context -> executeSubtitleClientCommand(context,
+                        "replacesubtitlecolor_color:" + StringArgumentType.getString(context, "colorValue")))))
+            .then(literal("confirm")
+                .executes(context -> executeSubtitleClientCommand(context, "replacesubtitlecolor_confirm")))
+            .then(literal("cancel")
+                .executes(context -> executeSubtitleClientCommand(context, "replacesubtitlecolor_cancel")));
     }
     
     /**
@@ -896,6 +968,21 @@ public class ServerCommands {
         } catch (Exception e) {
             Areashint.LOGGER.error("发送客户端命令时出错", e);
         }
+    }
+
+    /**
+     * 转发副字幕客户端动作。
+     * 副字幕流程的按钮和文本输入都只作用于执行命令的玩家本人，不支持目标选择器。
+     */
+    private static int executeSubtitleClientCommand(CommandContext<ServerCommandSource> context, String action) {
+        ServerCommandSource source = context.getSource();
+        if (!source.isExecutedByPlayer()) {
+            source.sendMessage(Text.translatable("command.error.general_9"));
+            return 0;
+        }
+
+        sendClientCommand(source, "areahint:" + action);
+        return Command.SINGLE_SUCCESS;
     }
 
     /**

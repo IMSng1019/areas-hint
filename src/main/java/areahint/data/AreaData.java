@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * 区域数据模型
- * 包含区域的基本信息：名称、顶点、边界框、高度范围、等级、基础名称和颜色
+ * 包含区域的基本信息：名称、顶点、边界框、高度范围、等级、基础名称、颜色和副字幕
  */
 public class AreaData {
     private String name;                    // 区域名称
@@ -21,6 +21,8 @@ public class AreaData {
     private List<String> signatures = new ArrayList<>(); // 域名创建者签名列表
     private String color;                  // 域名颜色（十六进制格式）
     private String surfacename;            // 联合域名（表面域名）
+    private String subtitle;               // 副字幕文本；字段不存在或为空时不显示
+    private String subtitlecolor;          // 副字幕颜色（十六进制格式或闪烁颜色）
 
     // 预计算缓存（transient确保Gson序列化时忽略）
     private transient double cachedMinX, cachedMaxX, cachedMinZ, cachedMaxZ;
@@ -210,6 +212,34 @@ public class AreaData {
         this.surfacename = surfacename;
     }
 
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = cleanOptionalText(subtitle);
+    }
+
+    public String getSubtitleColor() {
+        return subtitlecolor != null ? subtitlecolor : "#FFFFFF";
+    }
+
+    public void setSubtitleColor(String subtitlecolor) {
+        this.subtitlecolor = cleanOptionalText(subtitlecolor);
+    }
+
+    public boolean hasSubtitle() {
+        return subtitle != null && !subtitle.trim().isEmpty();
+    }
+
+    private static String cleanOptionalText(String value) {
+        if (value == null) {
+            return null;
+        }
+        String cleaned = value.trim();
+        return cleaned.isEmpty() ? null : cleaned;
+    }
+
     /**
      * 预计算AABB边界和中心点缓存
      */
@@ -279,6 +309,12 @@ public class AreaData {
         // 验证颜色格式（如果存在）
         if (color != null && !color.matches("^#[0-9A-Fa-f]{6}$")
                 && !areahint.util.ColorUtil.isFlashColor(color)) {
+            return false;
+        }
+
+        // 副字幕颜色与主标题颜色相互独立，但可用颜色格式保持一致。
+        if (subtitlecolor != null && !subtitlecolor.matches("^#[0-9A-Fa-f]{6}$")
+                && !areahint.util.ColorUtil.isFlashColor(subtitlecolor)) {
             return false;
         }
         
@@ -388,7 +424,7 @@ public class AreaData {
 
     @Override
     public String toString() {
-        return String.format("AreaData{name='%s', level=%d, altitude=%s, vertices=%d, baseName='%s', signature='%s', color='%s', surfacename='%s'}", 
-            name, level, altitude, vertices != null ? vertices.size() : 0, baseName, signature, color, surfacename);
+        return String.format("AreaData{name='%s', level=%d, altitude=%s, vertices=%d, baseName='%s', signature='%s', color='%s', surfacename='%s', subtitle='%s', subtitlecolor='%s'}",
+            name, level, altitude, vertices != null ? vertices.size() : 0, baseName, signature, color, surfacename, subtitle, subtitlecolor);
     }
 } 

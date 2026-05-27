@@ -25,8 +25,14 @@ public class GLRender implements RenderManager.IRender {
     // 当前显示的文本
     private String currentText = null;
 
+    // 当前显示的副字幕文本
+    private String currentSubtitle = null;
+
     // 当前颜色
     private String currentColor = "#FFFFFF";
+
+    // 当前副字幕颜色
+    private String currentSubtitleColor = "#FFFFFF";
 
     // 动画开始时间
     private long animationStartTime = 0;
@@ -121,50 +127,25 @@ public class GLRender implements RenderManager.IRender {
             lastAlpha = alpha;
         }
         
-        // 渲染文本
-        Text text = Text.of(currentText);
+        // 渲染主标题和副字幕。主标题与副字幕使用不同缩放，保证副字幕位于主标题正下方。
         TextRenderer textRenderer = client.textRenderer;
-        
-        // 应用缩放来增大文本尺寸
         MatrixStack matrixStack = drawContext.getMatrices();
         matrixStack.push();
-        // 使用浮点数直接传递给矩阵变换，避免整数转换
         matrixStack.translate(x, y + yOffset, 0);
-        // 根据配置获取域名标题大小
-        float textScale = getTextScale();
-        matrixStack.scale(textScale, textScale, 1.0f);
-        
-        // 获取未缩放的文本宽度
-        int textWidth = textRenderer.getWidth(text);
-        
-        // 计算最终位置 (正确计算居中位置)
-        int finalX = -textWidth / 2;
-        int finalY = 0;
-        
-        // 绘制带有阴影的文本（支持闪烁颜色）
-        long now = System.currentTimeMillis();
-        if (FlashColorHelper.isFlashMode(currentColor)) {
-            if (FlashColorHelper.isPerCharMode(currentColor)) {
-                // 单字模式：逐字符绘制
-                int xOff = finalX;
-                for (int i = 0; i < currentText.length(); i++) {
-                    String ch = String.valueOf(currentText.charAt(i));
-                    int charRgb = FlashColorHelper.getCharColor(currentColor, now, i);
-                    int charColor = getAlphaColor(charRgb, alpha);
-                    drawContext.drawTextWithShadow(textRenderer, Text.of(ch), xOff, finalY, charColor);
-                    xOff += textRenderer.getWidth(ch);
-                }
-            } else {
-                // 整体模式
-                int rgb = FlashColorHelper.getWholeColor(currentColor, now);
-                int color = getAlphaColor(rgb, alpha);
-                drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
+
+        float titleScale = TitleRenderHelper.getTitleScale();
+        TitleRenderHelper.drawCenteredLine(drawContext, textRenderer, matrixStack, currentText, currentColor, alpha, titleScale, 0, false);
+
+        if (TitleRenderHelper.hasSubtitle(currentSubtitle)) {
+            float subtitleScale = TitleRenderHelper.getSubtitleScale();
+            int subtitleY = TitleRenderHelper.getSubtitleStartY(textRenderer, titleScale);
+            int lineHeight = TitleRenderHelper.getLineHeight(textRenderer, subtitleScale);
+            java.util.List<String> subtitleLines = TitleRenderHelper.buildSubtitleLines(currentSubtitle, textRenderer, screenWidth, subtitleScale);
+
+            for (int i = 0; i < subtitleLines.size(); i++) {
+                TitleRenderHelper.drawCenteredLine(drawContext, textRenderer, matrixStack,
+                    subtitleLines.get(i), currentSubtitleColor, alpha, subtitleScale, subtitleY + i * lineHeight, false);
             }
-        } else {
-            // 普通静态颜色
-            int rgb = parseHexColor(currentColor);
-            int color = getAlphaColor(rgb, alpha);
-            drawContext.drawTextWithShadow(textRenderer, text, finalX, finalY, color);
         }
 
         // 恢复矩阵状态
@@ -204,6 +185,7 @@ public class GLRender implements RenderManager.IRender {
         } else if (animationState == AnimationState.OUT && elapsedTime >= ANIMATION_OUT_DURATION) {
             animationState = AnimationState.NONE;
             currentText = null;
+            currentSubtitle = null;
             AreashintClient.LOGGER.debug("GLRender: 动画状态更新 OUT → NONE");
         }
     }
@@ -246,19 +228,21 @@ public class GLRender implements RenderManager.IRender {
     }
     
     @Override
-    public void renderTitle(String title, String color) {
+    public void renderTitle(String title, String color, String subtitle, String subtitleColor) {
         if (title == null || title.isEmpty()) {
             return;
         }
 
         if (animationState != AnimationState.NONE) {
-            if (title.equals(currentText)) {
+            if (title.equals(currentText) && sameSubtitle(subtitle, currentSubtitle)) {
                 return;
             }
         }
 
         currentText = title;
+        currentSubtitle = TitleRenderHelper.normalizeSubtitleText(subtitle);
         currentColor = color != null ? color : "#FFFFFF";
+        currentSubtitleColor = subtitleColor != null ? subtitleColor : "#FFFFFF";
         animationState = AnimationState.IN;
         animationStartTime = System.currentTimeMillis();
         lastYOffset = 0.0f;
@@ -271,11 +255,19 @@ public class GLRender implements RenderManager.IRender {
     public void clearTitle() {
         // 关闭模组时立即停止当前标题动画，确保屏幕上不继续显示域名。
         currentText = null;
+        currentSubtitle = null;
         currentColor = "#FFFFFF";
+        currentSubtitleColor = "#FFFFFF";
         animationState = AnimationState.NONE;
         animationStartTime = 0;
         lastYOffset = 0.0f;
         lastAlpha = 0.0f;
+    }
+
+    private boolean sameSubtitle(String newSubtitle, String oldSubtitle) {
+        String normalizedNew = TitleRenderHelper.normalizeSubtitleText(newSubtitle);
+        String normalizedOld = TitleRenderHelper.normalizeSubtitleText(oldSubtitle);
+        return normalizedNew == null ? normalizedOld == null : normalizedNew.equals(normalizedOld);
     }
 
     private static int parseHexColor(String hex) {

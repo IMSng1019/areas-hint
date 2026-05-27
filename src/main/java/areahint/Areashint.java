@@ -111,6 +111,9 @@ public class Areashint implements ModInitializer {
 		// 初始化Description服务端网络处理
 		areahint.description.DescriptionServerNetworking.registerServerReceivers();
 
+		// 初始化Subtitle服务端网络处理
+		areahint.subtitle.SubtitleCommand.registerServerReceivers();
+
 		// 初始化DivideArea服务端网络处理
 		areahint.dividearea.DivideAreaServerNetworking.registerServerNetworking();
 		

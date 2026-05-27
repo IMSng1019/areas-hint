@@ -27,6 +27,10 @@ public class Packets {
     // Recolor功能相关的包ID
     public static final Identifier C2S_RECOLOR_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_recolor_request");
     public static final Identifier S2C_RECOLOR_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_recolor_response");
+
+    // Subtitle功能相关的包ID
+    public static final Identifier C2S_SUBTITLE_MUTATION = new Identifier(Areashint.MOD_ID, "c2s_subtitle_mutation");
+    public static final Identifier S2C_SUBTITLE_RESPONSE = new Identifier(Areashint.MOD_ID, "s2c_subtitle_response");
     
     // Rename功能相关的包ID
     public static final Identifier C2S_RENAME_REQUEST = new Identifier(Areashint.MOD_ID, "c2s_rename_request");

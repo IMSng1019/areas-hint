@@ -1,6 +1,7 @@
 package areahint;
 
 import areahint.config.ClientConfig;
+import areahint.data.AreaData;
 import areahint.data.ConfigData;
 import areahint.detection.AreaDetector;
 import areahint.detection.AsyncAreaDetector;
@@ -111,6 +112,9 @@ public class AreashintClient implements ClientModInitializer {
 
 		// 初始化Description功能
 		initDescription();
+
+		// 初始化Subtitle功能
+		initSubtitle();
 
 		// 初始化DivideArea功能
 		initDivideArea();
@@ -237,6 +241,18 @@ public class AreashintClient implements ClientModInitializer {
 			LOGGER.info("Description功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化Description功能时发生错误", e);
+		}
+	}
+
+	/**
+	 * 初始化Subtitle功能
+	 */
+	private void initSubtitle() {
+		try {
+			areahint.subtitle.SubtitleNetworking.registerClientReceivers();
+			LOGGER.info("Subtitle功能初始化完成");
+		} catch (Exception e) {
+			LOGGER.error("初始化Subtitle功能时发生错误", e);
 		}
 	}
 
@@ -468,7 +484,7 @@ public class AreashintClient implements ClientModInitializer {
 						currentAreaName = areaName;
 						areahint.data.AreaData detectedArea = areahint.log.AreaChangeTracker.getCurrentAreaData();
 						String areaColor = detectedArea != null ? detectedArea.getColor() : "#FFFFFF";
-						renderManager.showAreaTitle(areaName, areaColor);
+						renderManager.showAreaTitle(areaName, areaColor, getAreaSubtitle(detectedArea), getAreaSubtitleColor(detectedArea));
 						if (justEnteredWorld) {
 							LOGGER.info("进入世界时位于区域：{}", areaName);
 						} else {
@@ -532,7 +548,7 @@ public class AreashintClient implements ClientModInitializer {
 						currentAreaName = areaName;
 						if (areaName != null) {
 							String areaColor = result.areaData != null ? result.areaData.getColor() : "#FFFFFF";
-							renderManager.showAreaTitle(areaName, areaColor);
+							renderManager.showAreaTitle(areaName, areaColor, getAreaSubtitle(result.areaData), getAreaSubtitleColor(result.areaData));
 							hasShownDimensionalName = false;
 						} else if (!hasShownDimensionalName) {
 							String dimensionId = currentDimension != null
@@ -582,6 +598,22 @@ public class AreashintClient implements ClientModInitializer {
 	 */
 	public static RenderManager getRenderManager() {
 		return renderManager;
+	}
+
+	/**
+	 * 获取域名副字幕文本。
+	 * 只有域名文件里真实存在 subtitle 且内容非空时才显示副字幕，符合“没有字段则不显示副字幕”的规则。
+	 */
+	private static String getAreaSubtitle(AreaData area) {
+		return area != null && area.hasSubtitle() ? area.getSubtitle() : null;
+	}
+
+	/**
+	 * 获取域名副字幕颜色。
+	 * 副字幕颜色只在副字幕存在时生效，避免缺少 subtitle 字段的旧域名被误显示空副字幕。
+	 */
+	private static String getAreaSubtitleColor(AreaData area) {
+		return area != null && area.hasSubtitle() ? area.getSubtitleColor() : null;
 	}
 
 	/**
@@ -640,14 +672,14 @@ public class AreashintClient implements ClientModInitializer {
 				double playerX = player.getX();
 				double playerY = player.getY();
 				double playerZ = player.getZ();
-				String areaName = areaDetector.detectPlayerArea(playerX, playerY, playerZ);
+				AreaData detectedArea = areaDetector.findAreaRaw(playerX, playerY, playerZ);
+				String areaName = detectedArea != null ? areaDetector.formatAreaNameFromData(detectedArea) : null;
 				
 				// 立即显示结果
 				if (areaName != null) {
 					currentAreaName = areaName;
-					areahint.data.AreaData detectedArea = areahint.log.AreaChangeTracker.getCurrentAreaData();
 					String areaColor = detectedArea != null ? detectedArea.getColor() : "#FFFFFF";
-					renderManager.showAreaTitle(areaName, areaColor);
+					renderManager.showAreaTitle(areaName, areaColor, getAreaSubtitle(detectedArea), getAreaSubtitleColor(detectedArea));
 					LOGGER.info("网络同步后检测到位于区域：{}", areaName);
 				} else {
 					// 如果不在区域内，显示维度域名

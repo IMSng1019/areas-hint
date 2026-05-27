@@ -30,6 +30,7 @@ public class AreasHintConfigScreen extends Screen {
     private static final String[] RENDER_MODES = {"CPU", "OpenGL", "Vulkan"};
     private static final String[] STYLE_MODES = {"full", "simple", "mixed"};
     private static final String[] SIZE_MODES = {"extra_large", "large", "medium_large", "medium", "medium_small", "small", "extra_small"};
+    private static final String[] SUBTITLE_SIZE_MODES = {"auto", "extra_large", "large", "medium_large", "medium", "medium_small", "small", "extra_small"};
     private static final String[] TELEPORT_FORMATS = {"tp", "minecraft:tp", "teleport", "minecraft:teleport"};
 
     private final Screen parent;
@@ -73,6 +74,10 @@ public class AreasHintConfigScreen extends Screen {
         this.list.addButton("screen.areahint.config.title_size", cycleButton(sizeText(draft.getTitleSize()), button -> {
             draft.setTitleSize(nextValue(draft.getTitleSize(), SIZE_MODES));
             button.setMessage(sizeText(draft.getTitleSize()));
+        }));
+        this.list.addButton("screen.areahint.config.subtitle_size", cycleButton(subtitleSizeText(draft.getSubtitleSize()), button -> {
+            draft.setSubtitleSize(nextValue(draft.getSubtitleSize(), SUBTITLE_SIZE_MODES));
+            button.setMessage(subtitleSizeText(draft.getSubtitleSize()));
         }));
 
         this.list.addGroup("screen.areahint.config.group.input");
@@ -188,6 +193,10 @@ public class AreasHintConfigScreen extends Screen {
 
     private Text sizeText(String value) {
         return Text.literal(t("screen.areahint.config.value.size." + value));
+    }
+
+    private Text subtitleSizeText(String value) {
+        return Text.literal(t("screen.areahint.config.value.subtitle_size." + value));
     }
 
     private Text languageText(String language) {

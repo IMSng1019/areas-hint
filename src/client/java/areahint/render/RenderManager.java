@@ -77,10 +77,21 @@ public class RenderManager {
      * @param color 颜色值（十六进制或闪烁模式）
      */
     public void showAreaTitle(String areaName, String color) {
+        showAreaTitle(areaName, color, null, null);
+    }
+
+    /**
+     * 显示区域名称和副字幕
+     * @param areaName 区域名称
+     * @param color 主标题颜色值（十六进制或闪烁模式）
+     * @param subtitle 副字幕文本，为空时不显示
+     * @param subtitleColor 副字幕颜色值（十六进制或闪烁模式）
+     */
+    public void showAreaTitle(String areaName, String color, String subtitle, String subtitleColor) {
         if (areaName == null || areaName.isEmpty()) {
             return;
         }
-        currentRender.renderTitle(areaName, color != null ? color : "#FFFFFF");
+        currentRender.renderTitle(areaName, color != null ? color : "#FFFFFF", subtitle, subtitleColor);
     }
 
     /**
@@ -102,7 +113,7 @@ public class RenderManager {
          * @param title 标题文本
          * @param color 颜色值
          */
-        void renderTitle(String title, String color);
+        void renderTitle(String title, String color, String subtitle, String subtitleColor);
 
         /**
          * 清空当前标题并停止动画。

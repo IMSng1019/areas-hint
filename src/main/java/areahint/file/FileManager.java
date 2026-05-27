@@ -133,6 +133,9 @@ public class FileManager {
                     "  // TitleSize: 域名标题大小\n" +
                     "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
                     "  \"titleSize\": \"" + defaultConfig.getTitleSize() + "\",\n\n" +
+                    "  // SubtitleSize: 副字幕大小\n" +
+                    "  // 选项: \"auto\" (自动比域名标题小一级), \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
+                    "  \"subtitlesize\": \"" + defaultConfig.getSubtitleSize() + "\",\n\n" +
                     "  // BoundVizEnabled: 边界可视化开关\n" +
                     "  // true: 显示域名边界, false: 隐藏域名边界\n" +
                     "  \"boundVizEnabled\": " + defaultConfig.isBoundVizEnabled() + ",\n\n" +
@@ -215,7 +218,7 @@ public class FileManager {
             JsonObject configJson = JsonParser.parseString(normalizedJson).getAsJsonObject();
             ConfigData defaultConfig = new ConfigData();
 
-            // 新版本配置必须同时包含全部字段。旧配置缺少 hintRender/titleStyle/titleSize
+            // 新版本配置必须同时包含全部字段。旧配置缺少 hintRender/titleStyle/titleSize/subtitlesize
             // 等新字段时，直接重置整份个人配置，避免旧字段继续残留或被部分迁移。
             if (!hasAllRequiredConfigFields(configJson)) {
                 Areashint.LOGGER.warn("个人配置文件缺少必要字段，已重置为默认配置: " + path);
@@ -258,6 +261,13 @@ public class FileManager {
                 config.setTitleSize(defaultConfig.getTitleSize());
                 needsUpdate = true;
                 Areashint.LOGGER.warn("配置项 'titleSize' 无效，已补全为默认值: " + defaultConfig.getTitleSize());
+            }
+
+            // 检查并补全 subtitlesize
+            if (config.getSubtitleSize() == null || !ConfigData.isValidSubtitleSize(config.getSubtitleSize())) {
+                config.setSubtitleSize(defaultConfig.getSubtitleSize());
+                needsUpdate = true;
+                Areashint.LOGGER.warn("配置项 'subtitlesize' 无效，已补全为默认值: " + defaultConfig.getSubtitleSize());
             }
 
             // 检查并补全 recordKey
@@ -316,6 +326,7 @@ public class FileManager {
                 && configJson.has("enabled")
                 && configJson.has("recordKey")
                 && configJson.has("titleSize")
+                && (configJson.has("subtitlesize") || configJson.has("subtitleSize"))
                 && configJson.has("boundVizEnabled")
                 && configJson.has("language")
                 && configJson.has("languageLocked")
@@ -349,6 +360,9 @@ public class FileManager {
                     "  // TitleSize: 域名标题大小\n" +
                     "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
                     "  \"titleSize\": \"" + config.getTitleSize() + "\",\n\n" +
+                    "  // SubtitleSize: 副字幕大小\n" +
+                    "  // 选项: \"auto\" (自动比域名标题小一级), \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
+                    "  \"subtitlesize\": \"" + config.getSubtitleSize() + "\",\n\n" +
                     "  // BoundVizEnabled: 边界可视化开关\n" +
                     "  // true: 显示域名边界, false: 隐藏域名边界\n" +
                     "  \"boundVizEnabled\": " + config.isBoundVizEnabled() + ",\n\n" +
