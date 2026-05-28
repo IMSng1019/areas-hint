@@ -382,9 +382,6 @@ public class ServerCommands {
             // replacesubtitlecolor 命令（交互式替换域名副字幕颜色）
             .then(createReplaceSubtitleColorCommand("replacesubtitlecolor"))
 
-            // addsubtitlecolor 是 replacesubtitlecolor 的兼容别名，处理用户给出的名称差异。
-            .then(createReplaceSubtitleColorCommand("addsubtitlecolor"))
-
             // replacesubtitlesize 命令（修改个人配置中的副字幕大小）
             .then(literal("replacesubtitlesize")
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.REPLACE_SUBTITLE_SIZE, 0))
@@ -652,9 +649,6 @@ public class ServerCommands {
 
     /**
      * 创建副字幕颜色命令树。
-     * <p>
-     * replacesubtitlecolor 是主命令，addsubtitlecolor 作为兼容别名；两者交互流程完全一致，
-     * 都转发为 replacesubtitlecolor_* 客户端动作，避免客户端维护两套状态名。
      */
     private static LiteralArgumentBuilder<ServerCommandSource> createReplaceSubtitleColorCommand(String commandName) {
         return literal(commandName)
