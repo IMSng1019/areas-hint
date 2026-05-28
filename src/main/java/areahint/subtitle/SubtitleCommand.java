@@ -4,6 +4,7 @@ import areahint.Areashint;
 import areahint.data.AreaData;
 import areahint.file.FileManager;
 import areahint.file.JsonHelper;
+import areahint.i18n.ServerI18nManager;
 import areahint.network.Packets;
 import areahint.network.ServerNetworking;
 import areahint.permission.PermissionNodes;
@@ -55,7 +56,7 @@ public class SubtitleCommand {
                     server.execute(() -> handleSubtitleMutation(player, mutation, areaName, value, dimension));
                 } catch (Exception e) {
                     Areashint.LOGGER.error("处理副字幕修改请求时发生错误", e);
-                    sendResponse(player, false, "处理副字幕修改请求时发生错误: " + e.getMessage());
+                    sendResponse(player, false, translate(player, "subtitle.server.error.mutation_process", e.getMessage()));
                 }
             });
     }
@@ -93,7 +94,7 @@ public class SubtitleCommand {
         String dimensionType = convertDimensionIdToType(player.getWorld().getRegistryKey().getValue().toString());
         String fileName = Packets.getFileNameForDimension(dimensionType);
         if (fileName == null) {
-            source.sendMessage(Text.literal("§c无法识别当前维度，无法启动副字幕流程"));
+            source.sendMessage(Text.literal(translate(player, "subtitle.server.error.unknown_current_dimension")));
             return 0;
         }
 
@@ -111,12 +112,12 @@ public class SubtitleCommand {
         }
 
         if (editableAreas.isEmpty()) {
-            source.sendMessage(Text.literal("§c当前维度没有可操作的副字幕域名"));
+            source.sendMessage(Text.literal(translate(player, "subtitle.server.error.no_operable_areas")));
             return 0;
         }
 
         sendAreaList(player, action, dimensionType, editableAreas);
-        source.sendMessage(Text.literal("§a已发送副字幕交互界面"));
+        source.sendMessage(Text.literal(translate(player, "subtitle.server.message.interface_sent")));
         return Command.SINGLE_SUCCESS;
     }
 
@@ -125,7 +126,7 @@ public class SubtitleCommand {
         try {
             String fileName = Packets.getFileNameForDimension(dimension);
             if (fileName == null) {
-                sendResponse(player, false, "无效维度: " + dimension);
+                sendResponse(player, false, translate(player, "subtitle.server.error.invalid_dimension", dimension));
                 return;
             }
 
@@ -133,7 +134,7 @@ public class SubtitleCommand {
             List<AreaData> areas = FileManager.readAreaData(areaFile);
             AreaData targetArea = AreaPermissionUtil.findByName(areas, areaName);
             if (targetArea == null) {
-                sendResponse(player, false, "未找到域名: " + areaName);
+                sendResponse(player, false, translate(player, "subtitle.server.error.area_not_found", areaName));
                 return;
             }
 
@@ -144,31 +145,31 @@ public class SubtitleCommand {
             } else if (MUTATION_SET_COLOR.equals(mutation)) {
                 handleSetSubtitleColor(player, targetArea, areas, value);
             } else {
-                sendResponse(player, false, "未知副字幕操作: " + mutation);
+                sendResponse(player, false, translate(player, "subtitle.server.error.unknown_operation", mutation));
                 return;
             }
 
             if (FileManager.writeAreaData(areaFile, areas)) {
                 ServerNetworking.sendAllAreaDataToAll();
-                sendResponse(player, true, "副字幕已更新: " + targetArea.getName());
+                sendResponse(player, true, translate(player, "subtitle.server.success.updated", targetArea.getName()));
             } else {
-                sendResponse(player, false, "保存域名文件失败");
+                sendResponse(player, false, translate(player, "subtitle.server.error.save_area_file"));
             }
         } catch (Exception e) {
             Areashint.LOGGER.error("写入副字幕数据时发生错误", e);
-            sendResponse(player, false, "写入副字幕数据时发生错误: " + e.getMessage());
+            sendResponse(player, false, translate(player, "subtitle.server.error.write_data", e.getMessage()));
         }
     }
 
     private static void handleSetSubtitle(ServerPlayerEntity player, AreaData targetArea,
                                           List<AreaData> allAreas, String rawSubtitle) {
         if (!canOperate(player, targetArea, allAreas, SubtitlePermissionMode.MODIFY_BY_REFERENCE)) {
-            throw new IllegalStateException("你没有修改该域名副字幕的权限");
+            throw new IllegalStateException(translate(player, "subtitle.server.error.no_modify_permission"));
         }
 
         String subtitle = normalizeSubtitle(rawSubtitle);
         if (subtitle == null) {
-            throw new IllegalStateException("副字幕不能为空");
+            throw new IllegalStateException(translate(player, "subtitle.server.error.empty"));
         }
 
         targetArea.setSubtitle(subtitle);
@@ -178,11 +179,11 @@ public class SubtitleCommand {
 
     private static void handleDeleteSubtitle(ServerPlayerEntity player, AreaData targetArea, List<AreaData> allAreas) {
         if (!canOperate(player, targetArea, allAreas, SubtitlePermissionMode.DELETE_LIKE)) {
-            throw new IllegalStateException("你没有删除该域名副字幕的权限");
+            throw new IllegalStateException(translate(player, "subtitle.server.error.no_delete_permission"));
         }
 
         if (!targetArea.hasSubtitle()) {
-            throw new IllegalStateException("该域名没有副字幕");
+            throw new IllegalStateException(translate(player, "subtitle.server.error.no_subtitle"));
         }
 
         targetArea.setSubtitle(null);
@@ -192,16 +193,16 @@ public class SubtitleCommand {
     private static void handleSetSubtitleColor(ServerPlayerEntity player, AreaData targetArea,
                                                List<AreaData> allAreas, String rawColor) {
         if (!canOperate(player, targetArea, allAreas, SubtitlePermissionMode.COLOR_BY_REFERENCE)) {
-            throw new IllegalStateException("你没有修改该域名副字幕颜色的权限");
+            throw new IllegalStateException(translate(player, "subtitle.server.error.no_color_permission"));
         }
 
         if (!targetArea.hasSubtitle()) {
-            throw new IllegalStateException("该域名没有副字幕，无法修改副字幕颜色");
+            throw new IllegalStateException(translate(player, "subtitle.server.error.no_subtitle_for_color"));
         }
 
         String normalizedColor = ColorUtil.normalizeColor(rawColor);
         if (!ColorUtil.isValidColor(normalizedColor)) {
-            throw new IllegalStateException("无效副字幕颜色: " + rawColor);
+            throw new IllegalStateException(translate(player, "subtitle.server.error.invalid_color", rawColor));
         }
 
         targetArea.setSubtitleColor(normalizedColor);
@@ -239,7 +240,7 @@ public class SubtitleCommand {
             ServerPlayNetworking.send(player, Packets.S2C_SUBTITLE_RESPONSE, buf);
         } catch (Exception e) {
             Areashint.LOGGER.error("发送副字幕域名列表时发生错误", e);
-            sendResponse(player, false, "发送副字幕域名列表时发生错误: " + e.getMessage());
+            sendResponse(player, false, translate(player, "subtitle.server.error.send_area_list", e.getMessage()));
         }
     }
 
@@ -275,6 +276,10 @@ public class SubtitleCommand {
             return Packets.DIMENSION_END;
         }
         return null;
+    }
+
+    private static String translate(ServerPlayerEntity player, String key, Object... args) {
+        return ServerI18nManager.translateForPlayer(player.getUuid(), key, args);
     }
 
     private enum SubtitlePermissionMode {

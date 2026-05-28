@@ -3,6 +3,7 @@ package areahint.subtitle;
 import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import areahint.data.AreaData;
+import areahint.i18n.I18nManager;
 import areahint.util.ColorUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -92,7 +93,7 @@ public class SubtitleManager {
 
         String normalizedSubtitle = normalizeSubtitle(subtitleText);
         if (normalizedSubtitle == null) {
-            sendClientMessage("§c副字幕不能为空");
+            sendClientMessage(tr("subtitle.manager.error.empty"));
             return;
         }
 
@@ -106,7 +107,7 @@ public class SubtitleManager {
             return;
         }
         SubtitleNetworking.sendMutation("set_subtitle", selectedAreaName, pendingSubtitle, currentDimension);
-        sendClientMessage("§a已提交副字幕修改请求");
+        sendClientMessage(tr("subtitle.manager.message.set_subtitle_sent"));
         resetState();
     }
 
@@ -126,7 +127,7 @@ public class SubtitleManager {
             return;
         }
         SubtitleNetworking.sendMutation("delete_subtitle", selectedAreaName, "", currentDimension);
-        sendClientMessage("§a已提交副字幕删除请求");
+        sendClientMessage(tr("subtitle.manager.message.delete_subtitle_sent"));
         resetState();
     }
 
@@ -148,7 +149,7 @@ public class SubtitleManager {
 
         String normalizedColor = ColorUtil.normalizeColor(colorInput);
         if (!ColorUtil.isValidColor(normalizedColor)) {
-            sendClientMessage("§c无效副字幕颜色: " + colorInput);
+            sendClientMessage(tr("subtitle.manager.error.invalid_color", colorInput));
             return;
         }
 
@@ -162,13 +163,13 @@ public class SubtitleManager {
             return;
         }
         SubtitleNetworking.sendMutation("set_subtitle_color", selectedAreaName, pendingColor, currentDimension);
-        sendClientMessage("§a已提交副字幕颜色修改请求");
+        sendClientMessage(tr("subtitle.manager.message.set_color_sent"));
         resetState();
     }
 
     public void startSubtitleSizeSelection() {
         if (currentState != SubtitleState.IDLE) {
-            sendClientMessage("§c当前已有副字幕流程正在进行");
+            sendClientMessage(tr("subtitle.manager.error.active"));
             return;
         }
         currentState = SubtitleState.SIZE_SELECT;
@@ -181,31 +182,31 @@ public class SubtitleManager {
         }
 
         if (!areahint.data.ConfigData.isValidSubtitleSize(size)) {
-            sendClientMessage("§c无效副字幕大小: " + size);
+            sendClientMessage(tr("subtitle.manager.error.invalid_size", size));
             return;
         }
 
         ClientConfig.setSubtitleSize(size);
-        sendClientMessage("§a副字幕大小已设置为: " + SubtitleUI.getSizeDisplayName(size));
+        sendClientMessage(tr("subtitle.manager.message.size_set", SubtitleUI.getSizeDisplayName(size)));
         AreashintClient.reload();
         resetState();
     }
 
     public void cancel() {
         if (currentState != SubtitleState.IDLE) {
-            sendClientMessage("§7已取消副字幕流程");
+            sendClientMessage(tr("subtitle.manager.message.cancelled"));
         }
         resetState();
     }
 
     private boolean prepareStart(List<AreaData> areas, String dimension) {
         if (currentState != SubtitleState.IDLE) {
-            sendClientMessage("§c当前已有副字幕流程正在进行");
+            sendClientMessage(tr("subtitle.manager.error.active"));
             return false;
         }
 
         if (areas == null || areas.isEmpty()) {
-            sendClientMessage("§c没有可操作的副字幕域名");
+            sendClientMessage(tr("subtitle.manager.error.no_areas"));
             return false;
         }
 
@@ -228,7 +229,7 @@ public class SubtitleManager {
             }
         }
 
-        sendClientMessage("§c未找到可操作域名: " + areaName);
+        sendClientMessage(tr("subtitle.manager.error.area_not_found", areaName));
         return false;
     }
 
@@ -266,6 +267,10 @@ public class SubtitleManager {
         if (client.player != null) {
             client.player.sendMessage(Text.of(message), false);
         }
+    }
+
+    private String tr(String key, Object... args) {
+        return I18nManager.translate(key, args);
     }
 
     public SubtitleState getCurrentState() {

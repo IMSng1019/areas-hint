@@ -1,6 +1,7 @@
 package areahint.subtitle;
 
 import areahint.data.AreaData;
+import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -29,20 +30,20 @@ public class SubtitleUI {
             return;
         }
 
-        client.player.sendMessage(Text.of(getAreaSelectionTitle(mode)), false);
-        client.player.sendMessage(Text.of(getAreaSelectionPrompt(mode)), false);
+        client.player.sendMessage(Text.literal(getAreaSelectionTitle(mode)), false);
+        client.player.sendMessage(Text.literal(getAreaSelectionPrompt(mode)), false);
         client.player.sendMessage(Text.of(""), false);
 
         for (AreaData area : areas) {
             String displayName = areahint.util.AreaDataConverter.getDisplayName(area);
             String commandPrefix = getCommandPrefix(mode);
-            String subtitlePreview = area.hasSubtitle() ? area.getSubtitle().replace("\n", " / ") : "无";
+            String subtitlePreview = area.hasSubtitle() ? area.getSubtitle().replace("\n", " / ") : tr("subtitle.ui.none");
             MutableText areaButton = Text.literal("§6[" + displayName + "]")
                 .setStyle(Style.EMPTY
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/areahint " + commandPrefix + " select \"" + area.getName() + "\""))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        Text.of("域名: " + area.getName() + "\n等级: " + area.getLevel() + "\n当前副字幕: " + subtitlePreview)))
+                        Text.literal(tr("subtitle.ui.area.hover", area.getName(), area.getLevel(), subtitlePreview))))
                     .withColor(Formatting.GOLD));
 
             client.player.sendMessage(areaButton, false);
@@ -58,13 +59,13 @@ public class SubtitleUI {
             return;
         }
 
-        client.player.sendMessage(Text.of("§6=== 添加/替换副字幕 ==="), false);
-        client.player.sendMessage(Text.of("§e域名: §f" + area.getName()), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.add.title")), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.area", area.getName())), false);
         if (area.hasSubtitle()) {
-            client.player.sendMessage(Text.of("§7当前副字幕: §f" + area.getSubtitle().replace("\n", " / ")), false);
+            client.player.sendMessage(Text.literal(tr("subtitle.ui.field.current_subtitle", area.getSubtitle().replace("\n", " / "))), false);
         }
-        client.player.sendMessage(Text.of("§a输入: §f/areahint addsubtitle text <副字幕文本>"), false);
-        client.player.sendMessage(Text.of("§7可使用 /n 手动换行；使用 /n 后不会自动换行。"), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.add.input")), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.add.newline_hint")), false);
         client.player.sendMessage(createCancelButton("addsubtitle"), false);
     }
 
@@ -74,14 +75,14 @@ public class SubtitleUI {
             return;
         }
 
-        client.player.sendMessage(Text.of("§6=== 确认副字幕 ==="), false);
-        client.player.sendMessage(Text.of("§e域名: §f" + area.getName()), false);
-        client.player.sendMessage(Text.of("§e副字幕: §f" + subtitle.replace("\n", " / ")), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.add.confirm.title")), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.area", area.getName())), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.subtitle", subtitle.replace("\n", " / "))), false);
 
-        MutableText confirmButton = Text.literal("§a[确认]")
+        MutableText confirmButton = Text.literal(tr("subtitle.ui.button.confirm"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint addsubtitle confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("保存副字幕")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(tr("subtitle.ui.hover.save_subtitle"))))
                 .withColor(Formatting.GREEN));
 
         client.player.sendMessage(buttonRow(confirmButton, createCancelButton("addsubtitle")), false);
@@ -93,14 +94,14 @@ public class SubtitleUI {
             return;
         }
 
-        client.player.sendMessage(Text.of("§6=== 删除副字幕确认 ==="), false);
-        client.player.sendMessage(Text.of("§e域名: §f" + area.getName()), false);
-        client.player.sendMessage(Text.of("§e当前副字幕: §f" + area.getSubtitle().replace("\n", " / ")), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.delete.confirm.title")), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.area", area.getName())), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.current_subtitle", area.getSubtitle().replace("\n", " / "))), false);
 
-        MutableText confirmButton = Text.literal("§c[删除副字幕]")
+        MutableText confirmButton = Text.literal(tr("subtitle.ui.button.delete_subtitle"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint deletesubtitle confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("只删除 subtitle 和 subtitlecolor 字段")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(tr("subtitle.ui.hover.delete_subtitle"))))
                 .withColor(Formatting.RED)
                 .withBold(true));
 
@@ -113,27 +114,27 @@ public class SubtitleUI {
             return;
         }
 
-        client.player.sendMessage(Text.of("§6=== 副字幕颜色选择 ==="), false);
-        client.player.sendMessage(Text.of("§e域名: §f" + area.getName()), false);
-        client.player.sendMessage(Text.of("§e当前副字幕颜色: §f" + area.getSubtitleColor()), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.color.title")), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.area", area.getName())), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.current_color", area.getSubtitleColor())), false);
         client.player.sendMessage(Text.of(""), false);
 
         client.player.sendMessage(colorRow(
-            colorButton("白", "#FFFFFF", "§f"), colorButton("灰", "#808080", "§7"),
-            colorButton("深灰", "#555555", "§8"), colorButton("黑", "#000000", "§0")), false);
+            colorButton("subtitle.ui.color.white", "#FFFFFF", "§f"), colorButton("subtitle.ui.color.gray", "#808080", "§7"),
+            colorButton("subtitle.ui.color.dark_gray", "#555555", "§8"), colorButton("subtitle.ui.color.black", "#000000", "§0")), false);
         client.player.sendMessage(colorRow(
-            colorButton("暗红", "#AA0000", "§4"), colorButton("红", "#FF5555", "§c"),
-            colorButton("粉", "#FF55FF", "§d"), colorButton("金", "#FFAA00", "§6")), false);
+            colorButton("subtitle.ui.color.dark_red", "#AA0000", "§4"), colorButton("subtitle.ui.color.red", "#FF5555", "§c"),
+            colorButton("subtitle.ui.color.pink", "#FF55FF", "§d"), colorButton("subtitle.ui.color.gold", "#FFAA00", "§6")), false);
         client.player.sendMessage(colorRow(
-            colorButton("黄", "#FFFF55", "§e"), colorButton("绿", "#55FF55", "§a"),
-            colorButton("深绿", "#00AA00", "§2"), colorButton("青", "#55FFFF", "§b")), false);
+            colorButton("subtitle.ui.color.yellow", "#FFFF55", "§e"), colorButton("subtitle.ui.color.green", "#55FF55", "§a"),
+            colorButton("subtitle.ui.color.dark_green", "#00AA00", "§2"), colorButton("subtitle.ui.color.aqua", "#55FFFF", "§b")), false);
         client.player.sendMessage(colorRow(
-            colorButton("深青", "#00AAAA", "§3"), colorButton("蓝", "#5555FF", "§9"),
-            colorButton("深蓝", "#0000AA", "§1"), colorButton("紫", "#AA00AA", "§5")), false);
+            colorButton("subtitle.ui.color.dark_aqua", "#00AAAA", "§3"), colorButton("subtitle.ui.color.blue", "#5555FF", "§9"),
+            colorButton("subtitle.ui.color.dark_blue", "#0000AA", "§1"), colorButton("subtitle.ui.color.purple", "#AA00AA", "§5")), false);
         client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(colorRow(
-            colorButton("黑白闪烁", "FLASH_BW_ALL", "§7"), colorButton("彩虹闪烁", "FLASH_RAINBOW_ALL", "§b"),
-            colorButton("逐字黑白", "FLASH_BW_CHAR", "§8"), colorButton("逐字彩虹", "FLASH_RAINBOW_CHAR", "§d")), false);
+            colorButton("subtitle.ui.color.flash_bw_all", "FLASH_BW_ALL", "§7"), colorButton("subtitle.ui.color.flash_rainbow_all", "FLASH_RAINBOW_ALL", "§b"),
+            colorButton("subtitle.ui.color.flash_bw_char", "FLASH_BW_CHAR", "§8"), colorButton("subtitle.ui.color.flash_rainbow_char", "FLASH_RAINBOW_CHAR", "§d")), false);
         client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(createCancelButton("replacesubtitlecolor"), false);
     }
@@ -144,15 +145,15 @@ public class SubtitleUI {
             return;
         }
 
-        client.player.sendMessage(Text.of("§6=== 确认副字幕颜色 ==="), false);
-        client.player.sendMessage(Text.of("§e域名: §f" + area.getName()), false);
-        client.player.sendMessage(Text.of("§e原颜色: §f" + area.getSubtitleColor()), false);
-        client.player.sendMessage(Text.of("§e新颜色: §f" + newColor), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.color.confirm.title")), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.area", area.getName())), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.old_color", area.getSubtitleColor())), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.new_color", newColor)), false);
 
-        MutableText confirmButton = Text.literal("§a[确认]")
+        MutableText confirmButton = Text.literal(tr("subtitle.ui.button.confirm"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint replacesubtitlecolor confirm"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("保存副字幕颜色")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(tr("subtitle.ui.hover.save_color"))))
                 .withColor(Formatting.GREEN));
 
         client.player.sendMessage(buttonRow(confirmButton, createCancelButton("replacesubtitlecolor")), false);
@@ -164,27 +165,27 @@ public class SubtitleUI {
             return;
         }
 
-        client.player.sendMessage(Text.of("§6=== 副字幕大小选择 ==="), false);
-        client.player.sendMessage(Text.of("§e当前大小: §f" + getSizeDisplayName(currentSize)), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.size.title")), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.current_size", getSizeDisplayName(currentSize))), false);
         client.player.sendMessage(Text.of(""), false);
 
         MutableText row0 = Text.empty()
-            .append(sizeButton("自动", "auto", "§f"))
+            .append(sizeButton("auto", "§f"))
             .append(Text.of("  "))
-            .append(sizeButton("极大", "extra_large", "§d"))
+            .append(sizeButton("extra_large", "§d"))
             .append(Text.of("  "))
-            .append(sizeButton("大", "large", "§b"))
+            .append(sizeButton("large", "§b"))
             .append(Text.of("  "))
-            .append(sizeButton("较大", "medium_large", "§a"));
+            .append(sizeButton("medium_large", "§a"));
 
         MutableText row1 = Text.empty()
-            .append(sizeButton("中", "medium", "§e"))
+            .append(sizeButton("medium", "§e"))
             .append(Text.of("  "))
-            .append(sizeButton("较小", "medium_small", "§6"))
+            .append(sizeButton("medium_small", "§6"))
             .append(Text.of("  "))
-            .append(sizeButton("小", "small", "§c"))
+            .append(sizeButton("small", "§c"))
             .append(Text.of("  "))
-            .append(sizeButton("极小", "extra_small", "§4"));
+            .append(sizeButton("extra_small", "§4"));
 
         client.player.sendMessage(row0, false);
         client.player.sendMessage(row1, false);
@@ -195,21 +196,21 @@ public class SubtitleUI {
     public static String getSizeDisplayName(String size) {
         switch (size) {
             case "auto":
-                return "自动";
+                return tr("subtitle.ui.size.auto");
             case "extra_large":
-                return "极大";
+                return tr("subtitle.ui.size.extra_large");
             case "large":
-                return "大";
+                return tr("subtitle.ui.size.large");
             case "medium_large":
-                return "较大";
+                return tr("subtitle.ui.size.medium_large");
             case "medium":
-                return "中";
+                return tr("subtitle.ui.size.medium");
             case "medium_small":
-                return "较小";
+                return tr("subtitle.ui.size.medium_small");
             case "small":
-                return "小";
+                return tr("subtitle.ui.size.small");
             case "extra_small":
-                return "极小";
+                return tr("subtitle.ui.size.extra_small");
             default:
                 return size;
         }
@@ -223,27 +224,29 @@ public class SubtitleUI {
             .append(fourth);
     }
 
-    private static MutableText colorButton(String displayName, String colorValue, String colorCode) {
+    private static MutableText colorButton(String displayNameKey, String colorValue, String colorCode) {
+        String displayName = tr(displayNameKey);
         return Text.literal(colorCode + "[" + displayName + "]")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint replacesubtitlecolor color " + colorValue))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("选择副字幕颜色: " + displayName))));
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(tr("subtitle.ui.hover.select_color", displayName)))));
     }
 
-    private static MutableText sizeButton(String displayName, String sizeValue, String colorCode) {
+    private static MutableText sizeButton(String sizeValue, String colorCode) {
+        String displayName = getSizeDisplayName(sizeValue);
         return Text.literal(colorCode + "[" + displayName + "]")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                     "/areahint replacesubtitlesize select " + sizeValue))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("选择副字幕大小: " + displayName))));
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(tr("subtitle.ui.hover.select_size", displayName)))));
     }
 
     private static MutableText createCancelButton(String commandPrefix) {
-        return Text.literal("§c[取消]")
+        return Text.literal(tr("subtitle.ui.button.cancel"))
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/areahint " + commandPrefix + " cancel"))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("取消当前副字幕流程")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(tr("subtitle.ui.hover.cancel"))))
                 .withColor(Formatting.RED));
     }
 
@@ -266,24 +269,28 @@ public class SubtitleUI {
     private static String getAreaSelectionTitle(AreaSelectionMode mode) {
         switch (mode) {
             case DELETE:
-                return "§6=== 删除副字幕 - 选择域名 ===";
+                return tr("subtitle.ui.select.title.delete");
             case COLOR:
-                return "§6=== 修改副字幕颜色 - 选择域名 ===";
+                return tr("subtitle.ui.select.title.color");
             case ADD:
             default:
-                return "§6=== 添加/替换副字幕 - 选择域名 ===";
+                return tr("subtitle.ui.select.title.add");
         }
     }
 
     private static String getAreaSelectionPrompt(AreaSelectionMode mode) {
         switch (mode) {
             case DELETE:
-                return "§a请选择要删除副字幕的域名:";
+                return tr("subtitle.ui.select.prompt.delete");
             case COLOR:
-                return "§a请选择要修改副字幕颜色的域名:";
+                return tr("subtitle.ui.select.prompt.color");
             case ADD:
             default:
-                return "§a请选择要添加或替换副字幕的域名:";
+                return tr("subtitle.ui.select.prompt.add");
         }
+    }
+
+    private static String tr(String key, Object... args) {
+        return I18nManager.translate(key, args);
     }
 }
