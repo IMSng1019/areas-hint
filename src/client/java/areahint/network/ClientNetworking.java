@@ -626,8 +626,6 @@ public class ClientNetworking {
 
             if (action.startsWith("addsubtitle_select:")) {
                 manager.handleAddAreaSelection(action.substring("addsubtitle_select:".length()));
-            } else if (action.startsWith("addsubtitle_text:")) {
-                manager.handleSubtitleText(action.substring("addsubtitle_text:".length()));
             } else if (action.equals("addsubtitle_confirm")) {
                 manager.confirmAddSubtitle();
             } else if (action.equals("addsubtitle_cancel")) {

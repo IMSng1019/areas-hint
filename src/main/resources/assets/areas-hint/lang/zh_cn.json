@@ -1693,7 +1693,7 @@
   "subtitle.ui.select.prompt.delete": "§a请选择要删除副字幕的域名:",
   "subtitle.ui.select.prompt.color": "§a请选择要修改副字幕颜色的域名:",
   "subtitle.ui.add.title": "§6=== 添加/替换副字幕 ===",
-  "subtitle.ui.add.input": "§a输入: §f/areahint addsubtitle text <副字幕文本>",
+  "subtitle.ui.add.input": "§a直接在聊天框输入副字幕文本，或点击下方取消",
   "subtitle.ui.add.newline_hint": "§7可使用 /n 手动换行；使用 /n 后不会自动换行。",
   "subtitle.ui.add.confirm.title": "§6=== 确认副字幕 ===",
   "subtitle.ui.delete.confirm.title": "§6=== 删除副字幕确认 ===",

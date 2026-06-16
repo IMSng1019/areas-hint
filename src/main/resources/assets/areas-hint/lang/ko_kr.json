@@ -1693,7 +1693,7 @@
   "subtitle.ui.select.prompt.delete": "§a자막을 삭제할 도메인을 선택하세요:",
   "subtitle.ui.select.prompt.color": "§a자막 색상을 변경할 도메인을 선택하세요:",
   "subtitle.ui.add.title": "§6=== 자막 추가/교체 ===",
-  "subtitle.ui.add.input": "§a입력: §f/areahint addsubtitle text <자막 텍스트>",
+  "subtitle.ui.add.input": "§a채팅창에 부제목 텍스트를 직접 입력하거나 아래 취소를 누르세요",
   "subtitle.ui.add.newline_hint": "§7수동 줄바꿈을 넣으려면 /n을 사용하세요. /n 사용 후에는 자동 줄바꿈이 비활성화됩니다.",
   "subtitle.ui.add.confirm.title": "§6=== 자막 확인 ===",
   "subtitle.ui.delete.confirm.title": "§6=== 자막 삭제 확인 ===",

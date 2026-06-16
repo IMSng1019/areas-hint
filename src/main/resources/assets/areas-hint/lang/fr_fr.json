@@ -1693,7 +1693,7 @@
   "subtitle.ui.select.prompt.delete": "§aSélectionnez le domaine dont supprimer le sous-titre :",
   "subtitle.ui.select.prompt.color": "§aSélectionnez le domaine dont changer la couleur de sous-titre :",
   "subtitle.ui.add.title": "§6=== Ajouter/Remplacer le sous-titre ===",
-  "subtitle.ui.add.input": "§aSaisie : §f/areahint addsubtitle text <texte du sous-titre>",
+  "subtitle.ui.add.input": "§aSaisissez le sous-titre directement dans le chat, ou cliquez sur annuler ci-dessous",
   "subtitle.ui.add.newline_hint": "§7Utilisez /n pour insérer des retours à la ligne manuels ; après /n, le retour automatique à la ligne est désactivé.",
   "subtitle.ui.add.confirm.title": "§6=== Confirmer le sous-titre ===",
   "subtitle.ui.delete.confirm.title": "§6=== Confirmer la suppression du sous-titre ===",

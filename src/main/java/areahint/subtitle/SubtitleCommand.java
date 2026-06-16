@@ -213,7 +213,7 @@ public class SubtitleCommand {
         String playerName = player.getName().getString();
         switch (permissionMode) {
             case DELETE_LIKE:
-                // deletesubtitle 只复用 delete 的核心权限：管理员、权限节点或该域名签名者。
+                // deletesubtitle 对齐 delete 的权限口径：管理员或该域名签名者。
                 return PermissionService.hasNodeOr(player, PermissionNodes.DELETE_SUBTITLE,
                     () -> player.hasPermissionLevel(2) || AreaPermissionUtil.isSignedBy(area, playerName));
             case COLOR_BY_REFERENCE:

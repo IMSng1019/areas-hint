@@ -114,14 +114,41 @@ public class I18nManager {
                         added++;
                     }
                 }
-                if (added > 0) {
+
+                int updated = migrateDeprecatedTranslations(localMap, jarMap);
+                if (added > 0 || updated > 0) {
                     Files.writeString(targetFile, GSON.toJson(localMap), StandardCharsets.UTF_8);
-                    AreashintClient.LOGGER.info("已合并 " + added + " 条新翻译到: " + lang + ".json");
+                    AreashintClient.LOGGER.info("已合并 " + added + " 条新翻译、更新 " + updated + " 条过期翻译到: " + lang + ".json");
                 }
             }
         } catch (Exception e) {
             AreashintClient.LOGGER.error("提取语言文件失败 (" + lang + "): " + e.getMessage());
         }
+    }
+
+    /**
+     * 修复旧版本已经写入本地语言文件的过期翻译。
+     * <p>
+     * 语言文件允许玩家自定义，所以常规合并只补充缺失 key，不覆盖已有文本。
+     * 但 addsubtitle 已从“手动输入 /areahint addsubtitle text ...”改成 EasyAdd 风格的聊天输入，
+     * 如果本地语言文件保留旧提示，就会误导玩家继续输入已经移除的旧指令。
+     * 这里仅在文本仍然包含旧指令格式时覆盖，避免影响玩家主动改写的其他翻译。
+     */
+    private static int migrateDeprecatedTranslations(Map<String, String> localMap, Map<String, String> jarMap) {
+        int updated = 0;
+        updated += replaceDeprecatedTranslation(localMap, jarMap, "subtitle.ui.add.input", "/areahint addsubtitle text");
+        return updated;
+    }
+
+    private static int replaceDeprecatedTranslation(Map<String, String> localMap, Map<String, String> jarMap,
+                                                    String key, String deprecatedFragment) {
+        String localValue = localMap.get(key);
+        String jarValue = jarMap.get(key);
+        if (localValue != null && jarValue != null && localValue.contains(deprecatedFragment)) {
+            localMap.put(key, jarValue);
+            return 1;
+        }
+        return 0;
     }
 
     /**

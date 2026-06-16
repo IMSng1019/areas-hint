@@ -16,6 +16,9 @@ import java.util.List;
  * 副字幕聊天交互界面。
  * <p>
  * 与现有 Delete/Recolor/TitleSize 一样使用聊天按钮，让玩家在不打开额外屏幕的情况下完成编辑。
+ * <p>
+ * 其中 addsubtitle 的正文输入阶段额外支持直接在聊天框里输入文本，
+ * 以贴近 EasyAdd 那种“进入流程后直接输入内容”的交互习惯。
  */
 public class SubtitleUI {
     public enum AreaSelectionMode {

@@ -249,6 +249,8 @@ public class AreashintClient implements ClientModInitializer {
 	 */
 	private void initSubtitle() {
 		try {
+			// 注册副字幕文本输入阶段的聊天拦截器，使 addsubtitle 的输入体验与 EasyAdd 类似。
+			areahint.subtitle.SubtitleManager.init();
 			areahint.subtitle.SubtitleNetworking.registerClientReceivers();
 			LOGGER.info("Subtitle功能初始化完成");
 		} catch (Exception e) {

@@ -5,6 +5,7 @@ import areahint.config.ClientConfig;
 import areahint.data.AreaData;
 import areahint.i18n.I18nManager;
 import areahint.util.ColorUtil;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
@@ -18,6 +19,11 @@ import java.util.List;
  * 这样可以复用域名选择、状态清理和服务端提交逻辑。
  */
 public class SubtitleManager {
+    /**
+     * 对齐 EasyAdd 的实现方式，使用实例级标记避免重复注册聊天监听器。
+     */
+    private boolean chatListenerRegistered = false;
+
     public enum SubtitleState {
         IDLE,
         ADD_SELECT_AREA,
@@ -42,6 +48,10 @@ public class SubtitleManager {
     private String pendingColor = null;
 
     private SubtitleManager() {
+    }
+
+    public static void init() {
+        getInstance().registerChatListener();
     }
 
     public static SubtitleManager getInstance() {
@@ -210,6 +220,8 @@ public class SubtitleManager {
             return false;
         }
 
+        // 和 EasyAdd 一样，在流程真正开始时确保聊天监听器已经就位。
+        registerChatListener();
         editableAreas = new ArrayList<>(areas);
         currentDimension = dimension;
         selectedArea = null;
@@ -233,6 +245,51 @@ public class SubtitleManager {
         return false;
     }
 
+    /**
+     * 注册聊天监听器来捕获副字幕正文输入。
+     * <p>
+     * 行为上尽量贴近 EasyAdd：
+     * 只有在真正进入“输入正文”阶段时，才把玩家自己发出的聊天内容当作副字幕文本处理。
+     */
+    private void registerChatListener() {
+        if (chatListenerRegistered) {
+            return;
+        }
+
+        ClientReceiveMessageEvents.CHAT.register((message, signedMessage, sender, params, receptionTimestamp) -> {
+            if (currentState == SubtitleState.ADD_INPUT_TEXT) {
+                handleChatInput(message.getString());
+            }
+        });
+        chatListenerRegistered = true;
+    }
+
+    /**
+     * 处理聊天框直接输入的副字幕文本。
+     * <p>
+     * 只有在添加/替换副字幕的文本输入阶段才会消费普通聊天，
+     * 这样 deletesubtitle、replacesubtitlecolor、replacesubtitlesize
+     * 这些按钮式流程不会被额外拦截。
+     *
+     * @param input 玩家准备发送到聊天栏的原始文本
+     * @return 返回 true 表示本次聊天已被副字幕流程消费，不应再发到服务器
+     */
+    public boolean handleChatInput(String input) {
+        if (currentState != SubtitleState.ADD_INPUT_TEXT) {
+            return false;
+        }
+
+        String cleanedInput = sanitizeChatInput(input);
+        if ("cancel".equalsIgnoreCase(cleanedInput)
+                || tr("common.cancel.keyword").equals(cleanedInput)) {
+            cancel();
+            return true;
+        }
+
+        handleSubtitleText(input);
+        return true;
+    }
+
     private void resetState() {
         currentState = SubtitleState.IDLE;
         editableAreas.clear();
@@ -247,8 +304,29 @@ public class SubtitleManager {
         if (subtitleText == null) {
             return null;
         }
-        String normalized = subtitleText.replace("/n", "\n").replace("\\n", "\n").trim();
+        String normalized = sanitizeChatInput(subtitleText).replace("/n", "\n").replace("\\n", "\n").trim();
         return normalized.isEmpty() ? null : normalized;
+    }
+
+    /**
+     * 清理聊天消息文本。
+     * <p>
+     * EasyAdd、Rename 等模块都会去掉类似 "<玩家名> 内容" 这种聊天前缀；
+     * 副字幕这里也保持同样处理，避免把聊天格式前缀写进 subtitle 字段。
+     */
+    private String sanitizeChatInput(String input) {
+        if (input == null) {
+            return "";
+        }
+
+        String cleanedInput = input.trim();
+        if (cleanedInput.startsWith("<") && cleanedInput.contains(">")) {
+            int endIndex = cleanedInput.indexOf(">") + 1;
+            if (endIndex < cleanedInput.length()) {
+                cleanedInput = cleanedInput.substring(endIndex).trim();
+            }
+        }
+        return cleanedInput;
     }
 
     private String stripQuotes(String value) {

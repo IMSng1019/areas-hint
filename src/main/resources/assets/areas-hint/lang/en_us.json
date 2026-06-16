@@ -1693,7 +1693,7 @@
   "subtitle.ui.select.prompt.delete": "§aSelect the domain to delete its subtitle:",
   "subtitle.ui.select.prompt.color": "§aSelect the domain to change its subtitle color:",
   "subtitle.ui.add.title": "§6=== Add/Replace Subtitle ===",
-  "subtitle.ui.add.input": "§aInput: §f/areahint addsubtitle text <subtitle text>",
+  "subtitle.ui.add.input": "§aInput subtitle text directly in chat, or click cancel below",
   "subtitle.ui.add.newline_hint": "§7Use /n to insert manual line breaks; after using /n, automatic wrapping is disabled.",
   "subtitle.ui.add.confirm.title": "§6=== Confirm Subtitle ===",
   "subtitle.ui.delete.confirm.title": "§6=== Confirm Subtitle Deletion ===",

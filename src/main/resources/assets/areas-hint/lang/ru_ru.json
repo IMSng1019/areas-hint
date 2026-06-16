@@ -1693,7 +1693,7 @@
   "subtitle.ui.select.prompt.delete": "§aВыберите домен для удаления его субтитра:",
   "subtitle.ui.select.prompt.color": "§aВыберите домен для изменения цвета субтитров:",
   "subtitle.ui.add.title": "§6=== Добавить/заменить субтитр ===",
-  "subtitle.ui.add.input": "§aВвод: §f/areahint addsubtitle text <текст субтитра>",
+  "subtitle.ui.add.input": "§aВведите текст субтитра прямо в чат или нажмите отмену ниже",
   "subtitle.ui.add.newline_hint": "§7Используйте /n для ручных переносов строк; после использования /n автоматический перенос отключается.",
   "subtitle.ui.add.confirm.title": "§6=== Подтвердить субтитр ===",
   "subtitle.ui.delete.confirm.title": "§6=== Подтвердить удаление субтитра ===",

@@ -357,10 +357,6 @@ public class ServerCommands {
                     .then(argument("areaName", StringArgumentType.greedyString())
                         .executes(context -> executeSubtitleClientCommand(context,
                             "addsubtitle_select:" + stripQuotes(StringArgumentType.getString(context, "areaName"))))))
-                .then(literal("text")
-                    .then(argument("subtitle", StringArgumentType.greedyString())
-                        .executes(context -> executeSubtitleClientCommand(context,
-                            "addsubtitle_text:" + StringArgumentType.getString(context, "subtitle")))))
                 .then(literal("confirm")
                     .executes(context -> executeSubtitleClientCommand(context, "addsubtitle_confirm")))
                 .then(literal("cancel")
@@ -381,6 +377,9 @@ public class ServerCommands {
 
             // replacesubtitlecolor 命令（交互式替换域名副字幕颜色）
             .then(createReplaceSubtitleColorCommand("replacesubtitlecolor"))
+
+            // addsubtitlecolor 作为 replacesubtitlecolor 的兼容别名，流程和权限完全一致。
+            .then(createReplaceSubtitleColorCommand("addsubtitlecolor"))
 
             // replacesubtitlesize 命令（修改个人配置中的副字幕大小）
             .then(literal("replacesubtitlesize")
