@@ -36,11 +36,16 @@ public class SubtitleNetworking {
     }
 
     public static void sendMutation(String mutation, String areaName, String value, String dimension) {
+        sendMutation(mutation, areaName, value, dimension, "");
+    }
+
+    public static void sendMutation(String mutation, String areaName, String value, String dimension, String extraValue) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeString(mutation);
         buf.writeString(areaName != null ? areaName : "");
         buf.writeString(value != null ? value : "");
         buf.writeString(dimension != null ? dimension : "");
+        buf.writeString(extraValue != null ? extraValue : "");
         ClientPlayNetworking.send(Packets.C2S_SUBTITLE_MUTATION, buf);
     }
 

@@ -1707,6 +1707,7 @@
   "subtitle.ui.field.old_color": "§e이전 색상: §f{0}",
   "subtitle.ui.field.new_color": "§e새 색상: §f{0}",
   "subtitle.ui.field.current_size": "§e현재 크기: §f{0}",
+  "subtitle.ui.field.new_size": "§e새 크기: §f{0}",
   "subtitle.ui.button.confirm": "§a[확인]",
   "subtitle.ui.button.delete_subtitle": "§c[자막 삭제]",
   "subtitle.ui.button.cancel": "§c[취소]",

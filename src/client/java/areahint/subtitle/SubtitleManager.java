@@ -1,6 +1,5 @@
 package areahint.subtitle;
 
-import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import areahint.data.AreaData;
 import areahint.i18n.I18nManager;
@@ -28,6 +27,8 @@ public class SubtitleManager {
         IDLE,
         ADD_SELECT_AREA,
         ADD_INPUT_TEXT,
+        ADD_SELECT_COLOR,
+        ADD_SELECT_SIZE,
         ADD_CONFIRM,
         DELETE_SELECT_AREA,
         DELETE_CONFIRM,
@@ -46,6 +47,7 @@ public class SubtitleManager {
     private String selectedAreaName = null;
     private String pendingSubtitle = null;
     private String pendingColor = null;
+    private String pendingSize = null;
 
     private SubtitleManager() {
     }
@@ -108,15 +110,51 @@ public class SubtitleManager {
         }
 
         pendingSubtitle = normalizedSubtitle;
+        // 添加副字幕时先询问颜色，再询问大小，流程顺序与 EasyAdd 的“输入内容后继续选择属性”保持一致。
+        currentState = SubtitleState.ADD_SELECT_COLOR;
+        SubtitleUI.showAddColorSelectionScreen(selectedArea, pendingSubtitle);
+    }
+
+    public void handleAddColorSelection(String colorInput) {
+        if (currentState != SubtitleState.ADD_SELECT_COLOR) {
+            return;
+        }
+
+        if (!isValidColorInput(colorInput)) {
+            sendClientMessage(tr("subtitle.manager.error.invalid_color", colorInput));
+            return;
+        }
+
+        pendingColor = ColorUtil.normalizeColor(colorInput);
+        currentState = SubtitleState.ADD_SELECT_SIZE;
+        SubtitleUI.showAddSizeSelectionScreen(selectedArea, pendingSubtitle, pendingColor, ClientConfig.getSubtitleSize());
+    }
+
+    public void handleAddSizeSelection(String size) {
+        if (currentState != SubtitleState.ADD_SELECT_SIZE) {
+            return;
+        }
+
+        if (!areahint.data.ConfigData.isValidSubtitleSize(size)) {
+            sendClientMessage(tr("subtitle.manager.error.invalid_size", size));
+            return;
+        }
+
+        String normalizedSize = areahint.data.ConfigData.normalizeSubtitleSize(size);
+        pendingSize = normalizedSize;
         currentState = SubtitleState.ADD_CONFIRM;
-        SubtitleUI.showAddConfirmScreen(selectedArea, pendingSubtitle);
+        SubtitleUI.showAddConfirmScreen(selectedArea, pendingSubtitle, pendingColor, pendingSize);
     }
 
     public void confirmAddSubtitle() {
-        if (currentState != SubtitleState.ADD_CONFIRM || selectedAreaName == null || pendingSubtitle == null) {
+        if (currentState != SubtitleState.ADD_CONFIRM || selectedAreaName == null
+                || pendingSubtitle == null || pendingColor == null || pendingSize == null) {
             return;
         }
-        SubtitleNetworking.sendMutation("set_subtitle", selectedAreaName, pendingSubtitle, currentDimension);
+
+        // 副字幕大小当前属于客户端个人显示配置；在 addsubtitle 流程里选择后立即写入本地配置。
+        ClientConfig.setSubtitleSize(pendingSize);
+        SubtitleNetworking.sendMutation("set_subtitle", selectedAreaName, pendingSubtitle, currentDimension, pendingColor);
         sendClientMessage(tr("subtitle.manager.message.set_subtitle_sent"));
         resetState();
     }
@@ -198,7 +236,7 @@ public class SubtitleManager {
 
         ClientConfig.setSubtitleSize(size);
         sendClientMessage(tr("subtitle.manager.message.size_set", SubtitleUI.getSizeDisplayName(size)));
-        AreashintClient.reload();
+        areahint.AreashintClient.reload();
         resetState();
     }
 
@@ -228,6 +266,7 @@ public class SubtitleManager {
         selectedAreaName = null;
         pendingSubtitle = null;
         pendingColor = null;
+        pendingSize = null;
         return true;
     }
 
@@ -298,6 +337,22 @@ public class SubtitleManager {
         selectedAreaName = null;
         pendingSubtitle = null;
         pendingColor = null;
+        pendingSize = null;
+    }
+
+    private boolean isValidColorInput(String colorInput) {
+        if (colorInput == null) {
+            return false;
+        }
+
+        String trimmed = colorInput.trim();
+        if (trimmed.isEmpty()) {
+            return false;
+        }
+
+        return ColorUtil.isFlashColor(trimmed)
+            || trimmed.matches("^#?[0-9A-Fa-f]{6}$")
+            || ColorUtil.getColorHex(trimmed) != null;
     }
 
     private String normalizeSubtitle(String subtitleText) {

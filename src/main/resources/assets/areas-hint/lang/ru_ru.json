@@ -1707,6 +1707,7 @@
   "subtitle.ui.field.old_color": "§eСтарый цвет: §f{0}",
   "subtitle.ui.field.new_color": "§eНовый цвет: §f{0}",
   "subtitle.ui.field.current_size": "§eТекущий размер: §f{0}",
+  "subtitle.ui.field.new_size": "§eНовый размер: §f{0}",
   "subtitle.ui.button.confirm": "§a[Подтвердить]",
   "subtitle.ui.button.delete_subtitle": "§c[Удалить субтитр]",
   "subtitle.ui.button.cancel": "§c[Отмена]",

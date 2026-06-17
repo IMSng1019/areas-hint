@@ -72,7 +72,15 @@ public class SubtitleUI {
         client.player.sendMessage(createCancelButton("addsubtitle"), false);
     }
 
-    public static void showAddConfirmScreen(AreaData area, String subtitle) {
+    public static void showAddColorSelectionScreen(AreaData area, String subtitle) {
+        showColorSelectionScreen(area, "addsubtitle", subtitle);
+    }
+
+    public static void showAddSizeSelectionScreen(AreaData area, String subtitle, String color, String currentSize) {
+        showSubtitleSizeSelectionScreen("addsubtitle", currentSize, area, subtitle, color);
+    }
+
+    public static void showAddConfirmScreen(AreaData area, String subtitle, String color, String size) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
             return;
@@ -81,6 +89,8 @@ public class SubtitleUI {
         client.player.sendMessage(Text.literal(tr("subtitle.ui.add.confirm.title")), false);
         client.player.sendMessage(Text.literal(tr("subtitle.ui.field.area", area.getName())), false);
         client.player.sendMessage(Text.literal(tr("subtitle.ui.field.subtitle", subtitle.replace("\n", " / "))), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.new_color", color)), false);
+        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.new_size", getSizeDisplayName(size))), false);
 
         MutableText confirmButton = Text.literal(tr("subtitle.ui.button.confirm"))
             .setStyle(Style.EMPTY
@@ -112,6 +122,10 @@ public class SubtitleUI {
     }
 
     public static void showColorSelectionScreen(AreaData area) {
+        showColorSelectionScreen(area, "replacesubtitlecolor", null);
+    }
+
+    private static void showColorSelectionScreen(AreaData area, String commandPrefix, String pendingSubtitle) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
             return;
@@ -119,27 +133,30 @@ public class SubtitleUI {
 
         client.player.sendMessage(Text.literal(tr("subtitle.ui.color.title")), false);
         client.player.sendMessage(Text.literal(tr("subtitle.ui.field.area", area.getName())), false);
+        if (pendingSubtitle != null) {
+            client.player.sendMessage(Text.literal(tr("subtitle.ui.field.subtitle", pendingSubtitle.replace("\n", " / "))), false);
+        }
         client.player.sendMessage(Text.literal(tr("subtitle.ui.field.current_color", area.getSubtitleColor())), false);
         client.player.sendMessage(Text.of(""), false);
 
         client.player.sendMessage(colorRow(
-            colorButton("subtitle.ui.color.white", "#FFFFFF", "§f"), colorButton("subtitle.ui.color.gray", "#808080", "§7"),
-            colorButton("subtitle.ui.color.dark_gray", "#555555", "§8"), colorButton("subtitle.ui.color.black", "#000000", "§0")), false);
+            colorButton(commandPrefix, "subtitle.ui.color.white", "#FFFFFF", "§f"), colorButton(commandPrefix, "subtitle.ui.color.gray", "#808080", "§7"),
+            colorButton(commandPrefix, "subtitle.ui.color.dark_gray", "#555555", "§8"), colorButton(commandPrefix, "subtitle.ui.color.black", "#000000", "§0")), false);
         client.player.sendMessage(colorRow(
-            colorButton("subtitle.ui.color.dark_red", "#AA0000", "§4"), colorButton("subtitle.ui.color.red", "#FF5555", "§c"),
-            colorButton("subtitle.ui.color.pink", "#FF55FF", "§d"), colorButton("subtitle.ui.color.gold", "#FFAA00", "§6")), false);
+            colorButton(commandPrefix, "subtitle.ui.color.dark_red", "#AA0000", "§4"), colorButton(commandPrefix, "subtitle.ui.color.red", "#FF5555", "§c"),
+            colorButton(commandPrefix, "subtitle.ui.color.pink", "#FF55FF", "§d"), colorButton(commandPrefix, "subtitle.ui.color.gold", "#FFAA00", "§6")), false);
         client.player.sendMessage(colorRow(
-            colorButton("subtitle.ui.color.yellow", "#FFFF55", "§e"), colorButton("subtitle.ui.color.green", "#55FF55", "§a"),
-            colorButton("subtitle.ui.color.dark_green", "#00AA00", "§2"), colorButton("subtitle.ui.color.aqua", "#55FFFF", "§b")), false);
+            colorButton(commandPrefix, "subtitle.ui.color.yellow", "#FFFF55", "§e"), colorButton(commandPrefix, "subtitle.ui.color.green", "#55FF55", "§a"),
+            colorButton(commandPrefix, "subtitle.ui.color.dark_green", "#00AA00", "§2"), colorButton(commandPrefix, "subtitle.ui.color.aqua", "#55FFFF", "§b")), false);
         client.player.sendMessage(colorRow(
-            colorButton("subtitle.ui.color.dark_aqua", "#00AAAA", "§3"), colorButton("subtitle.ui.color.blue", "#5555FF", "§9"),
-            colorButton("subtitle.ui.color.dark_blue", "#0000AA", "§1"), colorButton("subtitle.ui.color.purple", "#AA00AA", "§5")), false);
+            colorButton(commandPrefix, "subtitle.ui.color.dark_aqua", "#00AAAA", "§3"), colorButton(commandPrefix, "subtitle.ui.color.blue", "#5555FF", "§9"),
+            colorButton(commandPrefix, "subtitle.ui.color.dark_blue", "#0000AA", "§1"), colorButton(commandPrefix, "subtitle.ui.color.purple", "#AA00AA", "§5")), false);
         client.player.sendMessage(Text.of(""), false);
         client.player.sendMessage(colorRow(
-            colorButton("subtitle.ui.color.flash_bw_all", "FLASH_BW_ALL", "§7"), colorButton("subtitle.ui.color.flash_rainbow_all", "FLASH_RAINBOW_ALL", "§b"),
-            colorButton("subtitle.ui.color.flash_bw_char", "FLASH_BW_CHAR", "§8"), colorButton("subtitle.ui.color.flash_rainbow_char", "FLASH_RAINBOW_CHAR", "§d")), false);
+            colorButton(commandPrefix, "subtitle.ui.color.flash_bw_all", "FLASH_BW_ALL", "§7"), colorButton(commandPrefix, "subtitle.ui.color.flash_rainbow_all", "FLASH_RAINBOW_ALL", "§b"),
+            colorButton(commandPrefix, "subtitle.ui.color.flash_bw_char", "FLASH_BW_CHAR", "§8"), colorButton(commandPrefix, "subtitle.ui.color.flash_rainbow_char", "FLASH_RAINBOW_CHAR", "§d")), false);
         client.player.sendMessage(Text.of(""), false);
-        client.player.sendMessage(createCancelButton("replacesubtitlecolor"), false);
+        client.player.sendMessage(createCancelButton(commandPrefix), false);
     }
 
     public static void showColorConfirmScreen(AreaData area, String newColor) {
@@ -163,37 +180,51 @@ public class SubtitleUI {
     }
 
     public static void showSubtitleSizeSelectionScreen(String currentSize) {
+        showSubtitleSizeSelectionScreen("replacesubtitlesize", currentSize, null, null, null);
+    }
+
+    private static void showSubtitleSizeSelectionScreen(String commandPrefix, String currentSize,
+                                                        AreaData area, String pendingSubtitle, String pendingColor) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
             return;
         }
 
         client.player.sendMessage(Text.literal(tr("subtitle.ui.size.title")), false);
+        if (area != null) {
+            client.player.sendMessage(Text.literal(tr("subtitle.ui.field.area", area.getName())), false);
+        }
+        if (pendingSubtitle != null) {
+            client.player.sendMessage(Text.literal(tr("subtitle.ui.field.subtitle", pendingSubtitle.replace("\n", " / "))), false);
+        }
+        if (pendingColor != null) {
+            client.player.sendMessage(Text.literal(tr("subtitle.ui.field.new_color", pendingColor)), false);
+        }
         client.player.sendMessage(Text.literal(tr("subtitle.ui.field.current_size", getSizeDisplayName(currentSize))), false);
         client.player.sendMessage(Text.of(""), false);
 
         MutableText row0 = Text.empty()
-            .append(sizeButton("auto", "§f"))
+            .append(sizeButton(commandPrefix, "auto", "§f"))
             .append(Text.of("  "))
-            .append(sizeButton("extra_large", "§d"))
+            .append(sizeButton(commandPrefix, "extra_large", "§d"))
             .append(Text.of("  "))
-            .append(sizeButton("large", "§b"))
+            .append(sizeButton(commandPrefix, "large", "§b"))
             .append(Text.of("  "))
-            .append(sizeButton("medium_large", "§a"));
+            .append(sizeButton(commandPrefix, "medium_large", "§a"));
 
         MutableText row1 = Text.empty()
-            .append(sizeButton("medium", "§e"))
+            .append(sizeButton(commandPrefix, "medium", "§e"))
             .append(Text.of("  "))
-            .append(sizeButton("medium_small", "§6"))
+            .append(sizeButton(commandPrefix, "medium_small", "§6"))
             .append(Text.of("  "))
-            .append(sizeButton("small", "§c"))
+            .append(sizeButton(commandPrefix, "small", "§c"))
             .append(Text.of("  "))
-            .append(sizeButton("extra_small", "§4"));
+            .append(sizeButton(commandPrefix, "extra_small", "§4"));
 
         client.player.sendMessage(row0, false);
         client.player.sendMessage(row1, false);
         client.player.sendMessage(Text.of(""), false);
-        client.player.sendMessage(createCancelButton("replacesubtitlesize"), false);
+        client.player.sendMessage(createCancelButton(commandPrefix), false);
     }
 
     public static String getSizeDisplayName(String size) {
@@ -227,21 +258,22 @@ public class SubtitleUI {
             .append(fourth);
     }
 
-    private static MutableText colorButton(String displayNameKey, String colorValue, String colorCode) {
+    private static MutableText colorButton(String commandPrefix, String displayNameKey, String colorValue, String colorCode) {
         String displayName = tr(displayNameKey);
         return Text.literal(colorCode + "[" + displayName + "]")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "/areahint replacesubtitlecolor color " + colorValue))
+                    "/areahint " + commandPrefix + " color " + colorValue))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(tr("subtitle.ui.hover.select_color", displayName)))));
     }
 
-    private static MutableText sizeButton(String sizeValue, String colorCode) {
+    private static MutableText sizeButton(String commandPrefix, String sizeValue, String colorCode) {
         String displayName = getSizeDisplayName(sizeValue);
+        String subCommand = "replacesubtitlesize".equals(commandPrefix) ? "select" : "size";
         return Text.literal(colorCode + "[" + displayName + "]")
             .setStyle(Style.EMPTY
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "/areahint replacesubtitlesize select " + sizeValue))
+                    "/areahint " + commandPrefix + " " + subCommand + " " + sizeValue))
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(tr("subtitle.ui.hover.select_size", displayName)))));
     }
 

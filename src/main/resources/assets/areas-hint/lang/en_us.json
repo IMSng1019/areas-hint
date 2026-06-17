@@ -1707,6 +1707,7 @@
   "subtitle.ui.field.old_color": "§eOld color: §f{0}",
   "subtitle.ui.field.new_color": "§eNew color: §f{0}",
   "subtitle.ui.field.current_size": "§eCurrent size: §f{0}",
+  "subtitle.ui.field.new_size": "§eNew size: §f{0}",
   "subtitle.ui.button.confirm": "§a[Confirm]",
   "subtitle.ui.button.delete_subtitle": "§c[Delete Subtitle]",
   "subtitle.ui.button.cancel": "§c[Cancel]",

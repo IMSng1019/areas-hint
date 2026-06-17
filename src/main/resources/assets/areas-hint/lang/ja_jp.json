@@ -1707,6 +1707,7 @@
   "subtitle.ui.field.old_color": "§e古い色: §f{0}",
   "subtitle.ui.field.new_color": "§e新しい色: §f{0}",
   "subtitle.ui.field.current_size": "§e現在のサイズ: §f{0}",
+  "subtitle.ui.field.new_size": "§e新しいサイズ: §f{0}",
   "subtitle.ui.button.confirm": "§a[確認]",
   "subtitle.ui.button.delete_subtitle": "§c[サブタイトル削除]",
   "subtitle.ui.button.cancel": "§c[キャンセル]",

@@ -1707,6 +1707,7 @@
   "subtitle.ui.field.old_color": "§e原顏色: §f{0}",
   "subtitle.ui.field.new_color": "§e新顏色: §f{0}",
   "subtitle.ui.field.current_size": "§e目前大小: §f{0}",
+  "subtitle.ui.field.new_size": "§e新大小: §f{0}",
   "subtitle.ui.button.confirm": "§a[確認]",
   "subtitle.ui.button.delete_subtitle": "§c[刪除副字幕]",
   "subtitle.ui.button.cancel": "§c[取消]",

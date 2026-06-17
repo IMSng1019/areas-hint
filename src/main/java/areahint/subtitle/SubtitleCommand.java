@@ -52,8 +52,9 @@ public class SubtitleCommand {
                     String areaName = buf.readString();
                     String value = buf.readString();
                     String dimension = buf.readString();
+                    String extraValue = buf.isReadable() ? buf.readString() : "";
 
-                    server.execute(() -> handleSubtitleMutation(player, mutation, areaName, value, dimension));
+                    server.execute(() -> handleSubtitleMutation(player, mutation, areaName, value, dimension, extraValue));
                 } catch (Exception e) {
                     Areashint.LOGGER.error("处理副字幕修改请求时发生错误", e);
                     sendResponse(player, false, translate(player, "subtitle.server.error.mutation_process", e.getMessage()));
@@ -122,7 +123,7 @@ public class SubtitleCommand {
     }
 
     private static void handleSubtitleMutation(ServerPlayerEntity player, String mutation, String areaName,
-                                               String value, String dimension) {
+                                               String value, String dimension, String extraValue) {
         try {
             String fileName = Packets.getFileNameForDimension(dimension);
             if (fileName == null) {
@@ -139,7 +140,7 @@ public class SubtitleCommand {
             }
 
             if (MUTATION_SET_SUBTITLE.equals(mutation)) {
-                handleSetSubtitle(player, targetArea, areas, value);
+                handleSetSubtitle(player, targetArea, areas, value, extraValue);
             } else if (MUTATION_DELETE_SUBTITLE.equals(mutation)) {
                 handleDeleteSubtitle(player, targetArea, areas);
             } else if (MUTATION_SET_COLOR.equals(mutation)) {
@@ -162,7 +163,7 @@ public class SubtitleCommand {
     }
 
     private static void handleSetSubtitle(ServerPlayerEntity player, AreaData targetArea,
-                                          List<AreaData> allAreas, String rawSubtitle) {
+                                          List<AreaData> allAreas, String rawSubtitle, String rawColor) {
         if (!canOperate(player, targetArea, allAreas, SubtitlePermissionMode.MODIFY_BY_REFERENCE)) {
             throw new IllegalStateException(translate(player, "subtitle.server.error.no_modify_permission"));
         }
@@ -173,8 +174,15 @@ public class SubtitleCommand {
         }
 
         targetArea.setSubtitle(subtitle);
-        // 添加副字幕时补齐 subtitlecolor 字段。已有颜色会保留，没有颜色则使用白色。
-        targetArea.setSubtitleColor(targetArea.getSubtitleColor());
+        String normalizedColor = rawColor == null || rawColor.trim().isEmpty()
+            ? targetArea.getSubtitleColor()
+            : ColorUtil.normalizeColor(rawColor);
+        if (rawColor != null && !rawColor.trim().isEmpty() && !ColorUtil.isValidColor(normalizedColor)) {
+            throw new IllegalStateException(translate(player, "subtitle.server.error.invalid_color", rawColor));
+        }
+
+        // 添加副字幕时优先写入本轮选择的 subtitlecolor；如果旧客户端没有传颜色，则沿用原颜色。
+        targetArea.setSubtitleColor(normalizedColor);
     }
 
     private static void handleDeleteSubtitle(ServerPlayerEntity player, AreaData targetArea, List<AreaData> allAreas) {
