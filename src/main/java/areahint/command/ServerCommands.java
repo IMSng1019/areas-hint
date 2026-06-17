@@ -350,25 +350,10 @@ public class ServerCommands {
                     .executes(ServerCommands::executeTitleSizeCancel)))
 
             // addsubtitle 命令（交互式添加/替换域名副字幕）
-            .then(literal("addsubtitle")
-                .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD_SUBTITLE, 0))
-                .executes(SubtitleCommand::executeAddSubtitle)
-                .then(literal("select")
-                    .then(argument("areaName", StringArgumentType.greedyString())
-                        .executes(context -> executeSubtitleClientCommand(context,
-                            "addsubtitle_select:" + stripQuotes(StringArgumentType.getString(context, "areaName"))))))
-                .then(literal("color")
-                    .then(argument("colorValue", StringArgumentType.word())
-                        .executes(context -> executeSubtitleClientCommand(context,
-                            "addsubtitle_color:" + StringArgumentType.getString(context, "colorValue")))))
-                .then(literal("size")
-                    .then(argument("sizeValue", StringArgumentType.word())
-                        .executes(context -> executeSubtitleClientCommand(context,
-                            "addsubtitle_size:" + StringArgumentType.getString(context, "sizeValue")))))
-                .then(literal("confirm")
-                    .executes(context -> executeSubtitleClientCommand(context, "addsubtitle_confirm")))
-                .then(literal("cancel")
-                    .executes(context -> executeSubtitleClientCommand(context, "addsubtitle_cancel"))))
+            .then(createAddSubtitleCommand("addsubtitle"))
+
+            // replacesubtitle 作为 addsubtitle 的同义指令，完整复用同一套权限、子命令和客户端流程。
+            .then(createAddSubtitleCommand("replacesubtitle"))
 
             // deletesubtitle 命令（交互式删除域名副字幕字段）
             .then(literal("deletesubtitle")
@@ -385,9 +370,6 @@ public class ServerCommands {
 
             // replacesubtitlecolor 命令（交互式替换域名副字幕颜色）
             .then(createReplaceSubtitleColorCommand("replacesubtitlecolor"))
-
-            // addsubtitlecolor 作为 replacesubtitlecolor 的兼容别名，流程和权限完全一致。
-            .then(createReplaceSubtitleColorCommand("addsubtitlecolor"))
 
             // replacesubtitlesize 命令（修改个人配置中的副字幕大小）
             .then(literal("replacesubtitlesize")
@@ -652,6 +634,34 @@ public class ServerCommands {
                     .executes(context -> executeEasyAddColor(context, StringArgumentType.getString(context, "colorValue")))))
             .then(literal("save")
                 .executes(ServerCommands::executeEasyAddSave));
+    }
+
+    /**
+     * 创建添加/替换副字幕命令树。
+     * <p>
+     * addsubtitle 与 replacesubtitle 都调用这里，内部继续派发 addsubtitle_* 动作，
+     * 确保两个命令入口实际走同一套客户端状态机和服务端写入逻辑。
+     */
+    private static LiteralArgumentBuilder<ServerCommandSource> createAddSubtitleCommand(String commandName) {
+        return literal(commandName)
+            .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.ADD_SUBTITLE, 0))
+            .executes(SubtitleCommand::executeAddSubtitle)
+            .then(literal("select")
+                .then(argument("areaName", StringArgumentType.greedyString())
+                    .executes(context -> executeSubtitleClientCommand(context,
+                        "addsubtitle_select:" + stripQuotes(StringArgumentType.getString(context, "areaName"))))))
+            .then(literal("color")
+                .then(argument("colorValue", StringArgumentType.word())
+                    .executes(context -> executeSubtitleClientCommand(context,
+                        "addsubtitle_color:" + StringArgumentType.getString(context, "colorValue")))))
+            .then(literal("size")
+                .then(argument("sizeValue", StringArgumentType.word())
+                    .executes(context -> executeSubtitleClientCommand(context,
+                        "addsubtitle_size:" + StringArgumentType.getString(context, "sizeValue")))))
+            .then(literal("confirm")
+                .executes(context -> executeSubtitleClientCommand(context, "addsubtitle_confirm")))
+            .then(literal("cancel")
+                .executes(context -> executeSubtitleClientCommand(context, "addsubtitle_cancel")));
     }
 
     /**

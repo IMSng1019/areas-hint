@@ -149,6 +149,22 @@ public class JsonHelper {
                     areaData.setSurfacename(surfacenameElement.getAsString());
                 }
             }
+
+            // 反序列化副字幕字段；客户端聊天按钮的悬浮提示依赖这里保留 subtitle。
+            if (jsonObject.has("subtitle")) {
+                JsonElement subtitleElement = jsonObject.get("subtitle");
+                if (!subtitleElement.isJsonNull()) {
+                    areaData.setSubtitle(subtitleElement.getAsString());
+                }
+            }
+
+            // 反序列化副字幕颜色，避免替换颜色流程进入确认界面时丢失原颜色。
+            if (jsonObject.has("subtitlecolor")) {
+                JsonElement subtitleColorElement = jsonObject.get("subtitlecolor");
+                if (!subtitleColorElement.isJsonNull()) {
+                    areaData.setSubtitleColor(subtitleColorElement.getAsString());
+                }
+            }
             
             return areaData;
         }
