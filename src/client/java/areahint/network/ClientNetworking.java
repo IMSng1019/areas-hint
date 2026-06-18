@@ -628,8 +628,6 @@ public class ClientNetworking {
                 manager.handleAddAreaSelection(action.substring("addsubtitle_select:".length()));
             } else if (action.startsWith("addsubtitle_color:")) {
                 manager.handleAddColorSelection(action.substring("addsubtitle_color:".length()));
-            } else if (action.startsWith("addsubtitle_size:")) {
-                manager.handleAddSizeSelection(action.substring("addsubtitle_size:".length()));
             } else if (action.equals("addsubtitle_confirm")) {
                 manager.confirmAddSubtitle();
             } else if (action.equals("addsubtitle_cancel")) {

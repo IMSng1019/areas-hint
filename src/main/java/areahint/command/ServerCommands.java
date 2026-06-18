@@ -654,10 +654,6 @@ public class ServerCommands {
                 .then(argument("colorValue", StringArgumentType.word())
                     .executes(context -> executeSubtitleClientCommand(context,
                         "addsubtitle_color:" + StringArgumentType.getString(context, "colorValue")))))
-            .then(literal("size")
-                .then(argument("sizeValue", StringArgumentType.word())
-                    .executes(context -> executeSubtitleClientCommand(context,
-                        "addsubtitle_size:" + StringArgumentType.getString(context, "sizeValue")))))
             .then(literal("confirm")
                 .executes(context -> executeSubtitleClientCommand(context, "addsubtitle_confirm")))
             .then(literal("cancel")

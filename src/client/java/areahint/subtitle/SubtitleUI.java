@@ -76,11 +76,7 @@ public class SubtitleUI {
         showColorSelectionScreen(area, "addsubtitle", subtitle);
     }
 
-    public static void showAddSizeSelectionScreen(AreaData area, String subtitle, String color, String currentSize) {
-        showSubtitleSizeSelectionScreen("addsubtitle", currentSize, area, subtitle, color);
-    }
-
-    public static void showAddConfirmScreen(AreaData area, String subtitle, String color, String size) {
+    public static void showAddConfirmScreen(AreaData area, String subtitle, String color) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) {
             return;
@@ -90,7 +86,6 @@ public class SubtitleUI {
         client.player.sendMessage(Text.literal(tr("subtitle.ui.field.area", area.getName())), false);
         client.player.sendMessage(Text.literal(tr("subtitle.ui.field.subtitle", subtitle.replace("\n", " / "))), false);
         client.player.sendMessage(Text.literal(tr("subtitle.ui.field.new_color", color)), false);
-        client.player.sendMessage(Text.literal(tr("subtitle.ui.field.new_size", getSizeDisplayName(size))), false);
 
         MutableText confirmButton = Text.literal(tr("subtitle.ui.button.confirm"))
             .setStyle(Style.EMPTY

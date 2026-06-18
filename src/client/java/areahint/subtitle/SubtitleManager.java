@@ -28,7 +28,6 @@ public class SubtitleManager {
         ADD_SELECT_AREA,
         ADD_INPUT_TEXT,
         ADD_SELECT_COLOR,
-        ADD_SELECT_SIZE,
         ADD_CONFIRM,
         DELETE_SELECT_AREA,
         DELETE_CONFIRM,
@@ -47,7 +46,6 @@ public class SubtitleManager {
     private String selectedAreaName = null;
     private String pendingSubtitle = null;
     private String pendingColor = null;
-    private String pendingSize = null;
 
     private SubtitleManager() {
     }
@@ -126,34 +124,17 @@ public class SubtitleManager {
         }
 
         pendingColor = ColorUtil.normalizeColor(colorInput);
-        currentState = SubtitleState.ADD_SELECT_SIZE;
-        SubtitleUI.showAddSizeSelectionScreen(selectedArea, pendingSubtitle, pendingColor, ClientConfig.getSubtitleSize());
-    }
-
-    public void handleAddSizeSelection(String size) {
-        if (currentState != SubtitleState.ADD_SELECT_SIZE) {
-            return;
-        }
-
-        if (!areahint.data.ConfigData.isValidSubtitleSize(size)) {
-            sendClientMessage(tr("subtitle.manager.error.invalid_size", size));
-            return;
-        }
-
-        String normalizedSize = areahint.data.ConfigData.normalizeSubtitleSize(size);
-        pendingSize = normalizedSize;
+        // addsubtitle 只选择副字幕内容和颜色，大小继续由 replacesubtitlesize 单独管理。
         currentState = SubtitleState.ADD_CONFIRM;
-        SubtitleUI.showAddConfirmScreen(selectedArea, pendingSubtitle, pendingColor, pendingSize);
+        SubtitleUI.showAddConfirmScreen(selectedArea, pendingSubtitle, pendingColor);
     }
 
     public void confirmAddSubtitle() {
         if (currentState != SubtitleState.ADD_CONFIRM || selectedAreaName == null
-                || pendingSubtitle == null || pendingColor == null || pendingSize == null) {
+                || pendingSubtitle == null || pendingColor == null) {
             return;
         }
 
-        // 副字幕大小当前属于客户端个人显示配置；在 addsubtitle 流程里选择后立即写入本地配置。
-        ClientConfig.setSubtitleSize(pendingSize);
         SubtitleNetworking.sendMutation("set_subtitle", selectedAreaName, pendingSubtitle, currentDimension, pendingColor);
         sendClientMessage(tr("subtitle.manager.message.set_subtitle_sent"));
         resetState();
@@ -266,7 +247,6 @@ public class SubtitleManager {
         selectedAreaName = null;
         pendingSubtitle = null;
         pendingColor = null;
-        pendingSize = null;
         return true;
     }
 
@@ -337,7 +317,6 @@ public class SubtitleManager {
         selectedAreaName = null;
         pendingSubtitle = null;
         pendingColor = null;
-        pendingSize = null;
     }
 
     private boolean isValidColorInput(String colorInput) {
