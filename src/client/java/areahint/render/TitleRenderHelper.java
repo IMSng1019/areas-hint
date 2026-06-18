@@ -1,6 +1,7 @@
 package areahint.render;
 
 import areahint.config.ClientConfig;
+import areahint.data.ConfigData;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
@@ -39,7 +40,12 @@ public final class TitleRenderHelper {
     public static float getSubtitleScale() {
         String subtitleSize = ClientConfig.getSubtitleSize();
         if ("auto".equals(subtitleSize)) {
-            return getScaleForSize(getOneStepSmallerSize(ClientConfig.getTitleSize()));
+            String titleSize = ClientConfig.getTitleSize();
+            Float customTitleScale = ConfigData.getCustomSizeScale(titleSize);
+            if (customTitleScale != null) {
+                return Math.max(ConfigData.CUSTOM_SIZE_MIN, customTitleScale * 0.8f);
+            }
+            return getScaleForSize(getOneStepSmallerSize(titleSize));
         }
         return getScaleForSize(subtitleSize);
     }
@@ -186,24 +192,7 @@ public final class TitleRenderHelper {
     }
 
     private static float getScaleForSize(String size) {
-        switch (size) {
-            case "extra_large":
-                return 3.0f;
-            case "large":
-                return 2.5f;
-            case "medium_large":
-                return 2.0f;
-            case "medium":
-                return 1.5f;
-            case "medium_small":
-                return 1.2f;
-            case "small":
-                return 1.0f;
-            case "extra_small":
-                return 0.8f;
-            default:
-                return 1.5f;
-        }
+        return ConfigData.getSizeScale(size);
     }
 
     private static int parseHexColor(String hex) {

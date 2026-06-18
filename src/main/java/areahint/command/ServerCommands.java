@@ -15,6 +15,7 @@ import areahint.subtitle.SubtitleCommand;
 import areahint.util.AreaPermissionUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -318,8 +319,8 @@ public class ServerCommands {
             // frequency 命令
             .then(literal("frequency")
                 .requires(source -> PermissionService.hasCommandPermission(source, PermissionNodes.FREQUENCY, 0))
-                .then(argument("value", IntegerArgumentType.integer(1, 60))
-                    .executes(context -> executeFrequency(context, IntegerArgumentType.getInteger(context, "value"))))
+                .then(argument("value", DoubleArgumentType.doubleArg(1, 60))
+                    .executes(context -> executeFrequency(context, DoubleArgumentType.getDouble(context, "value"))))
                 .executes(ServerCommands::executeFrequencyInfo))
             
             // hintrender 命令
@@ -1066,13 +1067,14 @@ public class ServerCommands {
      * @param value 频率值
      * @return 执行结果
      */
-    private static int executeFrequency(CommandContext<ServerCommandSource> context, int value) {
+    private static int executeFrequency(CommandContext<ServerCommandSource> context, double value) {
         ServerCommandSource source = context.getSource();
+        String frequencyText = areahint.data.ConfigData.formatFrequency(value);
         
         // 向客户端发送命令
-        sendClientCommand(source, "areahint:frequency " + value);
+        sendClientCommand(source, "areahint:frequency " + frequencyText);
         
-        source.sendMessage(Text.translatable("command.message.general_16").append(Text.literal(value + " ")).append(Text.translatable("command.message.frequency.unit")));
+        source.sendMessage(Text.translatable("command.message.general_16").append(Text.literal(frequencyText + " ")).append(Text.translatable("command.message.frequency.unit")));
         
         return Command.SINGLE_SUCCESS;
     }

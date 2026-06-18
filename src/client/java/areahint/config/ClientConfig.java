@@ -117,7 +117,7 @@ public class ClientConfig {
      * 获取检测频率
      * @return 检测频率
      */
-    public static int getFrequency() {
+    public static double getFrequency() {
         return config.getFrequency();
     }
     
@@ -125,7 +125,7 @@ public class ClientConfig {
      * 设置检测频率
      * @param frequency 检测频率
      */
-    public static void setFrequency(int frequency) {
+    public static void setFrequency(double frequency) {
         config.setFrequency(frequency);
         save();
     }

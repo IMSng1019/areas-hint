@@ -223,7 +223,7 @@ public class ClientNetworking {
                             try {
                                 String[] frequencyParts = action.split(" ");
                                 if (frequencyParts.length >= 2) {
-                                    int value = Integer.parseInt(frequencyParts[1]);
+                                    double value = Double.parseDouble(frequencyParts[1]);
                                     ClientConfig.setFrequency(value);
                                     AreashintClient.reload();
                                 }
@@ -856,8 +856,8 @@ public class ClientNetworking {
      */
     private static void displayFrequencyInfo(MinecraftClient client) {
         if (client.player != null) {
-            int frequency = ClientConfig.getFrequency();
-            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_50") + frequency + "§a Hz"));
+            double frequency = ClientConfig.getFrequency();
+            client.player.sendMessage(net.minecraft.text.Text.of(I18nManager.translate("message.message.general_50") + areahint.data.ConfigData.formatFrequency(frequency) + "§a Hz"));
         }
     }
     

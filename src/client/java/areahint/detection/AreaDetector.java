@@ -118,8 +118,8 @@ public class AreaDetector {
      * @return 如果应该进行检测返回true，否则返回false
      */
     public boolean shouldDetect() {
-        int frequency = ClientConfig.getFrequency();
-        long interval = 1000 / frequency; // 毫秒
+        double frequency = ClientConfig.getFrequency();
+        long interval = Math.max(1L, Math.round(1000.0 / frequency)); // 小数频率也按每秒次数换算为毫秒间隔
         return System.currentTimeMillis() - lastDetectionTime >= interval;
     }
     

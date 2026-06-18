@@ -2,13 +2,19 @@ package areahint.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Locale;
+
 /**
  * 配置数据模型类
  * 用于表示模组的配置选项
  */
 public class ConfigData {
-    // 检测频率，每秒检测的最大次数
-    private int frequency;
+    public static final float CUSTOM_SIZE_MIN = 0.1f;
+    public static final float CUSTOM_SIZE_MAX = 8.0f;
+    private static final String CUSTOM_SIZE_PREFIX = "custom:";
+
+    // 检测频率，每秒检测的最大次数，支持小数以便在配置界面做更细调节
+    private double frequency;
     
     // 提示文字渲染方式：CPU、OpenGL、Vulkan
     private String hintRender;
@@ -22,10 +28,10 @@ public class ConfigData {
     // 记录顶点的按键代码（GLFW键码）
     private int recordKey;
 
-    // 域名标题大小：extra_large、large、medium_large、medium、medium_small、small、extra_small
+    // 域名标题大小：预设档位，或 custom:倍率 形式的自定义缩放倍率
     private String titleSize;
 
-    // 副字幕大小：auto 表示始终比域名标题小一级，也可以手动使用标题大小的同组选项
+    // 副字幕大小：auto 表示始终比域名标题小一级，也可以手动使用预设档位或 custom:倍率
     @SerializedName(value = "subtitlesize", alternate = {"subtitleSize"})
     private String subtitleSize;
 
@@ -65,7 +71,7 @@ public class ConfigData {
      * @param hintRender 提示文字渲染方式
      * @param titleStyle 域名标题样式
      */
-    public ConfigData(int frequency, String hintRender, String titleStyle) {
+    public ConfigData(double frequency, String hintRender, String titleStyle) {
         this.frequency = frequency;
         this.hintRender = hintRender;
         this.titleStyle = titleStyle;
@@ -86,7 +92,7 @@ public class ConfigData {
      * @param titleStyle 域名标题样式
      * @param enabled 模组启用状态
      */
-    public ConfigData(int frequency, String hintRender, String titleStyle, boolean enabled) {
+    public ConfigData(double frequency, String hintRender, String titleStyle, boolean enabled) {
         this.frequency = frequency;
         this.hintRender = hintRender;
         this.titleStyle = titleStyle;
@@ -124,7 +130,7 @@ public class ConfigData {
      * 获取检测频率
      * @return 检测频率
      */
-    public int getFrequency() {
+    public double getFrequency() {
         return frequency;
     }
     
@@ -132,7 +138,7 @@ public class ConfigData {
      * 设置检测频率
      * @param frequency 检测频率
      */
-    public void setFrequency(int frequency) {
+    public void setFrequency(double frequency) {
         if (frequency <= 0) {
             frequency = 1; // 确保频率至少为1
         }
@@ -336,9 +342,7 @@ public class ConfigData {
      * @return 是否有效
      */
     public static boolean isValidSize(String size) {
-        return "extra_large".equals(size) || "large".equals(size) || "medium_large".equals(size) ||
-               "medium".equals(size) || "medium_small".equals(size) || "small".equals(size) ||
-               "extra_small".equals(size);
+        return isPresetSize(size) || isCustomSize(size);
     }
 
     /**
@@ -348,6 +352,103 @@ public class ConfigData {
      */
     public static boolean isValidSubtitleSize(String size) {
         return "auto".equals(size) || isValidSize(size);
+    }
+
+    public static boolean isPresetSize(String size) {
+        return "extra_large".equals(size) || "large".equals(size) || "medium_large".equals(size) ||
+               "medium".equals(size) || "medium_small".equals(size) || "small".equals(size) ||
+               "extra_small".equals(size);
+    }
+
+    public static boolean isCustomSize(String size) {
+        return getCustomSizeScale(size) != null;
+    }
+
+    public static String formatCustomSize(float scale) {
+        float clamped = clampCustomSizeScale(scale);
+        String formatted = String.format(Locale.ROOT, "%.2f", clamped);
+        while (formatted.contains(".") && formatted.endsWith("0")) {
+            formatted = formatted.substring(0, formatted.length() - 1);
+        }
+        if (formatted.endsWith(".")) {
+            formatted = formatted.substring(0, formatted.length() - 1);
+        }
+        return CUSTOM_SIZE_PREFIX + formatted;
+    }
+
+    public static String formatFrequency(double frequency) {
+        double safeFrequency = Double.isFinite(frequency) && frequency > 0 ? frequency : 1.0;
+        String formatted = String.format(Locale.ROOT, "%.2f", safeFrequency);
+        while (formatted.contains(".") && formatted.endsWith("0")) {
+            formatted = formatted.substring(0, formatted.length() - 1);
+        }
+        if (formatted.endsWith(".")) {
+            formatted = formatted.substring(0, formatted.length() - 1);
+        }
+        return formatted;
+    }
+
+    public static Float getPresetSizeScale(String size) {
+        if (size == null) {
+            return null;
+        }
+
+        switch (size) {
+            case "extra_large":
+                return 3.0f;
+            case "large":
+                return 2.5f;
+            case "medium_large":
+                return 2.0f;
+            case "medium":
+                return 1.5f;
+            case "medium_small":
+                return 1.2f;
+            case "small":
+                return 1.0f;
+            case "extra_small":
+                return 0.8f;
+            default:
+                return null;
+        }
+    }
+
+    public static float getSizeScale(String size) {
+        Float customScale = getCustomSizeScale(size);
+        if (customScale != null) {
+            return customScale;
+        }
+
+        Float presetScale = getPresetSizeScale(size);
+        return presetScale != null ? presetScale : 1.5f;
+    }
+
+    public static Float getCustomSizeScale(String size) {
+        if (size == null) {
+            return null;
+        }
+
+        String trimmed = size.trim().toLowerCase(Locale.ROOT);
+        if (!trimmed.startsWith(CUSTOM_SIZE_PREFIX)) {
+            return null;
+        }
+
+        try {
+            float scale = Float.parseFloat(trimmed.substring(CUSTOM_SIZE_PREFIX.length()));
+            if (!Float.isFinite(scale) || scale < CUSTOM_SIZE_MIN || scale > CUSTOM_SIZE_MAX) {
+                return null;
+            }
+            return scale;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    public static float clampCustomSizeScale(float scale) {
+        if (!Float.isFinite(scale)) {
+            return 1.5f;
+        }
+        return Math.max(CUSTOM_SIZE_MIN, Math.min(CUSTOM_SIZE_MAX, scale));
     }
 
     /**
@@ -406,7 +507,12 @@ public class ConfigData {
             return "medium"; // 默认值
         }
 
-        String normalized = input.toLowerCase();
+        String normalized = input.trim().toLowerCase(Locale.ROOT);
+        Float customScale = getCustomSizeScale(normalized);
+        if (customScale != null) {
+            return formatCustomSize(customScale);
+        }
+
         switch (normalized) {
             case "extra_large":
                 return "extra_large";
@@ -437,7 +543,7 @@ public class ConfigData {
             return "auto"; // 默认跟随主标题小一级
         }
 
-        String normalized = input.toLowerCase();
+        String normalized = input.trim().toLowerCase(Locale.ROOT);
         if ("auto".equals(normalized)) {
             return "auto";
         }

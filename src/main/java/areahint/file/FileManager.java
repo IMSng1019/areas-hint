@@ -116,8 +116,8 @@ public class FileManager {
 
             // 添加注释
             String jsonWithComments = "{\n" +
-                    "  // Frequency: 检测频率，每秒检测的最大次数（必须为正整数）\n" +
-                    "  \"frequency\": " + defaultConfig.getFrequency() + ",\n\n" +
+                    "  // Frequency: 检测频率，每秒检测的最大次数（必须为正数，可使用小数）\n" +
+                    "  \"frequency\": " + ConfigData.formatFrequency(defaultConfig.getFrequency()) + ",\n\n" +
                     "  // HintRender: 提示文字渲染方式\n" +
                     "  // 选项: \"CPU\" (使用CPU渲染), \"OpenGL\" (使用OpenGL渲染), \"Vulkan\" (使用Vulkan渲染)\n" +
                     "  \"hintRender\": \"" + defaultConfig.getHintRender() + "\",\n\n" +
@@ -131,10 +131,10 @@ public class FileManager {
                     "  // 默认: 88 (X键), 可通过 /areahint replacebutton 命令修改\n" +
                     "  \"recordKey\": " + defaultConfig.getRecordKey() + ",\n\n" +
                     "  // TitleSize: 域名标题大小\n" +
-                    "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
+                    "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\", 或 \"custom:1.75\"\n" +
                     "  \"titleSize\": \"" + defaultConfig.getTitleSize() + "\",\n\n" +
                     "  // SubtitleSize: 副字幕大小\n" +
-                    "  // 选项: \"auto\" (自动比域名标题小一级), \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
+                    "  // 选项: \"auto\" (自动比域名标题小一级), \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\", 或 \"custom:1.25\"\n" +
                     "  \"subtitlesize\": \"" + defaultConfig.getSubtitleSize() + "\",\n\n" +
                     "  // BoundVizEnabled: 边界可视化开关\n" +
                     "  // true: 显示域名边界, false: 隐藏域名边界\n" +
@@ -343,8 +343,8 @@ public class FileManager {
         try {
             // 添加注释
             String jsonWithComments = "{\n" +
-                    "  // Frequency: 检测频率，每秒检测的最大次数（必须为正整数）\n" +
-                    "  \"frequency\": " + config.getFrequency() + ",\n\n" +
+                    "  // Frequency: 检测频率，每秒检测的最大次数（必须为正数，可使用小数）\n" +
+                    "  \"frequency\": " + ConfigData.formatFrequency(config.getFrequency()) + ",\n\n" +
                     "  // HintRender: 提示文字渲染方式\n" +
                     "  // 选项: \"CPU\" (使用CPU渲染), \"OpenGL\" (使用OpenGL渲染), \"Vulkan\" (使用Vulkan渲染)\n" +
                     "  \"hintRender\": \"" + config.getHintRender() + "\",\n\n" +
@@ -358,10 +358,10 @@ public class FileManager {
                     "  // 默认: 88 (X键), 可通过 /areahint replacebutton 命令修改\n" +
                     "  \"recordKey\": " + config.getRecordKey() + ",\n\n" +
                     "  // TitleSize: 域名标题大小\n" +
-                    "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
+                    "  // 选项: \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\", 或 \"custom:1.75\"\n" +
                     "  \"titleSize\": \"" + config.getTitleSize() + "\",\n\n" +
                     "  // SubtitleSize: 副字幕大小\n" +
-                    "  // 选项: \"auto\" (自动比域名标题小一级), \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\"\n" +
+                    "  // 选项: \"auto\" (自动比域名标题小一级), \"extra_large\", \"large\", \"medium_large\", \"medium\", \"medium_small\", \"small\", \"extra_small\", 或 \"custom:1.25\"\n" +
                     "  \"subtitlesize\": \"" + config.getSubtitleSize() + "\",\n\n" +
                     "  // BoundVizEnabled: 边界可视化开关\n" +
                     "  // true: 显示域名边界, false: 隐藏域名边界\n" +
