@@ -30,6 +30,7 @@ public class ServerI18nManager {
     private static String currentLanguage = DEFAULT_LANGUAGE;
 
     public static void init() {
+        LanguageFileSynchronizer.syncBundledLanguageFiles();
         loadLanguageFile(DEFAULT_LANGUAGE);
         loadLanguageFile(FALLBACK_LANGUAGE);
         translations = allTranslations.getOrDefault(DEFAULT_LANGUAGE, new HashMap<>());

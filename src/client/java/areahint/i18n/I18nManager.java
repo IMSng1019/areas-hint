@@ -6,10 +6,7 @@ import areahint.file.FileManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import net.fabricmc.loader.api.FabricLoader;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,118 +34,8 @@ public class I18nManager {
      * 初始化i18n系统
      */
     public static void init() {
-        ensureLangFolder();
-        extractLanguageFilesFromResources();
+        LanguageFileSynchronizer.syncBundledLanguageFiles();
         loadLanguage(ClientConfig.getLanguage());
-    }
-
-    /**
-     * 确保lang文件夹存在
-     */
-    private static void ensureLangFolder() {
-        Path langDir = getLangFolder();
-        try {
-            if (Files.notExists(langDir)) {
-                Files.createDirectories(langDir);
-                AreashintClient.LOGGER.info("已创建语言文件夹: " + langDir);
-            }
-        } catch (IOException e) {
-            AreashintClient.LOGGER.error("创建语言文件夹失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 从资源文件中提取语言文件到配置文件夹
-     * 这样可以让玩家自定义翻译，同时保证有默认的翻译文件
-     */
-    private static void extractLanguageFilesFromResources() {
-        // 动态扫描JAR中所有语言文件
-        List<String> languages = new ArrayList<>();
-        var modContainer = FabricLoader.getInstance().getModContainer("areas-hint");
-        if (modContainer.isPresent()) {
-            var langPath = modContainer.get().findPath("assets/areas-hint/lang");
-            if (langPath.isPresent()) {
-                try (Stream<Path> files = Files.list(langPath.get())) {
-                    files.filter(p -> p.getFileName().toString().endsWith(".json"))
-                         .forEach(p -> {
-                             String name = p.getFileName().toString();
-                             languages.add(name.substring(0, name.length() - 5));
-                         });
-                } catch (IOException e) {
-                    AreashintClient.LOGGER.error("扫描JAR语言文件失败: " + e.getMessage());
-                }
-            }
-        }
-        if (languages.isEmpty()) {
-            languages.addAll(List.of("zh_cn", "en_us"));
-        }
-
-        for (String lang : languages) {
-            extractSingleLanguage(lang);
-        }
-    }
-
-    private static void extractSingleLanguage(String lang) {
-        Path targetFile = getLangFolder().resolve(lang + ".json");
-        String resourcePath = "/assets/areas-hint/lang/" + lang + ".json";
-
-        try (InputStream inputStream = I18nManager.class.getResourceAsStream(resourcePath)) {
-            if (inputStream == null) return;
-
-            String jarContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-            Map<String, String> jarMap = GSON.fromJson(jarContent, new TypeToken<Map<String, String>>(){}.getType());
-            if (jarMap == null) return;
-
-            if (Files.notExists(targetFile)) {
-                Files.writeString(targetFile, jarContent, StandardCharsets.UTF_8);
-                AreashintClient.LOGGER.info("已提取语言文件: " + lang + ".json");
-            } else {
-                String localContent = Files.readString(targetFile, StandardCharsets.UTF_8);
-                Map<String, String> localMap = GSON.fromJson(localContent, new TypeToken<Map<String, String>>(){}.getType());
-                if (localMap == null) localMap = new LinkedHashMap<>();
-
-                int added = 0;
-                for (Map.Entry<String, String> entry : jarMap.entrySet()) {
-                    if (!localMap.containsKey(entry.getKey())) {
-                        localMap.put(entry.getKey(), entry.getValue());
-                        added++;
-                    }
-                }
-
-                int updated = migrateDeprecatedTranslations(localMap, jarMap);
-                if (added > 0 || updated > 0) {
-                    Files.writeString(targetFile, GSON.toJson(localMap), StandardCharsets.UTF_8);
-                    AreashintClient.LOGGER.info("已合并 " + added + " 条新翻译、更新 " + updated + " 条过期翻译到: " + lang + ".json");
-                }
-            }
-        } catch (Exception e) {
-            AreashintClient.LOGGER.error("提取语言文件失败 (" + lang + "): " + e.getMessage());
-        }
-    }
-
-    /**
-     * 修复旧版本已经写入本地语言文件的过期翻译。
-     * <p>
-     * 语言文件允许玩家自定义，所以常规合并只补充缺失 key，不覆盖已有文本。
-     * 但 addsubtitle 已从“手动输入 /areahint addsubtitle text ...”改成 EasyAdd 风格的聊天输入，
-     * 如果本地语言文件保留旧提示，就会误导玩家继续输入已经移除的旧指令。
-     * 这里仅在文本仍然包含旧指令格式时覆盖，避免影响玩家主动改写的其他翻译。
-     */
-    private static int migrateDeprecatedTranslations(Map<String, String> localMap, Map<String, String> jarMap) {
-        int updated = 0;
-        updated += replaceDeprecatedTranslation(localMap, jarMap, "subtitle.ui.add.input", "/areahint addsubtitle text");
-        return updated;
-    }
-
-    private static int replaceDeprecatedTranslation(Map<String, String> localMap, Map<String, String> jarMap,
-                                                    String key, String deprecatedFragment) {
-        String localValue = localMap.get(key);
-        String jarValue = jarMap.get(key);
-        if (localValue != null && jarValue != null && localValue.contains(deprecatedFragment)) {
-            localMap.put(key, jarValue);
-            return 1;
-        }
-        return 0;
     }
 
     /**
