@@ -700,8 +700,14 @@ public class ServerCommands {
         source.sendMessage(Text.translatable("help.command.hintrender"));
         source.sendMessage(Text.translatable("help.command.titlestyle"));
         source.sendMessage(Text.translatable("help.command.titlesize"));
+        source.sendMessage(Text.translatable("help.command.addsubtitle"));
+        source.sendMessage(Text.translatable("help.command.replacesubtitle"));
+        source.sendMessage(Text.translatable("help.command.deletesubtitle"));
+        source.sendMessage(Text.translatable("help.command.replacesubtitlecolor"));
+        source.sendMessage(Text.translatable("help.command.replacesubtitlesize"));
         source.sendMessage(Text.translatable("help.command.add"));
         source.sendMessage(Text.translatable("help.command.easyadd"));
+        source.sendMessage(Text.translatable("help.command.addarea"));
         source.sendMessage(Text.translatable("help.command.recolor"));
         source.sendMessage(Text.translatable("help.command.rename"));
         source.sendMessage(Text.translatable("help.command.sethigh"));
@@ -728,6 +734,8 @@ public class ServerCommands {
         source.sendMessage(Text.translatable("help.command.adddimensionalitydescription"));
         source.sendMessage(Text.translatable("help.command.replacedimensionalitydescription"));
         source.sendMessage(Text.translatable("help.command.deletedimensionalitydescription"));
+        source.sendMessage(Text.translatable("help.command.addsignature"));
+        source.sendMessage(Text.translatable("help.command.deletesignature"));
         source.sendMessage(Text.translatable("help.command.serverlanguage"));
 
         return Command.SINGLE_SUCCESS;
