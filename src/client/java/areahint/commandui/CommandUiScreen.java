@@ -55,6 +55,9 @@ public abstract class CommandUiScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (UnifiedKeyHandler.matchesRecordKey(keyCode, scanCode)) {
+            if (UnifiedKeyHandler.isRecordKeySuppressedUntilRelease()) {
+                return true;
+            }
             closeToGameFromBoundKey();
             return true;
         }

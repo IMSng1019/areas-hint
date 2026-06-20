@@ -192,6 +192,8 @@ public class UnifiedKeyHandler {
             if (!commandPanelOpenedForHold && commandPanelHoldTicks >= COMMAND_PANEL_HOLD_TICKS) {
                 commandPanelOpenedForHold = true;
                 waitingForIdleRelease = false;
+                // 长按打开面板后忽略本次仍未松开的绑定键，避免重复按键事件立刻关闭界面。
+                suppressRecordKeyUntilRelease();
                 client.setScreen(new areahint.commandui.CommandPanelScreen());
             }
             return;
@@ -235,6 +237,13 @@ public class UnifiedKeyHandler {
     public static void suppressRecordKeyUntilRelease() {
         suppressUntilRecordKeyReleased = true;
         resetCommandPanelHoldState();
+    }
+
+    /**
+     * 指令可视化界面判断绑定键是否还处于需要丢弃的同一次按压。
+     */
+    public static boolean isRecordKeySuppressedUntilRelease() {
+        return suppressUntilRecordKeyReleased;
     }
 
     /**
