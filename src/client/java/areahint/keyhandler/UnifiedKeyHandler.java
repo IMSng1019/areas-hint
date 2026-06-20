@@ -2,6 +2,7 @@ package areahint.keyhandler;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
@@ -25,6 +26,12 @@ public class UnifiedKeyHandler {
 
     // 是否已注册tick事件
     private static boolean tickEventRegistered = false;
+    // 长按约0.5秒打开指令可视化主面板。
+    private static final int COMMAND_PANEL_HOLD_TICKS = 10;
+    private static int commandPanelHoldTicks = 0;
+    private static boolean waitingForIdleRelease = false;
+    private static boolean commandPanelOpenedForHold = false;
+    private static boolean suppressUntilRecordKeyReleased = false;
 
     /**
      * 注册统一的记录键处理器
@@ -45,11 +52,7 @@ public class UnifiedKeyHandler {
         if (!tickEventRegistered) {
             // 注册客户端tick事件监听器
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
-                if (recordKeyBinding != null && recordKeyBinding.wasPressed()) {
-                    handleRecordKeyPress();
-                } else {
-                    areahint.description.DescriptionKeyHandler.clearSuppressedRecordKeyPress();
-                }
+                handleRecordKeyTick(client);
             });
             tickEventRegistered = true;
         }
@@ -84,17 +87,49 @@ public class UnifiedKeyHandler {
     }
 
     /**
-     * 处理记录键按下事件
-     * 根据当前激活的模块分发事件
+     * 处理记录键tick，区分即时录点、短按描述查询和长按指令面板。
      */
-    private static void handleRecordKeyPress() {
+    private static void handleRecordKeyTick(MinecraftClient client) {
+        if (recordKeyBinding == null) {
+            return;
+        }
+
+        boolean pressedThisTick = recordKeyBinding.wasPressed();
+        if (suppressUntilRecordKeyReleased) {
+            resetCommandPanelHoldState();
+            if (!recordKeyBinding.isPressed()) {
+                suppressUntilRecordKeyReleased = false;
+            }
+            return;
+        }
+
+        if (pressedThisTick && handleImmediateRecordKeyPress()) {
+            resetCommandPanelHoldState();
+            return;
+        }
+
+        if (waitingForIdleRelease) {
+            handleIdleHoldProgress(client);
+        } else if (!pressedThisTick) {
+            areahint.description.DescriptionKeyHandler.clearSuppressedRecordKeyPress();
+        }
+    }
+
+    /**
+     * 处理必须在按下瞬间响应的流程。
+     */
+    private static boolean handleImmediateRecordKeyPress() {
         System.out.println("DEBUG: 记录键被按下");
 
         if (areahint.description.DescriptionKeyHandler.consumeSuppressedRecordKeyPress()) {
-            return;
+            return true;
         }
         if (areahint.description.DescriptionKeyHandler.closeCurrentDescriptionBookScreen()) {
-            return;
+            return true;
+        }
+        if (areahint.commandui.CommandUiScreen.closeIfCommandUiOpen()) {
+            suppressUntilRecordKeyReleased = true;
+            return true;
         }
 
         // 检查EasyAdd是否活跃且在记录状态
@@ -102,7 +137,7 @@ public class UnifiedKeyHandler {
         if (easyAddManager.getCurrentState() == EasyAddManager.EasyAddState.RECORDING_POINTS) {
             System.out.println("DEBUG: EasyAdd 处理记录键");
             easyAddManager.recordCurrentPosition();
-            return;
+            return true;
         }
 
         // 检查ExpandArea是否活跃且在记录状态
@@ -111,7 +146,7 @@ public class UnifiedKeyHandler {
         if (expandAreaManager.isActive() && expandAreaManager.isRecording()) {
             System.out.println("DEBUG: ExpandArea 处理记录键");
             expandAreaManager.recordCurrentPosition();
-            return;
+            return true;
         }
 
         // 检查ShrinkArea是否活跃且在记录状态
@@ -119,7 +154,7 @@ public class UnifiedKeyHandler {
         if (shrinkAreaManager.isActive() && shrinkAreaManager.isRecording()) {
             System.out.println("DEBUG: ShrinkArea 处理记录键");
             shrinkAreaManager.handleXKeyPress();
-            return;
+            return true;
         }
 
         // 检查DivideArea是否活跃且在记录状态
@@ -127,25 +162,88 @@ public class UnifiedKeyHandler {
         if (divideAreaManager.isActive() && divideAreaManager.isRecording()) {
             System.out.println("DEBUG: DivideArea 处理记录键");
             divideAreaManager.recordCurrentPosition();
-            return;
+            return true;
         }
 
         // 检查AddHint是否活跃且在记录状态
         areahint.addhint.AddHintManager addHintManager = areahint.addhint.AddHintManager.getInstance();
         if (addHintManager.isActive() && addHintManager.isRecording()) {
             addHintManager.recordCurrentPosition();
+            return true;
+        }
+
+        // 非录点状态才进入短按/长按判断。
+        if (shouldBlockIdleRecordKey()) {
+            return true;
+        }
+
+        waitingForIdleRelease = true;
+        commandPanelHoldTicks = 0;
+        commandPanelOpenedForHold = false;
+        return false;
+    }
+
+    /**
+     * 非录点状态下，短按保留描述查询，长按打开指令可视化主面板。
+     */
+    private static void handleIdleHoldProgress(MinecraftClient client) {
+        if (recordKeyBinding.isPressed()) {
+            commandPanelHoldTicks++;
+            if (!commandPanelOpenedForHold && commandPanelHoldTicks >= COMMAND_PANEL_HOLD_TICKS) {
+                commandPanelOpenedForHold = true;
+                waitingForIdleRelease = false;
+                client.setScreen(new areahint.commandui.CommandPanelScreen());
+            }
             return;
         }
 
-        // 没有录点功能消费绑定键时，默认行为是查询当前域名描述。
-        // 但如果玩家正在描述指令流程中，或当前已经打开任意界面，
-        // 绑定键不应额外打开“查看描述”界面，更不能干扰描述编辑/删除流程。
+        if (!commandPanelOpenedForHold) {
+            System.out.println("DEBUG: 没有模块处理记录键，查询当前域名描述");
+            DescriptionClientNetworking.sendCurrentAreaQuery();
+        }
+        resetCommandPanelHoldState();
+    }
+
+    private static void resetCommandPanelHoldState() {
+        commandPanelHoldTicks = 0;
+        waitingForIdleRelease = false;
+        commandPanelOpenedForHold = false;
+    }
+
+    private static boolean shouldBlockIdleRecordKey() {
+        // 当前已有界面或描述流程时，不打开面板，也不触发默认描述查询。
         if (areahint.description.DescriptionKeyHandler.shouldSkipDefaultRecordKeyQuery()) {
-            return;
+            return true;
         }
+        return EasyAddManager.getInstance().getCurrentState() != EasyAddManager.EasyAddState.IDLE
+            || ExpandAreaManager.getInstance().isActive()
+            || ShrinkAreaManager.getInstance().isActive()
+            || areahint.dividearea.DivideAreaManager.getInstance().isActive()
+            || areahint.addhint.AddHintManager.getInstance().isActive()
+            || areahint.deletehint.DeleteHintManager.getInstance().isActive()
+            || areahint.delete.DeleteManager.getInstance().getCurrentState() != areahint.delete.DeleteManager.DeleteState.IDLE
+            || areahint.dimensional.DimensionalNameUIManager.getInstance().getCurrentState() != areahint.dimensional.DimensionalNameUIManager.State.IDLE
+            || areahint.rename.RenameManager.getInstance().getCurrentState() != areahint.rename.RenameManager.RenameState.IDLE
+            || areahint.recolor.RecolorManager.getInstance().getCurrentState() != areahint.recolor.RecolorManager.RecolorState.IDLE
+            || areahint.signature.SignatureManager.getInstance().isActive()
+            || areahint.language.LanguageManager.getInstance().getCurrentState() != areahint.language.LanguageManager.State.IDLE;
+    }
 
-        System.out.println("DEBUG: 没有模块处理记录键，查询当前域名描述");
-        DescriptionClientNetworking.sendCurrentAreaQuery();
+    /**
+     * 指令可视化界面用绑定键关闭后，忽略同一次按键直到松开。
+     */
+    public static void suppressRecordKeyUntilRelease() {
+        suppressUntilRecordKeyReleased = true;
+        resetCommandPanelHoldState();
+    }
+
+    /**
+     * 判断当前按键事件是否为记录绑定键。
+     */
+    public static boolean matchesRecordKey(int keyCode, int scanCode) {
+        return recordKeyBinding != null
+            && !recordKeyBinding.isUnbound()
+            && recordKeyBinding.matchesKey(keyCode, scanCode);
     }
 
     /**

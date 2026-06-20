@@ -185,6 +185,15 @@ public class AreasHintConfigScreen extends Screen {
             rebuildList();
             return true;
         }
+        if (parent instanceof areahint.commandui.CommandUiScreen
+                && areahint.keyhandler.UnifiedKeyHandler.matchesRecordKey(keyCode, scanCode)) {
+            // 从指令可视化进入设置时，绑定键关闭界面并丢弃未应用的草稿。
+            areahint.keyhandler.UnifiedKeyHandler.suppressRecordKeyUntilRelease();
+            if (this.client != null) {
+                this.client.setScreen(null);
+            }
+            return true;
+        }
         if (list != null && list.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }

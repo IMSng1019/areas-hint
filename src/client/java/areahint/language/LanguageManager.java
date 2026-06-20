@@ -45,6 +45,16 @@ public class LanguageManager {
     }
 
     /**
+     * 启动图形化语言选择流程，只占用原语言状态机，不重复发送聊天按钮。
+     */
+    public void startVisualLanguageSelection() {
+        if (currentState == State.IDLE) {
+            currentState = State.SELECTING_LANGUAGE;
+            ClientConfig.setLanguageLocked(true);
+        }
+    }
+
+    /**
      * 处理语言选择
      * @param langCode 语言代码
      */
@@ -84,6 +94,15 @@ public class LanguageManager {
 
     private void resetState() {
         currentState = State.IDLE;
+    }
+
+    /**
+     * 图形界面被绑定键关闭或返回时丢弃本次可视化选择进度。
+     */
+    public void discardVisualLanguageSelection() {
+        if (currentState == State.SELECTING_LANGUAGE) {
+            resetState();
+        }
     }
 
     public State getCurrentState() {
