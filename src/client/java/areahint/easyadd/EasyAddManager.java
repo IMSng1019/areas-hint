@@ -2,13 +2,11 @@ package areahint.easyadd;
 
 import areahint.data.AreaData;
 import areahint.file.FileManager;
-import areahint.file.JsonHelper;
 import areahint.debug.ClientDebugManager;
 import areahint.i18n.I18nManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.Identifier;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 
 import java.util.ArrayList;
@@ -52,6 +50,8 @@ public class EasyAddManager {
     private List<AreaData> availableParentAreas = new ArrayList<>();
     private AreaData.AltitudeData customAltitudeData = null; // 自定义高度数据
     private String selectedColor = "#FFFFFF"; // 选择的颜色（新增）
+    private AreaData previewAreaData = null; // 图形确认页使用的预览数据
+    private boolean visualMode = false; // 图形流程模式，屏蔽旧聊天按钮刷屏
     
     // 聊天监听器注册状态
     private boolean chatListenerRegistered = false;
@@ -75,6 +75,7 @@ public class EasyAddManager {
     public void startEasyAdd() {
         if (currentState != EasyAddState.IDLE) {
             MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("easyadd.error.general")), false);
+            EasyAddVisualController.clear();
             return;
         }
         
@@ -85,10 +86,15 @@ public class EasyAddManager {
             
             // 注册聊天监听器
             registerChatListener();
+            visualMode = EasyAddVisualController.consumeVisualStartRequest();
             
             // 设置状态并显示UI
             currentState = EasyAddState.INPUT_NAME;
-            EasyAddUI.showNameInputScreen();
+            if (visualMode) {
+                EasyAddVisualController.showNameScreen(null);
+            } else {
+                EasyAddUI.showNameInputScreen();
+            }
         }
     }
     
@@ -112,6 +118,10 @@ public class EasyAddManager {
     private void handleChatInput(String input) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
+
+        if (visualMode) {
+            return;
+        }
         
         // 移除前缀符号（如果有的话）
         if (input.startsWith("<") && input.contains(">")) {
@@ -123,37 +133,11 @@ public class EasyAddManager {
         
         switch (currentState) {
             case INPUT_NAME:
-                if (!input.trim().isEmpty()) {
-                    areaName = input.trim();
-
-                    // 检查域名名称是否已存在（不检查联合域名）
-                    if (checkAreaNameExists(areaName)) {
-                        client.player.sendMessage(Text.of("§c" + I18nManager.translate("easyadd.message.area.name_4") + areaName + I18nManager.translate("easyadd.message.dimension")), false);
-                        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
-                        // 保持在 INPUT_NAME 状态，等待用户重新输入
-                        return;
-                    }
-
-                    client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.name_2") + areaName), false);
-
-                    // 进入联合域名输入
-                    currentState = EasyAddState.INPUT_SURFACE_NAME;
-                    EasyAddUI.showSurfaceNameInputScreen();
-                }
+                processNameInput(input, false);
                 break;
                 
             case INPUT_SURFACE_NAME:
-                // 联合域名可以为空
-                surfaceName = input.trim().isEmpty() ? null : input.trim();
-                if (surfaceName != null) {
-                    client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.surface") + surfaceName), false);
-                } else {
-                    client.player.sendMessage(Text.of(I18nManager.translate("dividearea.message.area.surface")), false);
-                }
-                
-                // 进入等级选择
-                currentState = EasyAddState.INPUT_LEVEL;
-                EasyAddUI.showLevelInputScreen();
+                processSurfaceNameInput(input, false);
                 break;
                 
             case HEIGHT_SELECTION:
@@ -172,6 +156,121 @@ public class EasyAddManager {
                 break;
         }
     }
+
+    /**
+     * 处理图形界面的域名名称输入。
+     */
+    public void handleVisualNameInput(String input) {
+        processNameInput(input, true);
+    }
+
+    /**
+     * 处理图形界面的联合域名输入。
+     */
+    public void handleVisualSurfaceNameInput(String input) {
+        processSurfaceNameInput(input, true);
+    }
+
+    /**
+     * 处理图形界面的自定义高度输入。
+     */
+    public void handleVisualCustomAltitudeInput(String minInput, String maxInput) {
+        try {
+            double min = Double.parseDouble(minInput.trim());
+            double max = Double.parseDouble(maxInput.trim());
+            if (max <= min) {
+                EasyAddVisualController.showCustomAltitudeScreen("commandui.easyadd.error.altitude_order");
+                return;
+            }
+            proceedWithAltitudeData(new AreaData.AltitudeData(max, min));
+        } catch (NumberFormatException e) {
+            EasyAddVisualController.showCustomAltitudeScreen("commandui.easyadd.error.number");
+        }
+    }
+
+    /**
+     * 处理图形界面的自定义颜色输入。
+     */
+    public void handleVisualCustomColorInput(String colorInput) {
+        String normalizedColor = normalizeStrictColor(colorInput);
+        if (normalizedColor == null) {
+            EasyAddVisualController.showCustomColorScreen("commandui.easyadd.error.color");
+            return;
+        }
+        proceedWithColorSelection(normalizedColor);
+    }
+
+    /**
+     * 统一处理域名名称，聊天和图形流程共用同一套校验。
+     */
+    private void processNameInput(String input, boolean fromVisual) {
+        if (currentState != EasyAddState.INPUT_NAME) {
+            return;
+        }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+
+        String trimmed = input == null ? "" : input.trim();
+        if (trimmed.isEmpty()) {
+            if (fromVisual) {
+                EasyAddVisualController.showNameScreen("commandui.easyadd.error.name_empty");
+            }
+            return;
+        }
+
+        areaName = trimmed;
+
+        // 检查域名名称是否已存在（不检查联合域名）
+        if (checkAreaNameExists(areaName)) {
+            if (visualMode || fromVisual) {
+                EasyAddVisualController.showNameScreen("commandui.easyadd.error.name_duplicate");
+            } else {
+                client.player.sendMessage(Text.of("§c" + I18nManager.translate("easyadd.message.area.name_4") + areaName + I18nManager.translate("easyadd.message.dimension")), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
+            }
+            return;
+        }
+
+        if (!visualMode) {
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.name_2") + areaName), false);
+        }
+
+        currentState = EasyAddState.INPUT_SURFACE_NAME;
+        if (visualMode) {
+            EasyAddVisualController.showSurfaceNameScreen();
+        } else {
+            EasyAddUI.showSurfaceNameInputScreen();
+        }
+    }
+
+    /**
+     * 统一处理联合域名，空字符串表示不设置联合域名。
+     */
+    private void processSurfaceNameInput(String input, boolean fromVisual) {
+        if (currentState != EasyAddState.INPUT_SURFACE_NAME) {
+            return;
+        }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+
+        surfaceName = input == null || input.trim().isEmpty() ? null : input.trim();
+        if (!visualMode) {
+            if (surfaceName != null) {
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.surface") + surfaceName), false);
+            } else {
+                client.player.sendMessage(Text.of(I18nManager.translate("dividearea.message.area.surface")), false);
+            }
+        }
+
+        currentState = EasyAddState.INPUT_LEVEL;
+        if (visualMode) {
+            EasyAddVisualController.showLevelScreen();
+        } else {
+            EasyAddUI.showLevelInputScreen();
+        }
+    }
     
     /**
      * 处理等级输入（从命令调用）
@@ -183,7 +282,7 @@ public class EasyAddManager {
         
         areaLevel = level;
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
+        if (!visualMode && client.player != null) {
             client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.level") + level), false);
         }
         
@@ -191,14 +290,23 @@ public class EasyAddManager {
             // 顶级域名，直接开始记录坐标
             baseName = null;
             currentState = EasyAddState.RECORDING_POINTS;
-            if (client.player != null) {
+            if (visualMode) {
+                EasyAddVisualController.showRecordingHud();
+            } else if (client.player != null) {
                 client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.coordinate.record_2") + EasyAddConfig.getRecordKey() + I18nManager.translate("easyadd.message.record_2")), false);
             }
         } else {
             // 需要选择上级域名
             loadAvailableParentAreas();
+            if (currentState == EasyAddState.IDLE) {
+                return;
+            }
             currentState = EasyAddState.SELECT_BASE;
-            EasyAddUI.showBaseSelectScreen(availableParentAreas);
+            if (visualMode) {
+                EasyAddVisualController.showBaseSelectScreen(availableParentAreas);
+            } else {
+                EasyAddUI.showBaseSelectScreen(availableParentAreas);
+            }
         }
     }
     
@@ -217,13 +325,15 @@ public class EasyAddManager {
         }
         
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
+        if (!visualMode && client.player != null) {
             client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.parent") + baseName), false);
         }
         
         // 开始记录坐标点
         currentState = EasyAddState.RECORDING_POINTS;
-        if (client.player != null) {
+        if (visualMode) {
+            EasyAddVisualController.showRecordingHud();
+        } else if (client.player != null) {
             client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.coordinate.record_2") + EasyAddConfig.getRecordKey() + I18nManager.translate("easyadd.message.record_2")), false);
         }
     }
@@ -255,7 +365,11 @@ public class EasyAddManager {
         if (availableParentAreas.isEmpty()) {
             MinecraftClient.getInstance().player.sendMessage(
                 Text.of(I18nManager.translate("easyadd.error.level") + (areaLevel - 1) + I18nManager.translate("easyadd.message.area.parent")), false);
+            boolean wasVisualMode = visualMode;
             cancelEasyAdd();
+            if (wasVisualMode && MinecraftClient.getInstance() != null) {
+                MinecraftClient.getInstance().setScreen(null);
+            }
             return;
         }
     }
@@ -287,11 +401,15 @@ public class EasyAddManager {
         BlockPos pos = client.player.getBlockPos();
         recordedPoints.add(pos);
 
-        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.coordinate.record") + recordedPoints.size() + ": §6(" +
-            pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ")"), false);
+        if (!visualMode) {
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.coordinate.record") + recordedPoints.size() + ": §6(" +
+                pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ")"), false);
+        }
 
         // 显示当前状态和选项
-        EasyAddUI.showPointRecordedScreen(recordedPoints, pos);
+        if (!visualMode) {
+            EasyAddUI.showPointRecordedScreen(recordedPoints, pos);
+        }
 
         // 更新边界可视化的临时顶点
         areahint.boundviz.BoundVizManager.getInstance().setTemporaryVertices(recordedPoints, true);
@@ -309,8 +427,10 @@ public class EasyAddManager {
         }
         
         if (recordedPoints.size() < 3) {
-            MinecraftClient.getInstance().player.sendMessage(
-                Text.of(I18nManager.translate("easyadd.error.record")), false);
+            if (!visualMode) {
+                MinecraftClient.getInstance().player.sendMessage(
+                    Text.of(I18nManager.translate("easyadd.error.record")), false);
+            }
             return;
         }
         
@@ -340,7 +460,11 @@ public class EasyAddManager {
         currentState = EasyAddState.COLOR_SELECTION;
         
         // 显示颜色选择界面
-        EasyAddUI.showColorSelectionScreen();
+        if (visualMode) {
+            EasyAddVisualController.showColorScreen();
+        } else {
+            EasyAddUI.showColorSelectionScreen();
+        }
     }
     
     /**
@@ -348,7 +472,7 @@ public class EasyAddManager {
      * @param selectedColor 选择的颜色
      */
     public void proceedWithColorSelection(String selectedColor) {
-        if (currentState != EasyAddState.COLOR_SELECTION) {
+        if (currentState != EasyAddState.COLOR_SELECTION && currentState != EasyAddState.COLOR_INPUT) {
             return;
         }
         
@@ -361,18 +485,27 @@ public class EasyAddManager {
         // 计算二级顶点和其他数据
         try {
             AreaData areaData = buildAreaData();
+            previewAreaData = areaData;
             
             // 验证域名有效性
             if (validateAreaData(areaData)) {
-                EasyAddUI.showConfirmSaveScreen(areaData);
+                if (visualMode) {
+                    EasyAddVisualController.showConfirmScreen(areaData);
+                } else {
+                    EasyAddUI.showConfirmSaveScreen(areaData);
+                }
             } else {
-                MinecraftClient.getInstance().player.sendMessage(
-                    Text.of(I18nManager.translate("easyadd.error.area.coordinate")), false);
+                if (!visualMode) {
+                    MinecraftClient.getInstance().player.sendMessage(
+                        Text.of(I18nManager.translate("easyadd.error.area.coordinate")), false);
+                }
                 cancelEasyAdd();
             }
         } catch (Exception e) {
-            MinecraftClient.getInstance().player.sendMessage(
-                Text.of(I18nManager.translate("easyadd.error.area_2") + e.getMessage()), false);
+            if (!visualMode) {
+                MinecraftClient.getInstance().player.sendMessage(
+                    Text.of(I18nManager.translate("easyadd.error.area_2") + e.getMessage()), false);
+            }
                 cancelEasyAdd();
         }
     }
@@ -392,16 +525,24 @@ public class EasyAddManager {
         // 处理自定义颜色输入
         if ("custom".equals(colorInput)) {
             currentState = EasyAddState.COLOR_INPUT;
-            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.color")), false);
-            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.general_9")), false);
-            client.player.sendMessage(Text.of(I18nManager.translate("command.error.cancel")), false);
+            if (visualMode) {
+                EasyAddVisualController.showCustomColorScreen(null);
+            } else {
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.color")), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.general_9")), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.error.cancel")), false);
+            }
             return;
         }
         
         // 验证颜色格式
-        String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
+        String normalizedColor = normalizeStrictColor(colorInput);
         if (normalizedColor == null) {
-            client.player.sendMessage(Text.of(I18nManager.translate("gui.error.color")), false);
+            if (visualMode) {
+                EasyAddVisualController.showColorScreen();
+            } else {
+                client.player.sendMessage(Text.of(I18nManager.translate("gui.error.color")), false);
+            }
             return;
         }
         
@@ -418,7 +559,7 @@ public class EasyAddManager {
         if (client.player == null) return;
         
         // 验证颜色格式
-        String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
+        String normalizedColor = normalizeStrictColor(colorInput);
         if (normalizedColor == null) {
             client.player.sendMessage(Text.of(I18nManager.translate("easyadd.error.color")), false);
             client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.general_10")), false);
@@ -519,7 +660,9 @@ public class EasyAddManager {
      * 取消EasyAdd流程
      */
     public void cancelEasyAdd() {
-        MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("easyadd.message.cancel")), false);
+        if (MinecraftClient.getInstance().player != null) {
+            MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("easyadd.message.cancel")), false);
+        }
         resetState();
     }
     
@@ -537,6 +680,9 @@ public class EasyAddManager {
         availableParentAreas.clear();
         customAltitudeData = null;
         selectedColor = "#FFFFFF"; // 重置颜色
+        previewAreaData = null;
+        visualMode = false;
+        EasyAddVisualController.clear();
 
         // 清除边界可视化的临时顶点
         areahint.boundviz.BoundVizManager.getInstance().clearTemporaryVertices();
@@ -610,4 +756,31 @@ public class EasyAddManager {
     public List<BlockPos> getRecordedPoints() { return new ArrayList<>(recordedPoints); }
     public String getCurrentDimension() { return currentDimension; }
     public String getSelectedColor() { return selectedColor; }
-} 
+    public String getSurfaceName() { return surfaceName; }
+    public List<AreaData> getAvailableParentAreas() { return new ArrayList<>(availableParentAreas); }
+    public AreaData.AltitudeData getCustomAltitudeData() { return customAltitudeData; }
+    public AreaData getPreviewAreaData() { return previewAreaData; }
+    public boolean isVisualMode() { return visualMode; }
+
+    /**
+     * 严格校验颜色，避免无效输入被 ColorUtil.normalizeColor 静默转换为白色。
+     */
+    private String normalizeStrictColor(String colorInput) {
+        if (colorInput == null || colorInput.trim().isEmpty()) {
+            return null;
+        }
+        String trimmed = colorInput.trim();
+        if (areahint.util.ColorUtil.isFlashColor(trimmed)) {
+            return trimmed;
+        }
+        String namedColor = areahint.util.ColorUtil.getColorHex(trimmed);
+        if (namedColor != null) {
+            return namedColor;
+        }
+        String normalized = trimmed.toUpperCase();
+        if (!normalized.startsWith("#")) {
+            normalized = "#" + normalized;
+        }
+        return normalized.matches("^#[0-9A-F]{6}$") ? normalized : null;
+    }
+}

@@ -49,8 +49,10 @@ public final class CommandVisualRegistry {
         handlers.add(command("replacesubtitlecolor", "areahint replacesubtitlecolor", "help.command.replacesubtitlecolor"));
         handlers.add(command("replacesubtitlesize", "areahint replacesubtitlesize", "help.command.replacesubtitlesize"));
         handlers.add(command("add", "areahint add", "help.command.add"));
-        handlers.add(command("easyadd", "areahint easyadd", "help.command.easyadd"));
-        handlers.add(command("addarea", "areahint addarea", "help.command.addarea"));
+        handlers.add(visual("easyadd", "areahint easyadd", "help.command.easyadd",
+            parent -> areahint.easyadd.EasyAddVisualController.openFromCommandUi(parent, "areahint easyadd")));
+        handlers.add(visual("addarea", "areahint addarea", "help.command.addarea",
+            parent -> areahint.easyadd.EasyAddVisualController.openFromCommandUi(parent, "areahint addarea")));
         handlers.add(command("recolor", "areahint recolor", "help.command.recolor"));
         handlers.add(command("rename", "areahint rename", "help.command.rename"));
         handlers.add(command("sethigh", "areahint sethigh", "help.command.sethigh"));

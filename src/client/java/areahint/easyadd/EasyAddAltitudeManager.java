@@ -51,8 +51,12 @@ public class EasyAddAltitudeManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
         
-        // 显示高度选择界面
-        EasyAddUI.showAltitudeSelectionScreen(recordedPoints);
+        // 图形模式下打开 Screen，普通模式继续使用聊天按钮。
+        if (EasyAddManager.getInstance().isVisualMode()) {
+            EasyAddVisualController.showAltitudeScreen(recordedPoints);
+        } else {
+            EasyAddUI.showAltitudeSelectionScreen(recordedPoints);
+        }
         
         ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD,
             "开始高度选择流程");
@@ -70,22 +74,29 @@ public class EasyAddAltitudeManager {
         
         if (type == AltitudeType.AUTOMATIC) {
             // 选择自动计算，直接进入下一步
-            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_2")), false);
+            if (!EasyAddManager.getInstance().isVisualMode()) {
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_2")), false);
+            }
             EasyAddManager.getInstance().proceedWithAltitudeData(null);
         } else if (type == AltitudeType.UNLIMITED) {
             // 选择不限制高度，使用null值表示无高度限制
-            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude")), false);
-            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.coordinate")), false);
+            if (!EasyAddManager.getInstance().isVisualMode()) {
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude")), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.area.coordinate")), false);
+            }
             AreaData.AltitudeData unlimitedAltitude = new AreaData.AltitudeData(null, null);
             EasyAddManager.getInstance().proceedWithAltitudeData(unlimitedAltitude);
         } else {
-            // 选择自定义，开始输入流程
-            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_3")), false);
-            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_5")), false);
-            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.altitude")), false);
-            client.player.sendMessage(Text.of(I18nManager.translate("command.error.cancel")), false);
-            
+            // 选择自定义，普通模式走聊天输入，图形模式走双输入框。
             currentInputState = AltitudeInputState.INPUT_MIN_HEIGHT;
+            if (EasyAddManager.getInstance().isVisualMode()) {
+                EasyAddVisualController.showCustomAltitudeScreen(null);
+            } else {
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_3")), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.altitude_5")), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("easyadd.message.altitude")), false);
+                client.player.sendMessage(Text.of(I18nManager.translate("command.error.cancel")), false);
+            }
         }
         
         ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.EASY_ADD,
@@ -181,4 +192,4 @@ public class EasyAddAltitudeManager {
         return currentInputState == AltitudeInputState.INPUT_MIN_HEIGHT || 
                currentInputState == AltitudeInputState.INPUT_MAX_HEIGHT;
     }
-} 
+}

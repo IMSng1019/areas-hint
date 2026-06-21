@@ -153,6 +153,10 @@ public class AreashintClient implements ClientModInitializer {
 			
 			// 注册网络接收器
 			areahint.easyadd.EasyAddNetworking.registerClientReceivers();
+
+			// 注册 EasyAdd 图形流程 HUD 和启动超时处理。
+			areahint.easyadd.EasyAddVisualController.register();
+			areahint.easyadd.EasyAddRecordingHud.register();
 			
 			LOGGER.info("EasyAdd功能初始化完成");
 		} catch (Exception e) {
