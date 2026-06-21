@@ -94,15 +94,17 @@ public class UnifiedKeyHandler {
             return;
         }
 
-        boolean pressedThisTick = recordKeyBinding.wasPressed();
         if (suppressUntilRecordKeyReleased) {
             resetCommandPanelHoldState();
-            if (!recordKeyBinding.isPressed()) {
+            drainRecordKeyPresses();
+            if (!(client.currentScreen instanceof areahint.commandui.CommandUiScreen)
+                    && !isRecordKeyPhysicallyPressed(client)) {
                 suppressUntilRecordKeyReleased = false;
             }
             return;
         }
 
+        boolean pressedThisTick = recordKeyBinding.wasPressed();
         if (pressedThisTick && handleImmediateRecordKeyPress()) {
             resetCommandPanelHoldState();
             return;
@@ -236,6 +238,7 @@ public class UnifiedKeyHandler {
      */
     public static void suppressRecordKeyUntilRelease() {
         suppressUntilRecordKeyReleased = true;
+        drainRecordKeyPresses();
         resetCommandPanelHoldState();
     }
 
@@ -244,6 +247,18 @@ public class UnifiedKeyHandler {
      */
     public static boolean isRecordKeySuppressedUntilRelease() {
         return suppressUntilRecordKeyReleased;
+    }
+
+    /**
+     * 指令可视化界面收到绑定键释放事件后，结束本次长按抑制。
+     */
+    public static boolean releaseSuppressedRecordKeyIfMatches(int keyCode, int scanCode) {
+        if (!suppressUntilRecordKeyReleased || !matchesRecordKey(keyCode, scanCode)) {
+            return false;
+        }
+        suppressUntilRecordKeyReleased = false;
+        drainRecordKeyPresses();
+        return true;
     }
 
     /**
@@ -270,5 +285,23 @@ public class UnifiedKeyHandler {
             return recordKeyBinding.getBoundKeyLocalizedText().getString();
         }
         return "X";
+    }
+
+    private static void drainRecordKeyPresses() {
+        if (recordKeyBinding == null) {
+            return;
+        }
+        while (recordKeyBinding.wasPressed()) {
+            // 清空长按或关闭界面期间积压的绑定键事件，避免松开后再次触发短按。
+        }
+    }
+
+    private static boolean isRecordKeyPhysicallyPressed(MinecraftClient client) {
+        int keyCode = ClientConfig.getRecordKey();
+        if (client != null && client.getWindow() != null
+                && keyCode > GLFW.GLFW_KEY_UNKNOWN && keyCode <= GLFW.GLFW_KEY_LAST) {
+            return GLFW.glfwGetKey(client.getWindow().getHandle(), keyCode) == GLFW.GLFW_PRESS;
+        }
+        return recordKeyBinding != null && recordKeyBinding.isPressed();
     }
 } 
