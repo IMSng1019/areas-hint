@@ -31,6 +31,9 @@ public class UnifiedKeyHandler {
     private static int commandPanelHoldTicks = 0;
     private static boolean waitingForIdleRelease = false;
     private static boolean commandPanelOpenedForHold = false;
+    private static boolean waitingForEasyAddVisualRecordRelease = false;
+    private static int easyAddVisualRecordHoldTicks = 0;
+    private static boolean easyAddVisualRecordPanelOpened = false;
     private static boolean suppressUntilRecordKeyReleased = false;
 
     /**
@@ -95,7 +98,7 @@ public class UnifiedKeyHandler {
         }
 
         if (suppressUntilRecordKeyReleased) {
-            resetCommandPanelHoldState();
+            resetHoldState();
             drainRecordKeyPresses();
             if (!(client.currentScreen instanceof areahint.commandui.CommandUiScreen)
                     && !isRecordKeyPhysicallyPressed(client)) {
@@ -106,11 +109,13 @@ public class UnifiedKeyHandler {
 
         boolean pressedThisTick = recordKeyBinding.wasPressed();
         if (pressedThisTick && handleImmediateRecordKeyPress()) {
-            resetCommandPanelHoldState();
+            resetHoldState();
             return;
         }
 
-        if (waitingForIdleRelease) {
+        if (waitingForEasyAddVisualRecordRelease) {
+            handleEasyAddVisualRecordHoldProgress(client);
+        } else if (waitingForIdleRelease) {
             handleIdleHoldProgress(client);
         } else if (!pressedThisTick) {
             areahint.description.DescriptionKeyHandler.clearSuppressedRecordKeyPress();
@@ -137,6 +142,12 @@ public class UnifiedKeyHandler {
         // 检查EasyAdd是否活跃且在记录状态
         EasyAddManager easyAddManager = EasyAddManager.getInstance();
         if (easyAddManager.getCurrentState() == EasyAddManager.EasyAddState.RECORDING_POINTS) {
+            if (easyAddManager.isVisualMode()) {
+                waitingForEasyAddVisualRecordRelease = true;
+                easyAddVisualRecordHoldTicks = 0;
+                easyAddVisualRecordPanelOpened = false;
+                return false;
+            }
             System.out.println("DEBUG: EasyAdd 处理记录键");
             easyAddManager.recordCurrentPosition();
             return true;
@@ -208,10 +219,51 @@ public class UnifiedKeyHandler {
         resetCommandPanelHoldState();
     }
 
+    /**
+     * 图形EasyAdd录点时，短按录点，长按打开完成/取消面板。
+     */
+    private static void handleEasyAddVisualRecordHoldProgress(MinecraftClient client) {
+        EasyAddManager manager = EasyAddManager.getInstance();
+        if (!manager.isVisualMode()
+                || manager.getCurrentState() != EasyAddManager.EasyAddState.RECORDING_POINTS) {
+            resetEasyAddVisualRecordHoldState();
+            return;
+        }
+
+        if (recordKeyBinding.isPressed()) {
+            easyAddVisualRecordHoldTicks++;
+            if (!easyAddVisualRecordPanelOpened
+                    && easyAddVisualRecordHoldTicks >= COMMAND_PANEL_HOLD_TICKS) {
+                easyAddVisualRecordPanelOpened = true;
+                waitingForEasyAddVisualRecordRelease = false;
+                suppressRecordKeyUntilRelease();
+                client.setScreen(new areahint.easyadd.EasyAddRecordingActionScreen(null));
+            }
+            return;
+        }
+
+        if (!easyAddVisualRecordPanelOpened) {
+            System.out.println("DEBUG: EasyAdd 图形录点短按记录坐标");
+            manager.recordCurrentPosition();
+        }
+        resetEasyAddVisualRecordHoldState();
+    }
+
     private static void resetCommandPanelHoldState() {
         commandPanelHoldTicks = 0;
         waitingForIdleRelease = false;
         commandPanelOpenedForHold = false;
+    }
+
+    private static void resetEasyAddVisualRecordHoldState() {
+        easyAddVisualRecordHoldTicks = 0;
+        waitingForEasyAddVisualRecordRelease = false;
+        easyAddVisualRecordPanelOpened = false;
+    }
+
+    private static void resetHoldState() {
+        resetCommandPanelHoldState();
+        resetEasyAddVisualRecordHoldState();
     }
 
     private static boolean shouldBlockIdleRecordKey() {
@@ -239,7 +291,7 @@ public class UnifiedKeyHandler {
     public static void suppressRecordKeyUntilRelease() {
         suppressUntilRecordKeyReleased = true;
         drainRecordKeyPresses();
-        resetCommandPanelHoldState();
+        resetHoldState();
     }
 
     /**
