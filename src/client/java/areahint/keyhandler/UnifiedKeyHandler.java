@@ -7,7 +7,6 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
-import areahint.description.DescriptionClientNetworking;
 import areahint.easyadd.EasyAddManager;
 import areahint.expandarea.ExpandAreaManager;
 import areahint.shrinkarea.ShrinkAreaManager;
@@ -214,7 +213,7 @@ public class UnifiedKeyHandler {
 
         if (!commandPanelOpenedForHold) {
             System.out.println("DEBUG: 没有模块处理记录键，查询当前域名描述");
-            DescriptionClientNetworking.sendCurrentAreaQuery();
+            areahint.description.DescriptionKeyHandler.queryCurrentDescription();
         }
         resetCommandPanelHoldState();
     }

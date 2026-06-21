@@ -63,7 +63,7 @@ public final class DescriptionKeyHandler {
                         skipNextQueryKeyPress = false;
                         drainQueryKeyPresses();
                     }
-                    case QUERY -> handleQueryKey();
+                    case QUERY -> queryCurrentDescription();
                     case NONE -> {
                     }
                 }
@@ -130,7 +130,7 @@ public final class DescriptionKeyHandler {
             || (client != null && client.currentScreen != null);
     }
 
-    private static void handleQueryKey() {
+    public static void queryCurrentDescription() {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null) {
             return;
@@ -148,6 +148,7 @@ public final class DescriptionKeyHandler {
             }
         }
         if (area != null && area.getName() != null) {
+            // 绑定键与独立查询键共用客户端当前域名判断，避免误回退到维度域名描述。
             DescriptionClientNetworking.sendQuery("area", dimensionType, area.getName());
         } else {
             DescriptionClientNetworking.sendQuery("dimension", dimensionType, client.world.getRegistryKey().getValue().toString());

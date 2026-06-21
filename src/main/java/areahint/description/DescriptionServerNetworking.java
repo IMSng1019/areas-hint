@@ -100,10 +100,9 @@ public final class DescriptionServerNetworking {
                 String surfaceName = getSurfaceName(area);
                 Path areaFile = DescriptionFileManager.getAreaDescriptionFile(dimensionType, surfaceName);
                 DescriptionData areaDescription = DescriptionFileManager.readDescription(areaFile);
-                if (hasUsableDescription(areaDescription)) {
-                    sendQueryResponse(player, surfaceName, areaDescription);
-                    return;
-                }
+                // 玩家位于普通域名内时只查询该域名，描述为空也不再回退到维度域名描述。
+                sendQueryResponse(player, surfaceName, areaDescription);
+                return;
             }
 
             String dimensionId = getPlayerDimensionId(player);
