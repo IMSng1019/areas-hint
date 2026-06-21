@@ -1,105 +1,44 @@
 package areahint.commandui;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.text.Text;
 
-import java.util.List;
-
 /**
- * 指令可视化主面板。
+ * 指令可视化主面板，只保留入口按钮，完整指令列表放在命令面板中。
  */
 public class CommandPanelScreen extends CommandUiScreen {
-    private CommandListWidget list;
-
     public CommandPanelScreen() {
         super("commandui.title", null);
     }
 
     @Override
     protected void init() {
-        this.list = new CommandListWidget(this.client, this.width, this.height, 32, this.height - 32);
-        this.addDrawableChild(this.list);
-        for (CommandVisualHandler handler : CommandVisualRegistry.getHandlers()) {
-            this.list.addCommand(handler);
-        }
+        int buttonWidth = Math.min(180, this.width - 40);
+        int x = (this.width - buttonWidth) / 2;
+        int startY = Math.max(38, this.height / 2 - 58);
+        int gap = 24;
 
-        int y = this.height - FOOTER_Y_OFFSET;
-        int buttonWidth = 78;
-        int totalWidth = buttonWidth * 3 + 8;
-        int x = (this.width - totalWidth) / 2;
-        this.addDrawableChild(ButtonWidget.builder(Text.literal(t("commandui.button.help")),
-            button -> MinecraftClient.getInstance().setScreen(new HelpCommandScreen(this)))
-            .dimensions(x, y, buttonWidth, BUTTON_HEIGHT).build());
+        addEntryButton(x, startY, buttonWidth, "commandui.button.boundviz", "boundviz");
+        this.addDrawableChild(ButtonWidget.builder(Text.literal(t("commandui.button.commands")),
+            button -> MinecraftClient.getInstance().setScreen(new CommandListScreen(this)))
+            .dimensions(x, startY + gap, buttonWidth, BUTTON_HEIGHT).build());
+        addEntryButton(x, startY + gap * 2, buttonWidth, "commandui.button.language", "language");
         this.addDrawableChild(ButtonWidget.builder(Text.literal(t("commandui.button.settings")),
             button -> AreasHintSettingsBridge.open(this))
-            .dimensions(x + buttonWidth + 4, y, buttonWidth, BUTTON_HEIGHT).build());
-        this.addDrawableChild(ButtonWidget.builder(Text.literal(t("commandui.button.close")),
-            button -> closeToGameFromBoundKey())
-            .dimensions(x + (buttonWidth + 4) * 2, y, buttonWidth, BUTTON_HEIGHT).build());
+            .dimensions(x, startY + gap * 3, buttonWidth, BUTTON_HEIGHT).build());
+        addEntryButton(x, startY + gap * 4, buttonWidth, "commandui.button.help", "help");
     }
 
-    private class CommandListWidget extends ElementListWidget<CommandListWidget.Entry> {
-        CommandListWidget(MinecraftClient client, int width, int height, int top, int bottom) {
-            super(client, width, bottom - top, top, 32);
-            this.setRenderBackground(false);
-        }
+    private void addEntryButton(int x, int y, int width, String textKey, String commandId) {
+        this.addDrawableChild(ButtonWidget.builder(Text.literal(t(textKey)), button -> openHandler(commandId))
+            .dimensions(x, y, width, BUTTON_HEIGHT).build());
+    }
 
-        void addCommand(CommandVisualHandler handler) {
-            this.addEntry(new Entry(handler));
-        }
-
-        @Override
-        public int getRowWidth() {
-            return Math.min(520, CommandPanelScreen.this.width - 36);
-        }
-
-        private class Entry extends ElementListWidget.Entry<Entry> {
-            private final CommandVisualHandler handler;
-
-            private Entry(CommandVisualHandler handler) {
-                this.handler = handler;
-            }
-
-            @Override
-            public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight,
-                               int mouseX, int mouseY, boolean hovered, float tickDelta) {
-                int markerColor = handler.hasVisualFlow() ? 0x55FF55 : 0xAAAAAA;
-                String marker = handler.hasVisualFlow() ? t("commandui.marker.visual") : t("commandui.marker.command");
-                context.drawTextWithShadow(CommandPanelScreen.this.textRenderer, Text.literal(marker), x + 4, y + 5, markerColor);
-                int textX = x + 64;
-                CommandPanelScreen.this.drawTrimmed(context, handler.displayName(), textX, y + 5, entryWidth - 72, 0xFFFFFF);
-                Text detail = hovered ? handler.description() : Text.literal(displayCommand(handler));
-                CommandPanelScreen.this.drawTrimmed(context, detail, textX, y + 18, entryWidth - 72, hovered ? 0xFFFFAA : 0xAAAAAA);
-            }
-
-            @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (button == 0) {
-                    handler.open(CommandPanelScreen.this);
-                    return true;
-                }
-                return false;
-            }
-
-            @Override
-            public List<? extends Element> children() {
-                return List.of();
-            }
-
-            @Override
-            public List<? extends Selectable> selectableChildren() {
-                return List.of();
-            }
-
-            private String displayCommand(CommandVisualHandler handler) {
-                String command = handler.defaultCommand();
-                return command == null || command.isBlank() ? t("commandui.command.settings.name") : "/" + command;
-            }
+    private void openHandler(String commandId) {
+        CommandVisualHandler handler = CommandVisualRegistry.getById(commandId);
+        if (handler != null) {
+            handler.open(this);
         }
     }
 }
