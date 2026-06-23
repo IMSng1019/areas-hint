@@ -56,6 +56,23 @@ public class DeleteHintManager {
     }
 
     /**
+     * 启动图形选择流程，只初始化状态并返回可修改域名。
+     */
+    public List<AreaData> beginVisualSelection() {
+        if (client.player == null) {
+            return List.of();
+        }
+
+        isActive = true;
+        List<AreaData> modifiableAreas = getModifiableAreas();
+        if (modifiableAreas.isEmpty()) {
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area.modify")), false);
+            isActive = false;
+        }
+        return modifiableAreas;
+    }
+
+    /**
      * 选择域名
      */
     public void selectArea(String areaName) {
@@ -85,6 +102,39 @@ public class DeleteHintManager {
 
         client.player.sendMessage(Text.of(I18nManager.translate("addhint.prompt.area") + AreaDataConverter.getDisplayName(area)), false);
         showVertexButtons();
+    }
+
+    /**
+     * 图形流程选择域名，不再输出旧聊天按钮。
+     */
+    public boolean selectAreaForVisual(String areaName) {
+        if (!isActive || client.player == null) {
+            return false;
+        }
+
+        String cleanedName = areaName.trim();
+        if (cleanedName.startsWith("\"") && cleanedName.endsWith("\"") && cleanedName.length() > 1) {
+            cleanedName = cleanedName.substring(1, cleanedName.length() - 1);
+        }
+
+        List<AreaData> modifiableAreas = getModifiableAreas();
+        AreaData area = null;
+        for (AreaData a : modifiableAreas) {
+            if (a.getName().equals(cleanedName)) {
+                area = a;
+                break;
+            }
+        }
+
+        if (area == null) {
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area") + cleanedName + I18nManager.translate("addhint.message.permission")), false);
+            return false;
+        }
+
+        selectedArea = area;
+        markedIndices.clear();
+        client.player.sendMessage(Text.of(I18nManager.translate("addhint.prompt.area") + AreaDataConverter.getDisplayName(area)), false);
+        return true;
     }
 
     /**
@@ -350,4 +400,6 @@ public class DeleteHintManager {
 
     // Getters
     public boolean isActive() { return isActive; }
+    public AreaData getSelectedArea() { return selectedArea; }
+    public Set<Integer> getMarkedIndices() { return markedIndices; }
 }

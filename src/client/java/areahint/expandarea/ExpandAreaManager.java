@@ -70,6 +70,24 @@ public class ExpandAreaManager {
         ui.showAreaSelection(modifiableAreas);
         System.out.println("DEBUG: startExpandArea() 执行完成");
     }
+
+    /**
+     * 启动图形选择流程，只初始化状态并返回可扩展域名。
+     */
+    public List<AreaData> beginVisualSelection() {
+        if (client.player == null) {
+            return List.of();
+        }
+
+        isActive = true;
+        List<AreaData> modifiableAreas = getModifiableAreas();
+        if (modifiableAreas.isEmpty()) {
+            sendMessage(I18nManager.translate("expandarea.error.area.expand_4"), Formatting.RED);
+            sendMessage(I18nManager.translate("expandarea.message.area.expand_2"), Formatting.GRAY);
+            isActive = false;
+        }
+        return modifiableAreas;
+    }
     
     /**
      * 检查玩家是否有权限修改指定域名
@@ -1550,4 +1568,4 @@ public class ExpandAreaManager {
     // Getter方法
     public AreaData getSelectedArea() { return selectedArea; }
     public List<Double[]> getNewVertices() { return newVertices; }
-} 
+}

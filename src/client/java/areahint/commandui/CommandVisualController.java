@@ -1,0 +1,1150 @@
+package areahint.commandui;
+
+import areahint.AreashintClient;
+import areahint.config.ClientConfig;
+import areahint.data.AreaData;
+import areahint.data.ConfigData;
+import areahint.delete.DeleteNetworking;
+import areahint.i18n.I18nManager;
+import areahint.network.ClientDimNameNetworking;
+import areahint.network.ClientNetworking;
+import areahint.network.Packets;
+import areahint.rename.RenameNetworking;
+import areahint.signature.SignatureClientNetworking;
+import areahint.util.ColorUtil;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * 指令可视化流程控制器，只负责把图形输入转换为现有指令或网络请求。
+ */
+public final class CommandVisualController {
+    private static String visualRecordCommandId;
+
+    private CommandVisualController() {
+    }
+
+    public static void beginVisualRecordMode(String id) {
+        visualRecordCommandId = id;
+    }
+
+    public static boolean isVisualRecordMode(String id) {
+        return id != null && id.equals(visualRecordCommandId);
+    }
+
+    public static void clearVisualRecordMode() {
+        visualRecordCommandId = null;
+    }
+
+    public static void openConfirmCommand(Screen parent, String id, String command) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client != null) {
+            client.setScreen(new WizardConfirmScreen(parent,
+                titleKey(id),
+                I18nManager.translate("commandui.common.confirm.prompt"),
+                List.of("/" + command),
+                "commandui.button.execute",
+                () -> CommandUiActions.runCommand(command),
+                null));
+        }
+    }
+
+    public static void openFrequency(Screen parent) {
+        openSingleField(parent, "frequency",
+            "commandui.frequency.label",
+            "commandui.frequency.placeholder",
+            ConfigData.formatFrequency(ClientConfig.getFrequency()),
+            "commandui.frequency.prompt",
+            I18nManager.translate("commandui.frequency.detail", ConfigData.formatFrequency(ClientConfig.getFrequency())),
+            null,
+            8,
+            value -> {
+                String input = value.trim();
+                try {
+                    double frequency = Double.parseDouble(input);
+                    if (!Double.isFinite(frequency) || frequency < 1.0 || frequency > 60.0) {
+                        openFrequencyWithError(parent, "commandui.frequency.error.range");
+                        return;
+                    }
+                    CommandUiActions.runCommand("areahint frequency " + ConfigData.formatFrequency(frequency));
+                    closeToGame();
+                } catch (NumberFormatException e) {
+                    openFrequencyWithError(parent, "commandui.frequency.error.number");
+                }
+            });
+    }
+
+    private static void openFrequencyWithError(Screen parent, String errorKey) {
+        openSingleField(parent, "frequency",
+            "commandui.frequency.label",
+            "commandui.frequency.placeholder",
+            ConfigData.formatFrequency(ClientConfig.getFrequency()),
+            "commandui.frequency.prompt",
+            I18nManager.translate("commandui.frequency.detail", ConfigData.formatFrequency(ClientConfig.getFrequency())),
+            errorKey,
+            8,
+            value -> {
+                String input = value.trim();
+                try {
+                    double frequency = Double.parseDouble(input);
+                    if (!Double.isFinite(frequency) || frequency < 1.0 || frequency > 60.0) {
+                        openFrequencyWithError(parent, "commandui.frequency.error.range");
+                        return;
+                    }
+                    CommandUiActions.runCommand("areahint frequency " + ConfigData.formatFrequency(frequency));
+                    closeToGame();
+                } catch (NumberFormatException e) {
+                    openFrequencyWithError(parent, "commandui.frequency.error.number");
+                }
+            });
+    }
+
+    public static void openHintRender(Screen parent) {
+        List<WizardOptionScreen.OptionSpec> options = List.of(
+            option("commandui.hintrender.cpu", () -> runAndClose("areahint hintrender CPU")),
+            option("commandui.hintrender.opengl", () -> runAndClose("areahint hintrender OpenGL")),
+            option("commandui.hintrender.vulkan", () -> runAndClose("areahint hintrender Vulkan")),
+            option("commandui.common.current", () -> runAndClose("areahint hintrender"))
+        );
+        setScreen(new WizardOptionScreen(parent, titleKey("hintrender"),
+            "commandui.hintrender.prompt",
+            I18nManager.translate("commandui.hintrender.detail", ClientConfig.getHintRender()),
+            options,
+            null));
+    }
+
+    public static void openTitleStyle(Screen parent) {
+        List<WizardOptionScreen.OptionSpec> options = List.of(
+            option("commandui.titlestyle.full", () -> startThenRun("areahint titlestyle", "areahint titlestyle select full")),
+            option("commandui.titlestyle.simple", () -> startThenRun("areahint titlestyle", "areahint titlestyle select simple")),
+            option("commandui.titlestyle.mixed", () -> startThenRun("areahint titlestyle", "areahint titlestyle select mixed"))
+        );
+        setScreen(new WizardOptionScreen(parent, titleKey("titlestyle"),
+            "commandui.titlestyle.prompt",
+            I18nManager.translate("commandui.titlestyle.detail", ClientConfig.getTitleStyle()),
+            options,
+            () -> CommandUiActions.runCommand("areahint titlestyle cancel")));
+    }
+
+    public static void openTitleSize(Screen parent) {
+        List<WizardOptionScreen.OptionSpec> options = sizePresetOptions(size ->
+            startThenRun("areahint titlesize", "areahint titlesize select " + size));
+        setScreen(new WizardOptionScreen(parent, titleKey("titlesize"),
+            "commandui.titlesize.prompt",
+            I18nManager.translate("commandui.titlesize.detail", ClientConfig.getTitleSize()),
+            options,
+            () -> CommandUiActions.runCommand("areahint titlesize cancel")));
+    }
+
+    public static void openDebug(Screen parent) {
+        List<WizardOptionScreen.OptionSpec> options = List.of(
+            option("commandui.debug.toggle", () -> runAndClose("areahint debug")),
+            option("commandui.debug.on", () -> runAndClose("areahint debug on")),
+            option("commandui.debug.off", () -> runAndClose("areahint debug off")),
+            option("commandui.debug.status", () -> runAndClose("areahint debug status"))
+        );
+        setScreen(new WizardOptionScreen(parent, titleKey("debug"),
+            "commandui.debug.prompt",
+            "commandui.debug.detail",
+            options,
+            null));
+    }
+
+    public static void openAddJson(Screen parent) {
+        setScreen(new WizardLongTextInputScreen(parent, titleKey("add"),
+            "commandui.add.prompt",
+            "commandui.add.detail",
+            "",
+            null,
+            text -> {
+                String json = text == null ? "" : text.trim();
+                if (json.isEmpty()) {
+                    openAddJsonWithError(parent);
+                    return;
+                }
+                CommandUiActions.runCommand("areahint add " + json);
+            },
+            null));
+    }
+
+    private static void openAddJsonWithError(Screen parent) {
+        setScreen(new WizardLongTextInputScreen(parent, titleKey("add"),
+            "commandui.add.prompt",
+            "commandui.add.detail",
+            "",
+            "commandui.add.error.empty",
+            text -> {
+                String json = text == null ? "" : text.trim();
+                if (json.isEmpty()) {
+                    openAddJsonWithError(parent);
+                    return;
+                }
+                CommandUiActions.runCommand("areahint add " + json);
+            },
+            null));
+    }
+
+    public static void openCheck(Screen parent) {
+        Map<String, List<AreaData>> unionGroups = buildUnionGroups();
+        List<WizardOptionScreen.OptionSpec> options = new ArrayList<>();
+        options.add(option("commandui.check.all", () -> runAndClose("areahint check")));
+        options.add(option("commandui.check.input", () -> openCheckInput(parent, null)));
+        if (!unionGroups.isEmpty()) {
+            setScreen(new WizardSelectionListScreen<>(parent, titleKey("check"),
+                "commandui.check.prompt",
+                unionItems(unionGroups),
+                unionName -> runAndClose("areahint check " + CommandUiData.quote(unionName)),
+                null));
+            return;
+        }
+        setScreen(new WizardOptionScreen(parent, titleKey("check"),
+            "commandui.check.prompt",
+            "commandui.check.detail",
+            options,
+            null));
+    }
+
+    private static void openCheckInput(Screen parent, String errorKey) {
+        openSingleField(parent, "check",
+            "commandui.check.label",
+            "commandui.check.placeholder",
+            "",
+            "commandui.check.input.prompt",
+            "commandui.check.input.detail",
+            errorKey,
+            120,
+            value -> {
+                String unionName = value.trim();
+                if (unionName.isEmpty()) {
+                    openCheckInput(parent, "commandui.check.error.empty");
+                    return;
+                }
+                runAndClose("areahint check " + CommandUiData.quote(unionName));
+            });
+    }
+
+    public static void openServerLanguage(Screen parent) {
+        List<WizardSelectionListScreen.SelectionItem<String>> items = new ArrayList<>();
+        for (String language : List.of("zh_cn", "zh_tw", "en_us", "en_pt", "ja_jp", "ko_kr", "fr_fr", "de_de", "es_es", "ru_ru", "zh_cn_neko")) {
+            items.add(new WizardSelectionListScreen.SelectionItem<>(language, language,
+                I18nManager.translate("commandui.serverlanguage.item.detail", language)));
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("serverlanguage"),
+            "commandui.serverlanguage.prompt",
+            items,
+            language -> openConfirmSend(parent, "serverlanguage",
+                "areahint serverlanguage " + language,
+                List.of(I18nManager.translate("commandui.serverlanguage.confirm", language))),
+            null));
+    }
+
+    public static void openTeleport(Screen parent, String mode) {
+        List<AreaData> areas = CommandUiData.validAreas(CommandUiData.loadCurrentDimensionAreas());
+        if (areas.isEmpty()) {
+            openInfo(parent, mode, "commandui.teleport.empty", null);
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey(mode),
+            I18nManager.translate("commandui.teleport.prompt", mode.toUpperCase(Locale.ROOT)),
+            CommandUiData.areaItems(areas),
+            area -> openConfirmAction(parent, mode,
+                I18nManager.translate("commandui.teleport.confirm", mode.toUpperCase(Locale.ROOT), area.getName()),
+                List.of(I18nManager.translate("commandui.teleport.format", ClientConfig.getTeleportFormat())),
+                () -> {
+                    closeToGame();
+                    ClientNetworking.sendTeleportRequest(mode, area.getName(), ClientConfig.getTeleportFormat());
+                }),
+            null));
+    }
+
+    public static void openSetTp(Screen parent, String errorKey) {
+        openSingleField(parent, "settp",
+            "commandui.settp.label",
+            "commandui.settp.placeholder",
+            ClientConfig.getTeleportFormat(),
+            "commandui.settp.prompt",
+            I18nManager.translate("commandui.settp.detail", ClientConfig.getTeleportFormat()),
+            errorKey,
+            32,
+            value -> {
+                String format = value.trim();
+                if (!ConfigData.isValidTeleportFormat(format)) {
+                    openSetTp(parent, "commandui.settp.error.invalid");
+                    return;
+                }
+                runAndClose("areahint settp " + format);
+            });
+    }
+
+    public static void openFirstDimName(Screen parent) {
+        openSingleField(parent, "firstdimname",
+            "commandui.firstdimname.label",
+            "commandui.firstdimname.placeholder",
+            "",
+            "commandui.firstdimname.prompt",
+            "commandui.firstdimname.detail",
+            null,
+            50,
+            value -> {
+                String name = value.trim();
+                if (name.isEmpty()) {
+                    openFirstDimNameWithError(parent);
+                    return;
+                }
+                runAndClose("areahint firstdimname " + CommandUiData.quote(name));
+            });
+    }
+
+    private static void openFirstDimNameWithError(Screen parent) {
+        openSingleField(parent, "firstdimname",
+            "commandui.firstdimname.label",
+            "commandui.firstdimname.placeholder",
+            "",
+            "commandui.firstdimname.prompt",
+            "commandui.firstdimname.detail",
+            "commandui.common.error.empty",
+            50,
+            value -> {
+                String name = value.trim();
+                if (name.isEmpty()) {
+                    openFirstDimNameWithError(parent);
+                    return;
+                }
+                runAndClose("areahint firstdimname " + CommandUiData.quote(name));
+            });
+    }
+
+    public static void openAreaSelectThenCommand(Screen parent, String id, String command, String cancelCommand) {
+        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
+        if (areas.isEmpty()) {
+            openInfo(parent, id, "commandui.common.no_areas", cancelCommand);
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey(id),
+            promptKey(id),
+            CommandUiData.areaItems(areas),
+            area -> {
+                closeToGame();
+                CommandUiActions.runCommand(command + " " + CommandUiData.quote(area.getName()));
+            },
+            cancelCommand == null ? null : () -> CommandUiActions.runCommand(cancelCommand)));
+    }
+
+    public static void openRecordCommand(Screen parent, String id, String startCommand, String cancelCommand) {
+        if ("addhint".equals(id)) {
+            openAddHintVisual(parent);
+        } else if ("deletehint".equals(id)) {
+            openDeleteHintVisual(parent);
+        } else if ("expandarea".equals(id)) {
+            openExpandAreaVisual(parent);
+        } else if ("shrinkarea".equals(id)) {
+            openShrinkAreaVisual(parent);
+        } else if ("dividearea".equals(id)) {
+            openDivideAreaVisual(parent);
+        } else {
+            setScreen(new WizardConfirmScreen(parent,
+                titleKey(id),
+                I18nManager.translate("commandui.record.prompt"),
+                List.of(I18nManager.translate("commandui.record.detail")),
+                "commandui.button.start",
+                () -> CommandUiActions.runCommand(startCommand),
+                () -> {
+                    if (cancelCommand != null) {
+                        CommandUiActions.runCommand(cancelCommand);
+                    }
+                }));
+        }
+    }
+
+    private static void openAddHintVisual(Screen parent) {
+        areahint.addhint.AddHintManager manager = areahint.addhint.AddHintManager.getInstance();
+        List<AreaData> areas = manager.beginVisualSelection();
+        if (areas.isEmpty()) {
+            openInfo(parent, "addhint", "commandui.common.no_areas", null);
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("addhint"),
+            "commandui.addhint.prompt",
+            CommandUiData.areaItems(areas),
+            area -> {
+                closeToGame();
+                beginVisualRecordMode("addhint");
+                manager.selectArea(area.getName());
+            },
+            () -> {
+                manager.cancel();
+                clearVisualRecordMode();
+            }));
+    }
+
+    private static void openDeleteHintVisual(Screen parent) {
+        areahint.deletehint.DeleteHintManager manager = areahint.deletehint.DeleteHintManager.getInstance();
+        List<AreaData> areas = manager.beginVisualSelection();
+        if (areas.isEmpty()) {
+            openInfo(parent, "deletehint", "commandui.common.no_areas", null);
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("deletehint"),
+            "commandui.deletehint.prompt",
+            CommandUiData.areaItems(areas),
+            area -> {
+                if (manager.selectAreaForVisual(area.getName())) {
+                    setScreen(new DeleteHintVertexScreen(parent, manager));
+                }
+            },
+            manager::cancel));
+    }
+
+    private static void openExpandAreaVisual(Screen parent) {
+        areahint.expandarea.ExpandAreaManager manager = areahint.expandarea.ExpandAreaManager.getInstance();
+        List<AreaData> areas = manager.beginVisualSelection();
+        if (areas.isEmpty()) {
+            openInfo(parent, "expandarea", "commandui.common.no_areas", null);
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("expandarea"),
+            "commandui.expandarea.prompt",
+            CommandUiData.areaItems(areas),
+            area -> {
+                closeToGame();
+                beginVisualRecordMode("expandarea");
+                manager.selectAreaByName(area.getName());
+            },
+            () -> {
+                manager.cancel();
+                clearVisualRecordMode();
+            }));
+    }
+
+    private static void openShrinkAreaVisual(Screen parent) {
+        areahint.shrinkarea.ShrinkAreaManager manager = areahint.shrinkarea.ShrinkAreaManager.getInstance();
+        List<AreaData> areas = manager.beginVisualSelection();
+        if (areas.isEmpty()) {
+            openInfo(parent, "shrinkarea", "commandui.common.no_areas", null);
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("shrinkarea"),
+            "commandui.shrinkarea.prompt",
+            CommandUiData.areaItems(areas),
+            area -> {
+                closeToGame();
+                beginVisualRecordMode("shrinkarea");
+                manager.selectAreaByName(area.getName());
+            },
+            () -> {
+                manager.stop();
+                clearVisualRecordMode();
+            }));
+    }
+
+    private static void openDivideAreaVisual(Screen parent) {
+        areahint.dividearea.DivideAreaManager manager = areahint.dividearea.DivideAreaManager.getInstance();
+        List<AreaData> areas = manager.beginVisualSelection();
+        if (areas.isEmpty()) {
+            openInfo(parent, "dividearea", "commandui.common.no_areas", null);
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("dividearea"),
+            "commandui.dividearea.prompt",
+            CommandUiData.areaItems(areas),
+            area -> {
+                closeToGame();
+                beginVisualRecordMode("dividearea");
+                manager.selectAreaByName(area.getName());
+            },
+            () -> {
+                manager.cancel();
+                clearVisualRecordMode();
+            }));
+    }
+
+    public static void openDivideAreaConfig(Screen parent) {
+        areahint.dividearea.DivideAreaManager manager = areahint.dividearea.DivideAreaManager.getInstance();
+        switch (manager.getState()) {
+            case AREA1_NAME -> openDivideAreaName(parent, manager, 1, null);
+            case AREA1_SURFACE_NAME -> openDivideAreaSurface(parent, manager, 1);
+            case AREA1_LEVEL -> openDivideAreaLevel(parent, manager, 1);
+            case AREA1_BASE -> openDivideAreaBase(parent, manager, 1);
+            case AREA1_COLOR -> openDivideAreaColor(parent, manager, 1);
+            case AREA2_NAME -> openDivideAreaName(parent, manager, 2, null);
+            case AREA2_SURFACE_NAME -> openDivideAreaSurface(parent, manager, 2);
+            case AREA2_LEVEL -> openDivideAreaLevel(parent, manager, 2);
+            case AREA2_BASE -> openDivideAreaBase(parent, manager, 2);
+            case AREA2_COLOR -> openDivideAreaColor(parent, manager, 2);
+            default -> {
+                clearVisualRecordMode();
+                closeToGame();
+            }
+        }
+    }
+
+    private static void openDivideAreaName(Screen parent, areahint.dividearea.DivideAreaManager manager,
+                                           int areaNumber, String errorKey) {
+        openSingleField(parent, "dividearea",
+            "commandui.dividearea.name.label",
+            "commandui.dividearea.name.placeholder",
+            "",
+            I18nManager.translate("commandui.dividearea.name.prompt", areaNumber),
+            "commandui.dividearea.name.detail",
+            errorKey,
+            80,
+            value -> {
+                String name = value.trim();
+                if (name.isEmpty()) {
+                    openDivideAreaName(parent, manager, areaNumber, "commandui.common.error.empty");
+                    return;
+                }
+                if (!manager.handleNameInputForVisual(name)) {
+                    openDivideAreaName(parent, manager, areaNumber, "commandui.dividearea.name.error.duplicate");
+                    return;
+                }
+                openDivideAreaSurface(parent, manager, areaNumber);
+            },
+            manager::cancel);
+    }
+
+    private static void openDivideAreaSurface(Screen parent, areahint.dividearea.DivideAreaManager manager,
+                                              int areaNumber) {
+        openSingleField(parent, "dividearea",
+            "commandui.dividearea.surface.label",
+            "commandui.dividearea.surface.placeholder",
+            "",
+            I18nManager.translate("commandui.dividearea.surface.prompt", areaNumber),
+            "commandui.dividearea.surface.detail",
+            null,
+            80,
+            value -> {
+                manager.handleSurfaceInput(value);
+                openDivideAreaLevel(parent, manager, areaNumber);
+            },
+            manager::cancel);
+    }
+
+    private static void openDivideAreaLevel(Screen parent, areahint.dividearea.DivideAreaManager manager,
+                                            int areaNumber) {
+        List<WizardOptionScreen.OptionSpec> options = List.of(
+            option("commandui.easyadd.level.1", () -> {
+                manager.handleLevelInputForVisual(1);
+                openDivideAreaConfig(parent);
+            }),
+            option("commandui.easyadd.level.2", () -> {
+                manager.handleLevelInputForVisual(2);
+                openDivideAreaConfig(parent);
+            }),
+            option("commandui.easyadd.level.3", () -> {
+                manager.handleLevelInputForVisual(3);
+                openDivideAreaConfig(parent);
+            })
+        );
+        setScreen(new WizardOptionScreen(parent, titleKey("dividearea"),
+            I18nManager.translate("commandui.dividearea.level.prompt", areaNumber),
+            "commandui.dividearea.level.detail",
+            options,
+            manager::cancel));
+    }
+
+    private static void openDivideAreaBase(Screen parent, areahint.dividearea.DivideAreaManager manager,
+                                           int areaNumber) {
+        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
+        List<WizardSelectionListScreen.SelectionItem<String>> items = new ArrayList<>();
+        items.add(new WizardSelectionListScreen.SelectionItem<>("none",
+            I18nManager.translate("commandui.common.none"),
+            I18nManager.translate("commandui.dividearea.base.none.detail")));
+        int targetLevel = manager.getCurrentBaseTargetLevel();
+        for (AreaData area : areas) {
+            if (targetLevel > 0 && area.getLevel() != targetLevel) {
+                continue;
+            }
+            items.add(new WizardSelectionListScreen.SelectionItem<>(area.getName(),
+                areahint.util.AreaDataConverter.getDisplayName(area),
+                I18nManager.translate("commandui.common.area.detail",
+                    area.getName(), area.getLevel(), area.getColor(), area.getSignature())));
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("dividearea"),
+            I18nManager.translate("commandui.dividearea.base.prompt", areaNumber),
+            items,
+            baseName -> {
+                manager.handleBaseInputForVisual(baseName);
+                openDivideAreaConfig(parent);
+            },
+            manager::cancel));
+    }
+
+    private static void openDivideAreaColor(Screen parent, areahint.dividearea.DivideAreaManager manager,
+                                            int areaNumber) {
+        setScreen(new WizardOptionScreen(parent, titleKey("dividearea"),
+            I18nManager.translate("commandui.dividearea.color.prompt", areaNumber),
+            "commandui.color.detail",
+            CommandUiData.colorOptions(color -> {
+                manager.handleColorInputForVisual(color);
+                openDivideAreaConfig(parent);
+            }, () -> openDivideAreaCustomColor(parent, manager, areaNumber, null)),
+            manager::cancel));
+    }
+
+    private static void openDivideAreaCustomColor(Screen parent, areahint.dividearea.DivideAreaManager manager,
+                                                  int areaNumber, String errorKey) {
+        openSingleField(parent, "dividearea",
+            "commandui.color.custom.label",
+            "commandui.color.custom.placeholder",
+            "#FFFFFF",
+            "commandui.color.custom.prompt",
+            "commandui.color.custom.detail",
+            errorKey,
+            16,
+            value -> {
+                String color = normalizeStrictColor(value);
+                if (color == null) {
+                    openDivideAreaCustomColor(parent, manager, areaNumber, "commandui.color.error.invalid");
+                    return;
+                }
+                manager.handleColorInputForVisual(color);
+                openDivideAreaConfig(parent);
+            },
+            manager::cancel);
+    }
+
+    public static void openDelete(Screen parent) {
+        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
+        if (areas.isEmpty()) {
+            openInfo(parent, "delete", "commandui.common.no_areas", "areahint delete cancel");
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("delete"),
+            "commandui.delete.prompt",
+            CommandUiData.areaItems(areas),
+            area -> openConfirmAction(parent, "delete",
+                I18nManager.translate("commandui.delete.confirm", area.getName()),
+                areaDetails(area),
+                () -> {
+                    String dimension = currentDimensionType();
+                    if (dimension == null) {
+                        sendLocalError("commandui.common.error.dimension");
+                        return;
+                    }
+                    closeToGame();
+                    DeleteNetworking.sendDeleteRequestToServer(area.getName(), dimension);
+                }),
+            () -> CommandUiActions.runCommand("areahint delete cancel")));
+    }
+
+    public static void openRename(Screen parent) {
+        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
+        if (areas.isEmpty()) {
+            openInfo(parent, "rename", "commandui.common.no_areas", "areahint rename cancel");
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("rename"),
+            "commandui.rename.prompt",
+            CommandUiData.areaItems(areas),
+            area -> openRenameName(parent, area, null),
+            () -> CommandUiActions.runCommand("areahint rename cancel")));
+    }
+
+    private static void openRenameName(Screen parent, AreaData area, String errorKey) {
+        openSingleField(parent, "rename",
+            "commandui.rename.name.label",
+            "commandui.rename.name.placeholder",
+            area.getName(),
+            "commandui.rename.name.prompt",
+            I18nManager.translate("commandui.rename.name.detail", area.getName()),
+            errorKey,
+            80,
+            value -> {
+                String newName = value.trim();
+                if (newName.isEmpty()) {
+                    openRenameName(parent, area, "commandui.common.error.empty");
+                    return;
+                }
+                openRenameSurface(parent, area, newName);
+            },
+            () -> CommandUiActions.runCommand("areahint rename cancel"));
+    }
+
+    private static void openRenameSurface(Screen parent, AreaData area, String newName) {
+        openSingleField(parent, "rename",
+            "commandui.rename.surface.label",
+            "commandui.rename.surface.placeholder",
+            area.getSurfacename() == null ? "" : area.getSurfacename(),
+            "commandui.rename.surface.prompt",
+            "commandui.rename.surface.detail",
+            null,
+            80,
+            surface -> openConfirmAction(parent, "rename",
+                I18nManager.translate("commandui.rename.confirm", area.getName(), newName),
+                List.of(I18nManager.translate("commandui.rename.confirm.surface", surface == null || surface.trim().isEmpty()
+                    ? I18nManager.translate("commandui.common.none")
+                    : surface.trim())),
+                () -> {
+                    String dimension = currentDimensionId();
+                    if (dimension == null) {
+                        sendLocalError("commandui.common.error.dimension");
+                        return;
+                    }
+                    closeToGame();
+                    RenameNetworking.sendRenameRequest(area.getName(), newName, blankToNull(surface), dimension);
+                }),
+            () -> CommandUiActions.runCommand("areahint rename cancel"));
+    }
+
+    public static void openRecolor(Screen parent) {
+        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
+        if (areas.isEmpty()) {
+            openInfo(parent, "recolor", "commandui.common.no_areas", "areahint recolor cancel");
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("recolor"),
+            "commandui.recolor.prompt",
+            CommandUiData.areaItems(areas),
+            area -> openColorSelection(parent, "recolor",
+                color -> openConfirmAction(parent, "recolor",
+                    I18nManager.translate("commandui.recolor.confirm", area.getName(), color),
+                    List.of(I18nManager.translate("commandui.recolor.old", area.getColor())),
+                    () -> {
+                        String dimension = currentDimensionId();
+                        if (dimension == null) {
+                            sendLocalError("commandui.common.error.dimension");
+                            return;
+                        }
+                        closeToGame();
+                        areahint.recolor.RecolorManager.getInstance();
+                        sendRecolor(area.getName(), color, dimension);
+                    })),
+            () -> CommandUiActions.runCommand("areahint recolor cancel")));
+    }
+
+    public static void openSetHigh(Screen parent) {
+        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
+        if (areas.isEmpty()) {
+            openInfo(parent, "sethigh", "commandui.common.no_areas", "areahint sethigh cancel");
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("sethigh"),
+            "commandui.sethigh.prompt",
+            CommandUiData.areaItems(areas),
+            area -> openSetHighMode(parent, area),
+            () -> CommandUiActions.runCommand("areahint sethigh cancel")));
+    }
+
+    private static void openSetHighMode(Screen parent, AreaData area) {
+        List<WizardOptionScreen.OptionSpec> options = List.of(
+            option("commandui.sethigh.unlimited", () -> openConfirmAction(parent, "sethigh",
+                I18nManager.translate("commandui.sethigh.confirm.unlimited", area.getName()),
+                List.of(),
+                () -> {
+                    closeToGame();
+                    ClientNetworking.sendSetHighRequest(area.getName(), false, null, null);
+                })),
+            option("commandui.sethigh.custom", () -> openSetHighCustom(parent, area, null))
+        );
+        setScreen(new WizardOptionScreen(parent, titleKey("sethigh"),
+            "commandui.sethigh.mode.prompt",
+            "commandui.sethigh.mode.detail",
+            options,
+            () -> CommandUiActions.runCommand("areahint sethigh cancel")));
+    }
+
+    private static void openSetHighCustom(Screen parent, AreaData area, String errorKey) {
+        setScreen(new WizardTextInputScreen(parent, titleKey("sethigh"),
+            List.of(
+                new WizardTextInputScreen.FieldSpec("commandui.sethigh.min.label", "commandui.sethigh.min.placeholder", "", 12),
+                new WizardTextInputScreen.FieldSpec("commandui.sethigh.max.label", "commandui.sethigh.max.placeholder", "", 12)
+            ),
+            "commandui.sethigh.custom.prompt",
+            "commandui.sethigh.custom.detail",
+            errorKey,
+            values -> {
+                try {
+                    double min = Double.parseDouble(values.get(0).trim());
+                    double max = Double.parseDouble(values.get(1).trim());
+                    if (max <= min) {
+                        openSetHighCustom(parent, area, "commandui.sethigh.error.order");
+                        return;
+                    }
+                    openConfirmAction(parent, "sethigh",
+                        I18nManager.translate("commandui.sethigh.confirm.custom", area.getName(), min, max),
+                        List.of(),
+                        () -> {
+                            closeToGame();
+                            ClientNetworking.sendSetHighRequest(area.getName(), true, max, min);
+                        });
+                } catch (NumberFormatException e) {
+                    openSetHighCustom(parent, area, "commandui.sethigh.error.number");
+                }
+            },
+            () -> CommandUiActions.runCommand("areahint sethigh cancel")));
+    }
+
+    public static void openSubtitleStart(Screen parent, String id) {
+        if ("replacesubtitlesize".equals(id)) {
+            openSubtitleSize(parent);
+            return;
+        }
+        openConfirmCommand(parent, id, "areahint " + id);
+    }
+
+    private static void openSubtitleSize(Screen parent) {
+        List<WizardOptionScreen.OptionSpec> options = new ArrayList<>();
+        options.add(option("commandui.common.size.auto", () -> runAndClose("areahint replacesubtitlesize select auto")));
+        options.addAll(sizePresetOptions(size -> runAndClose("areahint replacesubtitlesize select " + size)));
+        setScreen(new WizardOptionScreen(parent, titleKey("replacesubtitlesize"),
+            "commandui.subtitle.size.prompt",
+            I18nManager.translate("commandui.subtitle.size.detail", ClientConfig.getSubtitleSize()),
+            options,
+            () -> CommandUiActions.runCommand("areahint replacesubtitlesize cancel")));
+    }
+
+    public static void openDescriptionStart(Screen parent, String id) {
+        openConfirmCommand(parent, id, "areahint " + id);
+    }
+
+    public static void openSignature(Screen parent, String id) {
+        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
+        if (areas.isEmpty()) {
+            openInfo(parent, id, "commandui.common.no_areas", "areahint " + id + " cancel");
+            return;
+        }
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey(id),
+            promptKey(id),
+            CommandUiData.areaItems(areas),
+            area -> openSignaturePlayer(parent, id, area, null),
+            () -> CommandUiActions.runCommand("areahint " + id + " cancel")));
+    }
+
+    private static void openSignaturePlayer(Screen parent, String id, AreaData area, String errorKey) {
+        openSingleField(parent, id,
+            "commandui.signature.player.label",
+            "commandui.signature.player.placeholder",
+            "",
+            "commandui.signature.player.prompt",
+            "commandui.signature.player.detail",
+            errorKey,
+            32,
+            value -> {
+                String playerName = value.trim();
+                if (playerName.isEmpty()) {
+                    openSignaturePlayer(parent, id, area, "commandui.common.error.empty");
+                    return;
+                }
+                List<String> details = new ArrayList<>(areaDetails(area));
+                details.add(I18nManager.translate("commandui.signature.target", playerName));
+                openConfirmAction(parent, id,
+                    I18nManager.translate("commandui.signature.confirm", area.getName()),
+                    details,
+                    () -> {
+                        String dimension = currentDimensionId();
+                        if (dimension == null) {
+                            sendLocalError("commandui.common.error.dimension");
+                            return;
+                        }
+                        closeToGame();
+                        SignatureClientNetworking.sendToServer("addsignature".equals(id) ? "add" : "delete",
+                            area.getName(), dimension, playerName);
+                    });
+            },
+            () -> CommandUiActions.runCommand("areahint " + id + " cancel"));
+    }
+
+    public static void openDimensionalityName(Screen parent) {
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("dimensionalityname"),
+            "commandui.dimensionalityname.prompt",
+            dimensionItems(),
+            dimensionId -> openDimensionalityNameInput(parent, dimensionId, null),
+            () -> CommandUiActions.runCommand("areahint dimensionalityname cancel")));
+    }
+
+    private static void openDimensionalityNameInput(Screen parent, String dimensionId, String errorKey) {
+        openSingleField(parent, "dimensionalityname",
+            "commandui.dimensionalityname.name.label",
+            "commandui.dimensionalityname.name.placeholder",
+            dimensionalName(dimensionId),
+            "commandui.dimensionalityname.name.prompt",
+            I18nManager.translate("commandui.dimensionalityname.name.detail", dimensionId),
+            errorKey,
+            50,
+            value -> {
+                String name = value.trim();
+                if (name.isEmpty()) {
+                    openDimensionalityNameInput(parent, dimensionId, "commandui.common.error.empty");
+                    return;
+                }
+                openConfirmAction(parent, "dimensionalityname",
+                    I18nManager.translate("commandui.dimensionalityname.confirm", dimensionId, name),
+                    List.of(),
+                    () -> {
+                        closeToGame();
+                        ClientDimNameNetworking.sendDimNameChange(dimensionId, name);
+                    });
+            },
+            () -> CommandUiActions.runCommand("areahint dimensionalityname cancel"));
+    }
+
+    public static void openDimensionalityColor(Screen parent) {
+        setScreen(new WizardSelectionListScreen<>(parent, titleKey("dimensionalitycolor"),
+            "commandui.dimensionalitycolor.prompt",
+            dimensionItems(),
+            dimensionId -> openColorSelection(parent, "dimensionalitycolor",
+                color -> openConfirmAction(parent, "dimensionalitycolor",
+                    I18nManager.translate("commandui.dimensionalitycolor.confirm", dimensionId, color),
+                    List.of(I18nManager.translate("commandui.dimensionalitycolor.old", dimensionalColor(dimensionId))),
+                    () -> {
+                        closeToGame();
+                        ClientDimNameNetworking.sendDimColorChange(dimensionId, color);
+                    })),
+            () -> CommandUiActions.runCommand("areahint dimensionalitycolor cancel")));
+    }
+
+    private static void openColorSelection(Screen parent, String id, java.util.function.Consumer<String> colorAction) {
+        setScreen(new WizardOptionScreen(parent, titleKey(id),
+            "commandui.color.prompt",
+            "commandui.color.detail",
+            CommandUiData.colorOptions(colorAction, () -> openCustomColor(parent, id, colorAction, null)),
+            () -> CommandUiActions.runCommand("areahint " + id + " cancel")));
+    }
+
+    private static void openCustomColor(Screen parent, String id, java.util.function.Consumer<String> colorAction, String errorKey) {
+        openSingleField(parent, id,
+            "commandui.color.custom.label",
+            "commandui.color.custom.placeholder",
+            "#FFFFFF",
+            "commandui.color.custom.prompt",
+            "commandui.color.custom.detail",
+            errorKey,
+            16,
+            value -> {
+                String color = normalizeStrictColor(value);
+                if (color == null) {
+                    openCustomColor(parent, id, colorAction, "commandui.color.error.invalid");
+                    return;
+                }
+                colorAction.accept(color);
+            },
+            () -> CommandUiActions.runCommand("areahint " + id + " cancel"));
+    }
+
+    private static void openConfirmSend(Screen parent, String id, String command, List<String> details) {
+        setScreen(new WizardConfirmScreen(parent, titleKey(id),
+            I18nManager.translate("commandui.common.confirm.prompt"),
+            details == null || details.isEmpty() ? List.of("/" + command) : details,
+            "commandui.button.execute",
+            () -> CommandUiActions.runCommand(command),
+            null));
+    }
+
+    private static void openConfirmAction(Screen parent, String id, String prompt, List<String> details, Runnable action) {
+        setScreen(new WizardConfirmScreen(parent, titleKey(id),
+            prompt,
+            details,
+            "commandui.button.confirm",
+            action,
+            null));
+    }
+
+    private static void openInfo(Screen parent, String id, String messageKey, String cancelCommand) {
+        setScreen(new WizardConfirmScreen(parent, titleKey(id),
+            I18nManager.translate(messageKey),
+            List.of(),
+            "commandui.button.close",
+            () -> {
+                if (cancelCommand != null) {
+                    CommandUiActions.runCommand(cancelCommand);
+                }
+            },
+            cancelCommand == null ? null : () -> CommandUiActions.runCommand(cancelCommand)));
+    }
+
+    private static void openSingleField(Screen parent, String id, String labelKey, String placeholderKey,
+                                        String initialValue, String promptKey, String detailTextOrKey,
+                                        String errorKey, int maxLength,
+                                        java.util.function.Consumer<String> submitAction) {
+        openSingleField(parent, id, labelKey, placeholderKey, initialValue, promptKey, detailTextOrKey,
+            errorKey, maxLength, submitAction, null);
+    }
+
+    private static void openSingleField(Screen parent, String id, String labelKey, String placeholderKey,
+                                        String initialValue, String promptKey, String detailTextOrKey,
+                                        String errorKey, int maxLength,
+                                        java.util.function.Consumer<String> submitAction, Runnable cancelAction) {
+        setScreen(new WizardTextInputScreen(parent, titleKey(id),
+            List.of(new WizardTextInputScreen.FieldSpec(labelKey, placeholderKey, initialValue, maxLength)),
+            promptKey,
+            detailTextOrKey,
+            errorKey,
+            values -> submitAction.accept(values.isEmpty() ? "" : values.get(0)),
+            cancelAction));
+    }
+
+    private static void runAndClose(String command) {
+        closeToGame();
+        CommandUiActions.runCommand(command);
+    }
+
+    private static void startThenRun(String startCommand, String actionCommand) {
+        closeToGame();
+        CommandUiActions.runCommand(startCommand);
+        CommandUiActions.runCommand(actionCommand);
+    }
+
+    private static List<WizardOptionScreen.OptionSpec> sizePresetOptions(java.util.function.Consumer<String> action) {
+        return List.of(
+            option("commandui.common.size.extra_large", () -> action.accept("extra_large")),
+            option("commandui.common.size.large", () -> action.accept("large")),
+            option("commandui.common.size.medium_large", () -> action.accept("medium_large")),
+            option("commandui.common.size.medium", () -> action.accept("medium")),
+            option("commandui.common.size.medium_small", () -> action.accept("medium_small")),
+            option("commandui.common.size.small", () -> action.accept("small")),
+            option("commandui.common.size.extra_small", () -> action.accept("extra_small"))
+        );
+    }
+
+    private static WizardOptionScreen.OptionSpec option(String labelKey, Runnable action) {
+        return new WizardOptionScreen.OptionSpec(labelKey, "", -1, action);
+    }
+
+    private static void setScreen(Screen screen) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client != null) {
+            client.setScreen(screen);
+        }
+    }
+
+    private static void closeToGame() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client != null) {
+            client.setScreen(null);
+        }
+    }
+
+    private static String titleKey(String id) {
+        return "commandui." + id + ".title";
+    }
+
+    private static String promptKey(String id) {
+        return "commandui." + id + ".prompt";
+    }
+
+    private static String currentDimensionId() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        return client != null && client.world != null ? client.world.getRegistryKey().getValue().toString() : null;
+    }
+
+    private static String currentDimensionType() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null || client.world == null) {
+            return null;
+        }
+        return Packets.convertDimensionPathToType(client.world.getRegistryKey().getValue().getPath());
+    }
+
+    private static List<String> areaDetails(AreaData area) {
+        List<String> details = new ArrayList<>();
+        details.add(I18nManager.translate("commandui.common.area.name", area.getName()));
+        details.add(I18nManager.translate("commandui.common.area.level", area.getLevel()));
+        details.add(I18nManager.translate("commandui.common.area.surface", nullText(area.getSurfacename())));
+        details.add(I18nManager.translate("commandui.common.area.base", nullText(area.getBaseName())));
+        details.add(I18nManager.translate("commandui.common.area.signature", nullText(area.getSignature())));
+        return details;
+    }
+
+    private static Map<String, List<AreaData>> buildUnionGroups() {
+        Map<String, List<AreaData>> groups = new LinkedHashMap<>();
+        for (AreaData area : CommandUiData.loadCurrentDimensionAreas()) {
+            String unionName = area.getSurfacename() == null || area.getSurfacename().trim().isEmpty()
+                ? area.getName()
+                : area.getSurfacename().trim();
+            groups.computeIfAbsent(unionName, ignored -> new ArrayList<>()).add(area);
+        }
+        return groups;
+    }
+
+    private static List<WizardSelectionListScreen.SelectionItem<String>> unionItems(Map<String, List<AreaData>> unionGroups) {
+        List<WizardSelectionListScreen.SelectionItem<String>> items = new ArrayList<>();
+        for (Map.Entry<String, List<AreaData>> entry : unionGroups.entrySet()) {
+            items.add(new WizardSelectionListScreen.SelectionItem<>(entry.getKey(), entry.getKey(),
+                I18nManager.translate("commandui.check.item.detail", entry.getValue().size())));
+        }
+        return items;
+    }
+
+    private static List<WizardSelectionListScreen.SelectionItem<String>> dimensionItems() {
+        Set<String> dimensions = new LinkedHashSet<>();
+        dimensions.addAll(areahint.dimensional.ClientDimensionalNameManager.getAllDimensionalNames().keySet());
+        dimensions.add("minecraft:overworld");
+        dimensions.add("minecraft:the_nether");
+        dimensions.add("minecraft:the_end");
+
+        List<WizardSelectionListScreen.SelectionItem<String>> items = new ArrayList<>();
+        for (String dimensionId : dimensions) {
+            items.add(new WizardSelectionListScreen.SelectionItem<>(dimensionId,
+                dimensionalName(dimensionId),
+                I18nManager.translate("commandui.dimension.item.detail", dimensionId)));
+        }
+        return items;
+    }
+
+    private static String dimensionalName(String dimensionId) {
+        String name = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
+        return name == null || name.isBlank() ? dimensionId : name;
+    }
+
+    private static String dimensionalColor(String dimensionId) {
+        String color = areahint.dimensional.ClientDimensionalNameManager.getDimensionalColor(dimensionId);
+        return color == null || color.isBlank() ? "#FFFFFF" : color;
+    }
+
+    private static String normalizeStrictColor(String colorInput) {
+        if (colorInput == null || colorInput.trim().isEmpty()) {
+            return null;
+        }
+        String trimmed = colorInput.trim();
+        if (ColorUtil.isFlashColor(trimmed)) {
+            return trimmed;
+        }
+        String namedColor = ColorUtil.getColorHex(trimmed);
+        if (namedColor != null) {
+            return namedColor;
+        }
+        String normalized = trimmed.toUpperCase(Locale.ROOT);
+        if (!normalized.startsWith("#")) {
+            normalized = "#" + normalized;
+        }
+        return normalized.matches("^#[0-9A-F]{6}$") ? normalized : null;
+    }
+
+    private static String nullText(String value) {
+        return value == null || value.trim().isEmpty() ? I18nManager.translate("commandui.common.none") : value;
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.trim().isEmpty() ? null : value.trim();
+    }
+
+    private static void sendLocalError(String key) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client != null && client.player != null) {
+            client.player.sendMessage(Text.literal(I18nManager.translate(key)).formatted(Formatting.RED), false);
+        }
+    }
+
+    private static void sendRecolor(String areaName, String color, String dimension) {
+        try {
+            net.minecraft.network.PacketByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
+            buf.writeString(areaName);
+            buf.writeString(color);
+            buf.writeString(dimension);
+            net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(Packets.C2S_RECOLOR_REQUEST, buf);
+        } catch (Exception e) {
+            AreashintClient.LOGGER.error("发送颜色修改请求失败", e);
+        }
+    }
+}

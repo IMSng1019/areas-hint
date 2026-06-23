@@ -56,6 +56,23 @@ public class AddHintManager {
     }
 
     /**
+     * 启动图形选择流程，只初始化状态并返回可修改域名。
+     */
+    public List<AreaData> beginVisualSelection() {
+        if (client.player == null) {
+            return List.of();
+        }
+
+        isActive = true;
+        List<AreaData> modifiableAreas = getModifiableAreas();
+        if (modifiableAreas.isEmpty()) {
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area.modify")), false);
+            isActive = false;
+        }
+        return modifiableAreas;
+    }
+
+    /**
      * 选择域名
      */
     public void selectArea(String areaName) {
@@ -342,4 +359,6 @@ public class AddHintManager {
     // Getters
     public boolean isActive() { return isActive; }
     public boolean isRecording() { return isRecording; }
+    public AreaData getSelectedArea() { return selectedArea; }
+    public List<Double[]> getNewVertices() { return newVertices; }
 }

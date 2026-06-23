@@ -122,6 +122,32 @@ public class ShrinkAreaManager {
         // 显示域名选择界面
         ui.showAreaSelectionScreen();
     }
+
+    /**
+     * 启动图形选择流程，只初始化状态并返回可收缩域名。
+     */
+    public List<AreaData> beginVisualSelection() {
+        if (isActive) {
+            sendMessage(I18nManager.translate("shrinkarea.error.area.shrink"), Formatting.RED);
+            return List.of();
+        }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        ClientPlayerEntity player = client.player;
+        if (player == null) {
+            sendMessage(I18nManager.translate("shrinkarea.error.general"), Formatting.RED);
+            return List.of();
+        }
+
+        playerName = player.getGameProfile().getName();
+        isAdmin = client.player.hasPermissionLevel(2);
+        isActive = true;
+        currentState = ShrinkState.SELECTING_AREA;
+
+        sendMessage(I18nManager.translate("shrinkarea.message.area.shrink.start"), Formatting.GREEN);
+        loadAvailableAreas();
+        return List.copyOf(availableAreas);
+    }
     
     /**
      * 停止域名收缩流程
@@ -521,4 +547,4 @@ public class ShrinkAreaManager {
     public boolean isRecording() { return isRecording; }
     public boolean isAdmin() { return isAdmin; }
     public String getPlayerName() { return playerName; }
-} 
+}

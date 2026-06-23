@@ -35,57 +35,75 @@ public final class CommandVisualRegistry {
         handlers.add(visual("help", "areahint help", "help.command.help", HelpCommandScreen::new));
         handlers.add(visual("boundviz", "areahint boundviz", "help.command.boundviz", BoundVizCommandScreen::new));
         handlers.add(visual("language", "areahint language", "help.command.language", LanguageCommandScreen::new));
-        handlers.add(command("on", "areahint on", "command.usage.on"));
-        handlers.add(command("off", "areahint off", "command.usage.off"));
-        handlers.add(command("reload", "areahint reload", "help.command.reload"));
-        handlers.add(command("delete", "areahint delete", "help.command.delete"));
-        handlers.add(command("frequency", "areahint frequency", "help.command.frequency"));
-        handlers.add(command("hintrender", "areahint hintrender", "help.command.hintrender"));
-        handlers.add(command("titlestyle", "areahint titlestyle", "help.command.titlestyle"));
-        handlers.add(command("titlesize", "areahint titlesize", "help.command.titlesize"));
-        handlers.add(command("addsubtitle", "areahint addsubtitle", "help.command.addsubtitle"));
-        handlers.add(command("replacesubtitle", "areahint replacesubtitle", "help.command.replacesubtitle"));
-        handlers.add(command("deletesubtitle", "areahint deletesubtitle", "help.command.deletesubtitle"));
-        handlers.add(command("replacesubtitlecolor", "areahint replacesubtitlecolor", "help.command.replacesubtitlecolor"));
-        handlers.add(command("replacesubtitlesize", "areahint replacesubtitlesize", "help.command.replacesubtitlesize"));
-        handlers.add(command("add", "areahint add", "help.command.add"));
+        handlers.add(visualCommand("on", "areahint on", "command.usage.on"));
+        handlers.add(visualCommand("off", "areahint off", "command.usage.off"));
+        handlers.add(visualCommand("reload", "areahint reload", "help.command.reload"));
+        handlers.add(visual("delete", "areahint delete", "help.command.delete", CommandVisualController::openDelete));
+        handlers.add(visual("frequency", "areahint frequency", "help.command.frequency", CommandVisualController::openFrequency));
+        handlers.add(visual("hintrender", "areahint hintrender", "help.command.hintrender", CommandVisualController::openHintRender));
+        handlers.add(visual("titlestyle", "areahint titlestyle", "help.command.titlestyle", CommandVisualController::openTitleStyle));
+        handlers.add(visual("titlesize", "areahint titlesize", "help.command.titlesize", CommandVisualController::openTitleSize));
+        handlers.add(visual("addsubtitle", "areahint addsubtitle", "help.command.addsubtitle",
+            parent -> CommandVisualController.openSubtitleStart(parent, "addsubtitle")));
+        handlers.add(visual("replacesubtitle", "areahint replacesubtitle", "help.command.replacesubtitle",
+            parent -> CommandVisualController.openSubtitleStart(parent, "replacesubtitle")));
+        handlers.add(visual("deletesubtitle", "areahint deletesubtitle", "help.command.deletesubtitle",
+            parent -> CommandVisualController.openSubtitleStart(parent, "deletesubtitle")));
+        handlers.add(visual("replacesubtitlecolor", "areahint replacesubtitlecolor", "help.command.replacesubtitlecolor",
+            parent -> CommandVisualController.openSubtitleStart(parent, "replacesubtitlecolor")));
+        handlers.add(visual("replacesubtitlesize", "areahint replacesubtitlesize", "help.command.replacesubtitlesize",
+            parent -> CommandVisualController.openSubtitleStart(parent, "replacesubtitlesize")));
+        handlers.add(visual("add", "areahint add", "help.command.add", CommandVisualController::openAddJson));
         handlers.add(visual("easyadd", "areahint easyadd", "help.command.easyadd",
             parent -> areahint.easyadd.EasyAddVisualController.openFromCommandUi(parent, "areahint easyadd")));
         handlers.add(visual("addarea", "areahint addarea", "help.command.addarea",
             parent -> areahint.easyadd.EasyAddVisualController.openFromCommandUi(parent, "areahint addarea")));
-        handlers.add(command("recolor", "areahint recolor", "help.command.recolor"));
-        handlers.add(command("rename", "areahint rename", "help.command.rename"));
-        handlers.add(command("sethigh", "areahint sethigh", "help.command.sethigh"));
-        handlers.add(command("tcp", "areahint tcp", "help.command.tcp"));
-        handlers.add(command("udp", "areahint udp", "help.command.udp"));
-        handlers.add(command("settp", "areahint settp", "help.command.settp"));
-        handlers.add(command("replacebutton", "areahint replacebutton", "help.command.replacebutton"));
-        handlers.add(command("check", "areahint check", "help.command.check"));
-        handlers.add(command("dimensionalityname", "areahint dimensionalityname", "help.command.dimensionalityname"));
-        handlers.add(command("dimensionalitycolor", "areahint dimensionalitycolor", "help.command.dimensionalitycolor"));
-        handlers.add(command("expandarea", "areahint expandarea", "help.command.expandarea"));
-        handlers.add(command("shrinkarea", "areahint shrinkarea", "help.command.shrinkarea"));
-        handlers.add(command("dividearea", "areahint dividearea", "help.command.dividearea"));
-        handlers.add(command("addhint", "areahint addhint", "help.command.addhint"));
-        handlers.add(command("deletehint", "areahint deletehint", "help.command.deletehint"));
-        handlers.add(command("firstdimname", "areahint firstdimname", "help.command.firstdimname"));
-        handlers.add(command("firstdimname_skip", "areahint firstdimname_skip", "help.command.firstdimname_skip"));
-        handlers.add(command("debug", "areahint debug", "help.command.debug"));
-        handlers.add(command("adddescription", "areahint adddescription", "help.command.adddescription"));
-        handlers.add(command("replacedescription", "areahint replacedescription", "help.command.replacedescription"));
-        handlers.add(command("deletedescription", "areahint deletedescription", "help.command.deletedescription"));
-        handlers.add(command("adddimensionalitydescription", "areahint adddimensionalitydescription", "help.command.adddimensionalitydescription"));
-        handlers.add(command("replacedimensionalitydescription", "areahint replacedimensionalitydescription", "help.command.replacedimensionalitydescription"));
-        handlers.add(command("deletedimensionalitydescription", "areahint deletedimensionalitydescription", "help.command.deletedimensionalitydescription"));
-        handlers.add(command("addsignature", "areahint addsignature", "help.command.addsignature"));
-        handlers.add(command("deletesignature", "areahint deletesignature", "help.command.deletesignature"));
-        handlers.add(command("serverlanguage", "areahint serverlanguage", "help.command.serverlanguage"));
+        handlers.add(visual("recolor", "areahint recolor", "help.command.recolor", CommandVisualController::openRecolor));
+        handlers.add(visual("rename", "areahint rename", "help.command.rename", CommandVisualController::openRename));
+        handlers.add(visual("sethigh", "areahint sethigh", "help.command.sethigh", CommandVisualController::openSetHigh));
+        handlers.add(visual("tcp", "areahint tcp", "help.command.tcp", parent -> CommandVisualController.openTeleport(parent, "tcp")));
+        handlers.add(visual("udp", "areahint udp", "help.command.udp", parent -> CommandVisualController.openTeleport(parent, "udp")));
+        handlers.add(visual("settp", "areahint settp", "help.command.settp", parent -> CommandVisualController.openSetTp(parent, null)));
+        handlers.add(visualCommand("replacebutton", "areahint replacebutton", "help.command.replacebutton"));
+        handlers.add(visual("check", "areahint check", "help.command.check", CommandVisualController::openCheck));
+        handlers.add(visual("dimensionalityname", "areahint dimensionalityname", "help.command.dimensionalityname", CommandVisualController::openDimensionalityName));
+        handlers.add(visual("dimensionalitycolor", "areahint dimensionalitycolor", "help.command.dimensionalitycolor", CommandVisualController::openDimensionalityColor));
+        handlers.add(visual("expandarea", "areahint expandarea", "help.command.expandarea",
+            parent -> CommandVisualController.openRecordCommand(parent, "expandarea", "areahint expandarea", "areahint expandarea cancel")));
+        handlers.add(visual("shrinkarea", "areahint shrinkarea", "help.command.shrinkarea",
+            parent -> CommandVisualController.openRecordCommand(parent, "shrinkarea", "areahint shrinkarea", "areahint shrinkarea cancel")));
+        handlers.add(visual("dividearea", "areahint dividearea", "help.command.dividearea",
+            parent -> CommandVisualController.openRecordCommand(parent, "dividearea", "areahint dividearea", "areahint dividearea cancel")));
+        handlers.add(visual("addhint", "areahint addhint", "help.command.addhint",
+            parent -> CommandVisualController.openRecordCommand(parent, "addhint", "areahint addhint", "areahint addhint cancel")));
+        handlers.add(visual("deletehint", "areahint deletehint", "help.command.deletehint",
+            parent -> CommandVisualController.openRecordCommand(parent, "deletehint", "areahint deletehint", "areahint deletehint cancel")));
+        handlers.add(visual("firstdimname", "areahint firstdimname", "help.command.firstdimname", CommandVisualController::openFirstDimName));
+        handlers.add(visualCommand("firstdimname_skip", "areahint firstdimname_skip", "help.command.firstdimname_skip"));
+        handlers.add(visual("debug", "areahint debug", "help.command.debug", CommandVisualController::openDebug));
+        handlers.add(visual("adddescription", "areahint adddescription", "help.command.adddescription",
+            parent -> CommandVisualController.openDescriptionStart(parent, "adddescription")));
+        handlers.add(visual("replacedescription", "areahint replacedescription", "help.command.replacedescription",
+            parent -> CommandVisualController.openDescriptionStart(parent, "replacedescription")));
+        handlers.add(visual("deletedescription", "areahint deletedescription", "help.command.deletedescription",
+            parent -> CommandVisualController.openDescriptionStart(parent, "deletedescription")));
+        handlers.add(visual("adddimensionalitydescription", "areahint adddimensionalitydescription", "help.command.adddimensionalitydescription",
+            parent -> CommandVisualController.openDescriptionStart(parent, "adddimensionalitydescription")));
+        handlers.add(visual("replacedimensionalitydescription", "areahint replacedimensionalitydescription", "help.command.replacedimensionalitydescription",
+            parent -> CommandVisualController.openDescriptionStart(parent, "replacedimensionalitydescription")));
+        handlers.add(visual("deletedimensionalitydescription", "areahint deletedimensionalitydescription", "help.command.deletedimensionalitydescription",
+            parent -> CommandVisualController.openDescriptionStart(parent, "deletedimensionalitydescription")));
+        handlers.add(visual("addsignature", "areahint addsignature", "help.command.addsignature",
+            parent -> CommandVisualController.openSignature(parent, "addsignature")));
+        handlers.add(visual("deletesignature", "areahint deletesignature", "help.command.deletesignature",
+            parent -> CommandVisualController.openSignature(parent, "deletesignature")));
+        handlers.add(visual("serverlanguage", "areahint serverlanguage", "help.command.serverlanguage", CommandVisualController::openServerLanguage));
         return Collections.unmodifiableList(handlers);
     }
 
-    private static CommandVisualHandler command(String id, String defaultCommand, String descriptionKey) {
-        return new SimpleHandler(id, defaultCommand, descriptionKey, false,
-            parent -> MinecraftClient.getInstance().setScreen(new PlaceholderCommandScreen(parent, getById(id))));
+    private static CommandVisualHandler visualCommand(String id, String defaultCommand, String descriptionKey) {
+        return visual(id, defaultCommand, descriptionKey,
+            parent -> CommandVisualController.openConfirmCommand(parent, id, defaultCommand));
     }
 
     private static CommandVisualHandler visual(String id, String defaultCommand, String descriptionKey, Consumer<Screen> opener) {

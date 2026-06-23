@@ -33,6 +33,9 @@ public class UnifiedKeyHandler {
     private static boolean waitingForEasyAddVisualRecordRelease = false;
     private static int easyAddVisualRecordHoldTicks = 0;
     private static boolean easyAddVisualRecordPanelOpened = false;
+    private static boolean waitingForCommandVisualRecordRelease = false;
+    private static int commandVisualRecordHoldTicks = 0;
+    private static boolean commandVisualRecordPanelOpened = false;
     private static boolean suppressUntilRecordKeyReleased = false;
 
     /**
@@ -114,6 +117,8 @@ public class UnifiedKeyHandler {
 
         if (waitingForEasyAddVisualRecordRelease) {
             handleEasyAddVisualRecordHoldProgress(client);
+        } else if (waitingForCommandVisualRecordRelease) {
+            handleCommandVisualRecordHoldProgress(client);
         } else if (waitingForIdleRelease) {
             handleIdleHoldProgress(client);
         } else if (!pressedThisTick) {
@@ -156,6 +161,12 @@ public class UnifiedKeyHandler {
         ExpandAreaManager expandAreaManager = ExpandAreaManager.getInstance();
         System.out.println("DEBUG: ExpandArea - isActive: " + expandAreaManager.isActive() + ", isRecording: " + expandAreaManager.isRecording());
         if (expandAreaManager.isActive() && expandAreaManager.isRecording()) {
+            if (areahint.commandui.CommandVisualController.isVisualRecordMode("expandarea")) {
+                waitingForCommandVisualRecordRelease = true;
+                commandVisualRecordHoldTicks = 0;
+                commandVisualRecordPanelOpened = false;
+                return false;
+            }
             System.out.println("DEBUG: ExpandArea 处理记录键");
             expandAreaManager.recordCurrentPosition();
             return true;
@@ -164,6 +175,12 @@ public class UnifiedKeyHandler {
         // 检查ShrinkArea是否活跃且在记录状态
         ShrinkAreaManager shrinkAreaManager = ShrinkAreaManager.getInstance();
         if (shrinkAreaManager.isActive() && shrinkAreaManager.isRecording()) {
+            if (areahint.commandui.CommandVisualController.isVisualRecordMode("shrinkarea")) {
+                waitingForCommandVisualRecordRelease = true;
+                commandVisualRecordHoldTicks = 0;
+                commandVisualRecordPanelOpened = false;
+                return false;
+            }
             System.out.println("DEBUG: ShrinkArea 处理记录键");
             shrinkAreaManager.handleXKeyPress();
             return true;
@@ -172,6 +189,12 @@ public class UnifiedKeyHandler {
         // 检查DivideArea是否活跃且在记录状态
         areahint.dividearea.DivideAreaManager divideAreaManager = areahint.dividearea.DivideAreaManager.getInstance();
         if (divideAreaManager.isActive() && divideAreaManager.isRecording()) {
+            if (areahint.commandui.CommandVisualController.isVisualRecordMode("dividearea")) {
+                waitingForCommandVisualRecordRelease = true;
+                commandVisualRecordHoldTicks = 0;
+                commandVisualRecordPanelOpened = false;
+                return false;
+            }
             System.out.println("DEBUG: DivideArea 处理记录键");
             divideAreaManager.recordCurrentPosition();
             return true;
@@ -180,6 +203,12 @@ public class UnifiedKeyHandler {
         // 检查AddHint是否活跃且在记录状态
         areahint.addhint.AddHintManager addHintManager = areahint.addhint.AddHintManager.getInstance();
         if (addHintManager.isActive() && addHintManager.isRecording()) {
+            if (areahint.commandui.CommandVisualController.isVisualRecordMode("addhint")) {
+                waitingForCommandVisualRecordRelease = true;
+                commandVisualRecordHoldTicks = 0;
+                commandVisualRecordPanelOpened = false;
+                return false;
+            }
             addHintManager.recordCurrentPosition();
             return true;
         }
@@ -248,6 +277,34 @@ public class UnifiedKeyHandler {
         resetEasyAddVisualRecordHoldState();
     }
 
+    /**
+     * 指令可视化录点时，短按录点，长按打开继续/完成/取消面板。
+     */
+    private static void handleCommandVisualRecordHoldProgress(MinecraftClient client) {
+        if (!hasActiveCommandVisualRecording()) {
+            resetCommandVisualRecordHoldState();
+            areahint.commandui.CommandVisualController.clearVisualRecordMode();
+            return;
+        }
+
+        if (recordKeyBinding.isPressed()) {
+            commandVisualRecordHoldTicks++;
+            if (!commandVisualRecordPanelOpened
+                    && commandVisualRecordHoldTicks >= COMMAND_PANEL_HOLD_TICKS) {
+                commandVisualRecordPanelOpened = true;
+                waitingForCommandVisualRecordRelease = false;
+                suppressRecordKeyUntilRelease();
+                areahint.commandui.RecordCommandActionScreen.openActive(null);
+            }
+            return;
+        }
+
+        if (!commandVisualRecordPanelOpened) {
+            recordActiveCommandVisualPosition();
+        }
+        resetCommandVisualRecordHoldState();
+    }
+
     private static void resetCommandPanelHoldState() {
         commandPanelHoldTicks = 0;
         waitingForIdleRelease = false;
@@ -260,9 +317,43 @@ public class UnifiedKeyHandler {
         easyAddVisualRecordPanelOpened = false;
     }
 
+    private static void resetCommandVisualRecordHoldState() {
+        commandVisualRecordHoldTicks = 0;
+        waitingForCommandVisualRecordRelease = false;
+        commandVisualRecordPanelOpened = false;
+    }
+
     private static void resetHoldState() {
         resetCommandPanelHoldState();
         resetEasyAddVisualRecordHoldState();
+        resetCommandVisualRecordHoldState();
+    }
+
+    private static boolean hasActiveCommandVisualRecording() {
+        return areahint.commandui.CommandVisualController.isVisualRecordMode("addhint")
+            && areahint.addhint.AddHintManager.getInstance().isActive()
+            && areahint.addhint.AddHintManager.getInstance().isRecording()
+            || areahint.commandui.CommandVisualController.isVisualRecordMode("expandarea")
+            && ExpandAreaManager.getInstance().isActive()
+            && ExpandAreaManager.getInstance().isRecording()
+            || areahint.commandui.CommandVisualController.isVisualRecordMode("shrinkarea")
+            && ShrinkAreaManager.getInstance().isActive()
+            && ShrinkAreaManager.getInstance().isRecording()
+            || areahint.commandui.CommandVisualController.isVisualRecordMode("dividearea")
+            && areahint.dividearea.DivideAreaManager.getInstance().isActive()
+            && areahint.dividearea.DivideAreaManager.getInstance().isRecording();
+    }
+
+    private static void recordActiveCommandVisualPosition() {
+        if (areahint.commandui.CommandVisualController.isVisualRecordMode("addhint")) {
+            areahint.addhint.AddHintManager.getInstance().recordCurrentPosition();
+        } else if (areahint.commandui.CommandVisualController.isVisualRecordMode("expandarea")) {
+            ExpandAreaManager.getInstance().recordCurrentPosition();
+        } else if (areahint.commandui.CommandVisualController.isVisualRecordMode("shrinkarea")) {
+            ShrinkAreaManager.getInstance().handleXKeyPress();
+        } else if (areahint.commandui.CommandVisualController.isVisualRecordMode("dividearea")) {
+            areahint.dividearea.DivideAreaManager.getInstance().recordCurrentPosition();
+        }
     }
 
     private static boolean shouldBlockIdleRecordKey() {

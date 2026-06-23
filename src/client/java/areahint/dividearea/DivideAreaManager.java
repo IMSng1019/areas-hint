@@ -132,6 +132,8 @@ public class DivideAreaManager {
     public boolean isActive() { return isActive; }
     public boolean isRecording() { return isRecording; }
     public State getState() { return state; }
+    public AreaData getSelectedArea() { return selectedArea; }
+    public List<Double[]> getNewVertices() { return newVertices; }
 
     // ===== 第1阶段：启动和域名选择 =====
 
@@ -147,6 +149,25 @@ public class DivideAreaManager {
             return;
         }
         ui.showAreaSelection(modifiableAreas);
+    }
+
+    /**
+     * 启动图形选择流程，只初始化状态并返回可分割域名。
+     */
+    public List<AreaData> beginVisualSelection() {
+        if (client.player == null) {
+            return List.of();
+        }
+
+        registerChatListener();
+        isActive = true;
+        state = State.SELECTING_AREA;
+        List<AreaData> modifiableAreas = getModifiableAreas();
+        if (modifiableAreas.isEmpty()) {
+            sendMsg(I18nManager.translate("dividearea.error.area.divide_3"), Formatting.RED);
+            reset();
+        }
+        return modifiableAreas;
     }
 
     public void selectAreaByName(String areaName) {
@@ -310,6 +331,119 @@ public class DivideAreaManager {
             state = State.AREA2_LEVEL;
             showLevelSelection(2);
         }
+    }
+
+    /**
+     * 图形流程提交名称后继续进入表面域名输入。
+     */
+    public boolean handleNameInputForVisual(String name) {
+        if (state == State.AREA1_NAME) {
+            if (checkAreaNameExists(name.trim())) {
+                sendMsg(I18nManager.translate("dividearea.error.area.name") + "\"" + name.trim() + "\"" + I18nManager.translate("dividearea.prompt.general"), Formatting.RED);
+                return false;
+            }
+            area1Config.setName(name);
+            sendMsg(I18nManager.translate("dividearea.message.name") + name, Formatting.GREEN);
+            state = State.AREA1_SURFACE_NAME;
+        } else if (state == State.AREA2_NAME) {
+            if (checkAreaNameExists(name.trim())) {
+                sendMsg(I18nManager.translate("dividearea.error.area.name") + "\"" + name.trim() + "\"" + I18nManager.translate("dividearea.prompt.general"), Formatting.RED);
+                return false;
+            }
+            area2Config.setName(name);
+            sendMsg(I18nManager.translate("dividearea.message.name_2") + name, Formatting.GREEN);
+            state = State.AREA2_SURFACE_NAME;
+        }
+        return true;
+    }
+
+    /**
+     * 图形流程提交分割后域名的表面域名，空值表示跳过。
+     */
+    public void handleSurfaceInput(String surfaceName) {
+        String value = surfaceName == null ? "" : surfaceName.trim();
+        if (state == State.AREA1_SURFACE_NAME) {
+            if (!value.isEmpty()) {
+                area1Config.setSurfacename(value);
+                sendMsg(I18nManager.translate("dividearea.message.area.surface_2") + value, Formatting.GREEN);
+            } else {
+                sendMsg(I18nManager.translate("dividearea.message.area.surface"), Formatting.GRAY);
+            }
+            state = State.AREA1_LEVEL;
+        } else if (state == State.AREA2_SURFACE_NAME) {
+            if (!value.isEmpty()) {
+                area2Config.setSurfacename(value);
+                sendMsg(I18nManager.translate("dividearea.message.area.surface_3") + value, Formatting.GREEN);
+            } else {
+                sendMsg(I18nManager.translate("dividearea.message.area.surface"), Formatting.GRAY);
+            }
+            state = State.AREA2_LEVEL;
+        }
+    }
+
+    /**
+     * 图形流程提交等级，不输出旧聊天按钮。
+     */
+    public void handleLevelInputForVisual(int level) {
+        if (state == State.AREA1_LEVEL) {
+            area1Config.setLevel(level);
+            sendMsg(I18nManager.translate("dividearea.message.level") + level, Formatting.GREEN);
+            if (level > 1) {
+                state = State.AREA1_BASE;
+            } else {
+                area1Config.setBaseName(null);
+                state = State.AREA1_COLOR;
+            }
+        } else if (state == State.AREA2_LEVEL) {
+            area2Config.setLevel(level);
+            sendMsg(I18nManager.translate("dividearea.message.level_2") + level, Formatting.GREEN);
+            if (level > 1) {
+                state = State.AREA2_BASE;
+            } else {
+                area2Config.setBaseName(null);
+                state = State.AREA2_COLOR;
+            }
+        }
+    }
+
+    /**
+     * 图形流程提交上级域名，不输出旧聊天按钮。
+     */
+    public void handleBaseInputForVisual(String baseName) {
+        if (state == State.AREA1_BASE) {
+            area1Config.setBaseName("none".equals(baseName) ? null : baseName);
+            sendMsg(I18nManager.translate("dividearea.message.area.parent_2") + (area1Config.getBaseName() == null ? I18nManager.translate("dividearea.message.general_3") : baseName), Formatting.GREEN);
+            state = State.AREA1_COLOR;
+        } else if (state == State.AREA2_BASE) {
+            area2Config.setBaseName("none".equals(baseName) ? null : baseName);
+            sendMsg(I18nManager.translate("dividearea.message.area.parent_3") + (area2Config.getBaseName() == null ? I18nManager.translate("dividearea.message.general_3") : baseName), Formatting.GREEN);
+            state = State.AREA2_COLOR;
+        }
+    }
+
+    /**
+     * 图形流程提交颜色，区域1完成后直接进入区域2配置。
+     */
+    public void handleColorInputForVisual(String color) {
+        if (state == State.AREA1_COLOR) {
+            area1Config.setColor(color);
+            sendMsg(I18nManager.translate("dividearea.message.color") + color, Formatting.GREEN);
+            state = State.AREA2_NAME;
+        } else if (state == State.AREA2_COLOR) {
+            area2Config.setColor(color);
+            sendMsg(I18nManager.translate("dividearea.message.color_2") + color, Formatting.GREEN);
+            sendToServer();
+        }
+    }
+
+    public int getCurrentBaseTargetLevel() {
+        if (state == State.AREA1_BASE && area1Config != null) {
+            return area1Config.getLevel() - 1;
+        }
+        if (state == State.AREA2_BASE && area2Config != null) {
+            return area2Config.getLevel() - 1;
+        }
+        return -1;
     }
 
     public void handleLevelInput(int level) {
