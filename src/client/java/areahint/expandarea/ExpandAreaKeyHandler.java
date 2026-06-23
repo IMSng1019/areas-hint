@@ -20,10 +20,10 @@ public class ExpandAreaKeyHandler {
     public static void register() {
         // 注册确认按键 (Enter)
         confirmKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "key.areashint.expandarea.confirm", 
-            InputUtil.Type.KEYSYM, 
-            GLFW.GLFW_KEY_ENTER, 
-            "category.areashint.expandarea"
+            "key.areahint.expandarea.confirm",
+            InputUtil.Type.KEYSYM,
+            GLFW.GLFW_KEY_ENTER,
+            "category.areahint.general"
         ));
         
         // 注册客户端tick事件
@@ -55,4 +55,4 @@ public class ExpandAreaKeyHandler {
             wasConfirmPressed = confirmKey.isPressed();
         });
     }
-} 
+}

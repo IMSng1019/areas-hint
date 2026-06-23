@@ -162,7 +162,7 @@ public final class AddCommandVisualController {
                     "commandui.add.altitude.max.placeholder", draft.altitudeMaxText(), 12)
             ),
             "commandui.add.altitude.custom.prompt",
-            "commandui.add.altitude.custom.detail",
+            "commandui.add.altitude.custom.range_detail",
             errorKey,
             values -> {
                 try {

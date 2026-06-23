@@ -3,8 +3,9 @@ package areahint.i18n;
 import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import areahint.file.FileManager;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +19,6 @@ import java.util.stream.Stream;
  * 负责加载和管理翻译文件
  */
 public class I18nManager {
-    private static final Gson GSON = new Gson();
     private static final String LANG_FOLDER = "lang";
     private static final String DEFAULT_LANGUAGE = "zh_cn";
     private static final String FALLBACK_LANGUAGE = "en_us";
@@ -92,8 +92,7 @@ public class I18nManager {
 
         try {
             String json = Files.readString(langFile, StandardCharsets.UTF_8);
-            Map<String, String> loaded = GSON.fromJson(json, new TypeToken<Map<String, String>>(){}.getType());
-            translations = loaded != null ? loaded : new HashMap<>();
+            translations = parseTranslations(json);
             currentLanguage = resolvedLanguage;
             AreashintClient.LOGGER.info("已加载语言: " + resolvedLanguage + " (" + translations.size() + " 条翻译)");
         } catch (Exception e) {
@@ -115,12 +114,23 @@ public class I18nManager {
         }
         try {
             String json = Files.readString(langFile, StandardCharsets.UTF_8);
-            Map<String, String> loaded = GSON.fromJson(json, new TypeToken<Map<String, String>>(){}.getType());
-            return loaded != null ? loaded : new HashMap<>();
+            return parseTranslations(json);
         } catch (Exception e) {
             AreashintClient.LOGGER.error("读取语言文件失败: " + langFile + " - " + e.getMessage());
             return new HashMap<>();
         }
+    }
+
+    private static Map<String, String> parseTranslations(String json) {
+        Map<String, String> parsedTranslations = new HashMap<>();
+        JsonObject languageObject = JsonParser.parseString(json).getAsJsonObject();
+        for (Map.Entry<String, JsonElement> entry : languageObject.entrySet()) {
+            JsonElement value = entry.getValue();
+            if (value != null && !value.isJsonNull()) {
+                parsedTranslations.put(entry.getKey(), value.getAsString());
+            }
+        }
+        return parsedTranslations;
     }
 
     /**
@@ -191,7 +201,7 @@ public class I18nManager {
 
         try {
             String json = Files.readString(langFile, StandardCharsets.UTF_8);
-            Map<String, String> data = GSON.fromJson(json, new TypeToken<Map<String, String>>(){}.getType());
+            Map<String, String> data = parseTranslations(json);
             if (data != null && data.containsKey("language.name")) {
                 return data.get("language.name");
             }

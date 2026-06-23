@@ -1,8 +1,9 @@
 package areahint.i18n;
 
 import areahint.Areashint;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * 支持多语言加载和按玩家语言翻译
  */
 public class ServerI18nManager {
-    private static final Gson GSON = new Gson();
     private static final String DEFAULT_LANGUAGE = "zh_cn";
     private static final String FALLBACK_LANGUAGE = "en_us";
 
@@ -44,17 +44,24 @@ public class ServerI18nManager {
                 Areashint.LOGGER.warn("Server lang file not found: " + path);
                 return;
             }
-            Map<String, String> loaded = GSON.fromJson(
-                new InputStreamReader(is, StandardCharsets.UTF_8),
-                new TypeToken<Map<String, String>>(){}.getType()
-            );
-            if (loaded != null) {
-                allTranslations.put(language, loaded);
-                Areashint.LOGGER.info("Server loaded language: " + language + " (" + loaded.size() + " entries)");
-            }
+            Map<String, String> loaded = parseTranslations(new InputStreamReader(is, StandardCharsets.UTF_8));
+            allTranslations.put(language, loaded);
+            Areashint.LOGGER.info("Server loaded language: " + language + " (" + loaded.size() + " entries)");
         } catch (Exception e) {
             Areashint.LOGGER.error("Failed to load server lang: " + e.getMessage());
         }
+    }
+
+    private static Map<String, String> parseTranslations(InputStreamReader reader) {
+        Map<String, String> parsedTranslations = new HashMap<>();
+        JsonObject languageObject = JsonParser.parseReader(reader).getAsJsonObject();
+        for (Map.Entry<String, JsonElement> entry : languageObject.entrySet()) {
+            JsonElement value = entry.getValue();
+            if (value != null && !value.isJsonNull()) {
+                parsedTranslations.put(entry.getKey(), value.getAsString());
+            }
+        }
+        return parsedTranslations;
     }
 
     public static void setPlayerLanguage(UUID playerUuid, String language) {

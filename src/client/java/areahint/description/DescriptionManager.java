@@ -37,6 +37,7 @@ public class DescriptionManager {
     private DescriptionListEntry selectedEntry;
     private String pendingDescription;
     private boolean chatListenerRegistered;
+    private boolean visualFlowActive;
 
     private DescriptionManager() {
     }
@@ -100,25 +101,38 @@ public class DescriptionManager {
     }
 
     private void start(String operation, String targetType, String commandPrefix, boolean loadExistingDescriptionOnEdit) {
+        boolean visualRequested = "adddescription".equals(commandPrefix)
+            && AddDescriptionVisualController.consumeVisualStartRequest();
         if (isActive()) {
             sendMessage(I18nManager.translate("description.manager.error.active"), Formatting.RED);
+            if (visualRequested) {
+                AddDescriptionVisualController.clear();
+            }
             return;
         }
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null) {
+            if (visualRequested) {
+                AddDescriptionVisualController.clear();
+            }
             return;
         }
 
         registerChatListener();
-        resetStateOnly();
+        resetStateOnly(false);
         this.operation = operation;
         this.targetType = targetType;
         this.commandPrefix = commandPrefix;
         this.currentDimension = getCurrentDimensionType();
         this.loadExistingDescriptionOnEdit = loadExistingDescriptionOnEdit;
+        this.visualFlowActive = visualRequested;
         this.state = State.WAITING_SEARCH_INPUT;
-        DescriptionUI.showLoadingList(commandPrefix, isDimensionTarget(), isDeleteOperation());
+        if (visualFlowActive) {
+            AddDescriptionVisualController.showLoading();
+        } else {
+            DescriptionUI.showLoadingList(commandPrefix, isDimensionTarget(), isDeleteOperation());
+        }
         requestList();
     }
 
@@ -177,7 +191,15 @@ public class DescriptionManager {
             reset();
             return;
         }
-        DescriptionUI.showSelection(getCommandPrefix(), entries);
+        if (visualFlowActive && "adddescription".equals(getCommandPrefix())) {
+            AddDescriptionVisualController.showSelection(entries);
+        } else {
+            DescriptionUI.showSelection(getCommandPrefix(), entries);
+        }
+    }
+
+    public void selectVisualTarget(String rawId) {
+        select(rawId);
     }
 
     private void select(String rawId) {
@@ -193,10 +215,17 @@ public class DescriptionManager {
                     DescriptionUI.showDeleteConfirmFirst(getCommandPrefix(), selectedEntry);
                 } else {
                     state = loadExistingDescriptionOnEdit ? State.WAITING_EXISTING_DESCRIPTION : State.WAITING_DESCRIPTION_INPUT;
-                    DescriptionUI.showDescriptionInput(getCommandPrefix(), selectedEntry);
+                    if (visualFlowActive && "adddescription".equals(getCommandPrefix())) {
+                        AddDescriptionVisualController.showOpeningBook(selectedEntry);
+                    } else {
+                        DescriptionUI.showDescriptionInput(getCommandPrefix(), selectedEntry);
+                    }
                     if (loadExistingDescriptionOnEdit) {
                         DescriptionClientNetworking.sendEditQuery(targetType, currentDimension, selectedEntry.id());
                     } else {
+                        if (visualFlowActive) {
+                            AddDescriptionVisualController.closeToGame();
+                        }
                         DescriptionBookEditScreen.open(selectedEntry.displayName(), pendingDescription);
                     }
                 }
@@ -228,6 +257,9 @@ public class DescriptionManager {
         // adddescription 会在打开书本前读取旧描述；没有旧描述时保持空书本，方便直接添加。
         pendingDescription = description == null ? "" : description;
         state = State.WAITING_DESCRIPTION_INPUT;
+        if (visualFlowActive) {
+            AddDescriptionVisualController.closeToGame();
+        }
         DescriptionBookEditScreen.open(title == null || title.isBlank() ? selectedEntry.displayName() : title, pendingDescription);
     }
 
@@ -347,19 +379,23 @@ public class DescriptionManager {
     }
 
     public void reset() {
-        resetStateOnly();
+        resetStateOnly(true);
     }
 
-    private void resetStateOnly() {
+    private void resetStateOnly(boolean clearVisualController) {
         state = State.IDLE;
         operation = null;
         targetType = null;
         commandPrefix = null;
         currentDimension = null;
         loadExistingDescriptionOnEdit = false;
+        visualFlowActive = false;
         entries.clear();
         selectedEntry = null;
         pendingDescription = null;
+        if (clearVisualController) {
+            AddDescriptionVisualController.clear();
+        }
     }
 
     private String getCurrentDimensionType() {
