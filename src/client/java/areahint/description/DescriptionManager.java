@@ -101,12 +101,11 @@ public class DescriptionManager {
     }
 
     private void start(String operation, String targetType, String commandPrefix, boolean loadExistingDescriptionOnEdit) {
-        boolean visualRequested = "adddescription".equals(commandPrefix)
-            && AddDescriptionVisualController.consumeVisualStartRequest();
+        boolean visualRequested = consumeVisualStartRequest(commandPrefix);
         if (isActive()) {
             sendMessage(I18nManager.translate("description.manager.error.active"), Formatting.RED);
             if (visualRequested) {
-                AddDescriptionVisualController.clear();
+                clearVisualController(commandPrefix);
             }
             return;
         }
@@ -114,7 +113,7 @@ public class DescriptionManager {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null) {
             if (visualRequested) {
-                AddDescriptionVisualController.clear();
+                clearVisualController(commandPrefix);
             }
             return;
         }
@@ -129,7 +128,7 @@ public class DescriptionManager {
         this.visualFlowActive = visualRequested;
         this.state = State.WAITING_SEARCH_INPUT;
         if (visualFlowActive) {
-            AddDescriptionVisualController.showLoading();
+            showVisualLoading();
         } else {
             DescriptionUI.showLoadingList(commandPrefix, isDimensionTarget(), isDeleteOperation());
         }
@@ -191,8 +190,8 @@ public class DescriptionManager {
             reset();
             return;
         }
-        if (visualFlowActive && "adddescription".equals(getCommandPrefix())) {
-            AddDescriptionVisualController.showSelection(entries);
+        if (visualFlowActive) {
+            showVisualSelection(entries);
         } else {
             DescriptionUI.showSelection(getCommandPrefix(), entries);
         }
@@ -215,8 +214,8 @@ public class DescriptionManager {
                     DescriptionUI.showDeleteConfirmFirst(getCommandPrefix(), selectedEntry);
                 } else {
                     state = loadExistingDescriptionOnEdit ? State.WAITING_EXISTING_DESCRIPTION : State.WAITING_DESCRIPTION_INPUT;
-                    if (visualFlowActive && "adddescription".equals(getCommandPrefix())) {
-                        AddDescriptionVisualController.showOpeningBook(selectedEntry);
+                    if (visualFlowActive) {
+                        showVisualOpeningBook(selectedEntry);
                     } else {
                         DescriptionUI.showDescriptionInput(getCommandPrefix(), selectedEntry);
                     }
@@ -224,7 +223,7 @@ public class DescriptionManager {
                         DescriptionClientNetworking.sendEditQuery(targetType, currentDimension, selectedEntry.id());
                     } else {
                         if (visualFlowActive) {
-                            AddDescriptionVisualController.closeToGame();
+                            closeVisualToGame();
                         }
                         DescriptionBookEditScreen.open(selectedEntry.displayName(), pendingDescription);
                     }
@@ -258,7 +257,7 @@ public class DescriptionManager {
         pendingDescription = description == null ? "" : description;
         state = State.WAITING_DESCRIPTION_INPUT;
         if (visualFlowActive) {
-            AddDescriptionVisualController.closeToGame();
+            closeVisualToGame();
         }
         DescriptionBookEditScreen.open(title == null || title.isBlank() ? selectedEntry.displayName() : title, pendingDescription);
     }
@@ -394,8 +393,63 @@ public class DescriptionManager {
         selectedEntry = null;
         pendingDescription = null;
         if (clearVisualController) {
-            AddDescriptionVisualController.clear();
+            clearVisualControllers();
         }
+    }
+
+    private boolean consumeVisualStartRequest(String commandPrefix) {
+        if ("adddescription".equals(commandPrefix)) {
+            return AddDescriptionVisualController.consumeVisualStartRequest();
+        }
+        if ("adddimensionalitydescription".equals(commandPrefix)) {
+            return AddDimensionalityDescriptionVisualController.consumeVisualStartRequest();
+        }
+        return false;
+    }
+
+    private void showVisualLoading() {
+        if ("adddimensionalitydescription".equals(getCommandPrefix())) {
+            AddDimensionalityDescriptionVisualController.showLoading();
+        } else {
+            AddDescriptionVisualController.showLoading();
+        }
+    }
+
+    private void showVisualSelection(List<DescriptionListEntry> entries) {
+        if ("adddimensionalitydescription".equals(getCommandPrefix())) {
+            AddDimensionalityDescriptionVisualController.showSelection(entries);
+        } else {
+            AddDescriptionVisualController.showSelection(entries);
+        }
+    }
+
+    private void showVisualOpeningBook(DescriptionListEntry entry) {
+        if ("adddimensionalitydescription".equals(getCommandPrefix())) {
+            AddDimensionalityDescriptionVisualController.showOpeningBook(entry);
+        } else {
+            AddDescriptionVisualController.showOpeningBook(entry);
+        }
+    }
+
+    private void closeVisualToGame() {
+        if ("adddimensionalitydescription".equals(getCommandPrefix())) {
+            AddDimensionalityDescriptionVisualController.closeToGame();
+        } else {
+            AddDescriptionVisualController.closeToGame();
+        }
+    }
+
+    private void clearVisualController(String commandPrefix) {
+        if ("adddescription".equals(commandPrefix)) {
+            AddDescriptionVisualController.clear();
+        } else if ("adddimensionalitydescription".equals(commandPrefix)) {
+            AddDimensionalityDescriptionVisualController.clear();
+        }
+    }
+
+    private void clearVisualControllers() {
+        AddDescriptionVisualController.clear();
+        AddDimensionalityDescriptionVisualController.clear();
     }
 
     private String getCurrentDimensionType() {

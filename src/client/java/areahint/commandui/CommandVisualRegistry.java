@@ -88,7 +88,7 @@ public final class CommandVisualRegistry {
         handlers.add(visual("deletedescription", "areahint deletedescription", "help.command.deletedescription",
             parent -> CommandVisualController.openDescriptionStart(parent, "deletedescription")));
         handlers.add(visual("adddimensionalitydescription", "areahint adddimensionalitydescription", "help.command.adddimensionalitydescription",
-            parent -> CommandVisualController.openDescriptionStart(parent, "adddimensionalitydescription")));
+            areahint.description.AddDimensionalityDescriptionVisualController::openFromCommandUi));
         handlers.add(visual("replacedimensionalitydescription", "areahint replacedimensionalitydescription", "help.command.replacedimensionalitydescription",
             parent -> CommandVisualController.openDescriptionStart(parent, "replacedimensionalitydescription")));
         handlers.add(visual("deletedimensionalitydescription", "areahint deletedimensionalitydescription", "help.command.deletedimensionalitydescription",
