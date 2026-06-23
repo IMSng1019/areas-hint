@@ -161,37 +161,7 @@ public final class CommandVisualController {
     }
 
     public static void openAddJson(Screen parent) {
-        setScreen(new WizardLongTextInputScreen(parent, titleKey("add"),
-            "commandui.add.prompt",
-            "commandui.add.detail",
-            "",
-            null,
-            text -> {
-                String json = text == null ? "" : text.trim();
-                if (json.isEmpty()) {
-                    openAddJsonWithError(parent);
-                    return;
-                }
-                CommandUiActions.runCommand("areahint add " + json);
-            },
-            null));
-    }
-
-    private static void openAddJsonWithError(Screen parent) {
-        setScreen(new WizardLongTextInputScreen(parent, titleKey("add"),
-            "commandui.add.prompt",
-            "commandui.add.detail",
-            "",
-            "commandui.add.error.empty",
-            text -> {
-                String json = text == null ? "" : text.trim();
-                if (json.isEmpty()) {
-                    openAddJsonWithError(parent);
-                    return;
-                }
-                CommandUiActions.runCommand("areahint add " + json);
-            },
-            null));
+        AddCommandVisualController.open(parent);
     }
 
     public static void openCheck(Screen parent) {

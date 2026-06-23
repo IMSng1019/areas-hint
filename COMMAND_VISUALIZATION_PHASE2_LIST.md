@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-1. `add`
 2. `adddescription`
 3. `adddimensionalitydescription`
 4. `addhint`
@@ -64,6 +63,8 @@
 44. `udp`
 
 ## 已排除
+
+1. `add`： 已完成
 
 - `easyadd`：已完成高质量图形化流程，后续作为参考实现。
 - `addarea`：`easyadd` 的完整别名，逻辑与权限都复用 `easyadd`。
