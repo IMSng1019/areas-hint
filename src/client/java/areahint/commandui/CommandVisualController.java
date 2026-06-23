@@ -311,9 +311,7 @@ public final class CommandVisualController {
     }
 
     public static void openRecordCommand(Screen parent, String id, String startCommand, String cancelCommand) {
-        if ("addhint".equals(id)) {
-            openAddHintVisual(parent);
-        } else if ("deletehint".equals(id)) {
+        if ("deletehint".equals(id)) {
             openDeleteHintVisual(parent);
         } else if ("expandarea".equals(id)) {
             openExpandAreaVisual(parent);
@@ -334,27 +332,6 @@ public final class CommandVisualController {
                     }
                 }));
         }
-    }
-
-    private static void openAddHintVisual(Screen parent) {
-        areahint.addhint.AddHintManager manager = areahint.addhint.AddHintManager.getInstance();
-        List<AreaData> areas = manager.beginVisualSelection();
-        if (areas.isEmpty()) {
-            openInfo(parent, "addhint", "commandui.common.no_areas", null);
-            return;
-        }
-        setScreen(new WizardSelectionListScreen<>(parent, titleKey("addhint"),
-            "commandui.addhint.prompt",
-            CommandUiData.areaItems(areas),
-            area -> {
-                closeToGame();
-                beginVisualRecordMode("addhint");
-                manager.selectArea(area.getName());
-            },
-            () -> {
-                manager.cancel();
-                clearVisualRecordMode();
-            }));
     }
 
     private static void openDeleteHintVisual(Screen parent) {
