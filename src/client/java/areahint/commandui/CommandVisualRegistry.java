@@ -39,7 +39,8 @@ public final class CommandVisualRegistry {
         handlers.add(visualCommand("on", "areahint on", "command.usage.on"));
         handlers.add(visualCommand("off", "areahint off", "command.usage.off"));
         handlers.add(visualCommand("reload", "areahint reload", "help.command.reload"));
-        handlers.add(visual("delete", "areahint delete", "help.command.delete", CommandVisualController::openDelete));
+        handlers.add(visual("delete", "areahint delete", "help.command.delete",
+            areahint.delete.DeleteVisualController::openFromCommandUi));
         handlers.add(visual("frequency", "areahint frequency", "help.command.frequency", CommandVisualController::openFrequency));
         handlers.add(visual("hintrender", "areahint hintrender", "help.command.hintrender", CommandVisualController::openHintRender));
         handlers.add(visual("titlestyle", "areahint titlestyle", "help.command.titlestyle", CommandVisualController::openTitleStyle));

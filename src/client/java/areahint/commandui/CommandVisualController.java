@@ -4,7 +4,6 @@ import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import areahint.data.AreaData;
 import areahint.data.ConfigData;
-import areahint.delete.DeleteNetworking;
 import areahint.i18n.I18nManager;
 import areahint.network.ClientDimNameNetworking;
 import areahint.network.ClientNetworking;
@@ -504,30 +503,6 @@ public final class CommandVisualController {
                 openDivideAreaConfig(parent);
             },
             manager::cancel);
-    }
-
-    public static void openDelete(Screen parent) {
-        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
-        if (areas.isEmpty()) {
-            openInfo(parent, "delete", "commandui.common.no_areas", "areahint delete cancel");
-            return;
-        }
-        setScreen(new WizardSelectionListScreen<>(parent, titleKey("delete"),
-            "commandui.delete.prompt",
-            CommandUiData.areaItems(areas),
-            area -> openConfirmAction(parent, "delete",
-                I18nManager.translate("commandui.delete.confirm", area.getName()),
-                areaDetails(area),
-                () -> {
-                    String dimension = currentDimensionType();
-                    if (dimension == null) {
-                        sendLocalError("commandui.common.error.dimension");
-                        return;
-                    }
-                    closeToGame();
-                    DeleteNetworking.sendDeleteRequestToServer(area.getName(), dimension);
-                }),
-            () -> CommandUiActions.runCommand("areahint delete cancel")));
     }
 
     public static void openRename(Screen parent) {

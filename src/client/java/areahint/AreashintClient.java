@@ -285,6 +285,7 @@ public class AreashintClient implements ClientModInitializer {
 		try {
 			// 注册网络接收器
 			areahint.delete.DeleteNetworking.registerClientReceivers();
+			areahint.delete.DeleteVisualController.register();
 
 			LOGGER.info("Delete功能初始化完成");
 		} catch (Exception e) {

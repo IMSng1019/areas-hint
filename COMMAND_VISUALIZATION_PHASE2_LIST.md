@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-10. `delete`
 11. `deletedescription`
 12. `deletedimensionalitydescription`
 13. `deletehint`
@@ -65,6 +64,7 @@
 7. `boundviz`：已完成
 8. `check`：已完成
 9. `debug`：已完成
+10. `delete`：已完成
 
 ## 已排除
 

@@ -60,8 +60,11 @@ public class DeleteManager {
     public void startDelete() {
         if (currentState != DeleteState.IDLE) {
             MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_2")), false);
+            DeleteVisualController.clear();
             return;
         }
+
+        boolean visualRequested = DeleteVisualController.consumeVisualStartRequest();
 
         // 获取当前维度信息
         MinecraftClient client = MinecraftClient.getInstance();
@@ -74,6 +77,9 @@ public class DeleteManager {
                 client.player.sendMessage(Text.of(I18nManager.translate("message.error.dimension")), false);
                 ClientDebugManager.sendDebugInfo(ClientDebugManager.DebugCategory.AREA_DETECTION,
                     "无法转换维度路径: " + dimensionPath);
+                if (visualRequested) {
+                    DeleteVisualController.clear();
+                }
                 return;
             }
 
@@ -86,6 +92,8 @@ public class DeleteManager {
             // 向服务端请求可删除的域名列表（服务端会根据权限判断）
             client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.delete.list_2")), false);
             DeleteNetworking.requestDeletableAreas(currentDimension);
+        } else if (visualRequested) {
+            DeleteVisualController.clear();
         }
     }
 
@@ -102,12 +110,19 @@ public class DeleteManager {
 
         if (deletableAreas.isEmpty()) {
             client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.dimension.delete")), false);
+            if (DeleteVisualController.isVisualFlowActive()) {
+                DeleteVisualController.showInfo("message.message.area.dimension.delete");
+            }
             resetState();
             return;
         }
 
-        // 显示UI
-        DeleteUI.showAreaSelectionScreen(deletableAreas);
+        // 图形入口使用 Screen 选择，聊天入口继续使用原来的可点击聊天界面。
+        if (DeleteVisualController.isVisualFlowActive()) {
+            DeleteVisualController.showAreaSelection(deletableAreas);
+        } else {
+            DeleteUI.showAreaSelectionScreen(deletableAreas);
+        }
     }
 
 
@@ -142,7 +157,11 @@ public class DeleteManager {
 
         // 进入确认删除状态
         currentState = DeleteState.CONFIRM_DELETE;
-        DeleteUI.showConfirmDeleteScreen(selectedArea);
+        if (DeleteVisualController.isVisualFlowActive()) {
+            DeleteVisualController.showConfirmScreen(selectedArea);
+        } else {
+            DeleteUI.showConfirmDeleteScreen(selectedArea);
+        }
     }
 
     /**
@@ -194,6 +213,7 @@ public class DeleteManager {
         selectedArea = null;
         currentDimension = null;
         deletableAreas.clear();
+        DeleteVisualController.clear();
     }
 
     /**
