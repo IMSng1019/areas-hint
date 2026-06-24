@@ -211,7 +211,11 @@ public class DescriptionManager {
                 selectedEntry = entry;
                 if (isDeleteOperation()) {
                     state = State.WAITING_CONFIRM;
-                    DescriptionUI.showDeleteConfirmFirst(getCommandPrefix(), selectedEntry);
+                    if (visualFlowActive && "deletedescription".equals(getCommandPrefix())) {
+                        DeleteDescriptionVisualController.showFirstConfirm(selectedEntry);
+                    } else {
+                        DescriptionUI.showDeleteConfirmFirst(getCommandPrefix(), selectedEntry);
+                    }
                 } else {
                     state = loadExistingDescriptionOnEdit ? State.WAITING_EXISTING_DESCRIPTION : State.WAITING_DESCRIPTION_INPUT;
                     if (visualFlowActive) {
@@ -317,7 +321,11 @@ public class DescriptionManager {
             return;
         }
         state = State.WAITING_SECOND_CONFIRM;
-        DescriptionUI.showDeleteConfirmSecond(getCommandPrefix(), selectedEntry);
+        if (visualFlowActive && "deletedescription".equals(getCommandPrefix())) {
+            DeleteDescriptionVisualController.showSecondConfirm(selectedEntry);
+        } else {
+            DescriptionUI.showDeleteConfirmSecond(getCommandPrefix(), selectedEntry);
+        }
     }
 
     private void confirmSecond() {
@@ -401,6 +409,9 @@ public class DescriptionManager {
         if ("adddescription".equals(commandPrefix)) {
             return AddDescriptionVisualController.consumeVisualStartRequest();
         }
+        if ("deletedescription".equals(commandPrefix)) {
+            return DeleteDescriptionVisualController.consumeVisualStartRequest();
+        }
         if ("adddimensionalitydescription".equals(commandPrefix)) {
             return AddDimensionalityDescriptionVisualController.consumeVisualStartRequest();
         }
@@ -408,7 +419,9 @@ public class DescriptionManager {
     }
 
     private void showVisualLoading() {
-        if ("adddimensionalitydescription".equals(getCommandPrefix())) {
+        if ("deletedescription".equals(getCommandPrefix())) {
+            DeleteDescriptionVisualController.showLoading();
+        } else if ("adddimensionalitydescription".equals(getCommandPrefix())) {
             AddDimensionalityDescriptionVisualController.showLoading();
         } else {
             AddDescriptionVisualController.showLoading();
@@ -416,7 +429,9 @@ public class DescriptionManager {
     }
 
     private void showVisualSelection(List<DescriptionListEntry> entries) {
-        if ("adddimensionalitydescription".equals(getCommandPrefix())) {
+        if ("deletedescription".equals(getCommandPrefix())) {
+            DeleteDescriptionVisualController.showSelection(entries);
+        } else if ("adddimensionalitydescription".equals(getCommandPrefix())) {
             AddDimensionalityDescriptionVisualController.showSelection(entries);
         } else {
             AddDescriptionVisualController.showSelection(entries);
@@ -442,6 +457,8 @@ public class DescriptionManager {
     private void clearVisualController(String commandPrefix) {
         if ("adddescription".equals(commandPrefix)) {
             AddDescriptionVisualController.clear();
+        } else if ("deletedescription".equals(commandPrefix)) {
+            DeleteDescriptionVisualController.clear();
         } else if ("adddimensionalitydescription".equals(commandPrefix)) {
             AddDimensionalityDescriptionVisualController.clear();
         }
@@ -449,6 +466,7 @@ public class DescriptionManager {
 
     private void clearVisualControllers() {
         AddDescriptionVisualController.clear();
+        DeleteDescriptionVisualController.clear();
         AddDimensionalityDescriptionVisualController.clear();
     }
 
