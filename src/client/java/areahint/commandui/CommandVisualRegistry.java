@@ -82,7 +82,8 @@ public final class CommandVisualRegistry {
             parent -> CommandVisualController.openRecordCommand(parent, "deletehint", "areahint deletehint", "areahint deletehint cancel")));
         handlers.add(visual("firstdimname", "areahint firstdimname", "help.command.firstdimname", CommandVisualController::openFirstDimName));
         handlers.add(visualCommand("firstdimname_skip", "areahint firstdimname_skip", "help.command.firstdimname_skip"));
-        handlers.add(visual("debug", "areahint debug", "help.command.debug", CommandVisualController::openDebug));
+        handlers.add(visual("debug", "areahint debug", "help.command.debug",
+            areahint.debug.DebugVisualController::openFromCommandUi));
         handlers.add(visual("adddescription", "areahint adddescription", "help.command.adddescription",
             areahint.description.AddDescriptionVisualController::openFromCommandUi));
         handlers.add(visual("replacedescription", "areahint replacedescription", "help.command.replacedescription",

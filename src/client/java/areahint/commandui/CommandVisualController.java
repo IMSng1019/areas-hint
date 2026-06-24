@@ -144,20 +144,6 @@ public final class CommandVisualController {
             () -> CommandUiActions.runCommand("areahint titlesize cancel")));
     }
 
-    public static void openDebug(Screen parent) {
-        List<WizardOptionScreen.OptionSpec> options = List.of(
-            option("commandui.debug.toggle", () -> runAndClose("areahint debug")),
-            option("commandui.debug.on", () -> runAndClose("areahint debug on")),
-            option("commandui.debug.off", () -> runAndClose("areahint debug off")),
-            option("commandui.debug.status", () -> runAndClose("areahint debug status"))
-        );
-        setScreen(new WizardOptionScreen(parent, titleKey("debug"),
-            "commandui.debug.prompt",
-            "commandui.debug.detail",
-            options,
-            null));
-    }
-
     public static void openAddJson(Screen parent) {
         AddCommandVisualController.open(parent);
     }
