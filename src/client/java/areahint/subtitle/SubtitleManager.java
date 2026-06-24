@@ -46,6 +46,7 @@ public class SubtitleManager {
     private String selectedAreaName = null;
     private String pendingSubtitle = null;
     private String pendingColor = null;
+    private boolean visualFlowActive = false;
 
     private SubtitleManager() {
     }
@@ -62,15 +63,17 @@ public class SubtitleManager {
     }
 
     public void startAddSubtitle(List<AreaData> areas, String dimension) {
-        if (!prepareStart(areas, dimension)) {
+        boolean visualRequested = AddSubtitleVisualController.consumeVisualStartRequest();
+        if (!prepareStart(areas, dimension, visualRequested)) {
             return;
         }
+        visualFlowActive = visualRequested;
         currentState = SubtitleState.ADD_SELECT_AREA;
-        SubtitleUI.showAreaSelectionScreen(editableAreas, SubtitleUI.AreaSelectionMode.ADD);
+        showAddAreaSelection();
     }
 
     public void startDeleteSubtitle(List<AreaData> areas, String dimension) {
-        if (!prepareStart(areas, dimension)) {
+        if (!prepareStart(areas, dimension, false)) {
             return;
         }
         currentState = SubtitleState.DELETE_SELECT_AREA;
@@ -78,7 +81,7 @@ public class SubtitleManager {
     }
 
     public void startReplaceSubtitleColor(List<AreaData> areas, String dimension) {
-        if (!prepareStart(areas, dimension)) {
+        if (!prepareStart(areas, dimension, false)) {
             return;
         }
         currentState = SubtitleState.COLOR_SELECT_AREA;
@@ -90,10 +93,13 @@ public class SubtitleManager {
             return;
         }
         if (!selectArea(areaName)) {
+            if (visualFlowActive) {
+                showAddAreaSelection();
+            }
             return;
         }
         currentState = SubtitleState.ADD_INPUT_TEXT;
-        SubtitleUI.showSubtitleInputScreen(selectedArea);
+        showSubtitleTextInput(null);
     }
 
     public void handleSubtitleText(String subtitleText) {
@@ -104,13 +110,16 @@ public class SubtitleManager {
         String normalizedSubtitle = normalizeSubtitle(subtitleText);
         if (normalizedSubtitle == null) {
             sendClientMessage(tr("subtitle.manager.error.empty"));
+            if (visualFlowActive) {
+                showSubtitleTextInput("subtitle.manager.error.empty");
+            }
             return;
         }
 
         pendingSubtitle = normalizedSubtitle;
         // 添加副字幕时先询问颜色，再询问大小，流程顺序与 EasyAdd 的“输入内容后继续选择属性”保持一致。
         currentState = SubtitleState.ADD_SELECT_COLOR;
-        SubtitleUI.showAddColorSelectionScreen(selectedArea, pendingSubtitle);
+        showAddColorSelection();
     }
 
     public void handleAddColorSelection(String colorInput) {
@@ -120,13 +129,16 @@ public class SubtitleManager {
 
         if (!isValidColorInput(colorInput)) {
             sendClientMessage(tr("subtitle.manager.error.invalid_color", colorInput));
+            if (visualFlowActive) {
+                AddSubtitleVisualController.showCustomColorScreen(tr("subtitle.manager.error.invalid_color", colorInput));
+            }
             return;
         }
 
         pendingColor = ColorUtil.normalizeColor(colorInput);
         // addsubtitle 只选择副字幕内容和颜色，大小继续由 replacesubtitlesize 单独管理。
         currentState = SubtitleState.ADD_CONFIRM;
-        SubtitleUI.showAddConfirmScreen(selectedArea, pendingSubtitle, pendingColor);
+        showAddConfirm();
     }
 
     public void confirmAddSubtitle() {
@@ -228,14 +240,22 @@ public class SubtitleManager {
         resetState();
     }
 
-    private boolean prepareStart(List<AreaData> areas, String dimension) {
+    private boolean prepareStart(List<AreaData> areas, String dimension, boolean visualRequested) {
         if (currentState != SubtitleState.IDLE) {
             sendClientMessage(tr("subtitle.manager.error.active"));
+            if (visualRequested) {
+                AddSubtitleVisualController.showInfo("subtitle.manager.error.active");
+                AddSubtitleVisualController.clear();
+            }
             return false;
         }
 
         if (areas == null || areas.isEmpty()) {
             sendClientMessage(tr("subtitle.manager.error.no_areas"));
+            if (visualRequested) {
+                AddSubtitleVisualController.showInfo("subtitle.manager.error.no_areas");
+                AddSubtitleVisualController.clear();
+            }
             return false;
         }
 
@@ -247,6 +267,7 @@ public class SubtitleManager {
         selectedAreaName = null;
         pendingSubtitle = null;
         pendingColor = null;
+        visualFlowActive = false;
         return true;
     }
 
@@ -317,6 +338,8 @@ public class SubtitleManager {
         selectedAreaName = null;
         pendingSubtitle = null;
         pendingColor = null;
+        visualFlowActive = false;
+        AddSubtitleVisualController.clear();
     }
 
     private boolean isValidColorInput(String colorInput) {
@@ -387,5 +410,37 @@ public class SubtitleManager {
 
     public SubtitleState getCurrentState() {
         return currentState;
+    }
+
+    private void showAddAreaSelection() {
+        if (visualFlowActive) {
+            AddSubtitleVisualController.showAreaSelection(editableAreas);
+        } else {
+            SubtitleUI.showAreaSelectionScreen(editableAreas, SubtitleUI.AreaSelectionMode.ADD);
+        }
+    }
+
+    private void showSubtitleTextInput(String errorTextOrKey) {
+        if (visualFlowActive) {
+            AddSubtitleVisualController.showSubtitleTextScreen(selectedArea, errorTextOrKey);
+        } else {
+            SubtitleUI.showSubtitleInputScreen(selectedArea);
+        }
+    }
+
+    private void showAddColorSelection() {
+        if (visualFlowActive) {
+            AddSubtitleVisualController.showColorSelection(selectedArea, pendingSubtitle);
+        } else {
+            SubtitleUI.showAddColorSelectionScreen(selectedArea, pendingSubtitle);
+        }
+    }
+
+    private void showAddConfirm() {
+        if (visualFlowActive) {
+            AddSubtitleVisualController.showConfirmScreen(selectedArea, pendingSubtitle, pendingColor);
+        } else {
+            SubtitleUI.showAddConfirmScreen(selectedArea, pendingSubtitle, pendingColor);
+        }
     }
 }

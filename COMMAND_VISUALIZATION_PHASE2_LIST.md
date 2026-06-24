@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-6. `addsubtitle`
 7. `boundviz`
 8. `check`
 9. `debug`
@@ -65,6 +64,7 @@
 3. `adddimensionalitydescription`：已完成
 4. `addhint`：已完成
 5. `addsignature`：已完成
+6. `addsubtitle`：已完成
 
 ## 已排除
 
