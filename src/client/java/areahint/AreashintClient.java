@@ -246,6 +246,7 @@ public class AreashintClient implements ClientModInitializer {
 			areahint.description.AddDescriptionVisualController.register();
 			areahint.description.DeleteDescriptionVisualController.register();
 			areahint.description.AddDimensionalityDescriptionVisualController.register();
+			areahint.description.DeleteDimensionalityDescriptionVisualController.register();
 			LOGGER.info("Description功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化Description功能时发生错误", e);

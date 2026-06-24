@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-12. `deletedimensionalitydescription`
 13. `deletehint`
 14. `deletesignature`
 15. `deletesubtitle`
@@ -65,6 +64,7 @@
 9. `debug`：已完成
 10. `delete`：已完成
 11. `deletedescription`：已完成
+12. `deletedimensionalitydescription`：已完成
 
 ## 已排除
 

@@ -213,6 +213,8 @@ public class DescriptionManager {
                     state = State.WAITING_CONFIRM;
                     if (visualFlowActive && "deletedescription".equals(getCommandPrefix())) {
                         DeleteDescriptionVisualController.showFirstConfirm(selectedEntry);
+                    } else if (visualFlowActive && "deletedimensionalitydescription".equals(getCommandPrefix())) {
+                        DeleteDimensionalityDescriptionVisualController.showFirstConfirm(selectedEntry);
                     } else {
                         DescriptionUI.showDeleteConfirmFirst(getCommandPrefix(), selectedEntry);
                     }
@@ -323,6 +325,8 @@ public class DescriptionManager {
         state = State.WAITING_SECOND_CONFIRM;
         if (visualFlowActive && "deletedescription".equals(getCommandPrefix())) {
             DeleteDescriptionVisualController.showSecondConfirm(selectedEntry);
+        } else if (visualFlowActive && "deletedimensionalitydescription".equals(getCommandPrefix())) {
+            DeleteDimensionalityDescriptionVisualController.showSecondConfirm(selectedEntry);
         } else {
             DescriptionUI.showDeleteConfirmSecond(getCommandPrefix(), selectedEntry);
         }
@@ -415,12 +419,17 @@ public class DescriptionManager {
         if ("adddimensionalitydescription".equals(commandPrefix)) {
             return AddDimensionalityDescriptionVisualController.consumeVisualStartRequest();
         }
+        if ("deletedimensionalitydescription".equals(commandPrefix)) {
+            return DeleteDimensionalityDescriptionVisualController.consumeVisualStartRequest();
+        }
         return false;
     }
 
     private void showVisualLoading() {
         if ("deletedescription".equals(getCommandPrefix())) {
             DeleteDescriptionVisualController.showLoading();
+        } else if ("deletedimensionalitydescription".equals(getCommandPrefix())) {
+            DeleteDimensionalityDescriptionVisualController.showLoading();
         } else if ("adddimensionalitydescription".equals(getCommandPrefix())) {
             AddDimensionalityDescriptionVisualController.showLoading();
         } else {
@@ -431,6 +440,8 @@ public class DescriptionManager {
     private void showVisualSelection(List<DescriptionListEntry> entries) {
         if ("deletedescription".equals(getCommandPrefix())) {
             DeleteDescriptionVisualController.showSelection(entries);
+        } else if ("deletedimensionalitydescription".equals(getCommandPrefix())) {
+            DeleteDimensionalityDescriptionVisualController.showSelection(entries);
         } else if ("adddimensionalitydescription".equals(getCommandPrefix())) {
             AddDimensionalityDescriptionVisualController.showSelection(entries);
         } else {
@@ -461,6 +472,8 @@ public class DescriptionManager {
             DeleteDescriptionVisualController.clear();
         } else if ("adddimensionalitydescription".equals(commandPrefix)) {
             AddDimensionalityDescriptionVisualController.clear();
+        } else if ("deletedimensionalitydescription".equals(commandPrefix)) {
+            DeleteDimensionalityDescriptionVisualController.clear();
         }
     }
 
@@ -468,6 +481,7 @@ public class DescriptionManager {
         AddDescriptionVisualController.clear();
         DeleteDescriptionVisualController.clear();
         AddDimensionalityDescriptionVisualController.clear();
+        DeleteDimensionalityDescriptionVisualController.clear();
     }
 
     private String getCurrentDimensionType() {
