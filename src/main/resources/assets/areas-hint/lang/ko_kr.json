@@ -2022,6 +2022,7 @@
   "commandui.add.confirm.color": "색상: {0}",
   "commandui.check.title": "연합 영역 확인",
   "commandui.check.all": "모두 확인",
+  "commandui.check.select": "목록에서 선택",
   "commandui.check.input": "연합 영역 입력",
   "commandui.check.prompt": "확인할 연합 영역 선택",
   "commandui.check.detail": "자세한 결과는 채팅에 출력됩니다",

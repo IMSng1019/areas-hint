@@ -2022,6 +2022,7 @@
   "commandui.add.confirm.color": "Цвет: {0}",
   "commandui.check.title": "Проверить объединенную область",
   "commandui.check.all": "Проверить все",
+  "commandui.check.select": "Выбрать из списка",
   "commandui.check.input": "Ввести объединенную область",
   "commandui.check.prompt": "Выберите объединенную область для проверки",
   "commandui.check.detail": "Подробные результаты выводятся в чат",

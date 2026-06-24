@@ -2022,6 +2022,7 @@
   "commandui.add.confirm.color": "Farbe: {0}",
   "commandui.check.title": "Verbundgebiet prüfen",
   "commandui.check.all": "Alle prüfen",
+  "commandui.check.select": "Aus Liste wählen",
   "commandui.check.input": "Verbundgebiet eingeben",
   "commandui.check.prompt": "Zu prüfendes Verbundgebiet wählen",
   "commandui.check.detail": "Details werden im Chat ausgegeben",

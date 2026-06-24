@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-8. `check`
 9. `debug`
 10. `delete`
 11. `deletedescription`
@@ -65,6 +64,7 @@
 5. `addsignature`：已完成
 6. `addsubtitle`：已完成
 7. `boundviz`：已完成
+8. `check`：已完成
 
 ## 已排除
 

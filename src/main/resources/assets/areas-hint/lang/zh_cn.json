@@ -2022,6 +2022,7 @@
   "commandui.add.confirm.color": "颜色：{0}",
   "commandui.check.title": "检查联合域名",
   "commandui.check.all": "检查全部",
+  "commandui.check.select": "从列表选择",
   "commandui.check.input": "输入联合域名",
   "commandui.check.prompt": "选择要检查的联合域名",
   "commandui.check.detail": "详细结果会输出到聊天栏",

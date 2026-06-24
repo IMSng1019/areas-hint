@@ -2022,6 +2022,7 @@
   "commandui.add.confirm.color": "Color: {0}",
   "commandui.check.title": "Comprobar área unida",
   "commandui.check.all": "Comprobar todo",
+  "commandui.check.select": "Elegir de la lista",
   "commandui.check.input": "Introducir área unida",
   "commandui.check.prompt": "Elige un área unida para comprobar",
   "commandui.check.detail": "Los resultados detallados se muestran en el chat",

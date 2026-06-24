@@ -2022,6 +2022,7 @@
   "commandui.add.confirm.color": "Couleur : {0}",
   "commandui.check.title": "Vérifier une zone d'union",
   "commandui.check.all": "Tout vérifier",
+  "commandui.check.select": "Choisir dans la liste",
   "commandui.check.input": "Entrer une zone d'union",
   "commandui.check.prompt": "Choisir une zone d'union à vérifier",
   "commandui.check.detail": "Les résultats détaillés sont affichés dans le chat",

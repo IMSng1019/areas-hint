@@ -18,11 +18,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -162,45 +160,6 @@ public final class CommandVisualController {
 
     public static void openAddJson(Screen parent) {
         AddCommandVisualController.open(parent);
-    }
-
-    public static void openCheck(Screen parent) {
-        Map<String, List<AreaData>> unionGroups = buildUnionGroups();
-        List<WizardOptionScreen.OptionSpec> options = new ArrayList<>();
-        options.add(option("commandui.check.all", () -> runAndClose("areahint check")));
-        options.add(option("commandui.check.input", () -> openCheckInput(parent, null)));
-        if (!unionGroups.isEmpty()) {
-            setScreen(new WizardSelectionListScreen<>(parent, titleKey("check"),
-                "commandui.check.prompt",
-                unionItems(unionGroups),
-                unionName -> runAndClose("areahint check " + CommandUiData.quote(unionName)),
-                null));
-            return;
-        }
-        setScreen(new WizardOptionScreen(parent, titleKey("check"),
-            "commandui.check.prompt",
-            "commandui.check.detail",
-            options,
-            null));
-    }
-
-    private static void openCheckInput(Screen parent, String errorKey) {
-        openSingleField(parent, "check",
-            "commandui.check.label",
-            "commandui.check.placeholder",
-            "",
-            "commandui.check.input.prompt",
-            "commandui.check.input.detail",
-            errorKey,
-            120,
-            value -> {
-                String unionName = value.trim();
-                if (unionName.isEmpty()) {
-                    openCheckInput(parent, "commandui.check.error.empty");
-                    return;
-                }
-                runAndClose("areahint check " + CommandUiData.quote(unionName));
-            });
     }
 
     public static void openServerLanguage(Screen parent) {
@@ -1001,26 +960,6 @@ public final class CommandVisualController {
         details.add(I18nManager.translate("commandui.common.area.base", nullText(area.getBaseName())));
         details.add(I18nManager.translate("commandui.common.area.signature", nullText(area.getSignature())));
         return details;
-    }
-
-    private static Map<String, List<AreaData>> buildUnionGroups() {
-        Map<String, List<AreaData>> groups = new LinkedHashMap<>();
-        for (AreaData area : CommandUiData.loadCurrentDimensionAreas()) {
-            String unionName = area.getSurfacename() == null || area.getSurfacename().trim().isEmpty()
-                ? area.getName()
-                : area.getSurfacename().trim();
-            groups.computeIfAbsent(unionName, ignored -> new ArrayList<>()).add(area);
-        }
-        return groups;
-    }
-
-    private static List<WizardSelectionListScreen.SelectionItem<String>> unionItems(Map<String, List<AreaData>> unionGroups) {
-        List<WizardSelectionListScreen.SelectionItem<String>> items = new ArrayList<>();
-        for (Map.Entry<String, List<AreaData>> entry : unionGroups.entrySet()) {
-            items.add(new WizardSelectionListScreen.SelectionItem<>(entry.getKey(), entry.getKey(),
-                I18nManager.translate("commandui.check.item.detail", entry.getValue().size())));
-        }
-        return items;
     }
 
     private static List<WizardSelectionListScreen.SelectionItem<String>> dimensionItems() {
