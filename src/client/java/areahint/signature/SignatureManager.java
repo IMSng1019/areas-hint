@@ -56,6 +56,7 @@ public class SignatureManager {
     private String currentDimension;
     private boolean active;
     private boolean currentPlayerAdmin;
+    private boolean visualFlowActive;
     private final List<AreaData> selectableAreas = new ArrayList<>();
 
     private SignatureManager() {
@@ -102,11 +103,19 @@ public class SignatureManager {
      * 启动添加或删除扩展签名流程。
      */
     private void start(Operation nextOperation) {
+        boolean visualRequested = nextOperation == Operation.ADD
+            && AddSignatureVisualController.consumeVisualStartRequest();
         if (client.player == null || client.world == null) {
+            if (visualRequested) {
+                AddSignatureVisualController.clear();
+            }
             return;
         }
         if (active) {
             sendMessage(I18nManager.translate("signature.manager.error.active"), Formatting.RED);
+            if (visualRequested) {
+                AddSignatureVisualController.clear();
+            }
             return;
         }
 
@@ -116,16 +125,20 @@ public class SignatureManager {
         this.active = true;
         this.currentDimension = client.world.getRegistryKey().getValue().toString();
         this.currentPlayerAdmin = client.player.hasPermissionLevel(2);
+        this.visualFlowActive = visualRequested;
 
         selectableAreas.clear();
         selectableAreas.addAll(loadModifiableAreas());
         if (selectableAreas.isEmpty()) {
             sendMessage(I18nManager.translate("signature.manager.error.no_areas"), Formatting.RED);
+            if (visualFlowActive) {
+                AddSignatureVisualController.showInfo("signature.manager.error.no_areas");
+            }
             reset();
             return;
         }
 
-        SignatureUI.showAreaSelectionScreen(operation, selectableAreas, currentPlayerAdmin);
+        showAreaSelection();
     }
 
     /**
@@ -140,18 +153,21 @@ public class SignatureManager {
         AreaData area = findAreaByName(cleanedName, selectableAreas);
         if (area == null) {
             sendMessage(I18nManager.translate("signature.manager.error.area_not_found_or_denied", cleanedName), Formatting.RED);
+            if (visualFlowActive) {
+                showAreaSelection();
+            }
             return;
         }
 
         if (operation == Operation.DELETE && getRemovableSignatures(area).isEmpty()) {
             sendMessage(I18nManager.translate("signature.manager.error.no_removable_signatures", cleanedName), Formatting.RED);
-            SignatureUI.showAreaSelectionScreen(operation, selectableAreas, currentPlayerAdmin);
+            showAreaSelection();
             return;
         }
 
         this.selectedArea = area;
         this.state = State.INPUT_PLAYER_NAME;
-        SignatureUI.showPlayerNamePrompt(operation, selectedArea, getRemovableSignatures(selectedArea));
+        showPlayerNamePrompt(null);
     }
 
     /**
@@ -165,24 +181,24 @@ public class SignatureManager {
         String cleanedPlayerName = stripQuotes(playerName);
         if (cleanedPlayerName.isEmpty()) {
             sendMessage(I18nManager.translate("signature.manager.error.empty_player"), Formatting.RED);
-            SignatureUI.showPlayerNamePrompt(operation, selectedArea, getRemovableSignatures(selectedArea));
+            showPlayerNamePrompt(I18nManager.translate("signature.manager.error.empty_player"));
             return;
         }
 
         if (operation == Operation.ADD && selectedArea.hasSignature(cleanedPlayerName)) {
             sendMessage(I18nManager.translate("signature.manager.error.player_already_signed", cleanedPlayerName), Formatting.RED);
-            SignatureUI.showPlayerNamePrompt(operation, selectedArea, getRemovableSignatures(selectedArea));
+            showPlayerNamePrompt(I18nManager.translate("signature.manager.error.player_already_signed", cleanedPlayerName));
             return;
         }
         if (operation == Operation.DELETE && !hasExtensionSignature(selectedArea, cleanedPlayerName)) {
             sendMessage(I18nManager.translate("signature.manager.error.player_not_extension", cleanedPlayerName), Formatting.RED);
-            SignatureUI.showPlayerNamePrompt(operation, selectedArea, getRemovableSignatures(selectedArea));
+            showPlayerNamePrompt(I18nManager.translate("signature.manager.error.player_not_extension", cleanedPlayerName));
             return;
         }
 
         this.targetPlayerName = cleanedPlayerName;
         this.state = operation == Operation.ADD ? State.CONFIRM_ADD : State.CONFIRM_DELETE;
-        SignatureUI.showConfirmScreen(operation, selectedArea, targetPlayerName);
+        showConfirmScreen();
     }
 
     /**
@@ -438,14 +454,40 @@ public class SignatureManager {
         this.currentDimension = null;
         this.active = false;
         this.currentPlayerAdmin = false;
+        this.visualFlowActive = false;
         this.selectableAreas.clear();
     }
 
     private void reset() {
         resetStateOnly();
+        AddSignatureVisualController.clear();
     }
 
     public boolean isActive() {
         return active;
+    }
+
+    private void showAreaSelection() {
+        if (visualFlowActive && operation == Operation.ADD) {
+            AddSignatureVisualController.showAreaSelection(selectableAreas, currentPlayerAdmin);
+        } else {
+            SignatureUI.showAreaSelectionScreen(operation, selectableAreas, currentPlayerAdmin);
+        }
+    }
+
+    private void showPlayerNamePrompt(String errorTextOrKey) {
+        if (visualFlowActive && operation == Operation.ADD) {
+            AddSignatureVisualController.showPlayerNamePrompt(selectedArea, errorTextOrKey);
+        } else {
+            SignatureUI.showPlayerNamePrompt(operation, selectedArea, getRemovableSignatures(selectedArea));
+        }
+    }
+
+    private void showConfirmScreen() {
+        if (visualFlowActive && operation == Operation.ADD) {
+            AddSignatureVisualController.showConfirmScreen(selectedArea, targetPlayerName);
+        } else {
+            SignatureUI.showConfirmScreen(operation, selectedArea, targetPlayerName);
+        }
     }
 }

@@ -229,6 +229,7 @@ public class AreashintClient implements ClientModInitializer {
 		try {
 			areahint.signature.SignatureManager.init();
 			areahint.signature.SignatureClientNetworking.registerClientReceivers();
+			areahint.signature.AddSignatureVisualController.register();
 			LOGGER.info("Signature功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化Signature功能时发生错误", e);

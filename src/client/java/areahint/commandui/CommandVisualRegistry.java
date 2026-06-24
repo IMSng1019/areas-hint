@@ -94,7 +94,7 @@ public final class CommandVisualRegistry {
         handlers.add(visual("deletedimensionalitydescription", "areahint deletedimensionalitydescription", "help.command.deletedimensionalitydescription",
             parent -> CommandVisualController.openDescriptionStart(parent, "deletedimensionalitydescription")));
         handlers.add(visual("addsignature", "areahint addsignature", "help.command.addsignature",
-            parent -> CommandVisualController.openSignature(parent, "addsignature")));
+            areahint.signature.AddSignatureVisualController::openFromCommandUi));
         handlers.add(visual("deletesignature", "areahint deletesignature", "help.command.deletesignature",
             parent -> CommandVisualController.openSignature(parent, "deletesignature")));
         handlers.add(visual("serverlanguage", "areahint serverlanguage", "help.command.serverlanguage", CommandVisualController::openServerLanguage));
