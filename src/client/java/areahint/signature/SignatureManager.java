@@ -103,18 +103,17 @@ public class SignatureManager {
      * 启动添加或删除扩展签名流程。
      */
     private void start(Operation nextOperation) {
-        boolean visualRequested = nextOperation == Operation.ADD
-            && AddSignatureVisualController.consumeVisualStartRequest();
+        boolean visualRequested = consumeVisualStartRequest(nextOperation);
         if (client.player == null || client.world == null) {
             if (visualRequested) {
-                AddSignatureVisualController.clear();
+                clearVisualControllers();
             }
             return;
         }
         if (active) {
             sendMessage(I18nManager.translate("signature.manager.error.active"), Formatting.RED);
             if (visualRequested) {
-                AddSignatureVisualController.clear();
+                clearVisualControllers();
             }
             return;
         }
@@ -132,7 +131,7 @@ public class SignatureManager {
         if (selectableAreas.isEmpty()) {
             sendMessage(I18nManager.translate("signature.manager.error.no_areas"), Formatting.RED);
             if (visualFlowActive) {
-                AddSignatureVisualController.showInfo("signature.manager.error.no_areas");
+                showVisualInfo("signature.manager.error.no_areas");
             }
             reset();
             return;
@@ -236,7 +235,11 @@ public class SignatureManager {
 
         if (state == State.CONFIRM_DELETE) {
             state = State.FINAL_DELETE_CONFIRM;
-            SignatureUI.showFinalDeleteConfirmScreen(selectedArea, targetPlayerName);
+            if (visualFlowActive && operation == Operation.DELETE) {
+                DeleteSignatureVisualController.showFinalDeleteConfirmScreen(selectedArea, targetPlayerName);
+            } else {
+                SignatureUI.showFinalDeleteConfirmScreen(selectedArea, targetPlayerName);
+            }
         }
     }
 
@@ -460,7 +463,30 @@ public class SignatureManager {
 
     private void reset() {
         resetStateOnly();
+        clearVisualControllers();
+    }
+
+    private boolean consumeVisualStartRequest(Operation nextOperation) {
+        if (nextOperation == Operation.ADD) {
+            return AddSignatureVisualController.consumeVisualStartRequest();
+        }
+        if (nextOperation == Operation.DELETE) {
+            return DeleteSignatureVisualController.consumeVisualStartRequest();
+        }
+        return false;
+    }
+
+    private void clearVisualControllers() {
         AddSignatureVisualController.clear();
+        DeleteSignatureVisualController.clear();
+    }
+
+    private void showVisualInfo(String messageTextOrKey) {
+        if (operation == Operation.ADD) {
+            AddSignatureVisualController.showInfo(messageTextOrKey);
+        } else if (operation == Operation.DELETE) {
+            DeleteSignatureVisualController.showInfo(messageTextOrKey);
+        }
     }
 
     public boolean isActive() {
@@ -470,6 +496,8 @@ public class SignatureManager {
     private void showAreaSelection() {
         if (visualFlowActive && operation == Operation.ADD) {
             AddSignatureVisualController.showAreaSelection(selectableAreas, currentPlayerAdmin);
+        } else if (visualFlowActive && operation == Operation.DELETE) {
+            DeleteSignatureVisualController.showAreaSelection(selectableAreas, currentPlayerAdmin);
         } else {
             SignatureUI.showAreaSelectionScreen(operation, selectableAreas, currentPlayerAdmin);
         }
@@ -478,6 +506,8 @@ public class SignatureManager {
     private void showPlayerNamePrompt(String errorTextOrKey) {
         if (visualFlowActive && operation == Operation.ADD) {
             AddSignatureVisualController.showPlayerNamePrompt(selectedArea, errorTextOrKey);
+        } else if (visualFlowActive && operation == Operation.DELETE) {
+            DeleteSignatureVisualController.showPlayerSelection(selectedArea, getRemovableSignatures(selectedArea));
         } else {
             SignatureUI.showPlayerNamePrompt(operation, selectedArea, getRemovableSignatures(selectedArea));
         }
@@ -486,6 +516,8 @@ public class SignatureManager {
     private void showConfirmScreen() {
         if (visualFlowActive && operation == Operation.ADD) {
             AddSignatureVisualController.showConfirmScreen(selectedArea, targetPlayerName);
+        } else if (visualFlowActive && operation == Operation.DELETE) {
+            DeleteSignatureVisualController.showConfirmScreen(selectedArea, targetPlayerName);
         } else {
             SignatureUI.showConfirmScreen(operation, selectedArea, targetPlayerName);
         }
