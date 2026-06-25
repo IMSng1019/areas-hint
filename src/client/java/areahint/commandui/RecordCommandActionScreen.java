@@ -53,7 +53,7 @@ public class RecordCommandActionScreen extends CommandUiScreen {
             }
             this.flow.finishAction().run();
             if ("dividearea".equals(this.flow.id())) {
-                CommandVisualController.openDivideAreaConfig(null);
+                areahint.dividearea.DivideAreaVisualController.openConfig(null);
             } else if (!this.flow.isStillRecording()) {
                 CommandVisualController.clearVisualRecordMode();
             }

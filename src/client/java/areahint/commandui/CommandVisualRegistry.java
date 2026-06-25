@@ -78,7 +78,7 @@ public final class CommandVisualRegistry {
         handlers.add(visual("shrinkarea", "areahint shrinkarea", "help.command.shrinkarea",
             parent -> CommandVisualController.openRecordCommand(parent, "shrinkarea", "areahint shrinkarea", "areahint shrinkarea cancel")));
         handlers.add(visual("dividearea", "areahint dividearea", "help.command.dividearea",
-            parent -> CommandVisualController.openRecordCommand(parent, "dividearea", "areahint dividearea", "areahint dividearea cancel")));
+            areahint.dividearea.DivideAreaVisualController::openFromCommandUi));
         handlers.add(visual("addhint", "areahint addhint", "help.command.addhint",
             areahint.addhint.AddHintVisualController::openFromCommandUi));
         handlers.add(visual("deletehint", "areahint deletehint", "help.command.deletehint",
