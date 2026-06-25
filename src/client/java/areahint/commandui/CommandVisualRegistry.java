@@ -69,7 +69,8 @@ public final class CommandVisualRegistry {
         handlers.add(visualCommand("replacebutton", "areahint replacebutton", "help.command.replacebutton"));
         handlers.add(visual("check", "areahint check", "help.command.check",
             areahint.check.CheckVisualController::openFromCommandUi));
-        handlers.add(visual("dimensionalityname", "areahint dimensionalityname", "help.command.dimensionalityname", CommandVisualController::openDimensionalityName));
+        handlers.add(visual("dimensionalityname", "areahint dimensionalityname", "help.command.dimensionalityname",
+            areahint.dimensional.DimensionalityNameVisualController::openFromCommandUi));
         handlers.add(visual("dimensionalitycolor", "areahint dimensionalitycolor", "help.command.dimensionalitycolor",
             areahint.dimensional.DimensionalityColorVisualController::openFromCommandUi));
         handlers.add(visual("expandarea", "areahint expandarea", "help.command.expandarea",

@@ -5,7 +5,6 @@ import areahint.config.ClientConfig;
 import areahint.data.AreaData;
 import areahint.data.ConfigData;
 import areahint.i18n.I18nManager;
-import areahint.network.ClientDimNameNetworking;
 import areahint.network.ClientNetworking;
 import areahint.network.Packets;
 import areahint.rename.RenameNetworking;
@@ -17,10 +16,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * 指令可视化流程控制器，只负责把图形输入转换为现有指令或网络请求。
@@ -702,40 +699,6 @@ public final class CommandVisualController {
             () -> CommandUiActions.runCommand("areahint " + id + " cancel"));
     }
 
-    public static void openDimensionalityName(Screen parent) {
-        setScreen(new WizardSelectionListScreen<>(parent, titleKey("dimensionalityname"),
-            "commandui.dimensionalityname.prompt",
-            dimensionItems(),
-            dimensionId -> openDimensionalityNameInput(parent, dimensionId, null),
-            () -> CommandUiActions.runCommand("areahint dimensionalityname cancel")));
-    }
-
-    private static void openDimensionalityNameInput(Screen parent, String dimensionId, String errorKey) {
-        openSingleField(parent, "dimensionalityname",
-            "commandui.dimensionalityname.name.label",
-            "commandui.dimensionalityname.name.placeholder",
-            dimensionalName(dimensionId),
-            "commandui.dimensionalityname.name.prompt",
-            I18nManager.translate("commandui.dimensionalityname.name.detail", dimensionId),
-            errorKey,
-            50,
-            value -> {
-                String name = value.trim();
-                if (name.isEmpty()) {
-                    openDimensionalityNameInput(parent, dimensionId, "commandui.common.error.empty");
-                    return;
-                }
-                openConfirmAction(parent, "dimensionalityname",
-                    I18nManager.translate("commandui.dimensionalityname.confirm", dimensionId, name),
-                    List.of(),
-                    () -> {
-                        closeToGame();
-                        ClientDimNameNetworking.sendDimNameChange(dimensionId, name);
-                    });
-            },
-            () -> CommandUiActions.runCommand("areahint dimensionalityname cancel"));
-    }
-
     private static void openColorSelection(Screen parent, String id, java.util.function.Consumer<String> colorAction) {
         setScreen(new WizardOptionScreen(parent, titleKey(id),
             "commandui.color.prompt",
@@ -886,27 +849,6 @@ public final class CommandVisualController {
         details.add(I18nManager.translate("commandui.common.area.base", nullText(area.getBaseName())));
         details.add(I18nManager.translate("commandui.common.area.signature", nullText(area.getSignature())));
         return details;
-    }
-
-    private static List<WizardSelectionListScreen.SelectionItem<String>> dimensionItems() {
-        Set<String> dimensions = new LinkedHashSet<>();
-        dimensions.addAll(areahint.dimensional.ClientDimensionalNameManager.getAllDimensionalNames().keySet());
-        dimensions.add("minecraft:overworld");
-        dimensions.add("minecraft:the_nether");
-        dimensions.add("minecraft:the_end");
-
-        List<WizardSelectionListScreen.SelectionItem<String>> items = new ArrayList<>();
-        for (String dimensionId : dimensions) {
-            items.add(new WizardSelectionListScreen.SelectionItem<>(dimensionId,
-                dimensionalName(dimensionId),
-                I18nManager.translate("commandui.dimension.item.detail", dimensionId)));
-        }
-        return items;
-    }
-
-    private static String dimensionalName(String dimensionId) {
-        String name = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
-        return name == null || name.isBlank() ? dimensionId : name;
     }
 
     private static String normalizeStrictColor(String colorInput) {

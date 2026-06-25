@@ -47,10 +47,15 @@ public class DimensionalNameUIManager {
     public void startDimName() {
         if (currentState != State.IDLE) {
             sendMsg(I18nManager.translate("gui.error.general_3"));
+            DimensionalityNameVisualController.clear();
             return;
         }
         currentState = State.DIMNAME_SELECT;
-        DimensionalNameUI.showDimensionSelectionScreen("dimname");
+        if (DimensionalityNameVisualController.consumeVisualStartRequest()) {
+            DimensionalityNameVisualController.showDimensionSelectionScreen();
+        } else {
+            DimensionalNameUI.showDimensionSelectionScreen("dimname");
+        }
     }
 
     public void handleDimNameSelect(String dimensionId) {
@@ -58,14 +63,22 @@ public class DimensionalNameUIManager {
         this.selectedDimensionId = dimensionId;
         this.originalName = ClientDimensionalNameManager.getDimensionalName(dimensionId);
         currentState = State.DIMNAME_INPUT;
-        DimensionalNameUI.showNameInputScreen(dimensionId, originalName);
+        if (DimensionalityNameVisualController.isVisualFlowActive()) {
+            DimensionalityNameVisualController.showNameInputScreen(dimensionId, originalName);
+        } else {
+            DimensionalNameUI.showNameInputScreen(dimensionId, originalName);
+        }
     }
 
     public void handleDimNameInput(String name) {
         if (currentState != State.DIMNAME_INPUT) return;
         this.newName = name;
         currentState = State.DIMNAME_CONFIRM;
-        DimensionalNameUI.showNameConfirmScreen(selectedDimensionId, originalName, newName);
+        if (DimensionalityNameVisualController.isVisualFlowActive()) {
+            DimensionalityNameVisualController.showConfirmScreen(selectedDimensionId, originalName, newName);
+        } else {
+            DimensionalNameUI.showNameConfirmScreen(selectedDimensionId, originalName, newName);
+        }
     }
 
     public void confirmDimName() {
@@ -73,6 +86,7 @@ public class DimensionalNameUIManager {
         // 发送命令到服务端执行实际更改
         sendServerCommand("dimname_apply:" + selectedDimensionId + ":" + newName);
         sendMsg(I18nManager.translate("gui.prompt.area.dimension.modify"));
+        DimensionalityNameVisualController.clear();
         resetState();
     }
 
@@ -135,6 +149,7 @@ public class DimensionalNameUIManager {
 
     public void cancel() {
         sendMsg(I18nManager.translate("gui.message.cancel"));
+        DimensionalityNameVisualController.clear();
         DimensionalityColorVisualController.clear();
         resetState();
     }
