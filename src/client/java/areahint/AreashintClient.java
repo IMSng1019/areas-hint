@@ -263,6 +263,7 @@ public class AreashintClient implements ClientModInitializer {
 			areahint.subtitle.SubtitleManager.init();
 			areahint.subtitle.SubtitleNetworking.registerClientReceivers();
 			areahint.subtitle.AddSubtitleVisualController.register();
+			areahint.subtitle.DeleteSubtitleVisualController.register();
 			LOGGER.info("Subtitle功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化Subtitle功能时发生错误", e);

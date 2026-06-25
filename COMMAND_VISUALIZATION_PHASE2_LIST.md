@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-15. `deletesubtitle`
 16. `dimensionalitycolor`
 17. `dimensionalityname`
 18. `dividearea`
@@ -65,6 +64,7 @@
 12. `deletedimensionalitydescription`：已完成
 13. `deletehint`：已完成
 14. `deletesignature`：已完成
+15. `deletesubtitle`：已完成
 
 ## 已排除
 
