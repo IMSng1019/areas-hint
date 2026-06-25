@@ -81,10 +81,15 @@ public class DimensionalNameUIManager {
     public void startDimColor() {
         if (currentState != State.IDLE) {
             sendMsg(I18nManager.translate("gui.error.general_3"));
+            DimensionalityColorVisualController.clear();
             return;
         }
         currentState = State.DIMCOLOR_SELECT;
-        DimensionalNameUI.showDimensionSelectionScreen("dimcolor");
+        if (DimensionalityColorVisualController.consumeVisualStartRequest()) {
+            DimensionalityColorVisualController.showDimensionSelectionScreen();
+        } else {
+            DimensionalNameUI.showDimensionSelectionScreen("dimcolor");
+        }
     }
 
     public void handleDimColorSelect(String dimensionId) {
@@ -94,7 +99,11 @@ public class DimensionalNameUIManager {
         this.originalColor = ClientDimensionalNameManager.getDimensionalColor(dimensionId);
         if (originalColor == null) originalColor = "#FFFFFF";
         currentState = State.DIMCOLOR_INPUT;
-        DimensionalNameUI.showColorSelectionScreen(dimensionId, dimName, originalColor);
+        if (DimensionalityColorVisualController.isVisualFlowActive()) {
+            DimensionalityColorVisualController.showColorSelectionScreen(dimensionId);
+        } else {
+            DimensionalNameUI.showColorSelectionScreen(dimensionId, dimName, originalColor);
+        }
     }
 
     public void handleDimColorInput(String colorInput) {
@@ -107,13 +116,18 @@ public class DimensionalNameUIManager {
         this.newColor = normalized;
         String dimName = ClientDimensionalNameManager.getDimensionalName(selectedDimensionId);
         currentState = State.DIMCOLOR_CONFIRM;
-        DimensionalNameUI.showColorConfirmScreen(selectedDimensionId, dimName, originalColor, newColor);
+        if (DimensionalityColorVisualController.isVisualFlowActive()) {
+            DimensionalityColorVisualController.showConfirmScreen(selectedDimensionId, newColor);
+        } else {
+            DimensionalNameUI.showColorConfirmScreen(selectedDimensionId, dimName, originalColor, newColor);
+        }
     }
 
     public void confirmDimColor() {
         if (currentState != State.DIMCOLOR_CONFIRM) return;
         sendServerCommand("dimcolor_apply:" + selectedDimensionId + ":" + newColor);
         sendMsg(I18nManager.translate("gui.prompt.area.color.dimension"));
+        DimensionalityColorVisualController.clear();
         resetState();
     }
 
@@ -121,6 +135,7 @@ public class DimensionalNameUIManager {
 
     public void cancel() {
         sendMsg(I18nManager.translate("gui.message.cancel"));
+        DimensionalityColorVisualController.clear();
         resetState();
     }
 

@@ -70,7 +70,8 @@ public final class CommandVisualRegistry {
         handlers.add(visual("check", "areahint check", "help.command.check",
             areahint.check.CheckVisualController::openFromCommandUi));
         handlers.add(visual("dimensionalityname", "areahint dimensionalityname", "help.command.dimensionalityname", CommandVisualController::openDimensionalityName));
-        handlers.add(visual("dimensionalitycolor", "areahint dimensionalitycolor", "help.command.dimensionalitycolor", CommandVisualController::openDimensionalityColor));
+        handlers.add(visual("dimensionalitycolor", "areahint dimensionalitycolor", "help.command.dimensionalitycolor",
+            areahint.dimensional.DimensionalityColorVisualController::openFromCommandUi));
         handlers.add(visual("expandarea", "areahint expandarea", "help.command.expandarea",
             parent -> CommandVisualController.openRecordCommand(parent, "expandarea", "areahint expandarea", "areahint expandarea cancel")));
         handlers.add(visual("shrinkarea", "areahint shrinkarea", "help.command.shrinkarea",

@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-16. `dimensionalitycolor`
 17. `dimensionalityname`
 18. `dividearea`
 19. `expandarea`
@@ -65,6 +64,7 @@
 13. `deletehint`：已完成
 14. `deletesignature`：已完成
 15. `deletesubtitle`：已完成
+16. `dimensionalitycolor`：已完成
 
 ## 已排除
 

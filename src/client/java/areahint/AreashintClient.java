@@ -76,6 +76,7 @@ public class AreashintClient implements ClientModInitializer {
 		
 		// 初始化维度域名管理器
 		areahint.dimensional.ClientDimensionalNameManager.init();
+		areahint.dimensional.DimensionalityColorVisualController.register();
 		
 		// 初始化网络处理
 		ClientNetworking.init();

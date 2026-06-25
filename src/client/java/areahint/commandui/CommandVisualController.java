@@ -736,21 +736,6 @@ public final class CommandVisualController {
             () -> CommandUiActions.runCommand("areahint dimensionalityname cancel"));
     }
 
-    public static void openDimensionalityColor(Screen parent) {
-        setScreen(new WizardSelectionListScreen<>(parent, titleKey("dimensionalitycolor"),
-            "commandui.dimensionalitycolor.prompt",
-            dimensionItems(),
-            dimensionId -> openColorSelection(parent, "dimensionalitycolor",
-                color -> openConfirmAction(parent, "dimensionalitycolor",
-                    I18nManager.translate("commandui.dimensionalitycolor.confirm", dimensionId, color),
-                    List.of(I18nManager.translate("commandui.dimensionalitycolor.old", dimensionalColor(dimensionId))),
-                    () -> {
-                        closeToGame();
-                        ClientDimNameNetworking.sendDimColorChange(dimensionId, color);
-                    })),
-            () -> CommandUiActions.runCommand("areahint dimensionalitycolor cancel")));
-    }
-
     private static void openColorSelection(Screen parent, String id, java.util.function.Consumer<String> colorAction) {
         setScreen(new WizardOptionScreen(parent, titleKey(id),
             "commandui.color.prompt",
@@ -922,11 +907,6 @@ public final class CommandVisualController {
     private static String dimensionalName(String dimensionId) {
         String name = areahint.dimensional.ClientDimensionalNameManager.getDimensionalName(dimensionId);
         return name == null || name.isBlank() ? dimensionId : name;
-    }
-
-    private static String dimensionalColor(String dimensionId) {
-        String color = areahint.dimensional.ClientDimensionalNameManager.getDimensionalColor(dimensionId);
-        return color == null || color.isBlank() ? "#FFFFFF" : color;
     }
 
     private static String normalizeStrictColor(String colorInput) {
