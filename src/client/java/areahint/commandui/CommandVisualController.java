@@ -252,9 +252,7 @@ public final class CommandVisualController {
     }
 
     public static void openRecordCommand(Screen parent, String id, String startCommand, String cancelCommand) {
-        if ("expandarea".equals(id)) {
-            openExpandAreaVisual(parent);
-        } else if ("shrinkarea".equals(id)) {
+        if ("shrinkarea".equals(id)) {
             openShrinkAreaVisual(parent);
         } else {
             setScreen(new WizardConfirmScreen(parent,
@@ -267,29 +265,8 @@ public final class CommandVisualController {
                     if (cancelCommand != null) {
                         CommandUiActions.runCommand(cancelCommand);
                     }
-                }));
-        }
-    }
-
-    private static void openExpandAreaVisual(Screen parent) {
-        areahint.expandarea.ExpandAreaManager manager = areahint.expandarea.ExpandAreaManager.getInstance();
-        List<AreaData> areas = manager.beginVisualSelection();
-        if (areas.isEmpty()) {
-            openInfo(parent, "expandarea", "commandui.common.no_areas", null);
-            return;
-        }
-        setScreen(new WizardSelectionListScreen<>(parent, titleKey("expandarea"),
-            "commandui.expandarea.prompt",
-            CommandUiData.areaItems(areas),
-            area -> {
-                closeToGame();
-                beginVisualRecordMode("expandarea");
-                manager.selectAreaByName(area.getName());
-            },
-            () -> {
-                manager.cancel();
-                clearVisualRecordMode();
             }));
+        }
     }
 
     private static void openShrinkAreaVisual(Screen parent) {

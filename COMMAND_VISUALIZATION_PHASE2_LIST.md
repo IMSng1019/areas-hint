@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-19. `expandarea`
 20. `firstdimname`
 21. `firstdimname_skip`
 22. `frequency`
@@ -65,6 +64,7 @@
 16. `dimensionalitycolor`：已完成
 17. `dimensionalityname`：已完成
 18. `dividearea`：已完成
+19. `expandarea`：已完成
 
 ## 已排除
 
