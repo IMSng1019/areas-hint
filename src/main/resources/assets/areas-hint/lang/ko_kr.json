@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "Areas Hint 다시 불러오기",
   "commandui.replacebutton.title": "바인딩 키 변경",
   "commandui.firstdimname_skip.title": "첫 차원 이름 건너뛰기",
+  "commandui.firstdimname_skip.prompt": "첫 차원 이름 건너뛰기 확인",
+  "commandui.firstdimname_skip.detail": "기본 차원 이름을 사용하며 사용자 지정 첫 차원 영역 이름은 기록하지 않습니다",
   "commandui.frequency.title": "주기",
   "commandui.frequency.label": "주기",
   "commandui.frequency.placeholder": "1-60",

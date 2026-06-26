@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "Reload Areas Hint",
   "commandui.replacebutton.title": "Change bound key",
   "commandui.firstdimname_skip.title": "Skip first dimenshun naem",
+  "commandui.firstdimname_skip.prompt": "Confirm skip first dimenshun namin",
+  "commandui.firstdimname_skip.detail": "Default dimenshun naem will be used; no custom first dimenshun area naem will be writtin",
   "commandui.frequency.title": "Frequency",
   "commandui.frequency.label": "Frequency",
   "commandui.frequency.placeholder": "1-60",

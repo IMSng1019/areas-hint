@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "Reload Areas Hint",
   "commandui.replacebutton.title": "Change Bound Key",
   "commandui.firstdimname_skip.title": "Skip First Dimension Name",
+  "commandui.firstdimname_skip.prompt": "Confirm skipping first dimension naming",
+  "commandui.firstdimname_skip.detail": "The default dimension name will be used; no custom first dimension area name will be written",
   "commandui.frequency.title": "Frequency",
   "commandui.frequency.label": "Frequency",
   "commandui.frequency.placeholder": "1-60",

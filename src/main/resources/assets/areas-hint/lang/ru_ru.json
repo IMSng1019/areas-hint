@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "Перезагрузить Areas Hint",
   "commandui.replacebutton.title": "Изменить привязанную клавишу",
   "commandui.firstdimname_skip.title": "Пропустить первое имя измерения",
+  "commandui.firstdimname_skip.prompt": "Подтвердите пропуск первого имени измерения",
+  "commandui.firstdimname_skip.detail": "Будет использовано имя измерения по умолчанию; пользовательское первое имя области измерения не будет записано",
   "commandui.frequency.title": "Частота",
   "commandui.frequency.label": "Частота",
   "commandui.frequency.placeholder": "1-60",

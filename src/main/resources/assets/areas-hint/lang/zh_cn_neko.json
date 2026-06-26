@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "重载 Areas Hint 喵",
   "commandui.replacebutton.title": "更改绑定键喵",
   "commandui.firstdimname_skip.title": "跳过首次维度命名喵",
+  "commandui.firstdimname_skip.prompt": "确认跳过首次维度命名喵",
+  "commandui.firstdimname_skip.detail": "将使用默认维度名称，不写入自定义首次维度域名喵",
   "commandui.frequency.title": "刷新频率喵",
   "commandui.frequency.label": "频率喵",
   "commandui.frequency.placeholder": "1-60",

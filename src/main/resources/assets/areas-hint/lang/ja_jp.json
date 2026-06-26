@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "Areas Hint を再読み込み",
   "commandui.replacebutton.title": "バインドキーを変更",
   "commandui.firstdimname_skip.title": "初回ディメンション名をスキップ",
+  "commandui.firstdimname_skip.prompt": "初回ディメンション名のスキップを確認",
+  "commandui.firstdimname_skip.detail": "デフォルトのディメンション名を使用し、カスタムの初回ディメンションエリア名は書き込みません",
   "commandui.frequency.title": "頻度",
   "commandui.frequency.label": "頻度",
   "commandui.frequency.placeholder": "1-60",

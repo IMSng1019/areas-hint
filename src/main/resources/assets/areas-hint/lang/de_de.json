@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "Areas Hint neu laden",
   "commandui.replacebutton.title": "Gebundene Taste ändern",
   "commandui.firstdimname_skip.title": "Ersten Dimensionsnamen überspringen",
+  "commandui.firstdimname_skip.prompt": "Überspringen des ersten Dimensionsnamens bestätigen",
+  "commandui.firstdimname_skip.detail": "Der Standard-Dimensionsname wird verwendet; kein benutzerdefinierter erster Dimensionsgebietsname wird geschrieben",
   "commandui.frequency.title": "Frequenz",
   "commandui.frequency.label": "Frequenz",
   "commandui.frequency.placeholder": "1-60",

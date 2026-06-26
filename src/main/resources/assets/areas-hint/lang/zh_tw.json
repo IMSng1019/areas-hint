@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "重新載入 Areas Hint",
   "commandui.replacebutton.title": "更改綁定鍵",
   "commandui.firstdimname_skip.title": "跳過首次維度命名",
+  "commandui.firstdimname_skip.prompt": "確認跳過首次維度命名",
+  "commandui.firstdimname_skip.detail": "將使用預設維度名稱，不寫入自訂首次維度域名",
   "commandui.frequency.title": "重新整理頻率",
   "commandui.frequency.label": "頻率",
   "commandui.frequency.placeholder": "1-60",

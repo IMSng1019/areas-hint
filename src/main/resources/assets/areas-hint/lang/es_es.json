@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "Recargar Areas Hint",
   "commandui.replacebutton.title": "Cambiar tecla vinculada",
   "commandui.firstdimname_skip.title": "Omitir primer nombre de dimensión",
+  "commandui.firstdimname_skip.prompt": "Confirmar omitir el primer nombre de dimensión",
+  "commandui.firstdimname_skip.detail": "Se usará el nombre de dimensión predeterminado; no se escribirá un primer nombre de área de dimensión personalizado",
   "commandui.frequency.title": "Frecuencia",
   "commandui.frequency.label": "Frecuencia",
   "commandui.frequency.placeholder": "1-60",

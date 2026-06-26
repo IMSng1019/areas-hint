@@ -1933,6 +1933,8 @@
   "commandui.reload.title": "Recharger Areas Hint",
   "commandui.replacebutton.title": "Changer la touche liée",
   "commandui.firstdimname_skip.title": "Ignorer le premier nom de dimension",
+  "commandui.firstdimname_skip.prompt": "Confirmer l'ignorance du premier nom de dimension",
+  "commandui.firstdimname_skip.detail": "Le nom de dimension par défaut sera utilisé ; aucun premier nom de zone personnalisé ne sera écrit",
   "commandui.frequency.title": "Fréquence",
   "commandui.frequency.label": "Fréquence",
   "commandui.frequency.placeholder": "1-60",
