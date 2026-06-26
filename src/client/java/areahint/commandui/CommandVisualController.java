@@ -197,44 +197,6 @@ public final class CommandVisualController {
             });
     }
 
-    public static void openFirstDimName(Screen parent) {
-        openSingleField(parent, "firstdimname",
-            "commandui.firstdimname.label",
-            "commandui.firstdimname.placeholder",
-            "",
-            "commandui.firstdimname.prompt",
-            "commandui.firstdimname.detail",
-            null,
-            50,
-            value -> {
-                String name = value.trim();
-                if (name.isEmpty()) {
-                    openFirstDimNameWithError(parent);
-                    return;
-                }
-                runAndClose("areahint firstdimname " + CommandUiData.quote(name));
-            });
-    }
-
-    private static void openFirstDimNameWithError(Screen parent) {
-        openSingleField(parent, "firstdimname",
-            "commandui.firstdimname.label",
-            "commandui.firstdimname.placeholder",
-            "",
-            "commandui.firstdimname.prompt",
-            "commandui.firstdimname.detail",
-            "commandui.common.error.empty",
-            50,
-            value -> {
-                String name = value.trim();
-                if (name.isEmpty()) {
-                    openFirstDimNameWithError(parent);
-                    return;
-                }
-                runAndClose("areahint firstdimname " + CommandUiData.quote(name));
-            });
-    }
-
     public static void openAreaSelectThenCommand(Screen parent, String id, String command, String cancelCommand) {
         List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
         if (areas.isEmpty()) {

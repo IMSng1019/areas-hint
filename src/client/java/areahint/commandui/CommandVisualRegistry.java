@@ -83,7 +83,8 @@ public final class CommandVisualRegistry {
             areahint.addhint.AddHintVisualController::openFromCommandUi));
         handlers.add(visual("deletehint", "areahint deletehint", "help.command.deletehint",
             areahint.deletehint.DeleteHintVisualController::openFromCommandUi));
-        handlers.add(visual("firstdimname", "areahint firstdimname", "help.command.firstdimname", CommandVisualController::openFirstDimName));
+        handlers.add(visual("firstdimname", "areahint firstdimname", "help.command.firstdimname",
+            areahint.dimensional.FirstDimNameVisualController::openFromCommandUi));
         handlers.add(visualCommand("firstdimname_skip", "areahint firstdimname_skip", "help.command.firstdimname_skip"));
         handlers.add(visual("debug", "areahint debug", "help.command.debug",
             areahint.debug.DebugVisualController::openFromCommandUi));
