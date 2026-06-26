@@ -53,56 +53,6 @@ public final class CommandVisualController {
         }
     }
 
-    public static void openFrequency(Screen parent) {
-        openSingleField(parent, "frequency",
-            "commandui.frequency.label",
-            "commandui.frequency.placeholder",
-            ConfigData.formatFrequency(ClientConfig.getFrequency()),
-            "commandui.frequency.prompt",
-            I18nManager.translate("commandui.frequency.detail", ConfigData.formatFrequency(ClientConfig.getFrequency())),
-            null,
-            8,
-            value -> {
-                String input = value.trim();
-                try {
-                    double frequency = Double.parseDouble(input);
-                    if (!Double.isFinite(frequency) || frequency < 1.0 || frequency > 60.0) {
-                        openFrequencyWithError(parent, "commandui.frequency.error.range");
-                        return;
-                    }
-                    CommandUiActions.runCommand("areahint frequency " + ConfigData.formatFrequency(frequency));
-                    closeToGame();
-                } catch (NumberFormatException e) {
-                    openFrequencyWithError(parent, "commandui.frequency.error.number");
-                }
-            });
-    }
-
-    private static void openFrequencyWithError(Screen parent, String errorKey) {
-        openSingleField(parent, "frequency",
-            "commandui.frequency.label",
-            "commandui.frequency.placeholder",
-            ConfigData.formatFrequency(ClientConfig.getFrequency()),
-            "commandui.frequency.prompt",
-            I18nManager.translate("commandui.frequency.detail", ConfigData.formatFrequency(ClientConfig.getFrequency())),
-            errorKey,
-            8,
-            value -> {
-                String input = value.trim();
-                try {
-                    double frequency = Double.parseDouble(input);
-                    if (!Double.isFinite(frequency) || frequency < 1.0 || frequency > 60.0) {
-                        openFrequencyWithError(parent, "commandui.frequency.error.range");
-                        return;
-                    }
-                    CommandUiActions.runCommand("areahint frequency " + ConfigData.formatFrequency(frequency));
-                    closeToGame();
-                } catch (NumberFormatException e) {
-                    openFrequencyWithError(parent, "commandui.frequency.error.number");
-                }
-            });
-    }
-
     public static void openHintRender(Screen parent) {
         List<WizardOptionScreen.OptionSpec> options = List.of(
             option("commandui.hintrender.cpu", () -> runAndClose("areahint hintrender CPU")),

@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-22. `frequency`
 23. `help`
 24. `hintrender`
 25. `language`
@@ -65,6 +64,7 @@
 19. `expandarea`：已完成
 20. `firstdimname`：已完成
 21. `firstdimname_skip`：已完成
+22. `frequency`：已完成
 
 ## 已排除
 
