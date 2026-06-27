@@ -32,7 +32,7 @@ public final class CommandVisualRegistry {
 
     private static List<CommandVisualHandler> createHandlers() {
         List<CommandVisualHandler> handlers = new ArrayList<>();
-        handlers.add(visual("help", "areahint help", "help.command.help", HelpCommandScreen::new));
+        handlers.add(visual("help", "areahint help", "help.command.help", HelpVisualController::openFromCommandUi));
         handlers.add(visual("boundviz", "areahint boundviz", "help.command.boundviz",
             areahint.boundviz.BoundVizVisualController::openFromCommandUi));
         handlers.add(visual("language", "areahint language", "help.command.language", LanguageCommandScreen::new));
