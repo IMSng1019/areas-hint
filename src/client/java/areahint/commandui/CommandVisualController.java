@@ -53,20 +53,6 @@ public final class CommandVisualController {
         }
     }
 
-    public static void openHintRender(Screen parent) {
-        List<WizardOptionScreen.OptionSpec> options = List.of(
-            option("commandui.hintrender.cpu", () -> runAndClose("areahint hintrender CPU")),
-            option("commandui.hintrender.opengl", () -> runAndClose("areahint hintrender OpenGL")),
-            option("commandui.hintrender.vulkan", () -> runAndClose("areahint hintrender Vulkan")),
-            option("commandui.common.current", () -> runAndClose("areahint hintrender"))
-        );
-        setScreen(new WizardOptionScreen(parent, titleKey("hintrender"),
-            "commandui.hintrender.prompt",
-            I18nManager.translate("commandui.hintrender.detail", ClientConfig.getHintRender()),
-            options,
-            null));
-    }
-
     public static void openTitleStyle(Screen parent) {
         List<WizardOptionScreen.OptionSpec> options = List.of(
             option("commandui.titlestyle.full", () -> startThenRun("areahint titlestyle", "areahint titlestyle select full")),
