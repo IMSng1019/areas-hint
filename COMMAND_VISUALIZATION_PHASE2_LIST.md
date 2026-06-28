@@ -18,25 +18,24 @@
 
 ## 按首字母顺序执行
 
-26. `off`
-27. `on`
-28. `recolor`
-29. `reload`
-30. `rename`
-31. `replacebutton`
-32. `replacedescription`
-33. `replacedimensionalitydescription`
-34. `replacesubtitle`
-35. `replacesubtitlecolor`
-36. `replacesubtitlesize`
-37. `serverlanguage`
-38. `sethigh`
-39. `settp`
-40. `shrinkarea`
-41. `tcp`
-42. `titlesize`
-43. `titlestyle`
-44. `udp`
+26. `on`
+27. `recolor`
+28. `reload`
+29. `rename`
+30. `replacebutton`
+31. `replacedescription`
+32. `replacedimensionalitydescription`
+33. `replacesubtitle`
+34. `replacesubtitlecolor`
+35. `replacesubtitlesize`
+36. `serverlanguage`
+37. `sethigh`
+38. `settp`
+39. `shrinkarea`
+40. `tcp`
+41. `titlesize`
+42. `titlestyle`
+43. `udp`
 
 ## 已完成
 
@@ -65,6 +64,7 @@
 23. `help`：已完成
 24. `hintrender`：已完成
 25. `language`：已完成
+26. `off`：已完成
 
 ## 已排除
 
