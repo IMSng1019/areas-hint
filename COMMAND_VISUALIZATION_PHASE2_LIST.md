@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-25. `language`
 26. `off`
 27. `on`
 28. `recolor`
@@ -65,6 +64,7 @@
 22. `frequency`：已完成
 23. `help`：已完成
 24. `hintrender`：已完成
+25. `language`：已完成
 
 ## 已排除
 
