@@ -37,7 +37,8 @@ public final class CommandVisualRegistry {
             areahint.boundviz.BoundVizVisualController::openFromCommandUi));
         handlers.add(visual("language", "areahint language", "help.command.language",
             areahint.language.LanguageVisualController::openFromCommandUi));
-        handlers.add(visualCommand("on", "areahint on", "command.usage.on"));
+        handlers.add(visual("on", "areahint on", "command.usage.on",
+            areahint.command.OnVisualController::openFromCommandUi));
         handlers.add(visual("off", "areahint off", "command.usage.off",
             areahint.command.OffVisualController::openFromCommandUi));
         handlers.add(visualCommand("reload", "areahint reload", "help.command.reload"));
