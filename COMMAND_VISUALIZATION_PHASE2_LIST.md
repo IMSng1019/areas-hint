@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-28. `recolor`
 29. `reload`
 30. `rename`
 31. `replacebutton`
@@ -65,6 +64,7 @@
 25. `language`：已完成
 26. `off`：已完成
 27. `on`：已完成
+28. `recolor`：已完成
 
 ## 已排除
 

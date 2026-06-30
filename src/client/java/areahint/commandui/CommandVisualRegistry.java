@@ -65,7 +65,8 @@ public final class CommandVisualRegistry {
             parent -> areahint.easyadd.EasyAddVisualController.openFromCommandUi(parent, "areahint easyadd")));
         handlers.add(visual("addarea", "areahint addarea", "help.command.addarea",
             parent -> areahint.easyadd.EasyAddVisualController.openFromCommandUi(parent, "areahint addarea")));
-        handlers.add(visual("recolor", "areahint recolor", "help.command.recolor", CommandVisualController::openRecolor));
+        handlers.add(visual("recolor", "areahint recolor", "help.command.recolor",
+            areahint.recolor.RecolorVisualController::openFromCommandUi));
         handlers.add(visual("rename", "areahint rename", "help.command.rename", CommandVisualController::openRename));
         handlers.add(visual("sethigh", "areahint sethigh", "help.command.sethigh", CommandVisualController::openSetHigh));
         handlers.add(visual("tcp", "areahint tcp", "help.command.tcp", parent -> CommandVisualController.openTeleport(parent, "tcp")));

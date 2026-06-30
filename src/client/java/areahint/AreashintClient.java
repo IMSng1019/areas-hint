@@ -127,6 +127,9 @@ public class AreashintClient implements ClientModInitializer {
 		// 初始化ReplaceButton功能
 		initReplaceButton();
 
+		// 初始化Recolor图形流程
+		areahint.recolor.RecolorVisualController.register();
+
 		// 初始化BoundViz功能
 		initBoundViz();
 

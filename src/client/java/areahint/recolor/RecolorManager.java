@@ -40,6 +40,7 @@ public class RecolorManager {
     private String selectedColor = null;
     private String currentDimension = null;
     private String originalColor = null;
+    private boolean visualFlowActive = false;
 
     // 私有构造函数（单例模式）
     private RecolorManager() {}
@@ -60,17 +61,23 @@ public class RecolorManager {
      * @param dimension 当前维度
      */
     public void startRecolor(List<AreaData> areas, String dimension) {
+        boolean visualRequested = RecolorVisualController.consumeVisualStartRequest();
         if (currentState != RecolorState.IDLE) {
             MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_3")), false);
+            if (visualRequested) {
+                RecolorVisualController.showInfo("message.error.general_3");
+                RecolorVisualController.clear();
+            }
             return;
         }
 
         this.editableAreas = new ArrayList<>(areas);
         this.currentDimension = dimension;
+        this.visualFlowActive = visualRequested;
 
         // 设置状态并显示UI
         currentState = RecolorState.AREA_SELECTION;
-        RecolorUI.showAreaSelectionScreen(editableAreas);
+        showAreaSelection();
     }
 
     /**
@@ -107,7 +114,7 @@ public class RecolorManager {
 
         // 进入颜色选择状态
         currentState = RecolorState.COLOR_SELECTION;
-        RecolorUI.showColorSelectionScreen(areaName, originalColor);
+        showColorSelection(areaName, originalColor);
     }
 
     /**
@@ -126,6 +133,9 @@ public class RecolorManager {
         String normalizedColor = areahint.util.ColorUtil.normalizeColor(colorInput);
         if (!areahint.util.ColorUtil.isValidColor(normalizedColor)) {
             client.player.sendMessage(Text.of(I18nManager.translate("gui.error.color")), false);
+            if (visualFlowActive) {
+                RecolorVisualController.showCustomColorScreen(selectedAreaName, originalColor, "commandui.color.error.invalid");
+            }
             return;
         }
 
@@ -133,7 +143,7 @@ public class RecolorManager {
 
         // 进入确认状态
         currentState = RecolorState.CONFIRM_CHANGE;
-        RecolorUI.showConfirmScreen(selectedAreaName, originalColor, selectedColor);
+        showConfirm();
     }
 
     /**
@@ -183,6 +193,8 @@ public class RecolorManager {
         selectedColor = null;
         currentDimension = null;
         originalColor = null;
+        visualFlowActive = false;
+        RecolorVisualController.clear();
     }
 
     /**
@@ -213,4 +225,28 @@ public class RecolorManager {
     public String getSelectedAreaName() { return selectedAreaName; }
     public String getSelectedColor() { return selectedColor; }
     public String getOriginalColor() { return originalColor; }
+
+    private void showAreaSelection() {
+        if (visualFlowActive) {
+            RecolorVisualController.showAreaSelectionScreen(editableAreas);
+        } else {
+            RecolorUI.showAreaSelectionScreen(editableAreas);
+        }
+    }
+
+    private void showColorSelection(String areaName, String currentColor) {
+        if (visualFlowActive) {
+            RecolorVisualController.showColorSelectionScreen(areaName, currentColor);
+        } else {
+            RecolorUI.showColorSelectionScreen(areaName, currentColor);
+        }
+    }
+
+    private void showConfirm() {
+        if (visualFlowActive) {
+            RecolorVisualController.showConfirmScreen(selectedAreaName, originalColor, selectedColor);
+        } else {
+            RecolorUI.showConfirmScreen(selectedAreaName, originalColor, selectedColor);
+        }
+    }
 }

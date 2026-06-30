@@ -1,15 +1,12 @@
 package areahint.commandui;
 
-import areahint.AreashintClient;
 import areahint.config.ClientConfig;
 import areahint.data.AreaData;
 import areahint.data.ConfigData;
 import areahint.i18n.I18nManager;
 import areahint.network.ClientNetworking;
-import areahint.network.Packets;
 import areahint.rename.RenameNetworking;
 import areahint.signature.SignatureClientNetworking;
-import areahint.util.ColorUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
@@ -247,32 +244,6 @@ public final class CommandVisualController {
             () -> CommandUiActions.runCommand("areahint rename cancel"));
     }
 
-    public static void openRecolor(Screen parent) {
-        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
-        if (areas.isEmpty()) {
-            openInfo(parent, "recolor", "commandui.common.no_areas", "areahint recolor cancel");
-            return;
-        }
-        setScreen(new WizardSelectionListScreen<>(parent, titleKey("recolor"),
-            "commandui.recolor.prompt",
-            CommandUiData.areaItems(areas),
-            area -> openColorSelection(parent, "recolor",
-                color -> openConfirmAction(parent, "recolor",
-                    I18nManager.translate("commandui.recolor.confirm", area.getName(), color),
-                    List.of(I18nManager.translate("commandui.recolor.old", area.getColor())),
-                    () -> {
-                        String dimension = currentDimensionId();
-                        if (dimension == null) {
-                            sendLocalError("commandui.common.error.dimension");
-                            return;
-                        }
-                        closeToGame();
-                        areahint.recolor.RecolorManager.getInstance();
-                        sendRecolor(area.getName(), color, dimension);
-                    })),
-            () -> CommandUiActions.runCommand("areahint recolor cancel")));
-    }
-
     public static void openSetHigh(Screen parent) {
         List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
         if (areas.isEmpty()) {
@@ -405,34 +376,6 @@ public final class CommandVisualController {
             () -> CommandUiActions.runCommand("areahint " + id + " cancel"));
     }
 
-    private static void openColorSelection(Screen parent, String id, java.util.function.Consumer<String> colorAction) {
-        setScreen(new WizardOptionScreen(parent, titleKey(id),
-            "commandui.color.prompt",
-            "commandui.color.detail",
-            CommandUiData.colorOptions(colorAction, () -> openCustomColor(parent, id, colorAction, null)),
-            () -> CommandUiActions.runCommand("areahint " + id + " cancel")));
-    }
-
-    private static void openCustomColor(Screen parent, String id, java.util.function.Consumer<String> colorAction, String errorKey) {
-        openSingleField(parent, id,
-            "commandui.color.custom.label",
-            "commandui.color.custom.placeholder",
-            "#FFFFFF",
-            "commandui.color.custom.prompt",
-            "commandui.color.custom.detail",
-            errorKey,
-            16,
-            value -> {
-                String color = normalizeStrictColor(value);
-                if (color == null) {
-                    openCustomColor(parent, id, colorAction, "commandui.color.error.invalid");
-                    return;
-                }
-                colorAction.accept(color);
-            },
-            () -> CommandUiActions.runCommand("areahint " + id + " cancel"));
-    }
-
     private static void openConfirmSend(Screen parent, String id, String command, List<String> details) {
         setScreen(new WizardConfirmScreen(parent, titleKey(id),
             I18nManager.translate("commandui.common.confirm.prompt"),
@@ -539,14 +482,6 @@ public final class CommandVisualController {
         return client != null && client.world != null ? client.world.getRegistryKey().getValue().toString() : null;
     }
 
-    private static String currentDimensionType() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client == null || client.world == null) {
-            return null;
-        }
-        return Packets.convertDimensionPathToType(client.world.getRegistryKey().getValue().getPath());
-    }
-
     private static List<String> areaDetails(AreaData area) {
         List<String> details = new ArrayList<>();
         details.add(I18nManager.translate("commandui.common.area.name", area.getName()));
@@ -555,25 +490,6 @@ public final class CommandVisualController {
         details.add(I18nManager.translate("commandui.common.area.base", nullText(area.getBaseName())));
         details.add(I18nManager.translate("commandui.common.area.signature", nullText(area.getSignature())));
         return details;
-    }
-
-    private static String normalizeStrictColor(String colorInput) {
-        if (colorInput == null || colorInput.trim().isEmpty()) {
-            return null;
-        }
-        String trimmed = colorInput.trim();
-        if (ColorUtil.isFlashColor(trimmed)) {
-            return trimmed;
-        }
-        String namedColor = ColorUtil.getColorHex(trimmed);
-        if (namedColor != null) {
-            return namedColor;
-        }
-        String normalized = trimmed.toUpperCase(Locale.ROOT);
-        if (!normalized.startsWith("#")) {
-            normalized = "#" + normalized;
-        }
-        return normalized.matches("^#[0-9A-F]{6}$") ? normalized : null;
     }
 
     private static String nullText(String value) {
@@ -591,15 +507,4 @@ public final class CommandVisualController {
         }
     }
 
-    private static void sendRecolor(String areaName, String color, String dimension) {
-        try {
-            net.minecraft.network.PacketByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
-            buf.writeString(areaName);
-            buf.writeString(color);
-            buf.writeString(dimension);
-            net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(Packets.C2S_RECOLOR_REQUEST, buf);
-        } catch (Exception e) {
-            AreashintClient.LOGGER.error("发送颜色修改请求失败", e);
-        }
-    }
 }
