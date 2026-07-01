@@ -40,6 +40,7 @@ public class RenameManager {
     private String newSurfaceName = null;        // 新联合域名
     private String currentDimension = null;      // 当前维度
     private List<AreaData> availableAreas = new ArrayList<>();  // 可重命名的域名列表
+    private boolean visualFlowActive = false;    // 是否由图形指令入口启动
 
     // 聊天监听器注册状态
     private boolean chatListenerRegistered = false;
@@ -63,25 +64,39 @@ public class RenameManager {
      * @param dimension 当前维度
      */
     public void startRename(List<AreaData> areas, String dimension) {
+        boolean visualRequested = RenameVisualController.consumeVisualStartRequest();
         if (currentState != RenameState.IDLE) {
             MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.general_4")), false);
+            if (visualRequested) {
+                RenameVisualController.showInfo("message.error.general_4");
+                RenameVisualController.clear();
+            }
             return;
         }
 
         this.availableAreas = new ArrayList<>(areas);
         this.currentDimension = dimension;
+        this.visualFlowActive = visualRequested;
 
         if (areas.isEmpty()) {
             MinecraftClient.getInstance().player.sendMessage(Text.of(I18nManager.translate("message.error.area.dimension.rename_2")), false);
+            if (visualFlowActive) {
+                RenameVisualController.showInfo("message.error.area.dimension.rename_2");
+                currentDimension = null;
+                availableAreas.clear();
+                visualFlowActive = false;
+            }
             return;
         }
 
-        // 注册聊天监听器
-        registerChatListener();
+        if (!visualFlowActive) {
+            // 聊天流程才需要监听玩家后续输入，图形流程直接由 Screen 提交。
+            registerChatListener();
+        }
 
         // 设置状态并显示UI
         currentState = RenameState.SELECT_AREA;
-        RenameUI.showAreaSelectScreen(availableAreas);
+        showAreaSelection();
     }
 
     /**
@@ -115,48 +130,81 @@ public class RenameManager {
 
         switch (currentState) {
             case INPUT_NEW_NAME:
-                if (!input.trim().isEmpty()) {
-                    newAreaName = input.trim();
-
-                    // 检查新域名名称是否已存在
-                    if (checkAreaNameExists(newAreaName)) {
-                        client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area") + newAreaName + I18nManager.translate("easyadd.message.dimension")), false);
-                        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
-                        return;
-                    }
-
-                    // 检查新名称是否与原名称相同
-                    if (newAreaName.equals(selectedAreaName)) {
-                        client.player.sendMessage(Text.of(I18nManager.translate("message.error.area.name")), false);
-                        client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
-                        return;
-                    }
-
-                    client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.name") + newAreaName), false);
-
-                    // 进入联合域名输入
-                    currentState = RenameState.INPUT_NEW_SURFACE_NAME;
-                    RenameUI.showSurfaceNameInputScreen();
-                }
+                handleNewNameInput(input);
                 break;
 
             case INPUT_NEW_SURFACE_NAME:
-                // 联合域名可以为空
-                newSurfaceName = input.trim().isEmpty() ? null : input.trim();
-                if (newSurfaceName != null) {
-                    client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.surface") + newSurfaceName), false);
-                } else {
-                    client.player.sendMessage(Text.of(I18nManager.translate("dividearea.message.area.surface")), false);
-                }
-
-                // 进入确认状态
-                currentState = RenameState.CONFIRM_RENAME;
-                RenameUI.showConfirmScreen(selectedAreaName, newAreaName, newSurfaceName);
+                handleSurfaceNameInput(input);
                 break;
 
             default:
                 break;
         }
+    }
+
+    /**
+     * 处理新域名名称输入，聊天和图形流程共用同一套校验。
+     */
+    public void handleNewNameInput(String input) {
+        if (currentState != RenameState.INPUT_NEW_NAME) {
+            return;
+        }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+
+        String candidateName = input == null ? "" : input.trim();
+        if (candidateName.isEmpty()) {
+            showNewNameInput("commandui.common.error.empty");
+            return;
+        }
+
+        // 检查新域名名称是否已存在
+        if (checkAreaNameExists(candidateName)) {
+            client.player.sendMessage(Text.of(I18nManager.translate("addhint.error.area") + candidateName + I18nManager.translate("easyadd.message.dimension")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
+            showNewNameInput(I18nManager.translate("addhint.error.area") + candidateName + I18nManager.translate("easyadd.message.dimension"));
+            return;
+        }
+
+        // 检查新名称是否与原名称相同
+        if (candidateName.equals(selectedAreaName)) {
+            client.player.sendMessage(Text.of(I18nManager.translate("message.error.area.name")), false);
+            client.player.sendMessage(Text.of(I18nManager.translate("easyadd.prompt.area.name")), false);
+            showNewNameInput("message.error.area.name");
+            return;
+        }
+
+        newAreaName = candidateName;
+        client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.name") + newAreaName), false);
+
+        // 进入联合域名输入
+        currentState = RenameState.INPUT_NEW_SURFACE_NAME;
+        showSurfaceNameInput();
+    }
+
+    /**
+     * 处理新联合域名输入，空内容表示移除表面域名。
+     */
+    public void handleSurfaceNameInput(String input) {
+        if (currentState != RenameState.INPUT_NEW_SURFACE_NAME) {
+            return;
+        }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+
+        // 联合域名可以为空
+        newSurfaceName = input == null || input.trim().isEmpty() ? null : input.trim();
+        if (newSurfaceName != null) {
+            client.player.sendMessage(Text.of(I18nManager.translate("message.message.area.surface") + newSurfaceName), false);
+        } else {
+            client.player.sendMessage(Text.of(I18nManager.translate("dividearea.message.area.surface")), false);
+        }
+
+        // 进入确认状态
+        currentState = RenameState.CONFIRM_RENAME;
+        showConfirmScreen();
     }
 
     /**
@@ -194,7 +242,7 @@ public class RenameManager {
 
         // 进入新名称输入状态
         currentState = RenameState.INPUT_NEW_NAME;
-        RenameUI.showNewNameInputScreen();
+        showNewNameInput(null);
     }
 
     /**
@@ -240,6 +288,8 @@ public class RenameManager {
         newSurfaceName = null;
         currentDimension = null;
         availableAreas.clear();
+        visualFlowActive = false;
+        RenameVisualController.clear();
     }
 
     /**
@@ -301,4 +351,36 @@ public class RenameManager {
     public String getSelectedAreaName() { return selectedAreaName; }
     public String getNewAreaName() { return newAreaName; }
     public String getNewSurfaceName() { return newSurfaceName; }
+
+    private void showAreaSelection() {
+        if (visualFlowActive) {
+            RenameVisualController.showAreaSelection(availableAreas);
+        } else {
+            RenameUI.showAreaSelectScreen(availableAreas);
+        }
+    }
+
+    private void showNewNameInput(String errorTextOrKey) {
+        if (visualFlowActive) {
+            RenameVisualController.showNewNameInput(selectedAreaName, errorTextOrKey);
+        } else {
+            RenameUI.showNewNameInputScreen();
+        }
+    }
+
+    private void showSurfaceNameInput() {
+        if (visualFlowActive) {
+            RenameVisualController.showSurfaceNameInput(null);
+        } else {
+            RenameUI.showSurfaceNameInputScreen();
+        }
+    }
+
+    private void showConfirmScreen() {
+        if (visualFlowActive) {
+            RenameVisualController.showConfirmScreen(selectedAreaName, newAreaName, newSurfaceName);
+        } else {
+            RenameUI.showConfirmScreen(selectedAreaName, newAreaName, newSurfaceName);
+        }
+    }
 }

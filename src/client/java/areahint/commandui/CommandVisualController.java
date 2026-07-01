@@ -5,7 +5,6 @@ import areahint.data.AreaData;
 import areahint.data.ConfigData;
 import areahint.i18n.I18nManager;
 import areahint.network.ClientNetworking;
-import areahint.rename.RenameNetworking;
 import areahint.signature.SignatureClientNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -183,65 +182,6 @@ public final class CommandVisualController {
                 manager.stop();
                 clearVisualRecordMode();
             }));
-    }
-
-    public static void openRename(Screen parent) {
-        List<AreaData> areas = CommandUiData.loadCurrentDimensionAreas();
-        if (areas.isEmpty()) {
-            openInfo(parent, "rename", "commandui.common.no_areas", "areahint rename cancel");
-            return;
-        }
-        setScreen(new WizardSelectionListScreen<>(parent, titleKey("rename"),
-            "commandui.rename.prompt",
-            CommandUiData.areaItems(areas),
-            area -> openRenameName(parent, area, null),
-            () -> CommandUiActions.runCommand("areahint rename cancel")));
-    }
-
-    private static void openRenameName(Screen parent, AreaData area, String errorKey) {
-        openSingleField(parent, "rename",
-            "commandui.rename.name.label",
-            "commandui.rename.name.placeholder",
-            area.getName(),
-            "commandui.rename.name.prompt",
-            I18nManager.translate("commandui.rename.name.detail", area.getName()),
-            errorKey,
-            80,
-            value -> {
-                String newName = value.trim();
-                if (newName.isEmpty()) {
-                    openRenameName(parent, area, "commandui.common.error.empty");
-                    return;
-                }
-                openRenameSurface(parent, area, newName);
-            },
-            () -> CommandUiActions.runCommand("areahint rename cancel"));
-    }
-
-    private static void openRenameSurface(Screen parent, AreaData area, String newName) {
-        openSingleField(parent, "rename",
-            "commandui.rename.surface.label",
-            "commandui.rename.surface.placeholder",
-            area.getSurfacename() == null ? "" : area.getSurfacename(),
-            "commandui.rename.surface.prompt",
-            "commandui.rename.surface.detail",
-            null,
-            80,
-            surface -> openConfirmAction(parent, "rename",
-                I18nManager.translate("commandui.rename.confirm", area.getName(), newName),
-                List.of(I18nManager.translate("commandui.rename.confirm.surface", surface == null || surface.trim().isEmpty()
-                    ? I18nManager.translate("commandui.common.none")
-                    : surface.trim())),
-                () -> {
-                    String dimension = currentDimensionId();
-                    if (dimension == null) {
-                        sendLocalError("commandui.common.error.dimension");
-                        return;
-                    }
-                    closeToGame();
-                    RenameNetworking.sendRenameRequest(area.getName(), newName, blankToNull(surface), dimension);
-                }),
-            () -> CommandUiActions.runCommand("areahint rename cancel"));
     }
 
     public static void openSetHigh(Screen parent) {
@@ -494,10 +434,6 @@ public final class CommandVisualController {
 
     private static String nullText(String value) {
         return value == null || value.trim().isEmpty() ? I18nManager.translate("commandui.common.none") : value;
-    }
-
-    private static String blankToNull(String value) {
-        return value == null || value.trim().isEmpty() ? null : value.trim();
     }
 
     private static void sendLocalError(String key) {
