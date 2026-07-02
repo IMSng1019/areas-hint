@@ -422,6 +422,9 @@ public class DescriptionManager {
         if ("adddimensionalitydescription".equals(commandPrefix)) {
             return AddDimensionalityDescriptionVisualController.consumeVisualStartRequest();
         }
+        if ("replacedimensionalitydescription".equals(commandPrefix)) {
+            return ReplaceDimensionalityDescriptionVisualController.consumeVisualStartRequest();
+        }
         if ("deletedimensionalitydescription".equals(commandPrefix)) {
             return DeleteDimensionalityDescriptionVisualController.consumeVisualStartRequest();
         }
@@ -435,6 +438,8 @@ public class DescriptionManager {
             ReplaceDescriptionVisualController.showLoading();
         } else if ("deletedimensionalitydescription".equals(getCommandPrefix())) {
             DeleteDimensionalityDescriptionVisualController.showLoading();
+        } else if ("replacedimensionalitydescription".equals(getCommandPrefix())) {
+            ReplaceDimensionalityDescriptionVisualController.showLoading();
         } else if ("adddimensionalitydescription".equals(getCommandPrefix())) {
             AddDimensionalityDescriptionVisualController.showLoading();
         } else {
@@ -449,6 +454,8 @@ public class DescriptionManager {
             ReplaceDescriptionVisualController.showSelection(entries);
         } else if ("deletedimensionalitydescription".equals(getCommandPrefix())) {
             DeleteDimensionalityDescriptionVisualController.showSelection(entries);
+        } else if ("replacedimensionalitydescription".equals(getCommandPrefix())) {
+            ReplaceDimensionalityDescriptionVisualController.showSelection(entries);
         } else if ("adddimensionalitydescription".equals(getCommandPrefix())) {
             AddDimensionalityDescriptionVisualController.showSelection(entries);
         } else {
@@ -459,6 +466,8 @@ public class DescriptionManager {
     private void showVisualOpeningBook(DescriptionListEntry entry) {
         if ("adddimensionalitydescription".equals(getCommandPrefix())) {
             AddDimensionalityDescriptionVisualController.showOpeningBook(entry);
+        } else if ("replacedimensionalitydescription".equals(getCommandPrefix())) {
+            ReplaceDimensionalityDescriptionVisualController.showOpeningBook(entry);
         } else if ("replacedescription".equals(getCommandPrefix())) {
             ReplaceDescriptionVisualController.showOpeningBook(entry);
         } else {
@@ -469,6 +478,8 @@ public class DescriptionManager {
     private void closeVisualToGame() {
         if ("adddimensionalitydescription".equals(getCommandPrefix())) {
             AddDimensionalityDescriptionVisualController.closeToGame();
+        } else if ("replacedimensionalitydescription".equals(getCommandPrefix())) {
+            ReplaceDimensionalityDescriptionVisualController.closeToGame();
         } else if ("replacedescription".equals(getCommandPrefix())) {
             ReplaceDescriptionVisualController.closeToGame();
         } else {
@@ -485,6 +496,8 @@ public class DescriptionManager {
             DeleteDescriptionVisualController.clear();
         } else if ("adddimensionalitydescription".equals(commandPrefix)) {
             AddDimensionalityDescriptionVisualController.clear();
+        } else if ("replacedimensionalitydescription".equals(commandPrefix)) {
+            ReplaceDimensionalityDescriptionVisualController.clear();
         } else if ("deletedimensionalitydescription".equals(commandPrefix)) {
             DeleteDimensionalityDescriptionVisualController.clear();
         }
@@ -495,6 +508,7 @@ public class DescriptionManager {
         ReplaceDescriptionVisualController.clear();
         DeleteDescriptionVisualController.clear();
         AddDimensionalityDescriptionVisualController.clear();
+        ReplaceDimensionalityDescriptionVisualController.clear();
         DeleteDimensionalityDescriptionVisualController.clear();
     }
 
