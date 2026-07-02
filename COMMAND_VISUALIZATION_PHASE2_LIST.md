@@ -18,7 +18,6 @@
 
 ## 按首字母顺序执行
 
-31. `replacedescription`
 32. `replacedimensionalitydescription`
 33. `replacesubtitle`
 34. `replacesubtitlecolor`
@@ -65,6 +64,7 @@
 29. `reload`：已完成
 30. `rename`：已完成
 31. `replacebutton`：已完成
+32. `replacedescription`：已完成
 
 ## 已排除
 
