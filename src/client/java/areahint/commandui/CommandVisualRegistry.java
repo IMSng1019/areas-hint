@@ -74,7 +74,8 @@ public final class CommandVisualRegistry {
         handlers.add(visual("tcp", "areahint tcp", "help.command.tcp", parent -> CommandVisualController.openTeleport(parent, "tcp")));
         handlers.add(visual("udp", "areahint udp", "help.command.udp", parent -> CommandVisualController.openTeleport(parent, "udp")));
         handlers.add(visual("settp", "areahint settp", "help.command.settp", parent -> CommandVisualController.openSetTp(parent, null)));
-        handlers.add(visualCommand("replacebutton", "areahint replacebutton", "help.command.replacebutton"));
+        handlers.add(visual("replacebutton", "areahint replacebutton", "help.command.replacebutton",
+            areahint.replacebutton.ReplaceButtonVisualController::openFromCommandUi));
         handlers.add(visual("check", "areahint check", "help.command.check",
             areahint.check.CheckVisualController::openFromCommandUi));
         handlers.add(visual("dimensionalityname", "areahint dimensionalityname", "help.command.dimensionalityname",

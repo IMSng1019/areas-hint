@@ -30,6 +30,9 @@ public class ReplaceButtonManager {
     // 临时存储的新按键名称
     private String pendingKeyName = "";
 
+    // 是否由图形化指令入口启动，用于在 Screen 和聊天按钮之间切换展示。
+    private boolean visualFlowActive = false;
+
     /**
      * 私有构造方法（单例模式）
      */
@@ -50,8 +53,10 @@ public class ReplaceButtonManager {
      * 开始按键更换流程
      */
     public void startReplaceButton() {
+        boolean visualRequested = ReplaceButtonVisualController.consumeVisualStartRequest();
+        visualFlowActive = visualRequested;
         currentState = ReplaceButtonState.WAITING_FOR_KEY;
-        ReplaceButtonUI.showWaitingForKeyScreen();
+        showWaitingForKey(null);
     }
 
     /**
@@ -66,7 +71,7 @@ public class ReplaceButtonManager {
 
         // 忽略某些特殊键
         if (isInvalidKey(keyCode)) {
-            ReplaceButtonUI.showError(I18nManager.translate("replacebutton.message.record.key_2"));
+            showInvalidKeyError();
             return;
         }
 
@@ -76,7 +81,7 @@ public class ReplaceButtonManager {
 
         // 切换到确认状态
         currentState = ReplaceButtonState.CONFIRMING;
-        ReplaceButtonUI.showConfirmScreen(keyName);
+        showConfirmScreen(keyName);
     }
 
     /**
@@ -115,6 +120,8 @@ public class ReplaceButtonManager {
         currentState = ReplaceButtonState.IDLE;
         pendingKeyCode = -1;
         pendingKeyName = "";
+        visualFlowActive = false;
+        ReplaceButtonVisualController.clear();
     }
 
     /**
@@ -146,5 +153,39 @@ public class ReplaceButtonManager {
                keyCode == GLFW.GLFW_KEY_LEFT_ALT ||    // Alt键
                keyCode == GLFW.GLFW_KEY_RIGHT_ALT ||
                keyCode == GLFW.GLFW_KEY_UNKNOWN;       // 未知键
+    }
+
+    /**
+     * 显示等待按键界面，图形流程使用 Screen，聊天流程保持原交互。
+     */
+    private void showWaitingForKey(String errorText) {
+        if (visualFlowActive) {
+            ReplaceButtonVisualController.showWaitingForKeyScreen(errorText);
+        } else {
+            ReplaceButtonUI.showWaitingForKeyScreen();
+        }
+    }
+
+    /**
+     * 显示非法按键提示，图形流程把错误留在当前 Screen。
+     */
+    private void showInvalidKeyError() {
+        String errorText = I18nManager.translate("replacebutton.message.record.key_2");
+        if (visualFlowActive) {
+            ReplaceButtonVisualController.showWaitingForKeyScreen(errorText);
+        } else {
+            ReplaceButtonUI.showError(errorText);
+        }
+    }
+
+    /**
+     * 显示确认界面，后续确认仍走原有 replacebutton confirm 子命令。
+     */
+    private void showConfirmScreen(String keyName) {
+        if (visualFlowActive) {
+            ReplaceButtonVisualController.showConfirmScreen(keyName);
+        } else {
+            ReplaceButtonUI.showConfirmScreen(keyName);
+        }
     }
 }

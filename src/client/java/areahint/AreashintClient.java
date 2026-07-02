@@ -316,6 +316,9 @@ public class AreashintClient implements ClientModInitializer {
 			// 注册网络接收器
 			areahint.replacebutton.ReplaceButtonNetworking.registerClientReceivers();
 
+			// 注册ReplaceButton图形流程的启动超时处理
+			areahint.replacebutton.ReplaceButtonVisualController.register();
+
 			LOGGER.info("ReplaceButton功能初始化完成");
 		} catch (Exception e) {
 			LOGGER.error("初始化ReplaceButton功能时发生错误", e);

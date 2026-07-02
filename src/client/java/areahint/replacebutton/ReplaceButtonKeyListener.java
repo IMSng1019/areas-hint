@@ -63,7 +63,7 @@ public class ReplaceButtonKeyListener {
     /**
      * 获取按键名称
      */
-    private static String getKeyName(int keyCode) {
+    public static String getKeyName(int keyCode) {
         String glfwName = GLFW.glfwGetKeyName(keyCode, 0);
         if (glfwName != null && !glfwName.isEmpty()) {
             return glfwName.toUpperCase();
